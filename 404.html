@@ -38,17 +38,6 @@
             color: #ff0000;
             transition: all 1s ease-in-out;
         }
-
-        @keyframes explode {
-            0% {
-                transform: scale(1);
-                opacity: 1;
-            }
-            100% {
-                transform: scale(3);
-                opacity: 0;
-            }
-        }
     </style>
 </head>
 <body>
@@ -62,14 +51,15 @@
     <div class="explosion" id="explosion">💥</div>
 
     <script>
-        let countdown = 4;
+        let countdown = 5;
         const countdownElement = document.getElementById("countdown");
         const explosionElement = document.getElementById("explosion");
         const bombElement = document.getElementById("bomb");
 
-        // Start the countdown immediately when the page loads
+        // Start the countdown and bomb growth immediately when the page loads
         window.onload = function() {
             setInterval(updateCountdown, 1000);
+            setInterval(growBomb, 100); // Continuous bomb growth every 100ms
         };
 
         function updateCountdown() {
@@ -77,13 +67,16 @@
                 // Boom!
                 bombElement.style.display = "none";
                 explosionElement.style.display = "block";
-                explosionElement.style.fontSize = `${bombElement.style.fontSize}`; // Match explosion size to bomb
                 window.location.href = "https://binyan-shalem.com"; // Redirect after explosion
             } else {
                 countdownElement.textContent = countdown;
-                bombElement.style.fontSize = `${100 + (5 - countdown) * 20}px`; // Make the bomb get bigger as countdown goes down
                 countdown--;
             }
+        }
+
+        function growBomb() {
+            let currentSize = parseInt(bombElement.style.fontSize) || 100; // Default to 100px if undefined
+            bombElement.style.fontSize = `${currentSize + 1}px`; // Increase size by 1px every 100ms
         }
     </script>
 
