@@ -64,10 +64,15 @@
 
         function updateCountdown() {
             if (countdown <= 0) {
-                // Boom!
+                // Hide countdown number and trigger explosion
+                countdownElement.style.display = "none";
                 bombElement.style.display = "none";
                 explosionElement.style.display = "block";
-                window.location.href = "https://binyan-shalem.com"; // Redirect after explosion
+                
+                // Keep explosion for 0.5 seconds then redirect
+                setTimeout(function() {
+                    window.location.href = "https://binyan-shalem.com"; // Redirect after explosion
+                }, 500);
             } else {
                 countdownElement.textContent = countdown;
                 countdown--;
