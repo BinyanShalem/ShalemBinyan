@@ -29,13 +29,14 @@
             font-size: 100px;
             color: #ff6347;
             margin-top: 40px;
+            transition: all 1s ease-in-out;
         }
 
         .explosion {
             display: none;
             font-size: 200px;
             color: #ff0000;
-            animation: explode 1s forwards;
+            transition: all 1s ease-in-out;
         }
 
         @keyframes explode {
@@ -76,9 +77,11 @@
                 // Boom!
                 bombElement.style.display = "none";
                 explosionElement.style.display = "block";
+                explosionElement.style.fontSize = `${bombElement.style.fontSize}`; // Match explosion size to bomb
                 window.location.href = "https://binyan-shalem.com"; // Redirect after explosion
             } else {
                 countdownElement.textContent = countdown;
+                bombElement.style.fontSize = `${100 + (5 - countdown) * 20}px`; // Make the bomb get bigger as countdown goes down
                 countdown--;
             }
         }
