@@ -31,8 +31,7 @@
     <changefreq>yearly</changefreq>
     <priority>0.1</priority>
   </url>
-</urlset>
-
+  
   <!-- Text Us -->
   <url>
     <loc>https://www.binyan-shalem.com/text-us</loc>
