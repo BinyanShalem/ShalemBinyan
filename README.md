@@ -1,4 +1,4 @@
-[![Binyan Shalem](https://www.binyan-shalem.com/logo.png)](https://www.binyan-shalem.com)
+[![Binyan Shalem](https://www.binyan-shalem.com/ac3c018a8bd6693f622dae2943b20e (1) (3).png)](https://www.binyan-shalem.com)
 # Binyan Shalem
 
 Binyan Shalem is a platform dedicated to promoting Jewish values and community growth. This project is focused on providing resources, tools, and support to individuals seeking a deeper connection with their faith and practices.
