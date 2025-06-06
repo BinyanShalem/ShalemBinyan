@@ -12,344 +12,178 @@
       --accent: #7F0031;
       --hover: #590023;
     }
-
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
+      margin: 0; padding: 0; height: 100%;
       background-color: var(--primary-bg);
       color: var(--primary-text);
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-
-    body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-    }
-
-    .logo-container {
-      text-align: center;
-      padding: 1rem 0 0.5rem;
-      flex-shrink: 0;
-    }
-
+    body { display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+    .logo-container { text-align: center; padding: 1rem 0 0.5rem; flex-shrink: 0; }
     .logo {
-      max-width: 250px;
-      width: 80vw;
-      height: auto;
-      max-height: 100px;
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      border-radius: 8px;
-      box-sizing: border-box;
+      max-width: 250px; width: 80vw; height: auto; max-height: 100px;
+      border: 1px solid rgba(0, 0, 0, 0.1); border-radius: 8px;
     }
-
     nav {
       background-color: var(--secondary-bg);
-      display: flex;
-      justify-content: center;
-      gap: 1.5rem;
-      padding: 1rem 0;
-      flex-shrink: 0;
-      flex-wrap: wrap;
-      width: 100%;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      display: flex; justify-content: center; gap: 1.5rem; padding: 1rem 0;
+      flex-shrink: 0; flex-wrap: wrap; width: 100%; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-
     nav a {
-      color: white;
-      text-decoration: none;
-      padding: 0.5rem 1rem;
-      font-weight: bold;
-      font-size: 1.1rem;
-      white-space: nowrap;
-      user-select: none;
+      color: white; text-decoration: none; padding: 0.5rem 1rem;
+      font-weight: bold; font-size: 1.1rem; white-space: nowrap; user-select: none;
     }
-
-    nav a.active {
-      border-bottom: 3px solid var(--accent);
-      color: var(--accent);
-    }
-
-    nav a:hover {
-      color: var(--accent);
-    }
-
+    nav a.active { border-bottom: 3px solid var(--accent); color: var(--accent); }
+    nav a:hover { color: var(--accent); }
     .container {
-      flex-grow: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-      text-align: center;
-      width: 100%;
-      box-sizing: border-box;
-      max-width: 1200px;
+      flex-grow: 1; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 1rem; text-align: center; width: 100%;
+      box-sizing: border-box; max-width: 1200px;
     }
-
-    h1 {
-      font-size: 1.75rem;
-      margin: 0 0 0.5rem 0;
-    }
-
+    h1 { font-size: 1.75rem; margin: 0 0 0.5rem 0; }
     .intro {
-      font-size: 1rem;
-      margin-bottom: 1rem;
-      max-width: 90%;
+      font-size: 1rem; margin-bottom: 1rem; max-width: 90%; margin-left: auto; margin-right: auto;
     }
-
     .prize-row {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      width: 100%;
+      display: flex; flex-direction: column; gap: 1rem; width: 100%;
     }
-
     .prize {
-      background: #f8f8f8;
-      padding: 1rem;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      text-align: center;
+      background: #f8f8f8; padding: 1rem; border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1); text-align: center; width: 100%;
     }
-
     .prize img {
-      width: 100%;
-      max-height: 150px;
-      object-fit: contain;
-      margin-bottom: 1rem;
-      border-radius: 6px;
+      width: 100%; max-height: 100px; object-fit: contain;
+      margin-bottom: 1rem; border-radius: 6px;
     }
-
-    .prize h2 {
-      color: var(--accent);
-      font-size: 1.3rem;
-      margin: 0 0 0.5rem;
+    .prize h2 { color: var(--accent); margin: 0 0 0.5rem 0; font-size: 1.3rem; }
+    .prize p { font-size: 1rem; color: rgb(40,40,40); margin: 0 0 1rem 0; }
+    .view-button {
+      background-color: var(--accent); color: white; padding: 0.5rem 1rem;
+      border: none; border-radius: 5px; font-weight: 600;
+      cursor: pointer; margin-top: 0.5rem;
     }
-
-    .prize p {
-      font-size: 1rem;
-      margin: 0 0 1rem;
+    .popup {
+      display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      background-color: white; padding: 1rem; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      max-width: 90%; max-height: 80%; overflow-y: auto; z-index: 1000;
     }
-
-    .view-btn {
-      background-color: var(--accent);
-      color: white;
-      border: none;
-      padding: 0.5rem 1rem;
-      font-size: 1rem;
-      cursor: pointer;
-      border-radius: 5px;
+    .popup .close {
+      position: absolute; top: 0.5rem; right: 1rem; font-size: 1.5rem; cursor: pointer; color: var(--accent);
     }
-
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      overflow: auto;
-      background-color: rgba(0,0,0,0.5);
+    .overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.5); z-index: 999; display: none;
     }
-
-    .modal-content {
-      background-color: #fff;
-      margin: 5% auto;
-      padding: 1rem;
-      border-radius: 10px;
-      max-width: 90%;
-      width: 600px;
-      position: relative;
-    }
-
-    .close {
-      position: absolute;
-      right: 1rem;
-      top: 1rem;
-      font-size: 1.5rem;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .popup-slideshow {
-      position: relative;
-      width: 100%;
-      height: 200px;
-      margin-bottom: 1rem;
-    }
-
-    .popup-slide {
-      display: none;
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      border-radius: 8px;
-    }
-
-    .popup-slide.active {
-      display: block;
-    }
-
-    .popup-slideshow button {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      background: rgba(0,0,0,0.5);
-      color: white;
-      border: none;
-      font-size: 1.2rem;
-      padding: 0.3rem 0.6rem;
-      border-radius: 50%;
-      cursor: pointer;
-    }
-
-    .popup-slideshow button:first-of-type { left: 10px; }
-    .popup-slideshow button:last-of-type { right: 10px; }
-
-    .popup-description ul {
-      text-align: left;
-      padding-left: 1.2rem;
-    }
-
     .buy-links {
-      margin-top: 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-      max-width: 300px;
-      width: 100%;
+      margin-top: 1rem; display: flex; flex-direction: column; gap: 0.75rem;
+      width: 100%; max-width: 300px;
     }
-
     .buy-links a {
-      background-color: var(--accent);
-      color: white;
-      text-decoration: none;
-      padding: 0.75rem;
-      border-radius: 5px;
-      font-weight: 600;
-      font-size: 1rem;
-      text-align: center;
+      background-color: var(--accent); color: white; text-decoration: none;
+      padding: 0.75rem; border-radius: 5px; font-weight: 600;
+      font-size: 1rem; box-shadow: 0 4px 8px rgba(127, 0, 49, 0.5);
+      text-align: center; user-select: none; transition: background-color 0.3s;
+    }
+    .buy-links a:hover { background-color: var(--hover); }
+    @media (min-width: 768px) {
+      .prize-row { flex-direction: row; flex-wrap: wrap; justify-content: space-between; }
+      .prize { flex: 1 1 30%; }
+      .buy-links { flex-direction: row; justify-content: center; }
+      .buy-links a { width: auto; }
+    }
+    @media (max-width: 400px) {
+      h1 { font-size: 1.4rem; }
+      nav a { font-size: 1rem; padding: 0.4rem 0.8rem; }
+      .buy-links a { font-size: 0.9rem; padding: 0.6rem; }
     }
   </style>
 </head>
 <body>
   <div class="logo-container">
-    <img src="https://raw.githubusercontent.com/BinyanShalem/Support-Yeshivat-Torat-Yosef.github.io/refs/heads/main/assets/logo.png" class="logo" alt="Logo">
+    <img src="https://raw.githubusercontent.com/BinyanShalem/Support-Yeshivat-Torat-Yosef.github.io/refs/heads/main/assets/logo.png" alt="Yeshivat Torat Yosef Logo" class="logo" />
   </div>
-
   <nav>
     <a href="index.html">Home</a>
     <a href="prizes.html" class="active">Prizes</a>
     <a href="why.html">Why Buy</a>
   </nav>
-
   <div class="container">
     <h1>Raffle Prizes</h1>
     <p class="intro">One winner. Their choice of prize. One ticket could change everything. $126 per entry.</p>
-
     <div class="prize-row">
       <div class="prize">
-        <img src="https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7/c_limit,w_1920/v1/catalogue/2025/upright-c/m126300-0002" alt="Rolex">
+        <img src="https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7/c_limit,w_1920/v1/catalogue/2025/upright-c/m126300-0002" alt="Rolex Watch" />
         <h2>Rolex Watch</h2>
-        <p>Timeless luxury and unmatched value — perfect for any milestone or celebration.</p>
-        <button class="view-btn" onclick="openModal('modal1')">View Prize</button>
+        <p>Datejust 41, blue dial, Jubilee bracelet. Retail value over $9,000.</p>
+        <button class="view-button" onclick="openPopup(`
+          <img src='https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7/c_limit,w_1920/v1/catalogue/2025/upright-c/m126300-0002' style='max-width:100%; border-radius:8px; margin-bottom:1rem;' />
+          <strong>Rolex Datejust 41</strong><br><br>
+          Reference: <strong>126300</strong><br>
+          Case: <strong>Oystersteel</strong><br>
+          Bezel: <strong>Smooth</strong><br>
+          Dial: <strong>Bright Blue</strong><br>
+          Bracelet: <strong>Jubilee</strong><br>
+          Movement: <strong>Automatic</strong><br>
+          Water Resistance: <strong>100m</strong><br>
+          Retail: <strong>$9,000+</strong>
+        `)">View Prize</button>
       </div>
-
       <div class="prize">
-        <img src="https://res.cloudinary.com/peloton-cycle/image/fetch/dpr_1.5,f_auto,q_auto:good,w_1024/https://images.ctfassets.net/7vk8puwnesgc/4ghvqYMJrS833IKvNsulDr/bea86ceede17035cbe7bcb72debd68cd/BIKE_PLUS_ULT_01.png" alt="Peloton">
-        <h2>Peloton Bike + Home Gym</h2>
-        <p>Upgrade your health journey with a modern fitness setup, delivered to your home.</p>
-        <button class="view-btn" onclick="openModal('modal2')">View Prize</button>
+        <img src="https://res.cloudinary.com/peloton-cycle/image/fetch/dpr_1.5,f_auto,q_auto:good,w_1024/https://images.ctfassets.net/7vk8puwnesgc/4ghvqYMJrS833IKvNsulDr/bea86ceede17035cbe7bcb72debd68cd/BIKE_PLUS_ULT_01.png" alt="Peloton Bike" />
+        <h2>Peloton + Home Gym</h2>
+        <p>Choice of Peloton Bike+, Tread, or Row, each with weights, mats & more.</p>
+        <button class="view-button" onclick="openPopup(`
+          <img src='https://res.cloudinary.com/peloton-cycle/image/fetch/dpr_1.5,f_auto,q_auto:good,w_1024/https://images.ctfassets.net/7vk8puwnesgc/4ghvqYMJrS833IKvNsulDr/bea86ceede17035cbe7bcb72debd68cd/BIKE_PLUS_ULT_01.png' style='max-width:100%; border-radius:8px; margin-bottom:1rem;' />
+          <strong>Bike+ Ultimate Package</strong><br>
+          Peloton Bike+, Shoes, Dumbbells, Mats, Camelbak, Warranty<br><br>
+          <strong>Tread Starter Package</strong><br>
+          Tread, Dumbbells, Mats, Camelbak, Warranty<br><br>
+          <strong>Row Starter Package</strong><br>
+          Row, Dumbbells, Mats, Camelbak, Warranty
+        `)">View Prize</button>
+      </div>
+      <div class="prize">
+        <img src="https://cdn-icons-png.flaticon.com/512/2910/2910761.png" alt="$10,000 Cash" />
+        <h2>$10,000 Cash</h2>
+        <p>Get a $10,000 check. No strings. No taxes withheld. Just pure winnings.</p>
+        <button class="view-button" onclick="openPopup(`
+          <img src='https://cdn-icons-png.flaticon.com/512/2910/2910761.png' style='max-width:100%; border-radius:8px; margin-bottom:1rem;' />
+          <strong>$10,000 in Cash</strong><br><br>
+          You’ll receive a check for $10,000 made out directly to you. Spend it how you like — no strings attached.
+        `)">View Prize</button>
+      </div>
+      <div class="prize">
+        <img src="https://cdn-icons-png.flaticon.com/512/197/197572.png" alt="Trip to Israel" />
+        <h2>Trip to Israel</h2>
+        <p>Roundtrip airfare, 10-night hotel stay, and a $1,000 prepaid card for spending.</p>
+        <button class="view-button" onclick="openPopup(`
+          <img src='https://cdn-icons-png.flaticon.com/512/197/197572.png' style='max-width:100%; border-radius:8px; margin-bottom:1rem;' />
+          <strong>10-Night Israel Experience</strong><br><br>
+          Includes roundtrip airfare from the US, 10-night hotel accommodations, and $1,000 prepaid card to spend during your trip.
+        `)">View Prize</button>
       </div>
     </div>
-
     <div class="buy-links">
-      <a href="#">Buy Ticket (Venmo)</a>
-      <a href="#">Buy Ticket (Stripe)</a>
+      <a href="https://venmo.com" target="_blank" rel="noopener">Buy Ticket (Venmo)</a>
+      <a href="https://stripe.com" target="_blank" rel="noopener">Buy Ticket (Stripe)</a>
     </div>
   </div>
-
-  <div class="modal" id="modal2">
-    <div class="modal-content">
-      <span class="close" onclick="closeModal('modal2')">&times;</span>
-      <h2>Peloton Home Gym Packages</h2>
-
-      <div class="popup-slideshow">
-        <img class="popup-slide active" src="YOUR_IMAGE_URL_1" />
-        <img class="popup-slide" src="YOUR_IMAGE_URL_2" />
-        <img class="popup-slide" src="YOUR_IMAGE_URL_3" />
-        <button onclick="changePopupSlide(-1)">❮</button>
-        <button onclick="changePopupSlide(1)">❯</button>
-      </div>
-
-      <div class="popup-description">
-        <h3>Row Starter Package</h3>
-        <ul>
-          <li>Qty: 1 Row</li>
-          <li>Dumbbells - 5 lb</li>
-          <li>Reversible Workout Mat</li>
-          <li>Row Mat</li>
-          <li>Peloton x Camelbak®</li>
-          <li>12-Month Row Limited Warranty</li>
-          <li><strong>$3,525.00</strong></li>
-        </ul>
-        <hr />
-        <h3>Tread Starter Package</h3>
-        <ul>
-          <li>Qty: 1 Tread</li>
-          <li>Dumbbells - 15 lb, 10 lb</li>
-          <li>Reversible Workout Mat</li>
-          <li>Peloton x Camelbak®</li>
-          <li>12-Month Tread Limited Warranty</li>
-          <li><strong>$3,235.00</strong></li>
-        </ul>
-        <hr />
-        <h3>Bike+ Ultimate Package</h3>
-        <ul>
-          <li>Qty: 1 Peloton Bike+</li>
-          <li>Cycling Shoes - 40 / Men 7 / Women 9</li>
-          <li>Light Weights - 3lb</li>
-          <li>Dumbbells - 30 lb, 25 lb, 20 lb</li>
-          <li>Bike Mat & Reversible Workout Mat</li>
-          <li>Peloton x Camelbak®</li>
-          <li>12-Month Bike+ Limited Warranty</li>
-        </ul>
-      </div>
-    </div>
+  <div class="overlay" id="overlay" onclick="closePopup()"></div>
+  <div class="popup" id="popup">
+    <span class="close" onclick="closePopup()">&times;</span>
+    <div id="popup-content"></div>
   </div>
-
   <script>
-    function openModal(id) {
-      document.getElementById(id).style.display = 'block';
+    function openPopup(content) {
+      document.getElementById('popup-content').innerHTML = content;
+      document.getElementById('popup').style.display = 'block';
+      document.getElementById('overlay').style.display = 'block';
     }
-
-    function closeModal(id) {
-      document.getElementById(id).style.display = 'none';
+    function closePopup() {
+      document.getElementById('popup').style.display = 'none';
+      document.getElementById('overlay').style.display = 'none';
     }
-
-    let popupSlideIndex = 0;
-    const popupSlides = document.querySelectorAll('#modal2 .popup-slide');
-
-    function showPopupSlide(index) {
-      popupSlides.forEach((img, i) =>
-        img.classList.toggle('active', i === index)
-      );
-    }
-
-    function changePopupSlide(step) {
-      popupSlideIndex = (popupSlideIndex + step + popupSlides.length) % popupSlides.length;
-      showPopupSlide(popupSlideIndex);
-    }
-
-    showPopupSlide(popupSlideIndex);
   </script>
 </body>
 </html>
