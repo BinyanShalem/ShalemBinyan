@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Prizes - Yeshivat Torat Yosef Raffle</title>
+  <style>
+    :root {
+      --primary-bg: #ffffff;
+      --primary-text: rgb(0, 33, 65);
+      --secondary-bg: rgb(0, 33, 65);
+      --accent: #7F0031;
+      --hover: #590023;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background-color: var(--primary-bg);
+      color: var(--primary-text);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .logo-container {
+      text-align: center;
+      padding: 1rem 0 0.5rem;
+      flex-shrink: 0;
+    }
+
+    .logo {
+      max-width: 250px;
+      width: 80vw;
+      height: auto;
+      max-height: 100px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+
+    nav {
+      background-color: var(--secondary-bg);
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      padding: 1rem 0;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+      width: 100%;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      font-weight: bold;
+      font-size: 1.1rem;
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    nav a.active {
+      border-bottom: 3px solid var(--accent);
+      color: var(--accent);
+    }
+
+    nav a:hover {
+      color: var(--accent);
+    }
+
+    .container {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      text-align: center;
+      max-width: 100%;
+      width: 100%;
+      box-sizing: border-box;
+      max-width: 1200px;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      margin: 0 0 0.5rem 0;
+    }
+
+    .intro {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      max-width: 90%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .prize-row {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      width: 100%;
+    }
+
+    .prize {
+      background: #f8f8f8;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      text-align: center;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+
+    .prize img {
+      width: 100%;
+      max-height: 150px;
+      object-fit: contain;
+      margin-bottom: 1rem;
+      border-radius: 6px;
+    }
+
+    .prize h2 {
+      color: var(--accent);
+      margin: 0 0 0.5rem 0;
+      font-size: 1.3rem;
+    }
+
+    .prize p {
+      font-size: 1rem;
+      color: rgb(40,40,40);
+      margin: 0 0 1rem 0;
+    }
+
+    .buy-links {
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      width: 100%;
+      max-width: 300px;
+    }
+
+    .buy-links a {
+      background-color: var(--accent);
+      color: white;
+      text-decoration: none;
+      padding: 0.75rem;
+      border-radius: 5px;
+      font-weight: 600;
+      font-size: 1rem;
+      box-shadow: 0 4px 8px rgba(127, 0, 49, 0.5);
+      text-align: center;
+      user-select: none;
+      transition: background-color 0.3s;
+    }
+
+    .buy-links a:hover {
+      background-color: var(--hover);
+    }
+
+    @media (min-width: 768px) {
+      .prize-row {
+        flex-direction: row;
+        justify-content: space-between;
+      }
+
+      .prize {
+        flex: 1 1 30%;
+      }
+
+      .buy-links {
+        flex-direction: row;
+        justify-content: center;
+      }
+
+      .buy-links a {
+        width: auto;
+      }
+    }
+
+    @media (max-width: 400px) {
+      h1 {
+        font-size: 1.4rem;
+      }
+      nav a {
+        font-size: 1rem;
+        padding: 0.4rem 0.8rem;
+      }
+      .buy-links a {
+        font-size: 0.9rem;
+        padding: 0.6rem;
+      }
+    }
+
+    .slideshow-container {
+      position: relative;
+      max-width: 100%;
+      margin-bottom: 1rem;
+    }
+
+    .slide-image {
+      width: 100%;
+      max-height: 150px;
+      object-fit: contain;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .slide-image.active {
+      display: block;
+    }
+
+    .slideshow-nav {
+      position: absolute;
+      top: 50%;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      transform: translateY(-50%);
+    }
+
+    .slideshow-nav button {
+      background: rgba(127, 0, 49, 0.8);
+      border: none;
+      color: white;
+      padding: 0.5rem;
+      font-size: 1.2rem;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .slideshow-nav button:hover {
+      background: rgba(89, 0, 35, 0.9);
+    }
+  </style>
+</head>
+<body>
+  <div class="logo-container">
+    <img src="https://raw.githubusercontent.com/BinyanShalem/Support-Yeshivat-Torat-Yosef.github.io/refs/heads/main/assets/logo.png" alt="Yeshivat Torat Yosef Logo" class="logo" />
+  </div>
+
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="prizes.html" class="active">Prizes</a>
+    <a href="why.html">Why Buy</a>
+  </nav>
+
+  <div class="container">
+    <h1>Raffle Prizes</h1>
+    <p class="intro">One winner. Their choice of prize. One ticket could change everything. $126 per entry.</p>
+
+    <div class="prize-row">
+
+      <!-- Rolex -->
+      <div class="prize">
+        <div id="rolex-slideshow">
+          <img class="slide-image active" src="https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1200/v1/catalogue/2025/upright-c/m126300-0018" />
+          <img class="slide-image" src="https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1200/v1/catalogue/2025/upright-c/m126300-0001" />
+          <img class="slide-image" src="https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1200/v1/catalogue/2025/upright-c/m126300-0020" />
+          <button onclick="changeSlide(-1)">❮</button>
+          <button onclick="changeSlide(1)">❯</button>
+        </div>
+        <h2>Rolex Watch</h2>
+        <p>Timeless luxury and unmatched value — perfect for any milestone or celebration.</p>
+        <button onclick="openModal('modal1')">View Prize</button>
+      </div>
+
+      <!-- Peloton -->
+      <div class="prize">
+        <img src="https://res.cloudinary.com/peloton-cycle/image/fetch/dpr_1.5,f_auto,q_auto:good,w_1024/https://images.ctfassets.net/7vk8puwnesgc/4ghvqYMJrS833IKvNsulDr/bea86ceede17035cbe7bcb72debd68cd/BIKE_PLUS_ULT_01.png" alt="Peloton Bike" />
+        <h2>Peloton Bike + Home Gym Setup</h2>
+        <p>Upgrade your health journey with a modern fitness setup, delivered to your home.</p>
+        <button onclick="openModal('modal2')">View Prize</button>
+      </div>
+
+      <!-- Mystery -->
+      <div class="prize">
+        <img src="https://www.shutterstock.com/image-vector/mystery-box-random-loot-flat-260nw-1469820695.jpg" alt="Mystery Prize" />
+        <h2>Mystery Prize</h2>
+        <p>Stay tuned for an exciting surprise — announced soon.</p>
+        <button onclick="openModal('modal3')">View Prize</button>
+      </div>
+    </div>
+
+    <div class="buy-links">
+      <a href="https://venmo.com" target="_blank" rel="noopener">Buy Ticket (Venmo)</a>
+      <a href="https://stripe.com" target="_blank" rel="noopener">Buy Ticket (Stripe)</a>
+    </div>
+  </div>
+
+  <!-- Modals -->
+  <div class="modal" id="modal1">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('modal1')">&times;</span>
+      <h2>Rolex Watch</h2>
+      <img src="https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1200/v1/catalogue/2025/upright-c/m126300-0018" style="max-width:100%;" />
+      <p>This luxurious Rolex Datejust is an icon of elegance and craftsmanship, perfect for marking any achievement or special occasion.</p>
+    </div>
+  </div>
+
+  <div class="modal" id="modal2">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('modal2')">&times;</span>
+      <h2>Peloton Bike + Home Gym</h2>
+      <img src="https://res.cloudinary.com/peloton-cycle/image/fetch/dpr_1.5,f_auto,q_auto:good,w_1024/https://images.ctfassets.net/7vk8puwnesgc/4ghvqYMJrS833IKvNsulDr/bea86ceede17035cbe7bcb72debd68cd/BIKE_PLUS_ULT_01.png" style="max-width:100%;" />
+      <p>Stay fit at home with this complete setup — includes a Peloton Bike and gear to build your dream gym at home.</p>
+    </div>
+  </div>
+
+  <div class="modal" id="modal3">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('modal3')">&times;</span>
+      <h2>Mystery Prize</h2>
+      <img src="https://www.shutterstock.com/image-vector/mystery-box-random-loot-flat-260nw-1469820695.jpg" style="max-width:100%;" />
+      <p>Something fun. Something exciting. The Mystery Prize will be revealed soon — stay tuned!</p>
+    </div>
+  </div>
+
+  <!-- JS -->
+  <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('#rolex-slideshow .slide-image');
+
+    function showSlide(index) {
+      slides.forEach((img, i) => img.classList.toggle('active', i === index));
+    }
+
+    function changeSlide(step) {
+      currentSlide = (currentSlide + step + slides.length) % slides.length;
+      showSlide(currentSlide);
+    }
+
+    setInterval(() => changeSlide(1), 3000);
+    showSlide(currentSlide);
+
+    function openModal(id) {
+      document.getElementById(id).style.display = 'flex';
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).style.display = 'none';
+    }
+  </script>
+
+  <!-- Styles for modal & slideshow -->
+  <style>
+    #rolex-slideshow {
+      position: relative;
+      width: 100%;
+      height: 150px;
+    }
+    .slide-image {
+      display: none;
+      width: 100%;
+      height: 150px;
+      object-fit: contain;
+      border-radius: 6px;
+    }
+    .slide-image.active {
+      display: block;
+    }
+    #rolex-slideshow button {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,0.4);
+      color: white;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 50%;
+    }
+    #rolex-slideshow button:first-of-type {
+      left: 10px;
+    }
+    #rolex-slideshow button:last-of-type {
+      right: 10px;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 1rem;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 500px;
+      position: relative;
+      text-align: center;
+    }
+
+    .modal-content .close {
+      position: absolute;
+      top: 10px; right: 15px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #999;
+    }
+
+    .modal-content .close:hover {
+      color: black;
+    }
+
+    .prize button {
+      margin-top: 0.5rem;
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .prize button:hover {
+      background-color: var(--hover);
+    }
+  </style>
+</body>
+</html>
