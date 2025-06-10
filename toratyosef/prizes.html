@@ -264,7 +264,7 @@
         /* Slideshow container within the popup */
         .slideshow-container {
             position: relative;
-            width: 100%; /* Take full width of the popup content area */
+            width: 100%;
             max-width: 500px; /* Limit max width of the slideshow */
             margin: 0 auto 1rem auto; /* Center the slideshow container horizontally */
             text-align: center;
@@ -523,7 +523,16 @@
         const prizesData = {
             rolex: {
                 images: [
-                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7/c_limit,w_1920/v1/catalogue/2025/upright-c/m126300-0002', // Keep the original main image
+                    // Existing m126300 images
+                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7/c_limit,w_3200/v1/catalogue/2025/upright-c/m126300-0018',
+                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126300-0020',
+                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126300-0004',
+                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126300-0006',
+                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126300-0016',
+                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126300-0014',
+                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126300-0008',
+                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126300-0012',
+                    // New m126334 images (added to the list)
                     'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126334-0018',
                     'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126334-0014',
                     'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126334-0022',
@@ -548,7 +557,7 @@
             },
             peloton: {
                 images: [
-                    'https://res.cloudinary.com/peloton-cycle/image/fetch/dpr_2.0,f_auto,q_auto:good,w_768/https://images.ctfassets.net/7vk8puwnesgc/4ghvqYMJrS833IKvNsulDr/bea86ceede17035cbe7bcb72debd68cd/BIKE_PLUS_ULT_01.png', /* Bike+ image first, since it's the main image for the prize card */
+                    'https://res.cloudinary.com/peloton-cycle/image/fetch/dpr_1.5,f_auto,q_auto:good,w_1024/https://images.ctfassets.net/7vk8puwnesgc/4ghvqYMJrS833IKvNsulDr/bea86ceede17035cbe7bcb72debd68cd/BIKE_PLUS_ULT_01.png', /* Bike+ image first, since it's the main image for the prize card */
                     'https://res.cloudinary.com/peloton-cycle/image/fetch/dpr_2.0,f_auto,q_auto:good,w_768/https://images.ctfassets.net/7vk8puwnesgc/19TaoeNyEq3TMqLXOJC4WF/0a2e1c0e8020c019879227f198ceea7a/TREAD_STARTER_01.png',
                     'https://res.cloudinary.com/peloton-cycle/image/fetch/dpr_2.0,f_auto,q_auto:good,w_768/https://images.ctfassets.net/7vk8puwnesgc/1H5nluC74EeaM4Gmm63I25/70960bfd2c8afe129ee4b5d03f05874a/ROW_STARTER_01.png'
                 ],
