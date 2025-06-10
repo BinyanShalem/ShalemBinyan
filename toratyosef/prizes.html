@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Prizes - Yeshivat Torat Yosef Raffle</title>
     <style>
+        /* Define your color variables */
         :root {
             --primary-bg: #ffffff;
             --primary-text: rgb(0, 33, 65);
@@ -12,77 +13,202 @@
             --accent: #7F0031;
             --hover: #590023;
         }
-        * { box-sizing: border-box; }
+
+        /* Universal box-sizing for consistent layout */
+        * {
+            box-sizing: border-box;
+        }
+
+        /* Basic html and body styles */
         html, body {
-            margin: 0; padding: 0; height: 100%;
+            margin: 0;
+            padding: 0;
+            height: 100%;
             background-color: var(--primary-bg);
             color: var(--primary-text);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        body { display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        .logo-container { text-align: center; padding: 1rem 0 0.5rem; flex-shrink: 0; }
-        .logo {
-            max-width: 250px; width: 80vw; height: auto; max-height: 100px;
-            border: 1px solid rgba(0, 0, 0, 0.1); border-radius: 8px;
+
+        /* Body as a flex container for full page layout */
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh; /* Ensure body takes at least full viewport height */
         }
+
+        /* Logo container styling */
+        .logo-container {
+            text-align: center;
+            padding: 1rem 0 0.5rem;
+            flex-shrink: 0; /* Prevent logo from shrinking */
+        }
+
+        /* Logo image styling */
+        .logo {
+            max-width: 250px;
+            width: 80vw; /* Responsive width */
+            height: auto;
+            max-height: 100px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        /* Navigation bar styling */
         nav {
             background-color: var(--secondary-bg);
-            display: flex; justify-content: center; gap: 1.5rem; padding: 1rem 0;
-            flex-shrink: 0; flex-wrap: wrap; width: 100%; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            padding: 1rem 0;
+            flex-shrink: 0; /* Prevent nav from shrinking */
+            flex-wrap: wrap; /* Allow nav items to wrap on smaller screens */
+            width: 100%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
+
+        /* Navigation links styling */
         nav a {
-            color: white; text-decoration: none; padding: 0.5rem 1rem;
-            font-weight: bold; font-size: 1.1rem; white-space: nowrap; user-select: none;
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            font-weight: bold;
+            font-size: 1.1rem;
+            white-space: nowrap; /* Prevent links from breaking lines */
+            user-select: none; /* Prevent text selection */
         }
-        nav a.active { border-bottom: 3px solid var(--accent); color: var(--accent); }
-        nav a:hover { color: var(--accent); }
+
+        /* Active navigation link styling */
+        nav a.active {
+            border-bottom: 3px solid var(--accent);
+            color: var(--accent);
+        }
+
+        /* Navigation link hover effect */
+        nav a:hover {
+            color: var(--accent);
+        }
+
+        /* Main content container styling */
         .container {
-            flex-grow: 1; display: flex; flex-direction: column; align-items: center;
-            justify-content: center; padding: 1rem; text-align: center; width: 100%;
-            box-sizing: border-box; max-width: 1200px;
+            flex-grow: 1; /* Allow container to take available vertical space */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
+            max-width: 1200px; /* Limit max width for readability */
         }
-        h1 { font-size: 1.75rem; margin: 0 0 0.5rem 0; }
+
+        /* Heading 1 styling */
+        h1 {
+            font-size: 1.75rem;
+            margin: 0 0 0.5rem 0;
+        }
+
+        /* Intro paragraph styling */
         .intro {
-            font-size: 1rem; margin-bottom: 1rem; max-width: 90%; margin-left: auto; margin-right: auto;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            max-width: 90%;
+            margin-left: auto;
+            margin-right: auto;
         }
+
+        /* Prize row container for layout */
         .prize-row {
-            display: flex; flex-direction: column; gap: 1rem; width: 100%;
+            display: flex;
+            flex-direction: column; /* Stack prizes vertically by default */
+            gap: 1rem;
+            width: 100%;
         }
+
+        /* Individual prize card styling */
         .prize {
-            background: #f8f8f8; padding: 1rem; border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1); text-align: center; width: 100%;
+            background: #f8f8f8;
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 100%;
         }
+
+        /* Prize image styling */
         .prize img {
-            width: 100%; max-height: 100px; object-fit: contain;
-            margin-bottom: 1rem; border-radius: 6px;
+            width: 100%;
+            max-height: 100px;
+            object-fit: contain; /* Ensure image scales within bounds without cropping */
+            margin-bottom: 1rem;
+            border-radius: 6px;
         }
-        .prize h2 { color: var(--accent); margin: 0 0 0.5rem 0; font-size: 1.3rem; }
-        .prize p { font-size: 1rem; color: rgb(40,40,40); margin: 0 0 1rem 0; }
+
+        /* Prize heading 2 styling */
+        .prize h2 {
+            color: var(--accent);
+            margin: 0 0 0.5rem 0;
+            font-size: 1.3rem;
+        }
+
+        /* Prize paragraph styling */
+        .prize p {
+            font-size: 1rem;
+            color: rgb(40,40,40);
+            margin: 0 0 1rem 0;
+        }
+
+        /* View button styling */
         .view-button {
-            background-color: var(--accent); color: white; padding: 0.5rem 1rem;
-            border: none; border-radius: 5px; font-weight: 600;
-            cursor: pointer; margin-top: 0.5rem;
+            background-color: var(--accent);
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            transition: background-color 0.3s ease; /* Smooth transition */
         }
-        /* Popup and Slideshow Styles */
+
+        .view-button:hover {
+            background-color: var(--hover);
+        }
+
+        /* Overlay for popup background */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6); /* Darker semi-transparent background */
+            z-index: 999; /* Below popup, above page content */
+            display: none; /* Hidden by default */
+        }
+
+        /* Popup container styling */
         .popup {
-            display: none;
+            display: none; /* Hidden by default; JavaScript shows it as 'flex' */
             position: fixed;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%); /* Center the popup */
             background-color: white;
-            padding: 1.5rem; /* Increased padding */
+            padding: 1.5rem;
             border-radius: 8px;
             box-shadow: 0 0 15px rgba(0,0,0,0.4); /* Stronger shadow */
-            max-width: 90%;
-            max-height: 90%; /* Allow more height for content */
-            overflow-y: auto;
-            z-index: 1000;
-            width: 500px; /* Set a default width for the popup */
-            display: flex; /* Use flexbox for internal layout */
-            flex-direction: column;
-            align-items: center;
+            max-width: 90%; /* Max width relative to viewport */
+            max-height: 90%; /* Max height relative to viewport */
+            overflow-y: auto; /* Enable vertical scrolling if content overflows */
+            z-index: 1000; /* Above the overlay */
+            width: 500px; /* Default width for the popup */
+            flex-direction: column; /* Content inside popup stacks vertically */
+            align-items: center; /* Center content horizontally in the popup */
         }
+
+        /* Close button for popup */
         .popup .close {
             position: absolute;
             top: 0.5rem;
@@ -90,98 +216,113 @@
             font-size: 2rem; /* Larger close button */
             cursor: pointer;
             color: var(--accent);
-            z-index: 1001; /* Ensure it's above other elements */
-        }
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.6); /* Darker overlay */
-            z-index: 999;
-            display: none;
+            z-index: 1001; /* Ensure it's above other elements in popup */
         }
 
-        /* Slideshow specific styles */
+        /* Slideshow container within the popup */
         .slideshow-container {
             position: relative;
-            max-width: 100%;
-            margin-bottom: 1rem;
+            width: 100%; /* Take full width of the popup content area */
+            max-width: 500px; /* Limit max width of the slideshow */
+            margin: 0 auto 1rem auto; /* Center the slideshow container horizontally */
             text-align: center;
-            overflow: hidden; /* Hide overflowing parts of images during transition */
+            overflow: hidden; /* Hide any overflow, important for transitions */
         }
+
+        /* Individual slideshow image styling */
         .slideshow-image {
             width: 100%;
             max-height: 300px; /* Smaller image height in popup */
             object-fit: contain; /* Ensure the whole image is visible */
             border-radius: 6px;
-            display: none; /* Hidden by default */
+            /* display: none; Removed from here - JS handles initial visibility */
         }
+
+        /* Previous and Next arrows for slideshow */
         .prev, .next {
             cursor: pointer;
             position: absolute;
             top: 50%;
             width: auto;
-            padding: 12px 18px; /* Adjusted padding */
-            margin-top: -30px; /* Adjusted margin */
+            padding: 12px 18px;
+            margin-top: -30px; /* Vertically center the arrows */
             color: white;
             font-weight: bold;
-            font-size: 22px; /* Larger arrows */
+            font-size: 22px;
             transition: 0.6s ease;
-            border-radius: 0 3px 3px 0;
             user-select: none;
             background-color: rgba(0,0,0,0.5); /* Semi-transparent background */
             z-index: 99; /* Ensure arrows are above images */
         }
+
         .next {
             right: 0;
-            border-radius: 3px 0 0 3px;
+            border-radius: 3px 0 0 3px; /* Rounded on left for next button */
         }
+
+        .prev {
+            left: 0; /* Position prev button on left */
+            border-radius: 0 3px 3px 0; /* Rounded on right for prev button */
+        }
+
         .prev:hover, .next:hover {
             background-color: rgba(0,0,0,0.8);
         }
+
+        /* Thumbnail container styling */
         .thumbnail-container {
             text-align: center;
             padding: 10px 0;
-            white-space: nowrap;
-            overflow-x: auto; /* Enable horizontal scrolling for thumbnails */
+            white-space: nowrap; /* Prevent thumbnails from wrapping */
+            overflow-x: auto; /* Enable horizontal scrolling for thumbnails if many */
             margin-bottom: 1rem;
+            width: 100%; /* Ensure thumbnail container takes full width */
         }
+
+        /* Individual thumbnail image styling */
         .thumbnail {
             width: 60px; /* Smaller thumbnails */
             height: 40px;
-            object-fit: cover;
+            object-fit: cover; /* Crop to fill, maintain aspect ratio */
             border-radius: 4px;
             cursor: pointer;
-            opacity: 0.6;
+            opacity: 0.6; /* Dim inactive thumbnails */
             margin: 0 5px; /* Spacing between thumbnails */
             border: 2px solid transparent;
             transition: all 0.3s ease;
             display: inline-block; /* Display thumbnails in a row */
         }
+
+        /* Active thumbnail styling */
         .thumbnail:hover, .thumbnail.active {
-            opacity: 1;
-            border: 2px solid var(--accent);
+            opacity: 1; /* Full opacity on hover/active */
+            border: 2px solid var(--accent); /* Highlight active thumbnail */
         }
+
+        /* Popup details text styling */
         .popup-details {
-            text-align: left; /* Align text within popup to the left */
+            text-align: center; /* Center the text within the details */
             width: 100%; /* Take full width of the popup */
             padding: 0 1rem; /* Add some horizontal padding */
+            margin-bottom: 1rem; /* Space below details */
         }
+
         .popup-details strong {
             color: var(--accent); /* Highlight strong text */
         }
 
         /* Buy links in popup */
         .popup .buy-links {
-            margin-top: 1.5rem; /* More space above buy links */
+            margin-top: 1rem; /* Space above buy links */
             display: flex;
-            flex-direction: column;
+            flex-direction: column; /* Stack buy links vertically by default */
             gap: 0.75rem;
             width: 100%;
-            max-width: 300px;
+            max-width: 300px; /* Constrain max width of the buy links container */
+            margin-left: auto; /* Center the container itself */
+            margin-right: auto; /* Center the container itself */
         }
+
         .popup .buy-links a {
             background-color: var(--accent);
             color: white;
@@ -194,25 +335,70 @@
             text-align: center;
             user-select: none;
             transition: background-color 0.3s;
+            width: 100%; /* Make buttons take full width of their constrained container */
         }
-        .popup .buy-links a:hover { background-color: var(--hover); }
 
-        @media (min-width: 768px) {
-            .prize-row { flex-direction: row; flex-wrap: wrap; justify-content: space-between; }
-            .prize { flex: 1 1 30%; }
-            .buy-links { flex-direction: row; justify-content: center; }
-            .buy-links a { width: auto; }
-            .popup { max-width: 700px; } /* Wider popup on larger screens */
+        .popup .buy-links a:hover {
+            background-color: var(--hover);
         }
+
+        /* Media queries for responsiveness */
+        @media (min-width: 768px) {
+            .prize-row {
+                flex-direction: row; /* Display prizes in a row on larger screens */
+                flex-wrap: wrap;
+                justify-content: space-between;
+            }
+            .prize {
+                flex: 1 1 30%; /* Allow prizes to grow/shrink and take up about 30% width */
+            }
+            .buy-links {
+                flex-direction: row; /* Display buy links in a row on larger screens */
+                justify-content: center; /* Center items in a row */
+                max-width: none; /* Remove max-width when in row to let them naturally size */
+            }
+            .buy-links a {
+                width: auto; /* Auto width for buy links */
+            }
+            .popup {
+                max-width: 700px; /* Wider popup on larger screens */
+            }
+        }
+
         @media (max-width: 400px) {
-            h1 { font-size: 1.4rem; }
-            nav a { font-size: 1rem; padding: 0.4rem 0.8rem; }
-            .buy-links a { font-size: 0.9rem; padding: 0.6rem; }
-            .popup { padding: 1rem; } /* Less padding on small screens */
-            .popup .close { font-size: 1.7rem; }
-            .slideshow-image { max-height: 200px; } /* Even smaller on mobile */
-            .prev, .next { font-size: 18px; padding: 8px 12px; margin-top: -20px; }
-            .thumbnail { width: 45px; height: 30px; margin: 0 3px; }
+            h1 {
+                font-size: 1.4rem;
+            }
+            nav a {
+                font-size: 1rem;
+                padding: 0.4rem 0.8rem;
+            }
+            .buy-links {
+                max-width: 250px; /* Slightly reduce max-width on very small screens for stacking */
+            }
+            .buy-links a {
+                font-size: 0.9rem;
+                padding: 0.6rem;
+            }
+            .popup {
+                padding: 1rem; /* Less padding on small screens */
+            }
+            .popup .close {
+                font-size: 1.7rem;
+            }
+            .slideshow-image {
+                max-height: 200px; /* Even smaller on mobile */
+            }
+            .prev, .next {
+                font-size: 18px;
+                padding: 8px 12px;
+                margin-top: -20px;
+            }
+            .thumbnail {
+                width: 45px;
+                height: 30px;
+                margin: 0 3px;
+            }
         }
     </style>
 </head>
@@ -236,22 +422,22 @@
                 <button class="view-button" onclick="openPopup('rolex')">View Prize</button>
             </div>
             <div class="prize">
+                <img src="data:image/png;base64,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" alt="Trip to Israel" />
+                <h2>Trip to Israel</h2>
+                <p>Roundtrip airfare, 10-night hotel stay, and a $1,000 prepaid card for spending.</p>
+                <button class="view-button" onclick="openPopup('israel')">View Prize</button>
+            </div>
+            <div class="prize">
                 <img src="https://res.cloudinary.com/peloton-cycle/image/fetch/dpr_1.5,f_auto,q_auto:good,w_1024/https://images.ctfassets.net/7vk8puwnesgc/4ghvqYMJrS833IKvNsulDr/bea86ceede17035cbe7bcb72debd68cd/BIKE_PLUS_ULT_01.png" alt="Peloton Bike" />
                 <h2>Peloton + Home Gym</h2>
                 <p>Choice of Peloton Bike+, Tread, or Row, each with weights, mats & more.</p>
                 <button class="view-button" onclick="openPopup('peloton')">View Prize</button>
             </div>
             <div class="prize">
-                <img src="https://cdn-icons-png.flaticon.com/512/2910/2910761.png" alt="$10,000 Cash" />
+                <img src="https://t3.ftcdn.net/jpg/01/28/78/94/360_F_128789494_bR9ccEgCLKV13pyCG5bOzvIpuZKkO6mp.jpg" alt="$10,000 Cash" />
                 <h2>$10,000 Cash</h2>
                 <p>Get a $10,000 check. No strings. No taxes withheld. Just pure winnings.</p>
                 <button class="view-button" onclick="openPopup('cash')">View Prize</button>
-            </div>
-            <div class="prize">
-                <img src="https://cdn-icons-png.flaticon.com/512/197/197572.png" alt="Trip to Israel" />
-                <h2>Trip to Israel</h2>
-                <p>Roundtrip airfare, 10-night hotel stay, and a $1,000 prepaid card for spending.</p>
-                <button class="view-button" onclick="openPopup('israel')">View Prize</button>
             </div>
         </div>
         <div class="buy-links">
@@ -261,6 +447,7 @@
     </div>
 
     <div class="overlay" id="overlay" onclick="closePopup()"></div>
+
     <div class="popup" id="popup">
         <span class="close" onclick="closePopup()">&times;</span>
         <div id="popup-content">
@@ -268,14 +455,21 @@
     </div>
 
     <script>
-        let slideIndex = 0;
-        let slideInterval;
+        let slideIndex = 0; // Current slide index for the slideshow
+        let slideInterval; // Variable to hold the auto-slide interval ID
+
+        // Centralized data for all prizes, including images and details
         const prizesData = {
             rolex: {
                 images: [
-                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7/c_limit,w_1920/v1/catalogue/2025/upright-c/m126300-0002',
-                    'https://images.watchfinder.co.uk/images/catalog/Rolex-Datejust-41mm-126300-249557-01-web-listing-249557-61113.webp',
-                    'https://chronospride.com/cdn/shop/files/Datejust41_126300_BlueDial_Jubilee_1_1000x.png?v=1690940026'
+                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7/c_limit,w_3200/v1/catalogue/2025/upright-c/m126300-0018',
+                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126300-0020',
+                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126300-0004',
+                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126300-0006',
+                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126300-0016',
+                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126300-0014',
+                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126300-0008',
+                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126300-0012'
                 ],
                 details: `
                     <strong>Rolex Datejust 41</strong><br><br>
@@ -291,21 +485,52 @@
             },
             peloton: {
                 images: [
-                    'https://res.cloudinary.com/peloton-cycle/image/fetch/dpr_1.5,f_auto,q_auto:good,w_1024/https://images.ctfassets.net/7vk8puwnesgc/4ghvqYMJrS833IKvNsulDr/bea86ceede17035cbe7bcb72debd68cd/BIKE_PLUS_ULT_01.png',
-                    'https://res.cloudinary.com/peloton-cycle/image/fetch/dpr_1.5,f_auto,q_auto:good,w_1024/https://images.ctfassets.net/7vk8puwnesgc/4mE096v7D9G9m2Hl1d0i5r/ee2f71694f50624e525a74e5033c448d/PELOTON_TREAD_ULT_01.png',
-                    'https://res.cloudinary.com/peloton-cycle/image/fetch/dpr_1.5,f_auto,q_auto:good,w_1024/https://images.ctfassets.net/7vk8puwnesgc/6tY4f2N0D94z0o2j3o1l7N/7d4e3e3b3a6d7f0e3b2e3c0d0c3e3f0e/PELOTON_ROW_ULT_01.png'
+                    'https://res.cloudinary.com/peloton-cycle/image/fetch/dpr_2.0,f_auto,q_auto:good,w_768/https://images.ctfassets.net/7vk8puwnesgc/4ghvqYMJrS833IKvNsulDr/bea86ceede17035cbe7bcb72debd68cd/BIKE_PLUS_ULT_01.png', /* Bike+ image first, since it's the main image for the prize card */
+                    'https://res.cloudinary.com/peloton-cycle/image/fetch/dpr_2.0,f_auto,q_auto:good,w_768/https://images.ctfassets.net/7vk8puwnesgc/19TaoeNyEq3TMqLXOJC4WF/0a2e1c0e8020c019879227f198ceea7a/TREAD_STARTER_01.png',
+                    'https://res.cloudinary.com/peloton-cycle/image/fetch/dpr_2.0,f_auto,q_auto:good,w_768/https://images.ctfassets.net/7vk8puwnesgc/1H5nluC74EeaM4Gmm63I25/70960bfd2c8afe129ee4b5d03f05874a/ROW_STARTER_01.png'
                 ],
                 details: `
                     <strong>Choice of Peloton Package:</strong><br><br>
-                    <strong>Bike+ Ultimate Package:</strong> Peloton Bike+, Shoes, Dumbbells, Mats, Camelbak, Warranty<br><br>
-                    <strong>Tread Starter Package:</strong> Tread, Dumbbells, Mats, Camelbak, Warranty<br><br>
-                    <strong>Row Starter Package:</strong> Row, Dumbbells, Mats, Camelbak, Warranty
+                    <hr>
+                    <strong>Row Starter Package: ($3,525.00 Value)</strong><br>
+                    Qty: 1<br>
+                    Row<br>
+                    Dumbbells - 5 lb<br>
+                    Reversible Workout Mat<br>
+                    Row Mat<br>
+                    Peloton x Camelbak®<br>
+                    12-Month Row Limited Warranty<br>
+                    <hr>
+                    <strong>Tread Starter Package: ($3,235.00 Value)</strong><br>
+                    Qty: 1<br>
+                    Tread<br>
+                    Dumbbells - 10 lb<br>
+                    Dumbbells - 15 lb<br>
+                    Reversible Workout Mat<br>
+                    Peloton x Camelbak®<br>
+                    12-Month Tread Limited Warranty<br>
+                    <hr>
+                    <strong>Bike+ Ultimate Package: ($2,990.00 Value)</strong><br>
+                    Qty: 1<br>
+                    Peloton Bike+<br>
+                    Peloton Cycling Shoes - 40 / Men 7 / Women 9<br>
+                    Light Weights - 3lb<br>
+                    Dumbbells - 30 lb<br>
+                    Dumbbells - 25 lb<br>
+                    Dumbbells - 20 lb<br>
+                    Bike Mat<br>
+                    Reversible Workout Mat<br>
+                    Peloton x Camelbak®<br>
+                    12-Month Bike+ Limited Warranty<br>
+                    <hr>
+                    <strong>Peloton All-Access Membership:</strong><br>
+                    Qty: 3 (Months)<br>
+                    $44/mo membership to access full Peloton content. Monthly membership not included in cart total. Charges begin on device activation. Automatically renews monthly until canceled.
                 `
             },
             cash: {
                 images: [
-                    'https://cdn-icons-png.flaticon.com/512/2910/2910761.png',
-                    'https://static.vecteezy.com/system/resources/previews/007/352/248/original/money-bag-with-dollar-sign-icon-style-free-vector.jpg'
+                    'https://t3.ftcdn.net/jpg/01/28/78/94/360_F_128789494_bR9ccEgCLKV13pyCG5bOzvIpuZKkO6mp.jpg'
                 ],
                 details: `
                     <strong>$10,000 in Cash</strong><br><br>
@@ -314,9 +539,8 @@
             },
             israel: {
                 images: [
-                    'https://cdn-icons-png.flaticon.com/512/197/197572.png',
-                    'https://www.tripsavvy.com/thmb/B0XjL2Xn_g5f3_X_0W-8a_b6o_k=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/jerusalem-old-city-at-sunset-1033280068-d06efd0b678c430a911e3b5e40e69888.jpg',
-                    'https://lp-cms-production.s3.amazonaws.com/image_assets/assets/000/039/953/full_width/e88383e5898d9d40b84c85635f11e0371a396263.jpg'
+                    'data:image/png;base64,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',
+                    // Add more Israel images here if you get them later
                 ],
                 details: `
                     <strong>10-Night Israel Experience</strong><br><br>
@@ -325,27 +549,49 @@
             }
         };
 
+        /**
+         * Opens the prize popup with dynamic content and initializes the slideshow.
+         * @param {string} prizeKey - The key from the prizesData object (e.g., 'rolex').
+         */
         function openPopup(prizeKey) {
             const prize = prizesData[prizeKey];
-            if (!prize) return;
+            if (!prize) {
+                console.error(`Prize data for key '${prizeKey}' not found.`);
+                return;
+            }
 
-            let slideshowHTML = `
-                <div class="slideshow-container">
-            `;
-            prize.images.forEach((imgSrc, index) => {
-                slideshowHTML += `<img class="slideshow-image fade" src="${imgSrc}" alt="Prize Image ${index + 1}">`;
-            });
+            let slideshowHTML = '';
+            // Only create slideshow controls if there's more than one image
+            if (prize.images.length > 1) {
+                slideshowHTML += `
+                    <div class="slideshow-container">
+                `;
+                prize.images.forEach((imgSrc, index) => {
+                    slideshowHTML += `<img class="slideshow-image fade" src="${imgSrc}" alt="${prizeKey} Prize Image ${index + 1}">`;
+                });
+                slideshowHTML += `
+                        <a class="prev" onclick="plusSlides(-1, '${prizeKey}')">&#10094;</a>
+                        <a class="next" onclick="plusSlides(1, '${prizeKey}')">&#10095;</a>
+                    </div>
+                    <div class="thumbnail-container">
+                `;
+                prize.images.forEach((imgSrc, index) => {
+                    slideshowHTML += `<img class="thumbnail" src="${imgSrc}" onclick="currentSlide(${index + 1}, '${prizeKey}')" alt="Thumbnail of ${prizeKey} Prize Image ${index + 1}">`;
+                });
+                slideshowHTML += `
+                    </div>
+                `;
+            } else {
+                // If only one image, just display it without slideshow controls
+                slideshowHTML += `
+                    <div class="slideshow-container">
+                        <img class="slideshow-image" src="${prize.images[0]}" alt="${prizeKey} Prize Image">
+                    </div>
+                `;
+            }
+
+
             slideshowHTML += `
-                    <a class="prev" onclick="plusSlides(-1, '${prizeKey}')">&#10094;</a>
-                    <a class="next" onclick="plusSlides(1, '${prizeKey}')">&#10095;</a>
-                </div>
-                <div class="thumbnail-container">
-            `;
-            prize.images.forEach((imgSrc, index) => {
-                slideshowHTML += `<img class="thumbnail" src="${imgSrc}" onclick="currentSlide(${index + 1}, '${prizeKey}')" alt="Thumbnail ${index + 1}">`;
-            });
-            slideshowHTML += `
-                </div>
                 <div class="popup-details">${prize.details}</div>
                 <div class="buy-links">
                     <a href="https://venmo.com" target="_blank" rel="noopener">Buy Ticket (Venmo)</a>
@@ -353,64 +599,121 @@
                 </div>
             `;
 
+            // Inject the generated HTML into the popup content area
             document.getElementById('popup-content').innerHTML = slideshowHTML;
-            document.getElementById('popup').style.display = 'flex'; // Use flex to center content
+
+            // Display the popup and overlay FIRST to allow elements to be rendered
+            document.getElementById('popup').style.display = 'flex'; // Use flex for centering
             document.getElementById('overlay').style.display = 'block';
 
-            // Initialize slideshow
-            slideIndex = 0; // Reset slide index for each popup
-            showSlides(1, prizeKey); // Show the first slide
-            startAutoSlide(prizeKey);
+            // Special handling for single image vs. slideshow
+            if (prize.images.length > 1) {
+                let slides = document.querySelectorAll('#popup-content .slideshow-image');
+                let thumbnails = document.querySelectorAll('#popup-content .thumbnail');
+
+                for (let i = 0; i < slides.length; i++) {
+                    slides[i].style.display = "none";
+                    thumbnails[i].classList.remove("active");
+                }
+                if (slides.length > 0) {
+                    slides[0].style.display = "block";
+                    thumbnails[0].classList.add("active");
+                }
+                slideIndex = 1; // Set slideIndex to 1 (for the first slide)
+                startAutoSlide(prizeKey); // Start auto-sliding only if it's a slideshow
+            } else {
+                // If only one image, ensure no auto-slide is running
+                clearInterval(slideInterval);
+            }
         }
 
+        /**
+         * Closes the prize popup and stops the auto-slideshow.
+         */
         function closePopup() {
             document.getElementById('popup').style.display = 'none';
             document.getElementById('overlay').style.display = 'none';
             clearInterval(slideInterval); // Stop auto-sliding when popup closes
         }
 
+        /**
+         * Changes the current slide by a given number (n for next/prev).
+         * @param {number} n - The number of slides to move (e.g., 1 for next, -1 for previous).
+         * @param {string} prizeKey - The key of the currently active prize.
+         */
         function plusSlides(n, prizeKey) {
-            showSlides(slideIndex += n, prizeKey);
+            // Need to get slides dynamically within this function too, as popup content changes
+            let slides = document.querySelectorAll('#popup-content .slideshow-image');
+            let newIndex = slideIndex + n;
+            if (newIndex > slides.length) {newIndex = 1}
+            if (newIndex < 1) {newIndex = slides.length}
+            showSlides(newIndex, prizeKey);
             clearInterval(slideInterval); // Stop auto-sliding on manual navigation
-            startAutoSlide(prizeKey); // Restart auto-sliding
+            startAutoSlide(prizeKey); // Restart auto-sliding after manual navigation
         }
 
+        /**
+         * Sets the current slide to a specific number (n for current slide).
+         * @param {number} n - The 1-based index of the slide to show.
+         * @param {string} prizeKey - The key of the currently active prize.
+         */
         function currentSlide(n, prizeKey) {
-            showSlides(slideIndex = n, prizeKey);
+            showSlides(n, prizeKey); // n is already the desired 1-based index
             clearInterval(slideInterval); // Stop auto-sliding on manual navigation
-            startAutoSlide(prizeKey); // Restart auto-sliding
+            startAutoSlide(prizeKey); // Restart auto-sliding after manual navigation
         }
 
+        /**
+         * Displays a specific slide and updates thumbnail active state.
+         * @param {number} n - The 1-based index of the slide to display.
+         * @param {string} prizeKey - The key of the prize whose slideshow is being controlled.
+         */
         function showSlides(n, prizeKey) {
             const prize = prizesData[prizeKey];
             if (!prize) return;
 
             let i;
+            // Select elements specifically within the #popup-content to avoid conflicts
             let slides = document.querySelectorAll('#popup-content .slideshow-image');
             let thumbnails = document.querySelectorAll('#popup-content .thumbnail');
 
+            // Set global slideIndex after bounds check
             if (n > slides.length) { slideIndex = 1 }
-            if (n < 1) { slideIndex = slides.length }
+            else if (n < 1) { slideIndex = slides.length }
+            else { slideIndex = n; }
 
+
+            // Hide all slides
             for (i = 0; i < slides.length; i++) {
                 slides[i].style.display = "none";
             }
+            // Remove 'active' class from all thumbnails
             for (i = 0; i < thumbnails.length; i++) {
-                thumbnails[i].className = thumbnails[i].className.replace(" active", "");
+                thumbnails[i].classList.remove("active");
             }
-            if (slides[slideIndex - 1]) {
+
+            // Display the current slide and mark its thumbnail as active
+            if (slides[slideIndex - 1]) { // slideIndex is 1-based, array is 0-based
                 slides[slideIndex - 1].style.display = "block";
             }
             if (thumbnails[slideIndex - 1]) {
-                thumbnails[slideIndex - 1].className += " active";
+                thumbnails[slideIndex - 1].classList.add("active");
             }
         }
 
+        /**
+         * Starts the automatic slideshow.
+         * @param {string} prizeKey - The key of the prize whose slideshow is being controlled.
+         */
         function startAutoSlide(prizeKey) {
-            clearInterval(slideInterval); // Clear any existing interval
-            slideInterval = setInterval(() => {
-                showSlides(slideIndex += 1, prizeKey);
-            }, 3000); // Change image every 3 seconds
+            // Only start auto-slide if there's more than one image
+            if (prizesData[prizeKey].images.length > 1) {
+                clearInterval(slideInterval); // Clear any existing interval to prevent multiple instances
+                slideInterval = setInterval(() => {
+                    // Increment slideIndex and call showSlides, which will handle wrapping
+                    showSlides(slideIndex + 1, prizeKey);
+                }, 3000); // Change image every 3 seconds (adjust as needed)
+            }
         }
     </script>
 </body>
