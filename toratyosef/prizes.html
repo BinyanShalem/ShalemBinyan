@@ -497,6 +497,24 @@
             </div>
     </div>
 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-analytics.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDfXnCZXN-URjdvFvVlWHLg4KOkSw7hvng",
+            authDomain: "torat-yosef.firebaseapp.com",
+            projectId: "torat-yosef",
+            storageBucket: "torat-yosef.firebasestorage.app",
+            messagingSenderId: "1033400220494",
+            appId: "1:1033400220494:web:1437414bdad4439fd6bc1f",
+            measurementId: "G-331D9RHZWH"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+    </script>
+
     <script>
         let slideIndex = 0; // Current slide index for the slideshow
         let slideInterval; // Variable to hold the auto-slide interval ID
@@ -505,14 +523,16 @@
         const prizesData = {
             rolex: {
                 images: [
-                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7/c_limit,w_3200/v1/catalogue/2025/upright-c/m126300-0018',
-                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126300-0020',
-                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126300-0004',
-                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126300-0006',
-                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126300-0016',
-                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126300-0014',
-                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126300-0008',
-                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126300-0012'
+                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7/c_limit,w_1920/v1/catalogue/2025/upright-c/m126300-0002', // Keep the original main image
+                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126334-0018',
+                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126334-0014',
+                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126334-0022',
+                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126334-0002',
+                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126334-0026',
+                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126334-0028',
+                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126334-0004',
+                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126334-0010',
+                    'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7/c_limit,w_3200/v1/catalogue/2025/upright-c/m126334-0024'
                 ],
                 details: `
                     <strong>Rolex Datejust 41</strong><br><br>
@@ -635,12 +655,12 @@
 
 
             slideshowHTML += `
-                <div class="popup-details">${prize.details}</div>
-                <div class="buy-links">
-                    <a href="https://venmo.com" target="_blank" rel="noopener">Buy Ticket (Venmo)</a>
-                    <a href="https://stripe.com" target="_blank" rel="noopener">Buy Ticket (Stripe)</a>
-                </div>
-            `;
+                    <div class="popup-details">${prize.details}</div>
+                    <div class="buy-links">
+                        <a href="https://venmo.com" target="_blank" rel="noopener">Buy Ticket (Venmo)</a>
+                        <a href="https://stripe.com" target="_blank" rel="noopener">Buy Ticket (Stripe)</a>
+                    </div>
+                `;
 
             // Inject the generated HTML into the popup content area
             document.getElementById('popup-content').innerHTML = slideshowHTML;
