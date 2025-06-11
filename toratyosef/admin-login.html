@@ -52,27 +52,22 @@
           const userCredential = await signInWithEmailAndPassword(auth, email, password);
           const user = userCredential.user;
 
-          // Query agents collection for agent with matching uid
+          // Query Firestore for agent with matching uid
           const agentsRef = collection(db, 'agents');
           const q = query(agentsRef, where('uid', '==', user.uid));
           const querySnapshot = await getDocs(q);
 
           if (querySnapshot.empty) {
             errorDiv.textContent = 'No agent record found for this user.';
-            // Optionally sign out user immediately if no agent record found:
-            // await auth.signOut();
             return;
           }
 
-          // If multiple, just pick first
           const agentDoc = querySnapshot.docs[0];
           const agentData = agentDoc.data();
 
-          // You can store agent info locally or in session storage if needed
-          // sessionStorage.setItem('agentData', JSON.stringify(agentData));
-
-          // Redirect to dashboard (change this URL as needed)
-          window.location.href = 'dashboard.html';
+          // Redirect to dashboard with referrer ID
+          const refId = agentData.referrerId;
+          window.location.href = `dashboard.html?ref=${refId}`;
 
         } catch (err) {
           errorDiv.textContent = 'Login failed: ' + err.message;
