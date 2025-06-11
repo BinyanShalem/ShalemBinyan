@@ -5,39 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Agent Dashboard</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      padding: 40px;
-      text-align: center;
-    }
-    .dashboard-container {
-      max-width: 500px;
-      margin: auto;
-      background: white;
-      padding: 30px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-    h2 {
-      color: #002141;
-      margin-bottom: 10px;
-    }
-    p {
-      font-size: 18px;
-      margin-bottom: 10px;
-    }
+    body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 40px; }
+    .dashboard-container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    h1, h2 { color: #002141; }
+    p { font-size: 1.1rem; }
     .link-box {
-      background-color: #f9f9f9;
-      padding: 10px;
-      border-radius: 6px;
+      margin-top: 15px; 
+      padding: 10px; 
+      background: #e0e7ff; 
+      border-radius: 5px; 
       word-break: break-all;
+      font-family: monospace;
     }
   </style>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDfXnCZXN-URjdvFvVlWHLg4KOkSw7hvng",
@@ -52,38 +36,58 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = "agent-login.html";
-        return;
-      }
+    window.addEventListener('DOMContentLoaded', () => {
+      const agentNameEl = document.getElementById('agentName');
+      const totalReferralsEl = document.getElementById('totalReferrals');
+      const shareableLinkEl = document.getElementById('shareableLink');
+      const logoutBtn = document.getElementById('logoutBtn');
 
-      const agentDoc = await getDoc(doc(db, "agents", user.uid));
-      if (!agentDoc.exists()) {
-        document.querySelector(".dashboard-container").innerHTML = "<p>No agent record found.</p>";
-        return;
-      }
+      logoutBtn.addEventListener('click', async () => {
+        await signOut(auth);
+        window.location.href = 'agent-login.html';
+      });
 
-      const data = agentDoc.data();
-      const name = data.name || "Agent";
-      const refId = data.refId || "UNKNOWN";
-      const referrals = data.referrals || 0;
-      const referralLink = `https://toratyosefraffle.org/square?ref=${refId}`;
+      onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+          // Not logged in, redirect to login page
+          window.location.href = 'agent-login.html';
+          return;
+        }
 
-      document.getElementById("agentName").textContent = `Welcome, ${name}!`;
-      document.getElementById("refId").textContent = `Your ID: ${refId}`;
-      document.getElementById("refCount").textContent = `Total Referrals: ${referrals}`;
-      document.getElementById("referralLink").textContent = referralLink;
+        // Find the agent record by user UID
+        const agentsRef = collection(db, 'agents');
+        const q = query(agentsRef, where('uid', '==', user.uid));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+          agentNameEl.textContent = "No agent record found.";
+          totalReferralsEl.textContent = "";
+          shareableLinkEl.textContent = "";
+          return;
+        }
+
+        const agentDoc = querySnapshot.docs[0];
+        const agentData = agentDoc.data();
+
+        const name = agentData.name || "Agent";
+        const refId = agentData.referrerId || "UNKNOWN";
+
+        agentNameEl.textContent = `Welcome, ${name}!`;
+        totalReferralsEl.textContent = `Total Referrals: ${agentData.totalReferrals ?? 0}`;
+
+        const link = `https://toratyosefraffle.org/square?ref=${encodeURIComponent(refId)}`;
+        shareableLinkEl.textContent = link;
+      });
     });
   </script>
 </head>
 <body>
   <div class="dashboard-container">
-    <h2 id="agentName">Loading...</h2>
-    <p id="refId"></p>
-    <p id="refCount"></p>
-    <p>Your Shareable Link:</p>
-    <div class="link-box" id="referralLink"></div>
+    <h1 id="agentName">Loading...</h1>
+    <h2 id="totalReferrals"></h2>
+    <p>Your personal shareable link:</p>
+    <div class="link-box" id="shareableLink"></div>
+    <button id="logoutBtn" style="margin-top:20px; padding: 10px 20px; background-color: #7F0031; color: white; border: none; border-radius: 5px; cursor: pointer;">Logout</button>
   </div>
 </body>
 </html>
