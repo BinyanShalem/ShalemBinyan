@@ -5,22 +5,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Agent Dashboard</title>
   <style>
-    body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 40px; }
-    .dashboard-container { max-width: 500px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center; }
-    h2 { color: #002141; }
-    .referral-link { margin-top: 20px; font-size: 16px; word-break: break-all; color: #333; }
-    button.copy-btn { margin-top: 10px; padding: 10px 20px; background-color: #7F0031; color: white; border: none; border-radius: 4px; cursor: pointer; }
-    button.copy-btn:hover { background-color: #590023; }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      padding: 40px;
+      text-align: center;
+    }
+    .dashboard-container {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+      color: #002141;
+      margin-bottom: 10px;
+    }
+    p {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+    .link-box {
+      background-color: #f9f9f9;
+      padding: 10px;
+      border-radius: 6px;
+      word-break: break-all;
+    }
   </style>
-</head>
-<body>
-  <div class="dashboard-container">
-    <h2 id="agentName">Welcome!</h2>
-    <p id="referralCount">Total Referrals: 0</p>
-    <div class="referral-link" id="referralLink">Your referral link will appear here</div>
-    <button class="copy-btn" onclick="copyReferral()">Copy Link</button>
-  </div>
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
@@ -39,35 +52,38 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const agentNameEl = document.getElementById("agentName");
-    const referralCountEl = document.getElementById("referralCount");
-    const referralLinkEl = document.getElementById("referralLink");
-
     onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const docRef = doc(db, "agents", user.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          const fullName = data.name;
-          const refId = data.refId || "UNKNOWN";
-          const count = data.referrals || 0;
-
-          agentNameEl.textContent = `Welcome, ${fullName}!`;
-          referralCountEl.textContent = `Total Referrals: ${count}`;
-          referralLinkEl.textContent = `https://toratyosefraffle.org/square?ref=${refId}`;
-        } else {
-          agentNameEl.textContent = "Agent not found.";
-        }
-      } else {
+      if (!user) {
         window.location.href = "agent-login.html";
+        return;
       }
-    });
 
-    window.copyReferral = function () {
-      const text = referralLinkEl.textContent;
-      navigator.clipboard.writeText(text).then(() => alert("Referral link copied!"));
-    };
+      const agentDoc = await getDoc(doc(db, "agents", user.uid));
+      if (!agentDoc.exists()) {
+        document.querySelector(".dashboard-container").innerHTML = "<p>No agent record found.</p>";
+        return;
+      }
+
+      const data = agentDoc.data();
+      const name = data.name || "Agent";
+      const refId = data.refId || "UNKNOWN";
+      const referrals = data.referrals || 0;
+      const referralLink = `https://toratyosefraffle.org/square?ref=${refId}`;
+
+      document.getElementById("agentName").textContent = `Welcome, ${name}!`;
+      document.getElementById("refId").textContent = `Your ID: ${refId}`;
+      document.getElementById("refCount").textContent = `Total Referrals: ${referrals}`;
+      document.getElementById("referralLink").textContent = referralLink;
+    });
   </script>
+</head>
+<body>
+  <div class="dashboard-container">
+    <h2 id="agentName">Loading...</h2>
+    <p id="refId"></p>
+    <p id="refCount"></p>
+    <p>Your Shareable Link:</p>
+    <div class="link-box" id="referralLink"></div>
+  </div>
 </body>
 </html>
