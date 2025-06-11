@@ -5,23 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Prizes - Yeshivat Torat Yosef Raffle</title>
     <style>
-        /* Define your color variables */
+        /* Your existing CSS here */
         :root {
             --primary-bg: #ffffff;
             --primary-text: rgb(0, 33, 65);
             --secondary-bg: rgb(0, 33, 65);
             --accent: #7F0031;
             --hover: #590023;
-            --button-gradient-start: #a30040; /* Lighter shade of accent for gradient */
-            --button-gradient-end: #7F0031; /* Accent color for gradient */
+            --button-gradient-start: #a30040;
+            --button-gradient-end: #7F0031;
         }
 
-        /* Universal box-sizing for consistent layout */
         * {
             box-sizing: border-box;
         }
 
-        /* Basic html and body styles */
         html, body {
             margin: 0;
             padding: 0;
@@ -29,340 +27,310 @@
             background-color: var(--primary-bg);
             color: var(--primary-text);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.5; /* Improved readability */
+            line-height: 1.5;
         }
 
-        /* Body as a flex container for full page layout */
         body {
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh; /* Ensure body takes at least full viewport height */
-            padding-bottom: 1rem; /* Add some padding at the bottom for spacing */
+            min-height: 100vh;
+            padding-bottom: 1rem;
         }
 
-        /* Logo container styling */
         .logo-container {
             text-align: center;
-            padding: 0.8rem 0 0.4rem; /* Slightly reduced padding */
-            flex-shrink: 0; /* Prevent logo from shrinking */
+            padding: 0.8rem 0 0.4rem;
+            flex-shrink: 0;
         }
 
-        /* Logo image styling */
         .logo {
-            max-width: 130px; /* Further reduced max-width */
-            width: 75vw; /* Responsive width */
+            max-width: 130px;
+            width: 75vw;
             height: auto;
-            max-height: 60px; /* Further reduced max-height */
+            max-height: 60px;
             border: 1px solid rgba(0, 0, 0, 0.1);
             border-radius: 8px;
         }
 
-        /* Navigation bar styling */
         nav {
             background-color: var(--secondary-bg);
             display: flex;
             justify-content: center;
-            gap: 1rem; /* Reduced gap */
-            padding: 0.8rem 0; /* Slightly reduced padding */
-            flex-shrink: 0; /* Prevent nav from shrinking */
-            flex-wrap: wrap; /* Allow nav items to wrap on smaller screens */
+            gap: 1rem;
+            padding: 0.8rem 0;
+            flex-shrink: 0;
+            flex-wrap: wrap;
             width: 100%;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        /* Navigation links styling */
         nav a {
             color: white;
             text-decoration: none;
-            padding: 0.4rem 0.8rem; /* Slightly reduced padding */
+            padding: 0.4rem 0.8rem;
             font-weight: bold;
-            font-size: 1rem; /* Slightly reduced font size */
-            white-space: nowrap; /* Prevent links from breaking lines */
-            user-select: none; /* Prevent text selection */
+            font-size: 1rem;
+            white-space: nowrap;
+            user-select: none;
         }
 
-        /* Active navigation link styling */
         nav a.active {
             border-bottom: 3px solid var(--accent);
             color: var(--accent);
         }
 
-        /* Navigation link hover effect */
         nav a:hover {
             color: var(--accent);
         }
 
-        /* Main content container styling */
         .container {
-            flex-grow: 1; /* Allow container to take available vertical space */
+            flex-grow: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            /* Removed justify-content: center to allow content to naturally flow */
-            padding: 0.8rem; /* Reduced padding */
+            padding: 0.8rem;
             text-align: center;
             width: 100%;
             box-sizing: border-box;
-            max-width: 1200px; /* Limit max width for readability */
+            max-width: 1200px;
         }
 
-        /* Heading 1 styling */
         h1 {
-            font-size: 1.6rem; /* Slightly reduced font size */
-            margin: 0.5rem 0; /* Adjusted margin */
+            font-size: 1.6rem;
+            margin: 0.5rem 0;
         }
 
-        /* Intro paragraph styling */
         .intro {
-            font-size: 0.95rem; /* Slightly reduced font size */
-            margin-bottom: 0.8rem; /* Adjusted margin */
+            font-size: 0.95rem;
+            margin-bottom: 0.8rem;
             max-width: 90%;
             margin-left: auto;
             margin-right: auto;
         }
 
-        /* Prize row container for layout */
         .prize-row {
             display: flex;
-            flex-direction: column; /* Stack prizes vertically by default */
-            gap: 0.8rem; /* Reduced gap between prize cards */
+            flex-direction: column;
+            gap: 0.8rem;
             width: 100%;
         }
 
-        /* Individual prize card styling */
         .prize {
             background: #f8f8f8;
-            padding: 0.6rem; /* Further reduced padding */
+            padding: 0.6rem;
             border-radius: 10px;
-            box-shadow: 0 0 8px rgba(0,0,0,0.1); /* Slightly softer shadow */
+            box-shadow: 0 0 8px rgba(0,0,0,0.1);
             text-align: center;
             width: 100%;
         }
 
-        /* Prize image styling */
         .prize img {
             width: 100%;
-            max-height: 250px; /* Further reduced max-height for prize images */
+            max-height: 250px;
             Height: 100%;
-            object-fit: contain; /* Ensure image scales within bounds without cropping */
-            margin-bottom: 0.3rem; /* Further reduced margin */
+            object-fit: contain;
+            margin-bottom: 0.3rem;
             border-radius: 6px;
         }
 
-        /* Prize heading 2 styling */
         .prize h2 {
             color: var(--accent);
-            margin: 0 0 0.2rem 0; /* Further reduced margin */
-            font-size: 1.1rem; /* Further reduced font size */
+            margin: 0 0 0.2rem 0;
+            font-size: 1.1rem;
         }
 
-        /* Prize paragraph styling */
         .prize p {
-            font-size: 0.85rem; /* Further reduced font size */
+            font-size: 0.85rem;
             color: rgb(40,40,40);
-            margin: 0 0 0.6rem 0; /* Further reduced margin */
+            margin: 0 0 0.6rem 0;
         }
 
-        /* View button styling */
         .view-button {
             background-color: var(--accent);
             color: white;
-            padding: 0.3rem 0.7rem; /* Further reduced padding */
+            padding: 0.3rem 0.7rem;
             border: none;
             border-radius: 5px;
             font-weight: 600;
             cursor: pointer;
-            margin-top: 0.2rem; /* Further reduced margin */
-            transition: background-color 0.3s ease; /* Smooth transition */
-            font-size: 0.9rem; /* Slightly reduced font size */
+            margin-top: 0.2rem;
+            transition: background-color 0.3s ease;
+            font-size: 0.9rem;
         }
 
         .view-button:hover {
             background-color: var(--hover);
         }
 
-        /* Styling for Buy Ticket buttons at the bottom */
         .buy-links {
-            margin-top: 1.5rem; /* Adjusted space above the buttons */
+            margin-top: 1.5rem;
             display: flex;
             flex-direction: column;
-            gap: 0.75rem; /* Space between the buttons */
+            gap: 0.75rem;
             width: 100%;
-            max-width: 350px; /* Adjusted max-width for better appearance */
+            max-width: 350px;
             margin-left: auto;
             margin-right: auto;
         }
 
         .buy-links a {
-            display: block; /* Ensures links take full width and stack */
-            padding: 0.9rem 1.8rem; /* Comfortable padding */
-            background-image: linear-gradient(to right, var(--button-gradient-start), var(--button-gradient-end)); /* Gradient background */
-            color: white; /* White text color */
-            text-decoration: none; /* Remove underline */
-            border-radius: 8px; /* Rounded corners */
-            font-weight: 700; /* Bolder text */
-            font-size: 1.1rem; /* Slightly larger font size */
-            text-transform: uppercase; /* Uppercase text */
-            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease; /* Smooth transitions */
-            text-align: center; /* Center the text */
-            box-shadow: 0 6px 12px rgba(127, 0, 49, 0.4); /* Stronger shadow with accent color */
-            border: 1px solid var(--hover); /* Subtle border for definition */
-            position: relative; /* Needed for pseudo-elements if adding more effects */
-            overflow: hidden; /* Ensures gradient doesn't overflow rounded corners */
+            display: block;
+            padding: 0.9rem 1.8rem;
+            background-image: linear-gradient(to right, var(--button-gradient-start), var(--button-gradient-end));
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            text-align: center;
+            box-shadow: 0 6px 12px rgba(127, 0, 49, 0.4);
+            border: 1px solid var(--hover);
+            position: relative;
+            overflow: hidden;
         }
 
         .buy-links a:hover {
-            background-image: linear-gradient(to right, var(--hover), var(--accent)); /* Darker gradient on hover */
-            transform: translateY(-3px); /* More pronounced lift effect */
-            box-shadow: 0 8px 16px rgba(127, 0, 49, 0.6); /* Stronger shadow on hover */
+            background-image: linear-gradient(to right, var(--hover), var(--accent));
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(127, 0, 49, 0.6);
         }
 
-        /* Overlay for popup background */
         .overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.6); /* Darker semi-transparent background */
-            z-index: 999; /* Below popup, above page content */
-            display: none; /* Hidden by default */
+            background-color: rgba(0,0,0,0.6);
+            z-index: 999;
+            display: none;
         }
 
-        /* Popup container styling */
         .popup {
-            display: none; /* Hidden by default; JavaScript shows it as 'flex' */
+            display: none;
             position: fixed;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%); /* Center the popup */
+            transform: translate(-50%, -50%);
             background-color: white;
             padding: 1.5rem;
             border-radius: 8px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.4); /* Stronger shadow */
-            max-width: 90%; /* Max width relative to viewport */
-            max-height: 90%; /* Max height relative to viewport */
-            overflow-y: auto; /* Enable vertical scrolling if content overflows */
-            z-index: 1000; /* Above the overlay */
-            width: 500px; /* Default width for the popup */
-            flex-direction: column; /* Content inside popup stacks vertically */
-            align-items: center; /* Center content horizontally in the popup */
+            box-shadow: 0 0 15px rgba(0,0,0,0.4);
+            max-width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+            z-index: 1000;
+            width: 500px;
+            flex-direction: column;
+            align-items: center;
         }
 
-        /* Close button for popup */
         .popup .close {
             position: absolute;
             top: 0.5rem;
             right: 1rem;
-            font-size: 2rem; /* Larger close button */
+            font-size: 2rem;
             cursor: pointer;
             color: var(--accent);
-            z-index: 1001; /* Ensure it's above other elements in popup */
+            z-index: 1001;
         }
 
-        /* Slideshow container within the popup */
         .slideshow-container {
             position: relative;
             width: 100%;
-            max-width: 500px; /* Limit max width of the slideshow */
-            margin: 0 auto 1rem auto; /* Center the slideshow container horizontally */
+            max-width: 500px;
+            margin: 0 auto 1rem auto;
             text-align: center;
-            overflow: hidden; /* Hide any overflow, important for transitions */
+            overflow: hidden;
         }
 
-        /* Individual slideshow image styling */
         .slideshow-image {
             width: 100%;
-            max-height: 300px; /* Smaller image height in popup */
-            object-fit: contain; /* Ensure the whole image is visible */
+            max-height: 300px;
+            object-fit: contain;
             border-radius: 6px;
-            /* display: none; Removed from here - JS handles initial visibility */
         }
 
-        /* Previous and Next arrows for slideshow */
         .prev, .next {
             cursor: pointer;
             position: absolute;
             top: 50%;
             width: auto;
             padding: 12px 18px;
-            margin-top: -30px; /* Vertically center the arrows */
+            margin-top: -30px;
             color: white;
             font-weight: bold;
             font-size: 22px;
             transition: 0.6s ease;
             user-select: none;
-            background-color: rgba(0,0,0,0.5); /* Semi-transparent background */
-            z-index: 99; /* Ensure arrows are above images */
+            background-color: rgba(0,0,0,0.5);
+            z-index: 99;
         }
 
         .next {
             right: 0;
-            border-radius: 3px 0 0 3px; /* Rounded on left for next button */
+            border-radius: 3px 0 0 3px;
         }
 
         .prev {
-            left: 0; /* Position prev button on left */
-            border-radius: 0 3px 3px 0; /* Rounded on right for prev button */
+            left: 0;
+            border-radius: 0 3px 3px 0;
         }
 
         .prev:hover, .next:hover {
             background-color: rgba(0,0,0,0.8);
         }
 
-        /* Thumbnail container styling */
         .thumbnail-container {
             text-align: center;
             padding: 10px 0;
-            white-space: nowrap; /* Prevent thumbnails from wrapping */
-            overflow-x: auto; /* Enable horizontal scrolling for thumbnails if many */
+            white-space: nowrap;
+            overflow-x: auto;
             margin-bottom: 1rem;
-            width: 100%; /* Ensure thumbnail container takes full width */
+            width: 100%;
         }
 
-        /* Individual thumbnail image styling */
         .thumbnail {
-            width: 60px; /* Smaller thumbnails */
+            width: 60px;
             height: 40px;
-            object-fit: cover; /* Crop to fill, maintain aspect ratio */
+            object-fit: cover;
             border-radius: 4px;
             cursor: pointer;
-            opacity: 0.6; /* Dim inactive thumbnails */
-            margin: 0 5px; /* Spacing between thumbnails */
+            opacity: 0.6;
+            margin: 0 5px;
             border: 2px solid transparent;
             transition: all 0.3s ease;
-            display: inline-block; /* Display thumbnails in a row */
+            display: inline-block;
         }
 
-        /* Active thumbnail styling */
         .thumbnail:hover, .thumbnail.active {
-            opacity: 1; /* Full opacity on hover/active */
-            border: 2px solid var(--accent); /* Highlight active thumbnail */
+            opacity: 1;
+            border: 2px solid var(--accent);
         }
 
-        /* Popup details text styling */
         .popup-details {
-            text-align: center; /* Center the text within the details */
-            width: 100%; /* Take full width of the popup */
-            padding: 0 1rem; /* Add some horizontal padding */
-            margin-bottom: 1rem; /* Space below details */
+            text-align: center;
+            width: 100%;
+            padding: 0 1rem;
+            margin-bottom: 1rem;
         }
 
         .popup-details strong {
-            color: var(--accent); /* Highlight strong text */
+            color: var(--accent);
         }
 
-        /* Buy links in popup */
         .popup .buy-links {
-            margin-top: 1rem; /* Space above buy links */
+            margin-top: 1rem;
             display: flex;
-            flex-direction: column; /* Stack buy links vertically by default */
+            flex-direction: column;
             gap: 0.75rem;
             width: 100%;
-            max-width: 300px; /* Constrain max width of the buy links container */
-            margin-left: auto; /* Center the container itself */
-            margin-right: auto; /* Center the container itself */
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .popup .buy-links a {
@@ -377,34 +345,33 @@
             text-align: center;
             user-select: none;
             transition: background-color 0.3s;
-            width: 100%; /* Make buttons take full width of their constrained container */
+            width: 100%;
         }
 
         .popup .buy-links a:hover {
             background-color: var(--hover);
         }
 
-        /* Media queries for responsiveness */
         @media (min-width: 768px) {
             .prize-row {
-                flex-direction: row; /* Display prizes in a row on larger screens */
+                flex-direction: row;
                 flex-wrap: wrap;
-                justify-content: space-around; /* Distribute space evenly */
+                justify-content: space-around;
             }
             .prize {
-                flex: 0 0 calc(25% - 1rem); /* 4 prizes per row, accounting for gap */
-                max-width: calc(25% - 1rem); /* Ensure consistent sizing */
+                flex: 0 0 calc(25% - 1rem);
+                max-width: calc(25% - 1rem);
             }
             .buy-links {
-                flex-direction: row; /* Display buy links in a row on larger screens */
-                justify-content: center; /* Center items in a row */
-                max-width: none; /* Remove max-width when in row to let them naturally size */
+                flex-direction: row;
+                justify-content: center;
+                max-width: none;
             }
             .buy-links a {
-                width: auto; /* Auto width for buy links */
+                width: auto;
             }
             .popup {
-                max-width: 700px; /* Wider popup on larger screens */
+                max-width: 700px;
             }
         }
 
@@ -417,20 +384,20 @@
                 padding: 0.4rem 0.8rem;
             }
             .buy-links {
-                max-width: 250px; /* Slightly reduce max-width on very small screens for stacking */
+                max-width: 250px;
             }
             .buy-links a {
                 font-size: 0.9rem;
                 padding: 0.6rem;
             }
             .popup {
-                padding: 1rem; /* Less padding on small screens */
+                padding: 1rem;
             }
             .popup .close {
                 font-size: 1.7rem;
             }
             .slideshow-image {
-                max-height: 200px; /* Even smaller on mobile */
+                max-height: 200px;
             }
             .prev, .next {
                 font-size: 18px;
@@ -484,8 +451,8 @@
             </div>
         </div>
         <div class="buy-links">
-            <a href="https://venmo.com" target="_blank" rel="noopener">Buy Ticket (Venmo)</a>
-            <a href="https://stripe.com" target="_blank" rel="noopener">Buy Ticket (Stripe)</a>
+            <a href="square.html" rel="noopener" class="buy-link-main">Buy Ticket (Venmo)</a>
+            <a href="square.html" rel="noopener" class="buy-link-main">Buy Ticket (Stripe)</a>
         </div>
     </div>
 
@@ -494,12 +461,12 @@
     <div class="popup" id="popup">
         <span class="close" onclick="closePopup()">&times;</span>
         <div id="popup-content">
-            </div>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-analytics.js";
+        import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-analytics.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDfXnCZXN-URjdvFvVlWHLg4KOkSw7hvng",
@@ -513,17 +480,50 @@
 
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
+
+        // Function to parse URL parameters
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        };
+
+        const referrerId = getUrlParameter('ref'); // Get referrer from current URL
+        // Log event if prizes page is loaded with a referrer
+        if (referrerId) {
+            logEvent(analytics, 'prizes_page_loaded_with_referrer', { referrer: referrerId });
+        } else {
+            logEvent(analytics, 'prizes_page_loaded_no_referrer');
+        }
+
+        // --- Start Custom Code for Dynamic Buy Buttons ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const mainBuyButtons = document.querySelectorAll('.buy-link-main');
+            const paymentPageBaseUrl = `square.html`; // Relative path to payment page
+
+            mainBuyButtons.forEach(button => {
+                let href = paymentPageBaseUrl;
+                if (referrerId) {
+                    href += `?ref=${referrerId}`;
+                }
+                button.href = href;
+                // Optional: Update button text to include referrer if you want
+                // if (referrerId) {
+                //     button.textContent = `Buy Ticket (via ${referrerId})`;
+                // }
+            });
+        });
+        // --- End Custom Code for Dynamic Buy Buttons ---
     </script>
 
     <script>
-        let slideIndex = 0; // Current slide index for the slideshow
-        let slideInterval; // Variable to hold the auto-slide interval ID
+        let slideIndex = 0;
+        let slideInterval;
 
-        // Centralized data for all prizes, including images and details
         const prizesData = {
             rolex: {
                 images: [
-                    // Existing m126300 images
                     'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7/c_limit,w_3200/v1/catalogue/2025/upright-c/m126300-0018',
                     'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126300-0020',
                     'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126300-0004',
@@ -532,7 +532,6 @@
                     'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126300-0014',
                     'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126300-0008',
                     'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126300-0012',
-                    // New m126334 images (added to the list)
                     'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126334-0018',
                     'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126334-0014',
                     'https://media.rolex.com/image/upload/q_auto:eco/f_auto/t_v7-majesty/c_limit,w_1600/v1/catalogue/2025/upright-c/m126334-0022',
@@ -557,7 +556,7 @@
             },
             peloton: {
                 images: [
-                    'https://res.cloudinary.com/peloton-cycle/image/fetch/dpr_1.5,f_auto,q_auto:good,w_1024/https://images.ctfassets.net/7vk8puwnesgc/4ghvqYMJrS833IKvNsulDr/bea86ceede17035cbe7bcb72debd68cd/BIKE_PLUS_ULT_01.png', /* Bike+ image first, since it's the main image for the prize card */
+                    'https://res.cloudinary.com/peloton-cycle/image/fetch/dpr_1.5,f_auto,q_auto:good,w_1024/https://images.ctfassets.net/7vk8puwnesgc/4ghvqYMJrS833IKvNsulDr/bea86ceede17035cbe7bcb72debd68cd/BIKE_PLUS_ULT_01.png',
                     'https://res.cloudinary.com/peloton-cycle/image/fetch/dpr_2.0,f_auto,q_auto:good,w_768/https://images.ctfassets.net/7vk8puwnesgc/19TaoeNyEq3TMqLXOJC4WF/0a2e1c0e8020c019879227f198ceea7a/TREAD_STARTER_01.png',
                     'https://res.cloudinary.com/peloton-cycle/image/fetch/dpr_2.0,f_auto,q_auto:good,w_768/https://images.ctfassets.net/7vk8puwnesgc/1H5nluC74EeaM4Gmm63I25/70960bfd2c8afe129ee4b5d03f05874a/ROW_STARTER_01.png'
                 ],
@@ -621,10 +620,6 @@
             }
         };
 
-        /**
-         * Opens the prize popup with dynamic content and initializes the slideshow.
-         * @param {string} prizeKey - The key from the prizesData object (e.g., 'rolex').
-         */
         function openPopup(prizeKey) {
             const prize = prizesData[prizeKey];
             if (!prize) {
@@ -632,8 +627,24 @@
                 return;
             }
 
+            // Get the referrer ID from the current page's URL
+            const currentReferrerId = getUrlParameter('ref');
+            const paymentPageBaseUrl = `square.html`; // Relative path
+
+            let venmoPaymentUrl = paymentPageBaseUrl;
+            let stripePaymentUrl = paymentPageBaseUrl;
+
+            // Append referrer ID if it exists
+            if (currentReferrerId) {
+                venmoPaymentUrl += `?ref=${currentReferrerId}&method=venmo`;
+                stripePaymentUrl += `?ref=${currentReferrerId}&method=stripe`;
+            } else {
+                venmoPaymentUrl += `?method=venmo`; // Still include method if no referrer
+                stripePaymentUrl += `?method=stripe`;
+            }
+
+
             let slideshowHTML = '';
-            // Only create slideshow controls if there's more than one image
             if (prize.images.length > 1) {
                 slideshowHTML += `
                     <div class="slideshow-container">
@@ -654,7 +665,6 @@
                     </div>
                 `;
             } else {
-                // If only one image, just display it without slideshow controls
                 slideshowHTML += `
                     <div class="slideshow-container">
                         <img class="slideshow-image" src="${prize.images[0]}" alt="${prizeKey} Prize Image">
@@ -662,23 +672,19 @@
                 `;
             }
 
-
             slideshowHTML += `
-                    <div class="popup-details">${prize.details}</div>
-                    <div class="buy-links">
-                        <a href="https://venmo.com" target="_blank" rel="noopener">Buy Ticket (Venmo)</a>
-                        <a href="https://stripe.com" target="_blank" rel="noopener">Buy Ticket (Stripe)</a>
-                    </div>
-                `;
+                <div class="popup-details">${prize.details}</div>
+                <div class="buy-links">
+                    <a href="${venmoPaymentUrl}" target="_blank" rel="noopener">Buy Ticket (Venmo)</a>
+                    <a href="${stripePaymentUrl}" target="_blank" rel="noopener">Buy Ticket (Stripe)</a>
+                </div>
+            `;
 
-            // Inject the generated HTML into the popup content area
             document.getElementById('popup-content').innerHTML = slideshowHTML;
 
-            // Display the popup and overlay FIRST to allow elements to be rendered
-            document.getElementById('popup').style.display = 'flex'; // Use flex for centering
+            document.getElementById('popup').style.display = 'flex';
             document.getElementById('overlay').style.display = 'block';
 
-            // Special handling for single image vs. slideshow
             if (prize.images.length > 1) {
                 let slides = document.querySelectorAll('#popup-content .slideshow-image');
                 let thumbnails = document.querySelectorAll('#popup-content .thumbnail');
@@ -691,81 +697,56 @@
                     slides[0].style.display = "block";
                     thumbnails[0].classList.add("active");
                 }
-                slideIndex = 1; // Set slideIndex to 1 (for the first slide)
-                startAutoSlide(prizeKey); // Start auto-sliding only if it's a slideshow
+                slideIndex = 1;
+                startAutoSlide(prizeKey);
             } else {
-                // If only one image, ensure no auto-slide is running
                 clearInterval(slideInterval);
             }
         }
 
-        /**
-         * Closes the prize popup and stops the auto-slideshow.
-         */
         function closePopup() {
             document.getElementById('popup').style.display = 'none';
             document.getElementById('overlay').style.display = 'none';
-            clearInterval(slideInterval); // Stop auto-sliding when popup closes
+            clearInterval(slideInterval);
         }
 
-        /**
-         * Changes the current slide by a given number (n for next/prev).
-         * @param {number} n - The number of slides to move (e.g., 1 for next, -1 for previous).
-         * @param {string} prizeKey - The key of the currently active prize.
-         */
         function plusSlides(n, prizeKey) {
-            // Need to get slides dynamically within this function too, as popup content changes
             let slides = document.querySelectorAll('#popup-content .slideshow-image');
             let newIndex = slideIndex + n;
             if (newIndex > slides.length) {newIndex = 1}
             if (newIndex < 1) {newIndex = slides.length}
             showSlides(newIndex, prizeKey);
-            clearInterval(slideInterval); // Stop auto-sliding on manual navigation
-            startAutoSlide(prizeKey); // Restart auto-sliding after manual navigation
+            clearInterval(slideInterval);
+            startAutoSlide(prizeKey);
         }
 
-        /**
-         * Sets the current slide to a specific number (n for current slide).
-         * @param {number} n - The 1-based index of the slide to show.
-         * @param {string} prizeKey - The key of the currently active prize.
-         */
         function currentSlide(n, prizeKey) {
-            showSlides(n, prizeKey); // n is already the desired 1-based index
-            clearInterval(slideInterval); // Stop auto-sliding on manual navigation
-            startAutoSlide(prizeKey); // Restart auto-sliding after manual navigation
+            showSlides(n, prizeKey);
+            clearInterval(slideInterval);
+            startAutoSlide(prizeKey);
         }
 
-        /**
-         * Displays a specific slide and updates thumbnail active state.
-         * @param {number} n - The 1-based index of the slide to display.
-         * @param {string} prizeKey - The key of the prize whose slideshow is being controlled.
-         */
         function showSlides(n, prizeKey) {
             const prize = prizesData[prizeKey];
             if (!prize) return;
 
             let i;
-            // Select elements specifically within the #popup-content to avoid conflicts
             let slides = document.querySelectorAll('#popup-content .slideshow-image');
             let thumbnails = document.querySelectorAll('#popup-content .thumbnail');
 
-            // Set global slideIndex after bounds check
             if (n > slides.length) { slideIndex = 1 }
             else if (n < 1) { slideIndex = slides.length }
             else { slideIndex = n; }
 
 
-            // Hide all slides
             for (i = 0; i < slides.length; i++) {
                 slides[i].style.display = "none";
             }
-            // Remove 'active' class from all thumbnails
             for (i = 0; i < thumbnails.length; i++) {
                 thumbnails[i].classList.remove("active");
             }
 
-            // Display the current slide and mark its thumbnail as active
-            if (slides[slideIndex - 1]) { // slideIndex is 1-based, array is 0-based
+            if (slides[slideIndex - 1]) {
                 slides[slideIndex - 1].style.display = "block";
             }
             if (thumbnails[slideIndex - 1]) {
@@ -773,18 +754,12 @@
             }
         }
 
-        /**
-         * Starts the automatic slideshow.
-         * @param {string} prizeKey - The key of the prize whose slideshow is being controlled.
-         */
         function startAutoSlide(prizeKey) {
-            // Only start auto-slide if there's more than one image
             if (prizesData[prizeKey].images.length > 1) {
-                clearInterval(slideInterval); // Clear any existing interval to prevent multiple instances
+                clearInterval(slideInterval);
                 slideInterval = setInterval(() => {
-                    // Increment slideIndex and call showSlides, which will handle wrapping
                     showSlides(slideIndex + 1, prizeKey);
-                }, 3000); // Change image every 3 seconds (adjust as needed)
+                }, 3000);
             }
         }
     </script>
