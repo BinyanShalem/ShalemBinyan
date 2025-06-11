@@ -1,32 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8" />
   <title>Referrer Dashboard</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      padding: 30px;
-      background: #f9f9f9;
-      color: #002141;
-    }
-    h2 {
-      color: #7F0031;
-    }
-    ul {
-      padding-left: 20px;
-    }
-    li {
-      margin-bottom: 10px;
-    }
-  </style>
-</head>
-<body>
-  <h2>Referrer Dashboard</h2>
-  <p id="welcome">Loading...</p>
-  <ul id="donationList"></ul>
-  <p id="totalCount"></p>
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
     import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
@@ -46,4 +21,30 @@
     const auth = getAuth(app);
 
     onAuthStateChanged(auth, async (user) => {
-      if (!user) return location.href = "admin-login
+      if (!user) return location.href = 'admin-login.html';
+      const email = user.email;
+      document.getElementById("welcome").textContent = `Welcome, ${email}`;
+      const q = query(collection(db, "donations"), where("referrer", "==", email));
+      const snapshot = await getDocs(q);
+
+      let total = 0;
+      const list = document.getElementById("donationList");
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        const li = document.createElement("li");
+        li.textContent = `${d.name} - ${d.email} - ${d.phone}`;
+        list.appendChild(li);
+        total++;
+      });
+
+      document.getElementById("total").textContent = `Total Referrals: ${total}`;
+    });
+  </script>
+</head>
+<body>
+  <h2>Referrer Dashboard</h2>
+  <p id="welcome"></p>
+  <ul id="donationList"></ul>
+  <p id="total"></p>
+</body>
+</html>
