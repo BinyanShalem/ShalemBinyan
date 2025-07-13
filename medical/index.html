@@ -15,11 +15,17 @@
         .loader { width: 48px; height: 48px; border: 5px solid #FFF; border-bottom-color: #3B82F6; border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 1s linear infinite; }
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .loading-overlay { position: absolute; inset: 0; background-color: rgba(255, 255, 255, 0.8); display: flex; align-items: center; justify-content: center; z-index: 10; }
+        #initial-loader { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
     </style>
 </head>
 <body class="bg-gray-50">
     <div id="app">
-        <!-- App content will be rendered here -->
+        <div id="initial-loader">
+            <div class="text-center">
+                <h1 class="text-2xl font-bold text-blue-600">Refuah Berurah</h1>
+                <p class="mt-2 text-gray-600">Initializing...</p>
+            </div>
+        </div>
     </div>
     <div id="modal-container">
         <!-- Modals will be rendered here -->
@@ -31,19 +37,9 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signOut, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, addDoc, getDocs, onSnapshot, writeBatch, query, where, orderBy, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- Firebase Initialization ---
+        // --- App State ---
         let app, auth, db, userId;
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'refuah-berurah-prod';
-        
-        try {
-            const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
-        } catch (e) {
-            console.error("Firebase initialization failed. Using fallback.", e);
-            document.getElementById('app').innerHTML = `<div class="p-4 text-red-600">Error: Firebase could not be initialized. Please check your configuration.</div>`;
-        }
 
         // --- ROUTER: Handles navigation within the single-page application ---
         const AppRouter = {
@@ -83,22 +79,19 @@
 
         // --- Firestore Database Layer ---
         const FirestoreDB = {
-            // Patients
             getPatients: (callback) => onSnapshot(collection(db, `artifacts/${appId}/users/${userId}/patients`), callback),
             addPatient: (patientData) => addDoc(collection(db, `artifacts/${appId}/users/${userId}/patients`), patientData),
             savePatient: (patientId, patientData) => setDoc(doc(db, `artifacts/${appId}/users/${userId}/patients`, patientId), patientData, { merge: true }),
             deletePatient: (patientId) => deleteDoc(doc(db, `artifacts/${appId}/users/${userId}/patients`, patientId)),
-            
-            // Resources
             getResources: (callback) => onSnapshot(collection(db, `artifacts/${appId}/users/${userId}/resources`), callback),
             addResource: (resourceData) => addDoc(collection(db, `artifacts/${appId}/users/${userId}/resources`), resourceData),
             deleteResource: (resourceId) => deleteDoc(doc(db, `artifacts/${appId}/users/${userId}/resources`, resourceId)),
         };
 
-
         // --- GLOBAL MODAL HELPER ---
         window.showConfirmModal = (title, message, onConfirm) => {
             const modal = document.getElementById('confirm-modal');
+            if (!modal) return;
             document.getElementById('confirm-title').innerText = title;
             document.getElementById('confirm-message').innerText = message;
             
@@ -171,9 +164,7 @@
         };
 
         const DashboardComponent = {
-            render() {
-                return Layout.render(`<div id="dashboard-content"><div class="loading-overlay"><div class="loader"></div></div></div>`, 'Dashboard');
-            },
+            render() { return Layout.render(`<div id="dashboard-content"><div class="loading-overlay"><div class="loader"></div></div></div>`, 'Dashboard'); },
             async postRender() {
                 Layout.postRender();
                 const patientUnsubscribe = FirestoreDB.getPatients(patientQuerySnapshot => {
@@ -202,8 +193,7 @@
                                 <a href="#/resources" class="flex items-center justify-center p-4 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-all"><svg class="w-5 h-5 mr-2" data-lucide="plus-circle"></svg>Add New Resource</a>
                             </div>
                         </div>
-                    </div>
-                `;
+                    </div>`;
                 if(window.lucide) window.lucide.createIcons();
             }
         };
@@ -453,40 +443,60 @@
             }
         };
 
-        // --- AUTHENTICATION & APP INITIALIZATION ---
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                userId = user.uid;
-                const currentPath = window.location.hash.slice(1);
-                if (!currentPath || currentPath === '/') {
-                    AppRouter.navigate('/dashboard');
-                } else {
-                    AppRouter.handleRouteChange(); // Re-render current page with user context
+        // --- App Initialization ---
+        function initializeAndStartApp() {
+            try {
+                const firebaseConfigStr = typeof __firebase_config !== 'undefined' ? __firebase_config : '{}';
+                if (!firebaseConfigStr || firebaseConfigStr === '{}') {
+                    throw new Error("Firebase config is missing or empty.");
                 }
-            } else {
-                AppRouter.navigate('/');
-                // Attempt to sign in
-                (async () => {
-                    try {
-                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                            await signInWithCustomToken(auth, __initial_auth_token);
-                        } else {
-                            await signInAnonymously(auth);
-                        }
-                    } catch (error) {
-                        console.error("Authentication failed:", error);
-                        document.getElementById('app').innerHTML = `<div class="p-4 text-red-600">Authentication Failed. Please refresh and try again.</div>`;
-                    }
-                })();
-            }
-        });
+                const firebaseConfig = JSON.parse(firebaseConfigStr);
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
 
-        AppRouter.addRoute('/', LoginComponent);
-        AppRouter.addRoute('/dashboard', DashboardComponent);
-        AppRouter.addRoute('/patients', PatientsComponent);
-        AppRouter.addRoute('/patient/:id', PatientDetailComponent);
-        AppRouter.addRoute('/resources', ResourcesComponent);
-        AppRouter.init();
+                // --- AUTHENTICATION & ROUTING ---
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        const currentPath = window.location.hash.slice(1);
+                        if (!currentPath || currentPath === '/') {
+                            AppRouter.navigate('/dashboard');
+                        } else {
+                            AppRouter.handleRouteChange();
+                        }
+                    } else {
+                        AppRouter.navigate('/');
+                        (async () => {
+                            try {
+                                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                                    await signInWithCustomToken(auth, __initial_auth_token);
+                                } else {
+                                    await signInAnonymously(auth);
+                                }
+                            } catch (error) {
+                                console.error("Authentication failed:", error);
+                                document.getElementById('app').innerHTML = `<div class="p-4 text-red-600">Authentication Failed. Please refresh and try again.</div>`;
+                            }
+                        })();
+                    }
+                });
+
+                AppRouter.addRoute('/', LoginComponent);
+                AppRouter.addRoute('/dashboard', DashboardComponent);
+                AppRouter.addRoute('/patients', PatientsComponent);
+                AppRouter.addRoute('/patient/:id', PatientDetailComponent);
+                AppRouter.addRoute('/resources', ResourcesComponent);
+                AppRouter.init();
+
+            } catch (e) {
+                console.error("Firebase initialization failed:", e);
+                document.getElementById('app').innerHTML = `<div class="min-h-screen flex items-center justify-center bg-red-50"><div class="text-center p-8 bg-white rounded-lg shadow-lg"><h2 class="text-2xl font-bold text-red-700">Error: Firebase Initialization Failed</h2><p class="mt-2 text-gray-600">The application could not connect to the database. Please ensure the Firebase configuration is correct and available.</p><p class="mt-4 text-sm text-gray-500">Details: ${e.message}</p></div></div>`;
+            }
+        }
+
+        // Start the app after a short delay to ensure environment variables are loaded.
+        setTimeout(initializeAndStartApp, 100);
 
     </script>
 </body>
