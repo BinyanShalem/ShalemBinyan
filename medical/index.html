@@ -3,29 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Refuah Berurah - Login</title>
+    <title>Refuah Berurah - Production Ready</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/lucide-react@0.292.0/dist/lucide-react.min.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
         .transition-all { transition: all 0.3s ease-in-out; }
-        /* Custom styles for inputs used in modals */
-        .input {
-            margin-top: 0.25rem;
-            display: block;
-            width: 100%;
-            padding: 0.5rem 0.75rem;
-            border: 1px solid #D1D5DB; /* gray-300 */
-            border-radius: 0.375rem; /* rounded-md */
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-        }
-        .input:focus {
-            outline: none;
-            --tw-ring-color: #3B82F6; /* blue-500 */
-            box-shadow: 0 0 0 2px var(--tw-ring-color);
-            border-color: #3B82F6;
-        }
+        .input { margin-top: 0.25rem; display: block; width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #D1D5DB; border-radius: 0.375rem; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+        .input:focus { outline: none; --tw-ring-color: #3B82F6; box-shadow: 0 0 0 2px var(--tw-ring-color); border-color: #3B82F6; }
+        .loader { width: 48px; height: 48px; border: 5px solid #FFF; border-bottom-color: #3B82F6; border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 1s linear infinite; }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loading-overlay { position: absolute; inset: 0; background-color: rgba(255, 255, 255, 0.8); display: flex; align-items: center; justify-content: center; z-index: 10; }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -37,6 +26,25 @@
     </div>
 
     <script type="module">
+        // --- Firebase SDK Imports ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signOut, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, addDoc, getDocs, onSnapshot, writeBatch, query, where, orderBy, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Firebase Initialization ---
+        let app, auth, db, userId;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'refuah-berurah-prod';
+        
+        try {
+            const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+        } catch (e) {
+            console.error("Firebase initialization failed. Using fallback.", e);
+            document.getElementById('app').innerHTML = `<div class="p-4 text-red-600">Error: Firebase could not be initialized. Please check your configuration.</div>`;
+        }
+
         // --- ROUTER: Handles navigation within the single-page application ---
         const AppRouter = {
             routes: {},
@@ -45,12 +53,10 @@
                 window.addEventListener('hashchange', () => this.handleRouteChange());
                 window.addEventListener('load', () => this.handleRouteChange());
             },
-            addRoute(route, component) {
-                this.routes[route] = component;
-            },
+            addRoute(route, component) { this.routes[route] = component; },
             handleRouteChange() {
                 const hash = window.location.hash.slice(1) || '/';
-                if (this.currentRoute === hash) return;
+                if (this.currentRoute === hash && hash !== '/') return;
 
                 const routeParts = hash.split('/');
                 let component;
@@ -69,84 +75,26 @@
                     document.getElementById('modal-container').innerHTML = component.renderModals ? component.renderModals() : '';
                     if (component.postRender) component.postRender(params);
                 } else {
-                    console.warn(`No route found for hash: ${hash}. Redirecting to login.`);
                     window.location.hash = '/';
                 }
             },
-            navigate(path) {
-                window.location.hash = path;
-            }
+            navigate(path) { window.location.hash = path; }
         };
 
-        // --- MOCK DATABASE (using localStorage for demonstration) ---
-        const DB = {
-            _get(key, defaultValue = []) {
-                try {
-                    const data = localStorage.getItem(key);
-                    return data ? JSON.parse(data) : defaultValue;
-                } catch (e) {
-                    console.error(`Error reading from localStorage: ${key}`, e);
-                    return defaultValue;
-                }
-            },
-            _set(key, value) {
-                try {
-                    localStorage.setItem(key, JSON.stringify(value));
-                } catch (e) {
-                    console.error(`Error writing to localStorage: ${key}`, e);
-                }
-            },
-            getPatients() { return this._get('patients'); },
-            getPatient(id) { return this.getPatients().find(p => p.id === id); },
-            savePatient(patient) {
-                let patients = this.getPatients();
-                const index = patients.findIndex(p => p.id === patient.id);
-                if (index > -1) {
-                    patients[index] = patient;
-                } else {
-                    patients.push(patient);
-                }
-                this._set('patients', patients);
-            },
-            addPatient(patientData) {
-                let patients = this.getPatients();
-                // [NEW] Initialize new fields for mypage and linked resources
-                const newPatient = { id: `P${Date.now()}`, ...patientData, notes: [], files: [], credentials: [], mypageLink: '', linkedResourceIds: [] };
-                patients.push(newPatient);
-                this._set('patients', patients);
-                return newPatient;
-            },
-            deletePatient(id) {
-                let patients = this.getPatients().filter(p => p.id !== id);
-                this._set('patients', patients);
-            },
-            getResources() { return this._get('resources'); },
-            addResource(resourceData) {
-                let resources = this.getResources();
-                const newResource = { id: `R${Date.now()}`, ...resourceData };
-                resources.push(newResource);
-                this._set('resources', resources);
-                return newResource;
-            },
-            deleteResource(id) {
-                let resources = this.getResources().filter(r => r.id !== id);
-                this._set('resources', resources);
-            },
-            initDemoData() {
-                if (!localStorage.getItem('patients')) {
-                    this._set('patients', [
-                        { id: 'P1', name: 'John Doe', dob: '1985-05-20', contact: '555-1234', notes: [{id: 'N1', text: 'Initial consultation notes.', timestamp: new Date().toISOString()}], files: [{id: 'F1', name: 'intake_form.pdf', size: '128 KB', type: 'pdf'}], credentials: [{id: 'C1', service: 'Hospital EMR', link: 'https://emr.hospital.com', username: 'johndoe', passwordRef: 'Stored in 1Password'}], mypageLink: 'https://example.com/johndoe-mypage', linkedResourceIds: ['R1'] },
-                        { id: 'P2', name: 'Jane Smith', dob: '1992-11-15', contact: '555-5678', notes: [], files: [], credentials: [], mypageLink: '', linkedResourceIds: [] },
-                    ]);
-                }
-                if (!localStorage.getItem('resources')) {
-                    this._set('resources', [
-                        { id: 'R1', type: 'article', title: 'Advances in Cardiology', link: 'https://journalofmedicine.com/article1', summary: 'A review of recent breakthroughs.' },
-                        { id: 'R2', type: 'doctor', name: 'Dr. Emily Carter', specialty: 'Oncology', contact: 'City Hospital, 555-8765' },
-                    ]);
-                }
-            }
+        // --- Firestore Database Layer ---
+        const FirestoreDB = {
+            // Patients
+            getPatients: (callback) => onSnapshot(collection(db, `artifacts/${appId}/users/${userId}/patients`), callback),
+            addPatient: (patientData) => addDoc(collection(db, `artifacts/${appId}/users/${userId}/patients`), patientData),
+            savePatient: (patientId, patientData) => setDoc(doc(db, `artifacts/${appId}/users/${userId}/patients`, patientId), patientData, { merge: true }),
+            deletePatient: (patientId) => deleteDoc(doc(db, `artifacts/${appId}/users/${userId}/patients`, patientId)),
+            
+            // Resources
+            getResources: (callback) => onSnapshot(collection(db, `artifacts/${appId}/users/${userId}/resources`), callback),
+            addResource: (resourceData) => addDoc(collection(db, `artifacts/${appId}/users/${userId}/resources`), resourceData),
+            deleteResource: (resourceId) => deleteDoc(doc(db, `artifacts/${appId}/users/${userId}/resources`, resourceId)),
         };
+
 
         // --- GLOBAL MODAL HELPER ---
         window.showConfirmModal = (title, message, onConfirm) => {
@@ -181,7 +129,7 @@
                             </ul></div>
                             <div class="p-4 border-t border-gray-200"><a href="#" id="logout-btn" class="flex items-center p-3 rounded-lg text-gray-600 hover:bg-red-50 hover:text-red-600 transition-all"><svg class="w-5 h-5 mr-3" data-lucide="log-out"></svg>Logout</a></div>
                         </nav>
-                        <main class="flex-1 bg-gray-50 p-6 sm:p-8 overflow-y-auto">${content}</main>
+                        <main class="flex-1 bg-gray-50 p-6 sm:p-8 overflow-y-auto relative">${content}</main>
                     </div>
                     ${this.renderConfirmModal()}
                 `;
@@ -204,7 +152,7 @@
             postRender() {
                 if (window.lucide) window.lucide.createIcons();
                 const logoutBtn = document.getElementById('logout-btn');
-                if (logoutBtn) logoutBtn.addEventListener('click', (e) => { e.preventDefault(); AppRouter.navigate('/'); });
+                if (logoutBtn) logoutBtn.addEventListener('click', async (e) => { e.preventDefault(); await signOut(auth); AppRouter.navigate('/'); });
             }
         };
 
@@ -214,33 +162,38 @@
                     <div class="min-h-screen flex items-center justify-center bg-gray-100">
                         <div class="w-full max-w-md p-8 space-y-8 bg-white rounded-xl shadow-lg">
                             <div class="text-center"><h1 class="text-3xl font-bold text-blue-600">Refuah Berurah</h1><p class="mt-2 text-gray-500">Sign in to your secure medical hub</p></div>
-                            <form id="login-form" class="mt-8 space-y-6">
-                                <div class="rounded-md shadow-sm -space-y-px">
-                                    <div><label for="email-address" class="sr-only">Email address</label><input id="email-address" name="email" type="email" autocomplete="email" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" placeholder="Email address" value="demo@refuah.com"></div>
-                                    <div><label for="password" class="sr-only">Password</label><input id="password" name="password" type="password" autocomplete="current-password" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" placeholder="Password" value="password"></div>
-                                </div>
-                                <div><button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Sign in</button></div>
-                                <p class="text-xs text-center text-gray-500">For demo purposes, any email/password will work.</p>
-                            </form>
+                            <div class="text-center p-4"><div class="loader"></div><p class="mt-4 text-gray-600">Authenticating...</p></div>
                         </div>
                     </div>
                 `;
             },
-            postRender() {
-                document.getElementById('login-form').addEventListener('submit', (e) => { e.preventDefault(); AppRouter.navigate('/dashboard'); });
-            }
+            postRender() { /* Authentication handled by onAuthStateChanged */ }
         };
 
         const DashboardComponent = {
             render() {
-                const patients = DB.getPatients();
-                const resources = DB.getResources();
-                const content = `
+                return Layout.render(`<div id="dashboard-content"><div class="loading-overlay"><div class="loader"></div></div></div>`, 'Dashboard');
+            },
+            async postRender() {
+                Layout.postRender();
+                const patientUnsubscribe = FirestoreDB.getPatients(patientQuerySnapshot => {
+                    const patientCount = patientQuerySnapshot.size;
+                    const countEl = document.querySelector('#patient-count');
+                    if (countEl) countEl.innerText = patientCount;
+                });
+
+                const resourceUnsubscribe = FirestoreDB.getResources(resourceQuerySnapshot => {
+                    const resourceCount = resourceQuerySnapshot.size;
+                    const countEl = document.querySelector('#resource-count');
+                    if(countEl) countEl.innerText = resourceCount;
+                });
+
+                document.getElementById('dashboard-content').innerHTML = `
                     <div class="space-y-8">
-                        <div><h2 class="text-3xl font-bold text-gray-800">Dashboard</h2><p class="mt-1 text-gray-500">Welcome back! Here's a summary of your workspace.</p></div>
+                        <div><h2 class="text-3xl font-bold text-gray-800">Dashboard</h2><p class="mt-1 text-gray-500">Welcome back! Here's a real-time summary of your workspace.</p></div>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex items-center"><div class="p-3 rounded-full bg-blue-100 text-blue-600"><svg class="w-6 h-6" data-lucide="users"></svg></div><div class="ml-4"><p class="text-sm font-medium text-gray-500">Total Patients</p><p class="text-2xl font-bold text-gray-800">${patients.length}</p></div></div>
-                            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex items-center"><div class="p-3 rounded-full bg-green-100 text-green-600"><svg class="w-6 h-6" data-lucide="book-marked"></svg></div><div class="ml-4"><p class="text-sm font-medium text-gray-500">Total Resources</p><p class="text-2xl font-bold text-gray-800">${resources.length}</p></div></div>
+                            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex items-center"><div class="p-3 rounded-full bg-blue-100 text-blue-600"><svg class="w-6 h-6" data-lucide="users"></svg></div><div class="ml-4"><p class="text-sm font-medium text-gray-500">Total Patients</p><p id="patient-count" class="text-2xl font-bold text-gray-800">0</p></div></div>
+                            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex items-center"><div class="p-3 rounded-full bg-green-100 text-green-600"><svg class="w-6 h-6" data-lucide="book-marked"></svg></div><div class="ml-4"><p class="text-sm font-medium text-gray-500">Total Resources</p><p id="resource-count" class="text-2xl font-bold text-gray-800">0</p></div></div>
                         </div>
                         <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
                             <h3 class="text-lg font-semibold text-gray-800">Quick Actions</h3>
@@ -251,104 +204,78 @@
                         </div>
                     </div>
                 `;
-                return Layout.render(content, 'Dashboard');
-            },
-            postRender() { Layout.postRender(); }
+                if(window.lucide) window.lucide.createIcons();
+            }
         };
 
         const PatientsComponent = {
-            render() {
-                const content = `
-                    <div class="space-y-6">
-                        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-                            <div><h2 class="text-3xl font-bold text-gray-800">Patients</h2><p class="mt-1 text-gray-500">Manage your patient records.</p></div>
-                            <button id="add-patient-btn" class="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition-all w-full sm:w-auto"><svg class="w-5 h-5 mr-2" data-lucide="user-plus"></svg>Add Patient</button>
-                        </div>
-                        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                            <div class="p-4 border-b"><input id="search-patient" type="text" placeholder="Search patients by name..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"></div>
-                            <div id="patient-list" class="divide-y divide-gray-200"></div>
-                        </div>
-                    </div>
-                `;
-                return Layout.render(content, 'Patients');
-            },
+            render() { return Layout.render(`<div id="patients-container"><div class="loading-overlay"><div class="loader"></div></div></div>`, 'Patients'); },
             renderModals() {
                 return `
                     <div id="patient-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
-                        <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-lg">
-                            <h3 class="text-2xl font-bold mb-4">Add New Patient</h3>
-                            <form id="patient-form" class="space-y-4">
-                                <div><label for="name" class="block text-sm font-medium text-gray-700">Full Name</label><input type="text" id="name" required class="input"></div>
-                                <div><label for="dob" class="block text-sm font-medium text-gray-700">Date of Birth</label><input type="date" id="dob" required class="input"></div>
-                                <div><label for="contact" class="block text-sm font-medium text-gray-700">Contact Info</label><input type="text" id="contact" required class="input"></div>
-                                <div class="mt-6 flex justify-end space-x-3">
-                                    <button type="button" id="cancel-patient-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">Cancel</button>
-                                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Save Patient</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                `;
+                        <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-lg"><h3 class="text-2xl font-bold mb-4">Add New Patient</h3><form id="patient-form" class="space-y-4">
+                            <div><label for="name" class="block text-sm font-medium text-gray-700">Full Name</label><input type="text" id="name" required class="input"></div>
+                            <div><label for="dob" class="block text-sm font-medium text-gray-700">Date of Birth</label><input type="date" id="dob" required class="input"></div>
+                            <div><label for="contact" class="block text-sm font-medium text-gray-700">Contact Info</label><input type="text" id="contact" required class="input"></div>
+                            <div class="mt-6 flex justify-end space-x-3"><button type="button" id="cancel-patient-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">Cancel</button><button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Save Patient</button></div>
+                        </form></div>
+                    </div>`;
             },
-            renderPatientList(filter = '') {
-                const patients = DB.getPatients().filter(p => p.name.toLowerCase().includes(filter.toLowerCase()));
+            renderPatientList(patients, filter = '') {
+                const filteredPatients = patients.filter(p => p.data().name.toLowerCase().includes(filter.toLowerCase()));
                 const listEl = document.getElementById('patient-list');
                 if (!listEl) return;
-                listEl.innerHTML = patients.length === 0 ? `<p class="p-6 text-center text-gray-500">No patients found.</p>` : patients.map(patient => `
-                    <div class="p-4 flex items-center justify-between hover:bg-gray-50">
-                        <a href="#/patient/${patient.id}" class="flex-1 min-w-0"><p class="font-semibold text-blue-600 truncate">${patient.name}</p><p class="text-sm text-gray-500">DOB: ${patient.dob} | Contact: ${patient.contact}</p></a>
-                        <button data-id="${patient.id}" class="delete-patient-btn text-gray-400 hover:text-red-500 p-2 rounded-full flex-shrink-0 ml-4"><svg class="w-5 h-5" data-lucide="trash-2"></svg></button>
-                    </div>`).join('');
+                listEl.innerHTML = filteredPatients.length === 0 ? `<p class="p-6 text-center text-gray-500">No patients found.</p>` : filteredPatients.map(doc => {
+                    const patient = doc.data();
+                    return `<div class="p-4 flex items-center justify-between hover:bg-gray-50">
+                        <a href="#/patient/${doc.id}" class="flex-1 min-w-0"><p class="font-semibold text-blue-600 truncate">${patient.name}</p><p class="text-sm text-gray-500">DOB: ${patient.dob} | Contact: ${patient.contact}</p></a>
+                        <button data-id="${doc.id}" data-name="${patient.name}" class="delete-patient-btn text-gray-400 hover:text-red-500 p-2 rounded-full flex-shrink-0 ml-4"><svg class="w-5 h-5" data-lucide="trash-2"></svg></button>
+                    </div>`
+                }).join('');
                 document.querySelectorAll('.delete-patient-btn').forEach(btn => btn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const patientId = btn.dataset.id;
-                    const patient = DB.getPatient(patientId);
-                    window.showConfirmModal('Delete Patient?', `Are you sure you want to permanently delete ${patient.name}? This action cannot be undone.`, () => {
-                        DB.deletePatient(patientId);
-                        this.renderPatientList(document.getElementById('search-patient').value);
-                    });
+                    const patientName = btn.dataset.name;
+                    window.showConfirmModal('Delete Patient?', `Are you sure you want to permanently delete ${patientName}? This action cannot be undone.`, () => FirestoreDB.deletePatient(patientId));
                 }));
                 if (window.lucide) window.lucide.createIcons();
             },
             postRender() {
                 Layout.postRender();
-                this.renderPatientList();
-                const modal = document.getElementById('patient-modal');
-                const form = document.getElementById('patient-form');
-                document.getElementById('add-patient-btn').addEventListener('click', () => modal.classList.remove('hidden'));
-                document.getElementById('cancel-patient-btn').addEventListener('click', () => modal.classList.add('hidden'));
-                form.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    DB.addPatient({ name: form.name.value, dob: form.dob.value, contact: form.contact.value });
-                    modal.classList.add('hidden');
-                    form.reset();
-                    this.renderPatientList();
+                const container = document.getElementById('patients-container');
+                FirestoreDB.getPatients(querySnapshot => {
+                    container.innerHTML = `
+                        <div class="space-y-6">
+                            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                                <div><h2 class="text-3xl font-bold text-gray-800">Patients</h2><p class="mt-1 text-gray-500">Manage your patient records.</p></div>
+                                <button id="add-patient-btn" class="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition-all w-full sm:w-auto"><svg class="w-5 h-5 mr-2" data-lucide="user-plus"></svg>Add Patient</button>
+                            </div>
+                            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                                <div class="p-4 border-b"><input id="search-patient" type="text" placeholder="Search patients by name..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"></div>
+                                <div id="patient-list" class="divide-y divide-gray-200"></div>
+                            </div>
+                        </div>`;
+                    
+                    this.renderPatientList(querySnapshot.docs);
+                    
+                    const modal = document.getElementById('patient-modal');
+                    const form = document.getElementById('patient-form');
+                    document.getElementById('add-patient-btn').addEventListener('click', () => modal.classList.remove('hidden'));
+                    document.getElementById('cancel-patient-btn').addEventListener('click', () => modal.classList.add('hidden'));
+                    form.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        await FirestoreDB.addPatient({ name: form.name.value, dob: form.dob.value, contact: form.contact.value, mypageLink: '', linkedResourceIds: [] });
+                        modal.classList.add('hidden');
+                        form.reset();
+                    });
+                    document.getElementById('search-patient').addEventListener('input', (e) => this.renderPatientList(querySnapshot.docs, e.target.value));
+                    if(window.lucide) window.lucide.createIcons();
                 });
-                document.getElementById('search-patient').addEventListener('input', (e) => this.renderPatientList(e.target.value));
             }
         };
 
         const PatientDetailComponent = {
-            render(params) {
-                const patient = DB.getPatient(params.id);
-                if (!patient) return Layout.render('<p>Patient not found.</p>', 'Patients');
-                return Layout.render(`
-                    <div class="space-y-8">
-                        <div>
-                            <a href="#/patients" class="flex items-center text-sm text-blue-600 hover:underline mb-4"><svg class="w-4 h-4 mr-1" data-lucide="arrow-left"></svg>Back to Patients</a>
-                            <h2 class="text-3xl font-bold text-gray-800">${patient.name}</h2>
-                            <p class="mt-1 text-gray-500">DOB: ${patient.dob} | Contact: ${patient.contact}</p>
-                        </div>
-                        <div class="border-b border-gray-200"><nav class="-mb-px flex space-x-8" id="patient-tabs">
-                            <a href="#" data-tab="notes" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-blue-500 text-blue-600">Notes</a>
-                            <a href="#" data-tab="files" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Files</a>
-                            <a href="#" data-tab="credentials" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Chart Links & Credentials</a>
-                            <a href="#" data-tab="links" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Links & Resources</a>
-                        </nav></div>
-                        <div id="tab-content"></div>
-                    </div>
-                `, 'Patients');
-            },
+            render() { return Layout.render(`<div id="patient-detail-container"><div class="loading-overlay"><div class="loader"></div></div></div>`, 'Patients'); },
             renderModals() {
                 return `
                     <div id="credential-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
@@ -357,7 +284,7 @@
                             <div><label for="link" class="block text-sm font-medium text-gray-700">URL/Link</label><input type="url" id="link" required class="input"></div>
                             <div><label for="username" class="block text-sm font-medium text-gray-700">Username</label><input type="text" id="username" required class="input"></div>
                             <div><label for="passwordRef" class="block text-sm font-medium text-gray-700">Password Location</label><input type="text" id="passwordRef" placeholder="e.g., Stored in 1Password" required class="input"></div>
-                            <p class="text-xs text-red-600">Reminder: Do not store actual passwords here. Note the location of the password in your secure password manager.</p>
+                            <p class="text-xs text-red-600">Reminder: Do not store actual passwords here.</p>
                             <div class="mt-6 flex justify-end space-x-3"><button type="button" id="cancel-cred-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">Cancel</button><button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">Save</button></div>
                         </form></div>
                     </div>
@@ -366,205 +293,194 @@
                             <div id="resource-link-list" class="flex-grow overflow-y-auto border-t border-b mb-4 divide-y"></div>
                             <div class="flex justify-end space-x-3"><button type="button" id="cancel-link-resource-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">Cancel</button><button type="button" id="save-link-resource-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Save Links</button></div>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             },
             postRender(params) {
-                const patient = DB.getPatient(params.id);
-                if(!patient) return;
-
-                const renderNotes = (p) => `...`; // Define inside postRender to have access to patient data
-                const renderFiles = (p) => `...`;
-                const renderCredentials = (p) => `...`;
-                const renderLinks = (p) => `...`;
-
-                this.renderNotes = (p) => `<div class="bg-white rounded-lg shadow-sm border border-gray-200"><div class="p-4"><form id="note-form"><textarea id="note-text" placeholder="Add a new note..." required class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea><button type="submit" class="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">Add Note</button></form></div><div id="notes-list" class="divide-y divide-gray-200">${p.notes.length > 0 ? p.notes.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).map(note => `<div class="p-4"><p class="text-gray-800">${note.text.replace(/\n/g, '<br>')}</p><p class="text-xs text-gray-400 mt-2">${new Date(note.timestamp).toLocaleString()}</p></div>`).join('') : '<p class="p-4 text-gray-500">No notes yet.</p>'}</div></div>`;
-                this.renderFiles = (p) => `<div class="bg-white rounded-lg shadow-sm border border-gray-200"><div class="p-4 border-b"><label for="file-upload" class="cursor-pointer inline-block bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700"><span>Upload File</span><input id="file-upload" type="file" class="hidden"></label><p class="text-xs text-gray-500 mt-2">File uploads are simulated for this demo.</p></div><div id="files-list" class="divide-y divide-gray-200">${p.files.length > 0 ? p.files.map(file => `<div class="p-4 flex items-center justify-between"><div class="flex items-center"><svg class="w-6 h-6 text-gray-500 mr-3" data-lucide="file-text"></svg><div><p class="font-medium text-gray-800">${file.name}</p><p class="text-sm text-gray-500">${file.size}</p></div></div></div>`).join('') : '<p class="p-4 text-gray-500">No files uploaded.</p>'}</div></div>`;
-                this.renderCredentials = (p) => `<div class="bg-white rounded-lg shadow-sm border border-gray-200"><div class="p-4 border-b"><button id="add-credential-btn" class="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-purple-700">Add Credential</button></div><div id="credentials-list" class="divide-y divide-gray-200">${p.credentials.length > 0 ? p.credentials.map(cred => `<div class="p-4"><p class="font-semibold text-gray-800">${cred.service}</p><p class="text-sm text-gray-600">Link: <a href="${cred.link}" target="_blank" class="text-blue-500 hover:underline">${cred.link}</a></p><p class="text-sm text-gray-600">Username: ${cred.username}</p><p class="text-sm text-gray-600">Password Info: <span class="font-mono bg-gray-100 p-1 rounded text-red-600">${cred.passwordRef}</span></p></div>`).join('') : '<p class="p-4 text-gray-500">No credentials saved.</p>'}</div></div>`;
-                
-                this.renderLinks = (p) => {
-                    const allResources = DB.getResources();
-                    const linkedResources = p.linkedResourceIds.map(id => allResources.find(r => r.id === id)).filter(Boolean);
-                    
-                    return `
-                        <div class="space-y-6">
-                            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                                <h3 class="font-semibold text-lg">Patient MyPage Link</h3>
-                                <div class="flex gap-2 mt-2">
-                                    <input type="url" id="mypage-link-input" class="input flex-grow" value="${p.mypageLink || ''}" placeholder="https://example.com/patient-page">
-                                    <button id="save-mypage-link" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">Save</button>
-                                </div>
-                            </div>
-                            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                                <div class="p-4 border-b flex justify-between items-center">
-                                    <h3 class="font-semibold text-lg">Linked Resources</h3>
-                                    <button id="open-link-resource-modal" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700">Link New Resource</button>
-                                </div>
-                                <div id="linked-resources-list" class="divide-y divide-gray-200">
-                                    ${linkedResources.length > 0 ? linkedResources.map(resource => {
-                                        const content = resource.type === 'article'
-                                            ? `<p class="font-semibold text-green-700">${resource.title}</p><p class="text-sm text-gray-600">${resource.summary}</p><a href="${resource.link}" target="_blank" class="text-xs text-blue-500 hover:underline">Read Article</a>`
-                                            : `<p class="font-semibold text-green-700">${resource.name}</p><p class="text-sm text-gray-600">Specialty: ${resource.specialty}</p><p class="text-sm text-gray-600">Contact: ${resource.contact}</p>`;
-                                        return `<div class="p-4 flex items-center justify-between hover:bg-gray-50"><div class="flex-1 min-w-0">${content}</div><button data-id="${resource.id}" class="unlink-resource-btn text-gray-400 hover:text-red-500 p-2 rounded-full flex-shrink-0 ml-4"><svg class="w-5 h-5" data-lucide="unlink-2"></svg></button></div>`;
-                                    }).join('') : '<p class="p-4 text-gray-500">No resources linked to this patient yet.</p>'}
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                };
-
                 Layout.postRender();
-                const tabContent = document.getElementById('tab-content');
-
-                const switchTab = (tabName) => {
-                    document.querySelectorAll('.tab-link').forEach(link => {
-                        const isSelected = link.dataset.tab === tabName;
-                        link.classList.toggle('border-blue-500', isSelected);
-                        link.classList.toggle('text-blue-600', isSelected);
-                        link.classList.toggle('border-transparent', !isSelected);
-                        link.classList.toggle('text-gray-500', !isSelected);
-                    });
+                const container = document.getElementById('patient-detail-container');
+                
+                const patientUnsubscribe = onSnapshot(doc(db, `artifacts/${appId}/users/${userId}/patients`, params.id), (patientDoc) => {
+                    if (!patientDoc.exists()) {
+                        container.innerHTML = `<p>Patient not found.</p>`;
+                        return;
+                    }
+                    const patient = { id: patientDoc.id, ...patientDoc.data() };
                     
-                    if (tabName === 'notes') {
-                        tabContent.innerHTML = this.renderNotes(patient);
-                        document.getElementById('note-form').addEventListener('submit', (e) => { e.preventDefault(); const textEl = document.getElementById('note-text'); if (textEl.value.trim()) { patient.notes.push({ id: `N${Date.now()}`, text: textEl.value, timestamp: new Date().toISOString() }); DB.savePatient(patient); switchTab('notes'); } });
-                    } else if (tabName === 'files') {
-                        tabContent.innerHTML = this.renderFiles(patient);
-                        document.getElementById('file-upload').addEventListener('change', (e) => { const file = e.target.files[0]; if (file) { patient.files.push({ id: `F${Date.now()}`, name: file.name, size: `${(file.size / 1024).toFixed(1)} KB`, type: file.type.split('/')[1] }); DB.savePatient(patient); switchTab('files'); } });
-                    } else if (tabName === 'credentials') {
-                        tabContent.innerHTML = this.renderCredentials(patient);
-                        const modal = document.getElementById('credential-modal');
-                        const form = document.getElementById('credential-form');
-                        document.getElementById('add-credential-btn').addEventListener('click', () => modal.classList.remove('hidden'));
-                        document.getElementById('cancel-cred-btn').addEventListener('click', () => modal.classList.add('hidden'));
-                        form.addEventListener('submit', (e) => { e.preventDefault(); patient.credentials.push({ id: `C${Date.now()}`, service: form.service.value, link: form.link.value, username: form.username.value, passwordRef: form.passwordRef.value }); DB.savePatient(patient); modal.classList.add('hidden'); form.reset(); switchTab('credentials'); });
-                    } else if (tabName === 'links') {
-                        tabContent.innerHTML = this.renderLinks(patient);
-                        document.getElementById('save-mypage-link').addEventListener('click', () => {
-                            patient.mypageLink = document.getElementById('mypage-link-input').value;
-                            DB.savePatient(patient);
-                            alert('Link saved!');
-                        });
+                    container.innerHTML = `
+                        <div class="space-y-8">
+                            <div>
+                                <a href="#/patients" class="flex items-center text-sm text-blue-600 hover:underline mb-4"><svg class="w-4 h-4 mr-1" data-lucide="arrow-left"></svg>Back to Patients</a>
+                                <h2 class="text-3xl font-bold text-gray-800">${patient.name}</h2>
+                                <p class="mt-1 text-gray-500">DOB: ${patient.dob} | Contact: ${patient.contact}</p>
+                            </div>
+                            <div class="border-b border-gray-200"><nav class="-mb-px flex space-x-8" id="patient-tabs">
+                                <a href="#" data-tab="notes" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Notes</a>
+                                <a href="#" data-tab="files" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Files</a>
+                                <a href="#" data-tab="credentials" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Chart Links & Credentials</a>
+                                <a href="#" data-tab="links" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Links & Resources</a>
+                            </nav></div>
+                            <div id="tab-content"></div>
+                        </div>`;
+                    
+                    this.switchTab('notes', patient);
+                    document.querySelectorAll('.tab-link').forEach(link => link.addEventListener('click', (e) => { e.preventDefault(); this.switchTab(e.target.dataset.tab, patient); }));
+                    if(window.lucide) window.lucide.createIcons();
+                });
+            },
+            switchTab(tabName, patient) {
+                const tabContent = document.getElementById('tab-content');
+                document.querySelectorAll('.tab-link').forEach(link => {
+                    const isSelected = link.dataset.tab === tabName;
+                    link.classList.toggle('border-blue-500', isSelected);
+                    link.classList.toggle('text-blue-600', isSelected);
+                    link.classList.toggle('border-transparent', !isSelected);
+                    link.classList.toggle('text-gray-500', !isSelected);
+                });
+
+                if (tabName === 'notes') {
+                    tabContent.innerHTML = `<div class="bg-white rounded-lg shadow-sm border border-gray-200"><div class="p-4"><form id="note-form"><textarea id="note-text" placeholder="Add a new note..." required class="w-full p-2 border border-gray-300 rounded-md"></textarea><button type="submit" class="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">Add Note</button></form></div><div class="divide-y divide-gray-200">${(patient.notes || []).sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).map(note => `<div class="p-4"><p class="text-gray-800">${note.text.replace(/\n/g, '<br>')}</p><p class="text-xs text-gray-400 mt-2">${new Date(note.timestamp).toLocaleString()}</p></div>`).join('') || '<p class="p-4 text-gray-500">No notes yet.</p>'}</div></div>`;
+                    document.getElementById('note-form').addEventListener('submit', async (e) => { e.preventDefault(); const textEl = document.getElementById('note-text'); if (textEl.value.trim()) { const updatedNotes = [...(patient.notes || []), { text: textEl.value, timestamp: new Date().toISOString() }]; await FirestoreDB.savePatient(patient.id, { notes: updatedNotes }); } });
+                } else if (tabName === 'files') {
+                    tabContent.innerHTML = `<div class="bg-white rounded-lg shadow-sm border border-gray-200"><div class="p-4 border-b"><label for="file-upload" class="cursor-pointer inline-block bg-green-600 text-white px-4 py-2 rounded-lg text-sm"><span>Upload File</span><input id="file-upload" type="file" class="hidden"></label><p class="text-xs text-gray-500 mt-2">File uploads are simulated. In production, this would upload to a secure storage bucket.</p></div><div class="divide-y divide-gray-200">${(patient.files || []).map(file => `<div class="p-4 flex items-center"><svg class="w-6 h-6 text-gray-500 mr-3" data-lucide="file-text"></svg><div><p class="font-medium text-gray-800">${file.name}</p><p class="text-sm text-gray-500">${file.size}</p></div></div>`).join('') || '<p class="p-4 text-gray-500">No files uploaded.</p>'}</div></div>`;
+                    document.getElementById('file-upload').addEventListener('change', async (e) => { const file = e.target.files[0]; if (file) { const updatedFiles = [...(patient.files || []), { name: file.name, size: `${(file.size / 1024).toFixed(1)} KB` }]; await FirestoreDB.savePatient(patient.id, { files: updatedFiles }); } });
+                } else if (tabName === 'credentials') {
+                    tabContent.innerHTML = `<div class="bg-white rounded-lg shadow-sm border border-gray-200"><div class="p-4 border-b"><button id="add-credential-btn" class="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm">Add Credential</button></div><div class="divide-y divide-gray-200">${(patient.credentials || []).map(cred => `<div class="p-4"><p class="font-semibold text-gray-800">${cred.service}</p><p class="text-sm text-gray-600">Link: <a href="${cred.link}" target="_blank" class="text-blue-500 hover:underline">${cred.link}</a></p><p class="text-sm text-gray-600">Username: ${cred.username}</p><p class="text-sm text-gray-600">Password Info: <span class="font-mono bg-gray-100 p-1 rounded text-red-600">${cred.passwordRef}</span></p></div>`).join('') || '<p class="p-4 text-gray-500">No credentials saved.</p>'}</div></div>`;
+                    const modal = document.getElementById('credential-modal');
+                    document.getElementById('add-credential-btn').addEventListener('click', () => modal.classList.remove('hidden'));
+                    document.getElementById('cancel-cred-btn').addEventListener('click', () => modal.classList.add('hidden'));
+                    document.getElementById('credential-form').addEventListener('submit', async (e) => { e.preventDefault(); const form = e.target; const updatedCreds = [...(patient.credentials || []), { service: form.service.value, link: form.link.value, username: form.username.value, passwordRef: form.passwordRef.value }]; await FirestoreDB.savePatient(patient.id, { credentials: updatedCreds }); modal.classList.add('hidden'); form.reset(); });
+                } else if (tabName === 'links') {
+                    FirestoreDB.getResources(snapshot => {
+                        const allResources = [];
+                        snapshot.forEach(doc => allResources.push({ id: doc.id, ...doc.data() }));
+                        const linkedResources = (patient.linkedResourceIds || []).map(id => allResources.find(r => r.id === id)).filter(Boolean);
+                        
+                        tabContent.innerHTML = `<div class="space-y-6">
+                            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4"><h3 class="font-semibold text-lg">Patient MyPage Link</h3><div class="flex gap-2 mt-2"><input type="url" id="mypage-link-input" class="input flex-grow" value="${patient.mypageLink || ''}" placeholder="https://example.com/patient-page"><button id="save-mypage-link" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">Save</button></div></div>
+                            <div class="bg-white rounded-lg shadow-sm border border-gray-200"><div class="p-4 border-b flex justify-between items-center"><h3 class="font-semibold text-lg">Linked Resources</h3><button id="open-link-resource-modal" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm">Link New Resource</button></div><div class="divide-y divide-gray-200">${linkedResources.map(resource => `<div class="p-4 flex items-center justify-between"><div class="flex-1 min-w-0">${resource.type === 'article' ? `<p class="font-semibold text-green-700">${resource.title}</p><p class="text-sm text-gray-600">${resource.summary}</p><a href="${resource.link}" target="_blank" class="text-xs text-blue-500">Read Article</a>` : `<p class="font-semibold text-green-700">${resource.name}</p><p class="text-sm text-gray-600">Specialty: ${resource.specialty}</p><p class="text-sm text-gray-600">Contact: ${resource.contact}</p>`}</div><button data-id="${resource.id}" class="unlink-resource-btn text-gray-400 hover:text-red-500 p-2 rounded-full"><svg class="w-5 h-5" data-lucide="unlink-2"></svg></button></div>`).join('') || '<p class="p-4 text-gray-500">No resources linked.</p>'}</div></div>
+                        </div>`;
+                        
+                        document.getElementById('save-mypage-link').addEventListener('click', async () => { await FirestoreDB.savePatient(patient.id, { mypageLink: document.getElementById('mypage-link-input').value }); alert('Link saved!'); });
                         document.getElementById('open-link-resource-modal').addEventListener('click', () => {
                             const modal = document.getElementById('link-resource-modal');
-                            const listEl = document.getElementById('resource-link-list');
-                            const allResources = DB.getResources();
-                            listEl.innerHTML = allResources.map(r => `
-                                <label class="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50">
-                                    <div>
-                                        <p class="font-semibold">${r.title || r.name}</p>
-                                        <p class="text-sm text-gray-500">${r.summary || r.specialty}</p>
-                                    </div>
-                                    <input type="checkbox" value="${r.id}" class="resource-link-checkbox h-5 w-5 rounded text-blue-600 focus:ring-blue-500" ${patient.linkedResourceIds.includes(r.id) ? 'checked' : ''}>
-                                </label>
-                            `).join('');
+                            document.getElementById('resource-link-list').innerHTML = allResources.map(r => `<label class="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50"><div><p class="font-semibold">${r.title || r.name}</p><p class="text-sm text-gray-500">${r.summary || r.specialty}</p></div><input type="checkbox" value="${r.id}" class="resource-link-checkbox h-5 w-5 rounded" ${(patient.linkedResourceIds || []).includes(r.id) ? 'checked' : ''}></label>`).join('');
                             modal.classList.remove('hidden');
                         });
-                        document.querySelectorAll('.unlink-resource-btn').forEach(btn => btn.addEventListener('click', (e) => {
-                            const resourceId = e.currentTarget.dataset.id;
-                            patient.linkedResourceIds = patient.linkedResourceIds.filter(id => id !== resourceId);
-                            DB.savePatient(patient);
-                            switchTab('links');
-                        }));
-                        
+                        document.querySelectorAll('.unlink-resource-btn').forEach(btn => btn.addEventListener('click', async (e) => { const resourceId = e.currentTarget.dataset.id; await FirestoreDB.savePatient(patient.id, { linkedResourceIds: (patient.linkedResourceIds || []).filter(id => id !== resourceId) }); }));
                         document.getElementById('cancel-link-resource-btn').addEventListener('click', () => document.getElementById('link-resource-modal').classList.add('hidden'));
-                        document.getElementById('save-link-resource-btn').addEventListener('click', () => {
-                            const selectedIds = Array.from(document.querySelectorAll('.resource-link-checkbox:checked')).map(cb => cb.value);
-                            patient.linkedResourceIds = selectedIds;
-                            DB.savePatient(patient);
-                            document.getElementById('link-resource-modal').classList.add('hidden');
-                            switchTab('links');
-                        });
-                    }
-                    if (window.lucide) window.lucide.createIcons();
-                };
-
-                document.querySelectorAll('.tab-link').forEach(link => link.addEventListener('click', (e) => { e.preventDefault(); switchTab(e.target.dataset.tab); }));
-                switchTab('notes');
+                        document.getElementById('save-link-resource-btn').addEventListener('click', async () => { await FirestoreDB.savePatient(patient.id, { linkedResourceIds: Array.from(document.querySelectorAll('.resource-link-checkbox:checked')).map(cb => cb.value) }); document.getElementById('link-resource-modal').classList.add('hidden'); });
+                        if(window.lucide) window.lucide.createIcons();
+                    });
+                }
+                if(window.lucide) window.lucide.createIcons();
             }
         };
 
         const ResourcesComponent = {
-             render() {
-                const content = `
-                    <div class="space-y-6">
-                        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-                            <div><h2 class="text-3xl font-bold text-gray-800">Resources</h2><p class="mt-1 text-gray-500">A general database for articles, doctors, and more.</p></div>
-                            <button id="add-resource-btn" class="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-green-700 transition-all w-full sm:w-auto"><svg class="w-5 h-5 mr-2" data-lucide="plus-circle"></svg>Add Resource</button>
-                        </div>
-                        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                            <div class="p-4 border-b"><input id="search-resource" type="text" placeholder="Search resources..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"></div>
-                            <div id="resource-list" class="divide-y divide-gray-200"></div>
-                        </div>
-                    </div>
-                `;
-                return Layout.render(content, 'Resources');
-             },
+            render() { return Layout.render(`<div id="resources-container"><div class="loading-overlay"><div class="loader"></div></div></div>`, 'Resources'); },
             renderModals() {
                 return `
                     <div id="resource-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
                         <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-lg"><h3 class="text-2xl font-bold mb-4">Add New Resource</h3><form id="resource-form" class="space-y-4">
                             <div><label for="type" class="block text-sm font-medium text-gray-700">Resource Type</label><select id="type" class="input mt-1"><option value="article">Article</option><option value="doctor">Doctor</option></select></div>
                             <div id="form-fields" class="space-y-4"></div>
-                            <div class="mt-6 flex justify-end space-x-3"><button type="button" id="cancel-resource-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">Cancel</button><button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">Save Resource</button></div>
+                            <div class="mt-6 flex justify-end space-x-3"><button type="button" id="cancel-resource-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg">Cancel</button><button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg">Save Resource</button></div>
                         </form></div>
-                    </div>
-                `;
+                    </div>`;
             },
-            renderResourceList(filter = '') {
-                const resources = DB.getResources().filter(r => JSON.stringify(r).toLowerCase().includes(filter.toLowerCase()));
+            renderResourceList(resources, filter = '') {
+                const filteredResources = resources.filter(doc => JSON.stringify(doc.data()).toLowerCase().includes(filter.toLowerCase()));
                 const listEl = document.getElementById('resource-list');
                 if (!listEl) return;
-                listEl.innerHTML = resources.length === 0 ? `<p class="p-6 text-center text-gray-500">No resources found.</p>` : resources.map(resource => {
-                    const content = resource.type === 'article' ? `<p class="font-semibold text-green-700">${resource.title}</p><p class="text-sm text-gray-600">${resource.summary}</p><a href="${resource.link}" target="_blank" class="text-xs text-blue-500 hover:underline">Read Article</a>` : `<p class="font-semibold text-green-700">${resource.name}</p><p class="text-sm text-gray-600">Specialty: ${resource.specialty}</p><p class="text-sm text-gray-600">Contact: ${resource.contact}</p>`;
-                    return `<div class="p-4 flex items-center justify-between hover:bg-gray-50"><div class="flex-1 min-w-0">${content}</div><button data-id="${resource.id}" data-name="${resource.title || resource.name}" class="delete-resource-btn text-gray-400 hover:text-red-500 p-2 rounded-full flex-shrink-0 ml-4"><svg class="w-5 h-5" data-lucide="trash-2"></svg></button></div>`;
+                listEl.innerHTML = filteredResources.length === 0 ? `<p class="p-6 text-center text-gray-500">No resources found.</p>` : filteredResources.map(doc => {
+                    const resource = doc.data();
+                    const content = resource.type === 'article' ? `<p class="font-semibold text-green-700">${resource.title}</p><p class="text-sm text-gray-600">${resource.summary}</p><a href="${resource.link}" target="_blank" class="text-xs text-blue-500">Read Article</a>` : `<p class="font-semibold text-green-700">${resource.name}</p><p class="text-sm text-gray-600">Specialty: ${resource.specialty}</p><p class="text-sm text-gray-600">Contact: ${resource.contact}</p>`;
+                    return `<div class="p-4 flex items-center justify-between hover:bg-gray-50"><div class="flex-1 min-w-0">${content}</div><button data-id="${doc.id}" data-name="${resource.title || resource.name}" class="delete-resource-btn text-gray-400 hover:text-red-500 p-2 rounded-full"><svg class="w-5 h-5" data-lucide="trash-2"></svg></button></div>`;
                 }).join('');
                 document.querySelectorAll('.delete-resource-btn').forEach(btn => btn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    const resourceId = btn.dataset.id;
-                    const resourceName = btn.dataset.name;
-                    window.showConfirmModal('Delete Resource?', `Are you sure you want to delete the resource "${resourceName}"?`, () => {
-                        DB.deleteResource(resourceId);
-                        this.renderResourceList(document.getElementById('search-resource').value);
-                    });
+                    window.showConfirmModal('Delete Resource?', `Are you sure you want to delete "${btn.dataset.name}"?`, () => FirestoreDB.deleteResource(btn.dataset.id));
                 }));
-                if (window.lucide) window.lucide.createIcons();
+                if(window.lucide) window.lucide.createIcons();
             },
             postRender() {
                 Layout.postRender();
-                this.renderResourceList();
-                const modal = document.getElementById('resource-modal');
-                const form = document.getElementById('resource-form');
-                const typeSelect = document.getElementById('type');
-                const formFields = document.getElementById('form-fields');
-                const getFormFields = (type) => {
-                    if (type === 'article') return `<div><label for="title" class="block text-sm font-medium text-gray-700">Title</label><input type="text" id="title" required class="input"></div><div><label for="link" class="block text-sm font-medium text-gray-700">Link</label><input type="url" id="link" required class="input"></div><div><label for="summary" class="block text-sm font-medium text-gray-700">Summary</label><textarea id="summary" class="input"></textarea></div>`;
-                    if (type === 'doctor') return `<div><label for="name" class="block text-sm font-medium text-gray-700">Doctor's Name</label><input type="text" id="name" required class="input"></div><div><label for="specialty" class="block text-sm font-medium text-gray-700">Specialty</label><input type="text" id="specialty" required class="input"></div><div><label for="contact" class="block text-sm font-medium text-gray-700">Contact Info</label><input type="text" id="contact" required class="input"></div>`;
-                    return '';
-                };
-                const updateFormFields = () => { formFields.innerHTML = getFormFields(typeSelect.value); };
-                typeSelect.addEventListener('change', updateFormFields);
-                updateFormFields();
-                document.getElementById('add-resource-btn').addEventListener('click', () => modal.classList.remove('hidden'));
-                document.getElementById('cancel-resource-btn').addEventListener('click', () => modal.classList.add('hidden'));
-                form.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    const type = typeSelect.value;
-                    let resourceData = { type };
-                    if (type === 'article') resourceData = { ...resourceData, title: form.title.value, link: form.link.value, summary: form.summary.value };
-                    if (type === 'doctor') resourceData = { ...resourceData, name: form.name.value, specialty: form.specialty.value, contact: form.contact.value };
-                    DB.addResource(resourceData);
-                    modal.classList.add('hidden');
-                    form.reset();
+                const container = document.getElementById('resources-container');
+                FirestoreDB.getResources(querySnapshot => {
+                    container.innerHTML = `
+                        <div class="space-y-6">
+                            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                                <div><h2 class="text-3xl font-bold text-gray-800">Resources</h2><p class="mt-1 text-gray-500">A general database for articles, doctors, and more.</p></div>
+                                <button id="add-resource-btn" class="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-green-700 transition-all w-full sm:w-auto"><svg class="w-5 h-5 mr-2" data-lucide="plus-circle"></svg>Add Resource</button>
+                            </div>
+                            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                                <div class="p-4 border-b"><input id="search-resource" type="text" placeholder="Search resources..." class="w-full px-3 py-2 border border-gray-300 rounded-md"></div>
+                                <div id="resource-list" class="divide-y divide-gray-200"></div>
+                            </div>
+                        </div>`;
+                    
+                    this.renderResourceList(querySnapshot.docs);
+
+                    const modal = document.getElementById('resource-modal');
+                    const form = document.getElementById('resource-form');
+                    const typeSelect = document.getElementById('type');
+                    const formFields = document.getElementById('form-fields');
+                    const getFormFields = (type) => {
+                        if (type === 'article') return `<div><label for="title" class="block text-sm">Title</label><input type="text" id="title" required class="input"></div><div><label for="link" class="block text-sm">Link</label><input type="url" id="link" required class="input"></div><div><label for="summary" class="block text-sm">Summary</label><textarea id="summary" class="input"></textarea></div>`;
+                        if (type === 'doctor') return `<div><label for="name" class="block text-sm">Doctor's Name</label><input type="text" id="name" required class="input"></div><div><label for="specialty" class="block text-sm">Specialty</label><input type="text" id="specialty" required class="input"></div><div><label for="contact" class="block text-sm">Contact Info</label><input type="text" id="contact" required class="input"></div>`;
+                        return '';
+                    };
+                    const updateFormFields = () => { formFields.innerHTML = getFormFields(typeSelect.value); };
+                    typeSelect.addEventListener('change', updateFormFields);
                     updateFormFields();
-                    this.renderResourceList();
+
+                    document.getElementById('add-resource-btn').addEventListener('click', () => modal.classList.remove('hidden'));
+                    document.getElementById('cancel-resource-btn').addEventListener('click', () => modal.classList.add('hidden'));
+                    form.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        const type = typeSelect.value;
+                        let resourceData = { type };
+                        if (type === 'article') resourceData = { ...resourceData, title: form.title.value, link: form.link.value, summary: form.summary.value };
+                        if (type === 'doctor') resourceData = { ...resourceData, name: form.name.value, specialty: form.specialty.value, contact: form.contact.value };
+                        await FirestoreDB.addResource(resourceData);
+                        modal.classList.add('hidden');
+                        form.reset();
+                        updateFormFields();
+                    });
+                    document.getElementById('search-resource').addEventListener('input', (e) => this.renderResourceList(querySnapshot.docs, e.target.value));
+                    if(window.lucide) window.lucide.createIcons();
                 });
-                document.getElementById('search-resource').addEventListener('input', (e) => this.renderResourceList(e.target.value));
             }
         };
 
-        // --- ROUTER & APP INITIALIZATION ---
-        DB.initDemoData();
+        // --- AUTHENTICATION & APP INITIALIZATION ---
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                userId = user.uid;
+                const currentPath = window.location.hash.slice(1);
+                if (!currentPath || currentPath === '/') {
+                    AppRouter.navigate('/dashboard');
+                } else {
+                    AppRouter.handleRouteChange(); // Re-render current page with user context
+                }
+            } else {
+                AppRouter.navigate('/');
+                // Attempt to sign in
+                (async () => {
+                    try {
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            await signInWithCustomToken(auth, __initial_auth_token);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                    } catch (error) {
+                        console.error("Authentication failed:", error);
+                        document.getElementById('app').innerHTML = `<div class="p-4 text-red-600">Authentication Failed. Please refresh and try again.</div>`;
+                    }
+                })();
+            }
+        });
+
         AppRouter.addRoute('/', LoginComponent);
         AppRouter.addRoute('/dashboard', DashboardComponent);
         AppRouter.addRoute('/patients', PatientsComponent);
