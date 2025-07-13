@@ -10,64 +10,88 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
         .transition-all { transition: all 0.3s ease-in-out; }
+        /* Custom styles for inputs used in modals */
+        .input {
+            margin-top: 0.25rem;
+            display: block;
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #D1D5DB; /* gray-300 */
+            border-radius: 0.375rem; /* rounded-md */
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        .input:focus {
+            outline: none;
+            --tw-ring-color: #3B82F6; /* blue-500 */
+            box-shadow: 0 0 0 2px var(--tw-ring-color);
+            border-color: #3B82F6;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
     <div id="app">
         <!-- App content will be rendered here -->
     </div>
+    <div id="modal-container">
+        <!-- Modals will be rendered here -->
+    </div>
 
     <script type="module">
-        // In a real-world HIPAA compliant application, all data would be managed on a secure server with a proper database
-        // and strong authentication. localStorage is used here ONLY for demonstration purposes.
+        // --- ROUTER: Handles navigation within the single-page application ---
         const AppRouter = {
             routes: {},
             currentRoute: '',
             init() {
+                // Listen for URL hash changes and on initial page load
                 window.addEventListener('hashchange', () => this.handleRouteChange());
                 window.addEventListener('load', () => this.handleRouteChange());
             },
             addRoute(route, component) {
                 this.routes[route] = component;
             },
+            /**
+             * [FIXED] This function now correctly handles static and dynamic routes.
+             * It matches the hash in the URL (e.g., '/dashboard' or '/patient/P123')
+             * to the corresponding component and renders it.
+             */
             handleRouteChange() {
                 const hash = window.location.hash.slice(1) || '/';
                 if (this.currentRoute === hash) return;
 
-                const routeParts = hash.split('/');
-                let routeName = routeParts[0] || '/';
-                if (routeName === 'patient') {
-                    routeName = '/patient/:id';
+                const routeParts = hash.split('/'); // e.g., for '/patient/P123', this is ['', 'patient', 'P123']
+                let component;
+                let params = {};
+                
+                // First, check for the specific dynamic route pattern for patients
+                if (routeParts[1] === 'patient' && routeParts.length === 3) {
+                    component = this.routes['/patient/:id'];
+                    params = { id: routeParts[2] };
+                } else {
+                    // Otherwise, look for a direct match in the static routes
+                    component = this.routes[hash];
                 }
 
-                const component = this.routes[routeName];
                 if (component) {
                     this.currentRoute = hash;
-                    const params = this.getParams(hash, routeName);
+                    // Render the main content and any modals the component needs
                     document.getElementById('app').innerHTML = component.render(params);
+                    document.getElementById('modal-container').innerHTML = component.renderModals ? component.renderModals() : '';
+
+                    // Run any post-render scripts (like attaching event listeners)
                     if (component.postRender) component.postRender(params);
                 } else {
-                    // Fallback to login if route not found
+                    // If no route is found, redirect to the login page as a fallback
+                    console.warn(`No route found for hash: ${hash}. Redirecting to login.`);
                     window.location.hash = '/';
                 }
-            },
-            getParams(hash, routeName) {
-                const hashParts = hash.split('/');
-                const routeParts = routeName.split('/');
-                const params = {};
-                routeParts.forEach((part, i) => {
-                    if (part.startsWith(':')) {
-                        params[part.slice(1)] = hashParts[i];
-                    }
-                });
-                return params;
             },
             navigate(path) {
                 window.location.hash = path;
             }
         };
 
-        // --- MOCK DATABASE (using localStorage for demo) ---
+        // --- MOCK DATABASE (using localStorage for demonstration) ---
+        // In a real HIPAA-compliant app, this would be replaced with secure server-side logic (e.g., Firebase Firestore).
         const DB = {
             _get(key, defaultValue = []) {
                 try {
@@ -99,13 +123,7 @@
             },
             addPatient(patientData) {
                 let patients = this.getPatients();
-                const newPatient = {
-                    id: `P${Date.now()}`,
-                    ...patientData,
-                    notes: [],
-                    files: [],
-                    credentials: []
-                };
+                const newPatient = { id: `P${Date.now()}`, ...patientData, notes: [], files: [], credentials: [] };
                 patients.push(newPatient);
                 this._set('patients', patients);
                 return newPatient;
@@ -126,7 +144,6 @@
                 let resources = this.getResources().filter(r => r.id !== id);
                 this._set('resources', resources);
             },
-            // Initialize with some demo data if empty
             initDemoData() {
                 if (!localStorage.getItem('patients')) {
                     this._set('patients', [
@@ -143,6 +160,43 @@
             }
         };
 
+        // --- GLOBAL MODAL HELPER ---
+        /**
+         * [NEW] A global function to show a confirmation dialog.
+         * This replaces the basic `window.confirm()` for a better user experience.
+         * @param {string} title - The title of the modal.
+         * @param {string} message - The confirmation message.
+         * @param {function} onConfirm - The function to execute if the user confirms.
+         */
+        window.showConfirmModal = (title, message, onConfirm) => {
+            const modal = document.getElementById('confirm-modal');
+            document.getElementById('confirm-title').innerText = title;
+            document.getElementById('confirm-message').innerText = message;
+            
+            const confirmBtn = document.getElementById('confirm-action-btn');
+            const cancelBtn = document.getElementById('cancel-confirm-btn');
+
+            // This cloning technique prevents multiple event listeners from stacking up
+            const newConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+            newConfirmBtn.onclick = () => {
+                onConfirm();
+                modal.classList.add('hidden');
+            };
+
+            cancelBtn.onclick = () => {
+                modal.classList.add('hidden');
+            };
+
+            modal.classList.remove('hidden');
+            if (window.lucide) {
+                window.lucide.createIcons({
+                    nodes: [modal.querySelector('[data-lucide]')]
+                });
+            }
+        };
+
         // --- COMPONENTS ---
 
         const Layout = {
@@ -154,40 +208,59 @@
                 ];
                 return `
                     <div class="min-h-screen flex">
-                        <!-- Sidebar -->
-                        <nav class="w-64 bg-white border-r border-gray-200 flex-shrink-0">
+                        <!-- Sidebar Navigation -->
+                        <nav class="w-64 bg-white border-r border-gray-200 flex-shrink-0 flex flex-col">
                             <div class="h-16 flex items-center justify-center border-b border-gray-200">
                                 <h1 class="text-2xl font-bold text-blue-600">Refuah Berurah</h1>
                             </div>
-                            <div class="p-4">
+                            <div class="p-4 flex-grow">
                                 <ul>
                                     ${navLinks.map(link => `
                                         <li>
                                             <a href="#${link.path}" class="flex items-center p-3 rounded-lg text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-all ${activeLink === link.label ? 'bg-blue-100 text-blue-700 font-semibold' : ''}">
-                                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-lucide="${link.icon.toLowerCase()}"></svg>
+                                                <svg class="w-5 h-5 mr-3" data-lucide="${link.icon.toLowerCase()}"></svg>
                                                 ${link.label}
                                             </a>
                                         </li>
                                     `).join('')}
                                 </ul>
                             </div>
-                            <div class="absolute bottom-0 w-64 p-4 border-t border-gray-200">
+                            <div class="p-4 border-t border-gray-200">
                                 <a href="#" id="logout-btn" class="flex items-center p-3 rounded-lg text-gray-600 hover:bg-red-50 hover:text-red-600 transition-all">
-                                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-lucide="log-out"></svg>
+                                    <svg class="w-5 h-5 mr-3" data-lucide="log-out"></svg>
                                     Logout
                                 </a>
                             </div>
                         </nav>
-
-                        <!-- Main Content -->
-                        <main class="flex-1 bg-gray-50 p-6 sm:p-8">
+                        <!-- Main Content Area -->
+                        <main class="flex-1 bg-gray-50 p-6 sm:p-8 overflow-y-auto">
                             ${content}
                         </main>
+                    </div>
+                    ${this.renderConfirmModal()}
+                `;
+            },
+            /**
+             * [NEW] Renders the confirmation modal structure. It's always in the DOM but hidden by default.
+             */
+            renderConfirmModal() {
+                return `
+                    <div id="confirm-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+                        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm text-center">
+                            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                                <svg class="h-6 w-6 text-red-600" data-lucide="alert-triangle"></svg>
+                            </div>
+                            <h3 id="confirm-title" class="text-lg font-bold mt-3">Delete Item</h3>
+                            <p id="confirm-message" class="text-sm text-gray-500 mt-2 mb-4">Are you sure? This action cannot be undone.</p>
+                            <div class="flex justify-center space-x-3">
+                                <button id="cancel-confirm-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 w-24">Cancel</button>
+                                <button id="confirm-action-btn" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 w-24">Delete</button>
+                            </div>
+                        </div>
                     </div>
                 `;
             },
             postRender() {
-                // Use lucide-react's createIcons method
                 if (window.lucide) {
                     window.lucide.createIcons();
                 }
@@ -232,7 +305,6 @@
             postRender() {
                 document.getElementById('login-form').addEventListener('submit', (e) => {
                     e.preventDefault();
-                    // In a real app, you'd perform actual authentication here
                     AppRouter.navigate('/dashboard');
                 });
             }
@@ -248,40 +320,24 @@
                             <h2 class="text-3xl font-bold text-gray-800">Dashboard</h2>
                             <p class="mt-1 text-gray-500">Welcome back! Here's a summary of your workspace.</p>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                                <div class="flex items-center">
-                                    <div class="p-3 rounded-full bg-blue-100 text-blue-600">
-                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-lucide="users"></svg>
-                                    </div>
-                                    <div class="ml-4">
-                                        <p class="text-sm font-medium text-gray-500">Total Patients</p>
-                                        <p class="text-2xl font-bold text-gray-800">${patients.length}</p>
-                                    </div>
-                                </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex items-center">
+                                <div class="p-3 rounded-full bg-blue-100 text-blue-600"><svg class="w-6 h-6" data-lucide="users"></svg></div>
+                                <div class="ml-4"><p class="text-sm font-medium text-gray-500">Total Patients</p><p class="text-2xl font-bold text-gray-800">${patients.length}</p></div>
                             </div>
-                            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                                <div class="flex items-center">
-                                    <div class="p-3 rounded-full bg-green-100 text-green-600">
-                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-lucide="book-marked"></svg>
-                                    </div>
-                                    <div class="ml-4">
-                                        <p class="text-sm font-medium text-gray-500">Total Resources</p>
-                                        <p class="text-2xl font-bold text-gray-800">${resources.length}</p>
-                                    </div>
-                                </div>
+                            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex items-center">
+                                <div class="p-3 rounded-full bg-green-100 text-green-600"><svg class="w-6 h-6" data-lucide="book-marked"></svg></div>
+                                <div class="ml-4"><p class="text-sm font-medium text-gray-500">Total Resources</p><p class="text-2xl font-bold text-gray-800">${resources.length}</p></div>
                             </div>
                         </div>
                         <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
                             <h3 class="text-lg font-semibold text-gray-800">Quick Actions</h3>
                             <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <a href="#/patients" class="flex items-center justify-center p-4 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-all">
-                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-lucide="user-plus"></svg>
-                                    Add New Patient
+                                    <svg class="w-5 h-5 mr-2" data-lucide="user-plus"></svg>Add New Patient
                                 </a>
                                 <a href="#/resources" class="flex items-center justify-center p-4 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-all">
-                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-lucide="plus-circle"></svg>
-                                    Add New Resource
+                                    <svg class="w-5 h-5 mr-2" data-lucide="plus-circle"></svg>Add New Resource
                                 </a>
                             </div>
                         </div>
@@ -296,15 +352,15 @@
 
         const PatientsComponent = {
             render() {
-                const content = `
+                return `
                     <div class="space-y-6">
-                        <div class="flex items-center justify-between">
+                        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
                             <div>
                                 <h2 class="text-3xl font-bold text-gray-800">Patients</h2>
                                 <p class="mt-1 text-gray-500">Manage your patient records.</p>
                             </div>
-                            <button id="add-patient-btn" class="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition-all">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-lucide="user-plus"></svg>
+                            <button id="add-patient-btn" class="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition-all w-full sm:w-auto">
+                                <svg class="w-5 h-5 mr-2" data-lucide="user-plus"></svg>
                                 Add Patient
                             </button>
                         </div>
@@ -312,66 +368,20 @@
                             <div class="p-4 border-b">
                                 <input id="search-patient" type="text" placeholder="Search patients by name..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                             </div>
-                            <div id="patient-list" class="divide-y divide-gray-200">
-                                <!-- Patient list rendered by JS -->
-                            </div>
+                            <div id="patient-list" class="divide-y divide-gray-200"></div>
                         </div>
                     </div>
-                    ${this.renderModal()}
                 `;
-                return Layout.render(content, 'Patients');
             },
-            renderPatientList(filter = '') {
-                const patients = DB.getPatients().filter(p => p.name.toLowerCase().includes(filter.toLowerCase()));
-                const listEl = document.getElementById('patient-list');
-                if (patients.length === 0) {
-                    listEl.innerHTML = `<p class="p-6 text-center text-gray-500">No patients found.</p>`;
-                    return;
-                }
-                listEl.innerHTML = patients.map(patient => `
-                    <div class="p-4 flex items-center justify-between hover:bg-gray-50">
-                        <a href="#/patient/${patient.id}" class="flex-1">
-                            <p class="font-semibold text-blue-600">${patient.name}</p>
-                            <p class="text-sm text-gray-500">DOB: ${patient.dob} | Contact: ${patient.contact}</p>
-                        </a>
-                        <button data-id="${patient.id}" class="delete-patient-btn text-gray-400 hover:text-red-500 p-2 rounded-full">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-lucide="trash-2"></svg>
-                        </button>
-                    </div>
-                `).join('');
-
-                document.querySelectorAll('.delete-patient-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        if (confirm('Are you sure you want to delete this patient?')) {
-                            DB.deletePatient(btn.dataset.id);
-                            this.renderPatientList(document.getElementById('search-patient').value);
-                            if (window.lucide) window.lucide.createIcons();
-                        }
-                    });
-                });
-                if (window.lucide) window.lucide.createIcons();
-            },
-            renderModal() {
+            renderModals() {
                 return `
-                    <div id="patient-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+                    <div id="patient-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
                         <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-lg">
                             <h3 class="text-2xl font-bold mb-4">Add New Patient</h3>
-                            <form id="patient-form">
-                                <div class="space-y-4">
-                                    <div>
-                                        <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
-                                        <input type="text" id="name" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                                    </div>
-                                    <div>
-                                        <label for="dob" class="block text-sm font-medium text-gray-700">Date of Birth</label>
-                                        <input type="date" id="dob" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                                    </div>
-                                    <div>
-                                        <label for="contact" class="block text-sm font-medium text-gray-700">Contact Info</label>
-                                        <input type="text" id="contact" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                                    </div>
-                                </div>
+                            <form id="patient-form" class="space-y-4">
+                                <div><label for="name" class="block text-sm font-medium text-gray-700">Full Name</label><input type="text" id="name" required class="input"></div>
+                                <div><label for="dob" class="block text-sm font-medium text-gray-700">Date of Birth</label><input type="date" id="dob" required class="input"></div>
+                                <div><label for="contact" class="block text-sm font-medium text-gray-700">Contact Info</label><input type="text" id="contact" required class="input"></div>
                                 <div class="mt-6 flex justify-end space-x-3">
                                     <button type="button" id="cancel-patient-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">Cancel</button>
                                     <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Save Patient</button>
@@ -380,6 +390,41 @@
                         </div>
                     </div>
                 `;
+            },
+            renderPatientList(filter = '') {
+                const patients = DB.getPatients().filter(p => p.name.toLowerCase().includes(filter.toLowerCase()));
+                const listEl = document.getElementById('patient-list');
+                if (!listEl) return;
+                listEl.innerHTML = patients.length === 0 
+                    ? `<p class="p-6 text-center text-gray-500">No patients found.</p>`
+                    : patients.map(patient => `
+                        <div class="p-4 flex items-center justify-between hover:bg-gray-50">
+                            <a href="#/patient/${patient.id}" class="flex-1 min-w-0">
+                                <p class="font-semibold text-blue-600 truncate">${patient.name}</p>
+                                <p class="text-sm text-gray-500">DOB: ${patient.dob} | Contact: ${patient.contact}</p>
+                            </a>
+                            <button data-id="${patient.id}" class="delete-patient-btn text-gray-400 hover:text-red-500 p-2 rounded-full flex-shrink-0 ml-4">
+                                <svg class="w-5 h-5" data-lucide="trash-2"></svg>
+                            </button>
+                        </div>
+                    `).join('');
+
+                document.querySelectorAll('.delete-patient-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const patientId = btn.dataset.id;
+                        const patient = DB.getPatient(patientId);
+                        window.showConfirmModal(
+                            'Delete Patient?',
+                            `Are you sure you want to permanently delete ${patient.name}? This action cannot be undone.`,
+                            () => {
+                                DB.deletePatient(patientId);
+                                this.renderPatientList(document.getElementById('search-patient').value);
+                            }
+                        );
+                    });
+                });
+                if (window.lucide) window.lucide.createIcons();
             },
             postRender() {
                 Layout.postRender();
@@ -393,20 +438,13 @@
 
                 form.addEventListener('submit', (e) => {
                     e.preventDefault();
-                    const patientData = {
-                        name: form.name.value,
-                        dob: form.dob.value,
-                        contact: form.contact.value
-                    };
-                    DB.addPatient(patientData);
+                    DB.addPatient({ name: form.name.value, dob: form.dob.value, contact: form.contact.value });
                     modal.classList.add('hidden');
                     form.reset();
                     this.renderPatientList();
                 });
 
-                document.getElementById('search-patient').addEventListener('input', (e) => {
-                    this.renderPatientList(e.target.value);
-                });
+                document.getElementById('search-patient').addEventListener('input', (e) => this.renderPatientList(e.target.value));
             }
         };
 
@@ -414,84 +452,78 @@
             render(params) {
                 const patient = DB.getPatient(params.id);
                 if (!patient) return Layout.render('<p>Patient not found.</p>', 'Patients');
-
-                const content = `
+                return Layout.render(`
                     <div class="space-y-8">
                         <div>
                             <a href="#/patients" class="flex items-center text-sm text-blue-600 hover:underline mb-4">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-lucide="arrow-left"></svg>
-                                Back to Patients
+                                <svg class="w-4 h-4 mr-1" data-lucide="arrow-left"></svg>Back to Patients
                             </a>
                             <h2 class="text-3xl font-bold text-gray-800">${patient.name}</h2>
                             <p class="mt-1 text-gray-500">DOB: ${patient.dob} | Contact: ${patient.contact}</p>
                         </div>
-
-                        <!-- Tabs -->
-                        <div class="border-b border-gray-200">
-                            <nav class="-mb-px flex space-x-8" id="patient-tabs">
-                                <a href="#" data-tab="notes" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-blue-500 text-blue-600">Notes</a>
-                                <a href="#" data-tab="files" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Files</a>
-                                <a href="#" data-tab="credentials" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Chart Links & Credentials</a>
-                            </nav>
-                        </div>
-
-                        <!-- Tab Content -->
-                        <div id="tab-content">
-                            <!-- Content rendered by JS -->
-                        </div>
+                        <div class="border-b border-gray-200"><nav class="-mb-px flex space-x-8" id="patient-tabs">
+                            <a href="#" data-tab="notes" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-blue-500 text-blue-600">Notes</a>
+                            <a href="#" data-tab="files" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Files</a>
+                            <a href="#" data-tab="credentials" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Chart Links & Credentials</a>
+                        </nav></div>
+                        <div id="tab-content"></div>
                     </div>
-                `;
-                return Layout.render(content, 'Patients');
+                `, 'Patients');
             },
-            renderNotes(patient) {
+            renderModals() {
                 return `
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                        <div class="p-4">
-                            <form id="note-form">
-                                <textarea id="note-text" placeholder="Add a new note..." required class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
-                                <button type="submit" class="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">Add Note</button>
+                    <div id="credential-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
+                        <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-lg">
+                            <h3 class="text-2xl font-bold mb-4">Add Credential</h3>
+                            <form id="credential-form" class="space-y-4">
+                                <div><label for="service" class="block text-sm font-medium text-gray-700">Service/System Name</label><input type="text" id="service" required class="input"></div>
+                                <div><label for="link" class="block text-sm font-medium text-gray-700">URL/Link</label><input type="url" id="link" required class="input"></div>
+                                <div><label for="username" class="block text-sm font-medium text-gray-700">Username</label><input type="text" id="username" required class="input"></div>
+                                <div><label for="passwordRef" class="block text-sm font-medium text-gray-700">Password Location</label><input type="text" id="passwordRef" placeholder="e.g., Stored in 1Password" required class="input"></div>
+                                <p class="text-xs text-red-600">Reminder: Do not store actual passwords here. Note the location of the password in your secure password manager.</p>
+                                <div class="mt-6 flex justify-end space-x-3">
+                                    <button type="button" id="cancel-cred-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">Cancel</button>
+                                    <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">Save</button>
+                                </div>
                             </form>
                         </div>
-                        <div id="notes-list" class="divide-y divide-gray-200">
-                            ${patient.notes.length > 0 ? patient.notes.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).map(note => `
-                                <div class="p-4">
-                                    <p class="text-gray-800">${note.text.replace(/\n/g, '<br>')}</p>
-                                    <p class="text-xs text-gray-400 mt-2">${new Date(note.timestamp).toLocaleString()}</p>
-                                </div>
-                            `).join('') : '<p class="p-4 text-gray-500">No notes yet.</p>'}
-                        </div>
                     </div>
                 `;
             },
-            renderFiles(patient) {
-                 return `
+            renderNotes: (patient) => `...`, // Render functions defined below for clarity
+            renderFiles: (patient) => `...`,
+            renderCredentials: (patient) => `...`,
+            postRender(params) {
+                this.renderNotes = (patient) => `
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                        <div class="p-4"><form id="note-form">
+                            <textarea id="note-text" placeholder="Add a new note..." required class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                            <button type="submit" class="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">Add Note</button>
+                        </form></div>
+                        <div id="notes-list" class="divide-y divide-gray-200">
+                            ${patient.notes.length > 0 ? patient.notes.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).map(note => `
+                                <div class="p-4"><p class="text-gray-800">${note.text.replace(/\n/g, '<br>')}</p><p class="text-xs text-gray-400 mt-2">${new Date(note.timestamp).toLocaleString()}</p></div>
+                            `).join('') : '<p class="p-4 text-gray-500">No notes yet.</p>'}
+                        </div>
+                    </div>`;
+                this.renderFiles = (patient) => `
                     <div class="bg-white rounded-lg shadow-sm border border-gray-200">
                         <div class="p-4 border-b">
-                            <label for="file-upload" class="cursor-pointer bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700">
-                                <span>Upload File</span>
-                                <input id="file-upload" type="file" class="hidden">
+                            <label for="file-upload" class="cursor-pointer inline-block bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700">
+                                <span>Upload File</span><input id="file-upload" type="file" class="hidden">
                             </label>
                             <p class="text-xs text-gray-500 mt-2">File uploads are simulated for this demo.</p>
                         </div>
                         <div id="files-list" class="divide-y divide-gray-200">
                             ${patient.files.length > 0 ? patient.files.map(file => `
-                                <div class="p-4 flex items-center justify-between">
-                                    <div class="flex items-center">
-                                        <svg class="w-6 h-6 text-gray-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-lucide="file-text"></svg>
-                                        <div>
-                                            <p class="font-medium text-gray-800">${file.name}</p>
-                                            <p class="text-sm text-gray-500">${file.size}</p>
-                                        </div>
-                                    </div>
-                                    <button class="text-gray-400 hover:text-red-500 p-2 rounded-full"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-lucide="trash-2"></svg></button>
-                                </div>
+                                <div class="p-4 flex items-center justify-between"><div class="flex items-center">
+                                    <svg class="w-6 h-6 text-gray-500 mr-3" data-lucide="file-text"></svg>
+                                    <div><p class="font-medium text-gray-800">${file.name}</p><p class="text-sm text-gray-500">${file.size}</p></div>
+                                </div></div>
                             `).join('') : '<p class="p-4 text-gray-500">No files uploaded.</p>'}
                         </div>
-                    </div>
-                `;
-            },
-            renderCredentials(patient) {
-                 return `
+                    </div>`;
+                this.renderCredentials = (patient) => `
                     <div class="bg-white rounded-lg shadow-sm border border-gray-200">
                         <div class="p-4 border-b">
                             <button id="add-credential-btn" class="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-purple-700">Add Credential</button>
@@ -506,213 +538,96 @@
                                 </div>
                             `).join('') : '<p class="p-4 text-gray-500">No credentials saved.</p>'}
                         </div>
-                    </div>
-                    ${this.renderCredentialModal()}
-                `;
-            },
-            renderCredentialModal() {
-                 return `
-                    <div id="credential-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-                        <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-lg">
-                            <h3 class="text-2xl font-bold mb-4">Add Credential</h3>
-                            <form id="credential-form">
-                                <div class="space-y-4">
-                                    <div><label for="service" class="block text-sm font-medium text-gray-700">Service/System Name</label><input type="text" id="service" required class="mt-1 block w-full input"></div>
-                                    <div><label for="link" class="block text-sm font-medium text-gray-700">URL/Link</label><input type="url" id="link" required class="mt-1 block w-full input"></div>
-                                    <div><label for="username" class="block text-sm font-medium text-gray-700">Username</label><input type="text" id="username" required class="mt-1 block w-full input"></div>
-                                    <div><label for="passwordRef" class="block text-sm font-medium text-gray-700">Password Location</label><input type="text" id="passwordRef" placeholder="e.g., Stored in 1Password" required class="mt-1 block w-full input"></div>
-                                    <p class="text-xs text-red-600">Reminder: Do not store actual passwords here. Note the location of the password in your secure password manager.</p>
-                                </div>
-                                <div class="mt-6 flex justify-end space-x-3">
-                                    <button type="button" id="cancel-cred-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">Cancel</button>
-                                    <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">Save</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                `;
-            },
-            postRender(params) {
+                    </div>`;
+
                 Layout.postRender();
                 const patient = DB.getPatient(params.id);
-                const tabContent = document.getElementById('tab-content');
+                if(!patient) return;
 
+                const tabContent = document.getElementById('tab-content');
                 const switchTab = (tabName) => {
                     document.querySelectorAll('.tab-link').forEach(link => {
-                        if (link.dataset.tab === tabName) {
-                            link.classList.add('border-blue-500', 'text-blue-600');
-                            link.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
-                        } else {
-                            link.classList.remove('border-blue-500', 'text-blue-600');
-                            link.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
-                        }
+                        const isSelected = link.dataset.tab === tabName;
+                        link.classList.toggle('border-blue-500', isSelected);
+                        link.classList.toggle('text-blue-600', isSelected);
+                        link.classList.toggle('border-transparent', !isSelected);
+                        link.classList.toggle('text-gray-500', !isSelected);
                     });
-
+                    
                     if (tabName === 'notes') {
                         tabContent.innerHTML = this.renderNotes(patient);
-                        this.attachNoteHandlers(patient);
+                        document.getElementById('note-form').addEventListener('submit', (e) => {
+                            e.preventDefault();
+                            const textEl = document.getElementById('note-text');
+                            if (textEl.value.trim()) {
+                                patient.notes.push({ id: `N${Date.now()}`, text: textEl.value, timestamp: new Date().toISOString() });
+                                DB.savePatient(patient);
+                                switchTab('notes'); // Re-render tab
+                            }
+                        });
                     } else if (tabName === 'files') {
                         tabContent.innerHTML = this.renderFiles(patient);
-                        this.attachFileHandlers(patient);
+                        document.getElementById('file-upload').addEventListener('change', (e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                                patient.files.push({ id: `F${Date.now()}`, name: file.name, size: `${(file.size / 1024).toFixed(1)} KB`, type: file.type.split('/')[1] });
+                                DB.savePatient(patient);
+                                switchTab('files'); // Re-render tab
+                            }
+                        });
                     } else if (tabName === 'credentials') {
                         tabContent.innerHTML = this.renderCredentials(patient);
-                        this.attachCredentialHandlers(patient);
+                        const modal = document.getElementById('credential-modal');
+                        const form = document.getElementById('credential-form');
+                        document.getElementById('add-credential-btn').addEventListener('click', () => modal.classList.remove('hidden'));
+                        document.getElementById('cancel-cred-btn').addEventListener('click', () => modal.classList.add('hidden'));
+                        form.addEventListener('submit', (e) => {
+                            e.preventDefault();
+                            patient.credentials.push({ id: `C${Date.now()}`, service: form.service.value, link: form.link.value, username: form.username.value, passwordRef: form.passwordRef.value });
+                            DB.savePatient(patient);
+                            modal.classList.add('hidden');
+                            form.reset();
+                            switchTab('credentials'); // Re-render tab
+                        });
                     }
                     if (window.lucide) window.lucide.createIcons();
                 };
 
-                document.querySelectorAll('.tab-link').forEach(link => {
-                    link.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        switchTab(e.target.dataset.tab);
-                    });
-                });
-
-                // Initial tab
+                document.querySelectorAll('.tab-link').forEach(link => link.addEventListener('click', (e) => { e.preventDefault(); switchTab(e.target.dataset.tab); }));
                 switchTab('notes');
-            },
-            attachNoteHandlers(patient) {
-                document.getElementById('note-form').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    const text = document.getElementById('note-text').value;
-                    if (text.trim()) {
-                        patient.notes.push({ id: `N${Date.now()}`, text, timestamp: new Date().toISOString() });
-                        DB.savePatient(patient);
-                        this.postRender({ id: patient.id }); // Re-render component
-                    }
-                });
-            },
-            attachFileHandlers(patient) {
-                document.getElementById('file-upload').addEventListener('change', (e) => {
-                    const file = e.target.files[0];
-                    if (file) {
-                        patient.files.push({ id: `F${Date.now()}`, name: file.name, size: `${(file.size / 1024).toFixed(1)} KB`, type: file.type.split('/')[1] });
-                        DB.savePatient(patient);
-                        this.postRender({ id: patient.id });
-                    }
-                });
-            },
-            attachCredentialHandlers(patient) {
-                const modal = document.getElementById('credential-modal');
-                const form = document.getElementById('credential-form');
-
-                document.getElementById('add-credential-btn').addEventListener('click', () => modal.classList.remove('hidden'));
-                document.getElementById('cancel-cred-btn').addEventListener('click', () => modal.classList.add('hidden'));
-
-                form.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    patient.credentials.push({
-                        id: `C${Date.now()}`,
-                        service: form.service.value,
-                        link: form.link.value,
-                        username: form.username.value,
-                        passwordRef: form.passwordRef.value,
-                    });
-                    DB.savePatient(patient);
-                    modal.classList.add('hidden');
-                    form.reset();
-                    this.postRender({ id: patient.id });
-                });
             }
         };
 
         const ResourcesComponent = {
              render() {
-                const content = `
+                return `
                     <div class="space-y-6">
-                        <div class="flex items-center justify-between">
+                        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
                             <div>
                                 <h2 class="text-3xl font-bold text-gray-800">Resources</h2>
                                 <p class="mt-1 text-gray-500">A general database for articles, doctors, and more.</p>
                             </div>
-                            <button id="add-resource-btn" class="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-green-700 transition-all">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-lucide="plus-circle"></svg>
-                                Add Resource
+                            <button id="add-resource-btn" class="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-green-700 transition-all w-full sm:w-auto">
+                                <svg class="w-5 h-5 mr-2" data-lucide="plus-circle"></svg>Add Resource
                             </button>
                         </div>
                         <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                            <div class="p-4 border-b">
-                                <input id="search-resource" type="text" placeholder="Search resources..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500">
-                            </div>
-                            <div id="resource-list" class="divide-y divide-gray-200">
-                                <!-- Resource list rendered by JS -->
-                            </div>
+                            <div class="p-4 border-b"><input id="search-resource" type="text" placeholder="Search resources..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"></div>
+                            <div id="resource-list" class="divide-y divide-gray-200"></div>
                         </div>
                     </div>
-                    ${this.renderModal()}
                 `;
-                return Layout.render(content, 'Resources');
             },
-            renderResourceList(filter = '') {
-                const resources = DB.getResources().filter(r => 
-                    (r.title && r.title.toLowerCase().includes(filter.toLowerCase())) ||
-                    (r.name && r.name.toLowerCase().includes(filter.toLowerCase())) ||
-                    (r.specialty && r.specialty.toLowerCase().includes(filter.toLowerCase()))
-                );
-                const listEl = document.getElementById('resource-list');
-                if (resources.length === 0) {
-                    listEl.innerHTML = `<p class="p-6 text-center text-gray-500">No resources found.</p>`;
-                    return;
-                }
-                listEl.innerHTML = resources.map(resource => {
-                    if (resource.type === 'article') {
-                        return `
-                            <div class="p-4 flex items-center justify-between hover:bg-gray-50">
-                                <div class="flex-1">
-                                    <p class="font-semibold text-green-700">${resource.title}</p>
-                                    <p class="text-sm text-gray-600">${resource.summary}</p>
-                                    <a href="${resource.link}" target="_blank" class="text-xs text-blue-500 hover:underline">Read Article</a>
-                                </div>
-                                <button data-id="${resource.id}" class="delete-resource-btn text-gray-400 hover:text-red-500 p-2 rounded-full">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-lucide="trash-2"></svg>
-                                </button>
-                            </div>
-                        `;
-                    } else if (resource.type === 'doctor') {
-                         return `
-                            <div class="p-4 flex items-center justify-between hover:bg-gray-50">
-                                <div class="flex-1">
-                                    <p class="font-semibold text-green-700">${resource.name}</p>
-                                    <p class="text-sm text-gray-600">Specialty: ${resource.specialty}</p>
-                                    <p class="text-sm text-gray-600">Contact: ${resource.contact}</p>
-                                </div>
-                                <button data-id="${resource.id}" class="delete-resource-btn text-gray-400 hover:text-red-500 p-2 rounded-full">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-lucide="trash-2"></svg>
-                                </button>
-                            </div>
-                        `;
-                    }
-                    return '';
-                }).join('');
-                document.querySelectorAll('.delete-resource-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        if (confirm('Are you sure you want to delete this resource?')) {
-                            DB.deleteResource(btn.dataset.id);
-                            this.renderResourceList(document.getElementById('search-resource').value);
-                        }
-                    });
-                });
-                if (window.lucide) window.lucide.createIcons();
-            },
-            renderModal() {
+            renderModals() {
                 return `
-                    <div id="resource-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+                    <div id="resource-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
                         <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-lg">
                             <h3 class="text-2xl font-bold mb-4">Add New Resource</h3>
-                            <form id="resource-form">
-                                <div class="space-y-4">
-                                    <div>
-                                        <label for="type" class="block text-sm font-medium text-gray-700">Resource Type</label>
-                                        <select id="type" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
-                                            <option value="article">Article</option>
-                                            <option value="doctor">Doctor</option>
-                                        </select>
-                                    </div>
-                                    <div id="form-fields">
-                                        <!-- Fields will be inserted here by JS -->
-                                    </div>
+                            <form id="resource-form" class="space-y-4">
+                                <div><label for="type" class="block text-sm font-medium text-gray-700">Resource Type</label>
+                                    <select id="type" class="input mt-1"><option value="article">Article</option><option value="doctor">Doctor</option></select>
                                 </div>
+                                <div id="form-fields" class="space-y-4"></div>
                                 <div class="mt-6 flex justify-end space-x-3">
                                     <button type="button" id="cancel-resource-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">Cancel</button>
                                     <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">Save Resource</button>
@@ -722,21 +637,41 @@
                     </div>
                 `;
             },
-            getFormFields(type) {
-                if (type === 'article') {
-                    return `
-                        <div><label for="title" class="block text-sm font-medium text-gray-700">Title</label><input type="text" id="title" required class="mt-1 block w-full input"></div>
-                        <div><label for="link" class="block text-sm font-medium text-gray-700">Link</label><input type="url" id="link" required class="mt-1 block w-full input"></div>
-                        <div><label for="summary" class="block text-sm font-medium text-gray-700">Summary</label><textarea id="summary" class="mt-1 block w-full input"></textarea></div>
-                    `;
-                } else if (type === 'doctor') {
-                    return `
-                        <div><label for="name" class="block text-sm font-medium text-gray-700">Doctor's Name</label><input type="text" id="name" required class="mt-1 block w-full input"></div>
-                        <div><label for="specialty" class="block text-sm font-medium text-gray-700">Specialty</label><input type="text" id="specialty" required class="mt-1 block w-full input"></div>
-                        <div><label for="contact" class="block text-sm font-medium text-gray-700">Contact Info</label><input type="text" id="contact" required class="mt-1 block w-full input"></div>
-                    `;
-                }
-                return '';
+            renderResourceList(filter = '') {
+                const resources = DB.getResources().filter(r => JSON.stringify(r).toLowerCase().includes(filter.toLowerCase()));
+                const listEl = document.getElementById('resource-list');
+                if (!listEl) return;
+                listEl.innerHTML = resources.length === 0
+                    ? `<p class="p-6 text-center text-gray-500">No resources found.</p>`
+                    : resources.map(resource => {
+                        const content = resource.type === 'article'
+                            ? `<p class="font-semibold text-green-700">${resource.title}</p><p class="text-sm text-gray-600">${resource.summary}</p><a href="${resource.link}" target="_blank" class="text-xs text-blue-500 hover:underline">Read Article</a>`
+                            : `<p class="font-semibold text-green-700">${resource.name}</p><p class="text-sm text-gray-600">Specialty: ${resource.specialty}</p><p class="text-sm text-gray-600">Contact: ${resource.contact}</p>`;
+                        return `
+                            <div class="p-4 flex items-center justify-between hover:bg-gray-50">
+                                <div class="flex-1 min-w-0">${content}</div>
+                                <button data-id="${resource.id}" data-name="${resource.title || resource.name}" class="delete-resource-btn text-gray-400 hover:text-red-500 p-2 rounded-full flex-shrink-0 ml-4">
+                                    <svg class="w-5 h-5" data-lucide="trash-2"></svg>
+                                </button>
+                            </div>`;
+                    }).join('');
+
+                document.querySelectorAll('.delete-resource-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const resourceId = btn.dataset.id;
+                        const resourceName = btn.dataset.name;
+                        window.showConfirmModal(
+                            'Delete Resource?',
+                            `Are you sure you want to delete the resource "${resourceName}"?`,
+                            () => {
+                                DB.deleteResource(resourceId);
+                                this.renderResourceList(document.getElementById('search-resource').value);
+                            }
+                        );
+                    });
+                });
+                if (window.lucide) window.lucide.createIcons();
             },
             postRender() {
                 Layout.postRender();
@@ -746,10 +681,12 @@
                 const form = document.getElementById('resource-form');
                 const typeSelect = document.getElementById('type');
                 const formFields = document.getElementById('form-fields');
-
-                const updateFormFields = () => {
-                    formFields.innerHTML = this.getFormFields(typeSelect.value);
+                const getFormFields = (type) => {
+                    if (type === 'article') return `<div><label for="title" class="block text-sm font-medium text-gray-700">Title</label><input type="text" id="title" required class="input"></div><div><label for="link" class="block text-sm font-medium text-gray-700">Link</label><input type="url" id="link" required class="input"></div><div><label for="summary" class="block text-sm font-medium text-gray-700">Summary</label><textarea id="summary" class="input"></textarea></div>`;
+                    if (type === 'doctor') return `<div><label for="name" class="block text-sm font-medium text-gray-700">Doctor's Name</label><input type="text" id="name" required class="input"></div><div><label for="specialty" class="block text-sm font-medium text-gray-700">Specialty</label><input type="text" id="specialty" required class="input"></div><div><label for="contact" class="block text-sm font-medium text-gray-700">Contact Info</label><input type="text" id="contact" required class="input"></div>`;
+                    return '';
                 };
+                const updateFormFields = () => { formFields.innerHTML = getFormFields(typeSelect.value); };
                 
                 typeSelect.addEventListener('change', updateFormFields);
                 updateFormFields();
@@ -761,11 +698,8 @@
                     e.preventDefault();
                     const type = typeSelect.value;
                     let resourceData = { type };
-                    if (type === 'article') {
-                        resourceData = { ...resourceData, title: form.title.value, link: form.link.value, summary: form.summary.value };
-                    } else if (type === 'doctor') {
-                        resourceData = { ...resourceData, name: form.name.value, specialty: form.specialty.value, contact: form.contact.value };
-                    }
+                    if (type === 'article') resourceData = { ...resourceData, title: form.title.value, link: form.link.value, summary: form.summary.value };
+                    if (type === 'doctor') resourceData = { ...resourceData, name: form.name.value, specialty: form.specialty.value, contact: form.contact.value };
                     DB.addResource(resourceData);
                     modal.classList.add('hidden');
                     form.reset();
@@ -773,13 +707,11 @@
                     this.renderResourceList();
                 });
                 
-                document.getElementById('search-resource').addEventListener('input', (e) => {
-                    this.renderResourceList(e.target.value);
-                });
+                document.getElementById('search-resource').addEventListener('input', (e) => this.renderResourceList(e.target.value));
             }
         };
 
-        // --- ROUTER SETUP ---
+        // --- ROUTER & APP INITIALIZATION ---
         DB.initDemoData();
         AppRouter.addRoute('/', LoginComponent);
         AppRouter.addRoute('/dashboard', DashboardComponent);
