@@ -23,7 +23,7 @@
         <div id="initial-loader">
             <div class="text-center">
                 <h1 class="text-2xl font-bold text-blue-600">Refuah Berurah</h1>
-                <p class="mt-2 text-gray-600">Initializing...</p>
+                <p class="mt-2 text-gray-600">Connecting to services...</p>
             </div>
         </div>
     </div>
@@ -495,8 +495,25 @@
             }
         }
 
-        // Start the app after a short delay to ensure environment variables are loaded.
-        setTimeout(initializeAndStartApp, 100);
+        // --- Bootstrap App ---
+        // This function waits for the Firebase config to be available before starting the app.
+        function bootstrapApp() {
+            let attempts = 0;
+            const maxAttempts = 50; // Try for 5 seconds
+            const interval = setInterval(() => {
+                attempts++;
+                if (typeof __firebase_config !== 'undefined' && __firebase_config !== '{}') {
+                    clearInterval(interval);
+                    initializeAndStartApp();
+                } else if (attempts > maxAttempts) {
+                    clearInterval(interval);
+                    console.error("Firebase config not found after multiple attempts.");
+                    document.getElementById('app').innerHTML = `<div class="min-h-screen flex items-center justify-center bg-red-50"><div class="text-center p-8 bg-white rounded-lg shadow-lg"><h2 class="text-2xl font-bold text-red-700">Error: Configuration Timeout</h2><p class="mt-2 text-gray-600">Could not load necessary configuration from the environment.</p></div></div>`;
+                }
+            }, 100);
+        }
+
+        bootstrapApp();
 
     </script>
 </body>
