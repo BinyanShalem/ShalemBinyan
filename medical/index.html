@@ -7,6 +7,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/lucide-react@0.292.0/dist/lucide-react.min.js"></script>
+    
+    <!-- Firebase SDKs (Classic Scripts) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
     <style>
         body { font-family: 'Inter', sans-serif; }
         .transition-all { transition: all 0.3s ease-in-out; }
@@ -31,30 +37,26 @@
         <!-- Modals will be rendered here -->
     </div>
 
-    <script type="module">
-        // --- Firebase SDK Imports ---
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, addDoc, getDocs, onSnapshot, writeBatch, query, where, orderBy, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <script>
+        // =================================================================================
+        // WORD-FOR-WORD INSTRUCTION:
+        // Paste the `firebaseConfig` object you copied from the Firebase console here.
+        // It should look like: const firebaseConfig = { apiKey: "...", ... };
+        // =================================================================================
+        const firebaseConfig = {
+          apiKey: "AIzaSyDMAZ_HJ7JIqNHxYAXcOgpVZN4tnLwWUWA",
+          authDomain: "refuahberur.firebaseapp.com",
+          projectId: "refuahberur",
+          storageBucket: "refuahberur.appspot.com",
+          messagingSenderId: "345766239268",
+          appId: "1:345766239268:web:9b7fcf947760b5ea53ccb1",
+          measurementId: "G-0XREW3ZGYZ"
+        };
+        // =================================================================================
 
         // --- App State ---
         let app, auth, db, userId;
         const appId = 'refuah-berurah-prod';
-
-        // =================================================================================
-        // WORD-FOR-WORD INSTRUCTION:
-        // Delete the placeholder object below and paste the `firebaseConfig` object
-        // you copied from the Firebase console in its place.
-        // =================================================================================
-        const firebaseConfig = {
-            apiKey: "AIzaSyDMAZ_HJ7JIqNHxYAXcOgpVZN4tnLwWUWA",
-            authDomain: "refuahberur.firebaseapp.com",
-            projectId: "refuahberur",
-            storageBucket: "refuahberur.firebasestorage.app",
-            messagingSenderId: "345766239268",
-            appId: "1:345766239268:web:9b7fcf947760b5ea53ccb1",
-            measurementId: "G-0XREW3ZGYZ"
-        // =================================================================================
 
         // --- ROUTER: Handles navigation within the single-page application ---
         const AppRouter = {
@@ -94,13 +96,13 @@
 
         // --- Firestore Database Layer ---
         const FirestoreDB = {
-            getPatients: (callback) => onSnapshot(collection(db, `artifacts/${appId}/users/${userId}/patients`), callback),
-            addPatient: (patientData) => addDoc(collection(db, `artifacts/${appId}/users/${userId}/patients`), patientData),
-            savePatient: (patientId, patientData) => setDoc(doc(db, `artifacts/${appId}/users/${userId}/patients`, patientId), patientData, { merge: true }),
-            deletePatient: (patientId) => deleteDoc(doc(db, `artifacts/${appId}/users/${userId}/patients`, patientId)),
-            getResources: (callback) => onSnapshot(collection(db, `artifacts/${appId}/users/${userId}/resources`), callback),
-            addResource: (resourceData) => addDoc(collection(db, `artifacts/${appId}/users/${userId}/resources`), resourceData),
-            deleteResource: (resourceId) => deleteDoc(doc(db, `artifacts/${appId}/users/${userId}/resources`, resourceId)),
+            getPatients: (callback) => db.collection(`artifacts/${appId}/users/${userId}/patients`).onSnapshot(callback),
+            addPatient: (patientData) => db.collection(`artifacts/${appId}/users/${userId}/patients`).add(patientData),
+            savePatient: (patientId, patientData) => db.collection(`artifacts/${appId}/users/${userId}/patients`).doc(patientId).set(patientData, { merge: true }),
+            deletePatient: (patientId) => db.collection(`artifacts/${appId}/users/${userId}/patients`).doc(patientId).delete(),
+            getResources: (callback) => db.collection(`artifacts/${appId}/users/${userId}/resources`).onSnapshot(callback),
+            addResource: (resourceData) => db.collection(`artifacts/${appId}/users/${userId}/resources`).add(resourceData),
+            deleteResource: (resourceId) => db.collection(`artifacts/${appId}/users/${userId}/resources`).doc(resourceId).delete(),
         };
 
         // --- GLOBAL MODAL HELPER ---
@@ -160,7 +162,7 @@
             postRender() {
                 if (window.lucide) window.lucide.createIcons();
                 const logoutBtn = document.getElementById('logout-btn');
-                if (logoutBtn) logoutBtn.addEventListener('click', async (e) => { e.preventDefault(); await signOut(auth); AppRouter.navigate('/'); });
+                if (logoutBtn) logoutBtn.addEventListener('click', async (e) => { e.preventDefault(); await auth.signOut(); AppRouter.navigate('/'); });
             }
         };
 
@@ -226,25 +228,6 @@
                         </form></div>
                     </div>`;
             },
-            renderPatientList(patients, filter = '') {
-                const filteredPatients = patients.filter(p => p.data().name.toLowerCase().includes(filter.toLowerCase()));
-                const listEl = document.getElementById('patient-list');
-                if (!listEl) return;
-                listEl.innerHTML = filteredPatients.length === 0 ? `<p class="p-6 text-center text-gray-500">No patients found.</p>` : filteredPatients.map(doc => {
-                    const patient = doc.data();
-                    return `<div class="p-4 flex items-center justify-between hover:bg-gray-50">
-                        <a href="#/patient/${doc.id}" class="flex-1 min-w-0"><p class="font-semibold text-blue-600 truncate">${patient.name}</p><p class="text-sm text-gray-500">DOB: ${patient.dob} | Contact: ${patient.contact}</p></a>
-                        <button data-id="${doc.id}" data-name="${patient.name}" class="delete-patient-btn text-gray-400 hover:text-red-500 p-2 rounded-full flex-shrink-0 ml-4"><svg class="w-5 h-5" data-lucide="trash-2"></svg></button>
-                    </div>`
-                }).join('');
-                document.querySelectorAll('.delete-patient-btn').forEach(btn => btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const patientId = btn.dataset.id;
-                    const patientName = btn.dataset.name;
-                    window.showConfirmModal('Delete Patient?', `Are you sure you want to permanently delete ${patientName}? This action cannot be undone.`, () => FirestoreDB.deletePatient(patientId));
-                }));
-                if (window.lucide) window.lucide.createIcons();
-            },
             postRender() {
                 Layout.postRender();
                 const container = document.getElementById('patients-container');
@@ -276,7 +259,26 @@
                     document.getElementById('search-patient').addEventListener('input', (e) => this.renderPatientList(querySnapshot.docs, e.target.value));
                     if(window.lucide) window.lucide.createIcons();
                 });
-            }
+            },
+            renderPatientList(patients, filter = '') {
+                const filteredPatients = patients.filter(p => p.data().name.toLowerCase().includes(filter.toLowerCase()));
+                const listEl = document.getElementById('patient-list');
+                if (!listEl) return;
+                listEl.innerHTML = filteredPatients.length === 0 ? `<p class="p-6 text-center text-gray-500">No patients found.</p>` : filteredPatients.map(doc => {
+                    const patient = doc.data();
+                    return `<div class="p-4 flex items-center justify-between hover:bg-gray-50">
+                        <a href="#/patient/${doc.id}" class="flex-1 min-w-0"><p class="font-semibold text-blue-600 truncate">${patient.name}</p><p class="text-sm text-gray-500">DOB: ${patient.dob} | Contact: ${patient.contact}</p></a>
+                        <button data-id="${doc.id}" data-name="${patient.name}" class="delete-patient-btn text-gray-400 hover:text-red-500 p-2 rounded-full flex-shrink-0 ml-4"><svg class="w-5 h-5" data-lucide="trash-2"></svg></button>
+                    </div>`
+                }).join('');
+                document.querySelectorAll('.delete-patient-btn').forEach(btn => btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const patientId = btn.dataset.id;
+                    const patientName = btn.dataset.name;
+                    window.showConfirmModal('Delete Patient?', `Are you sure you want to permanently delete ${patientName}? This action cannot be undone.`, () => FirestoreDB.deletePatient(patientId));
+                }));
+                if (window.lucide) window.lucide.createIcons();
+            },
         };
 
         const PatientDetailComponent = {
@@ -304,8 +306,8 @@
                 Layout.postRender();
                 const container = document.getElementById('patient-detail-container');
                 
-                const patientUnsubscribe = onSnapshot(doc(db, `artifacts/${appId}/users/${userId}/patients`, params.id), (patientDoc) => {
-                    if (!patientDoc.exists()) {
+                db.collection(`artifacts/${appId}/users/${userId}/patients`).doc(params.id).onSnapshot((patientDoc) => {
+                    if (!patientDoc.exists) {
                         container.innerHTML = `<p>Patient not found.</p>`;
                         return;
                     }
@@ -393,21 +395,6 @@
                         </form></div>
                     </div>`;
             },
-            renderResourceList(resources, filter = '') {
-                const filteredResources = resources.filter(doc => JSON.stringify(doc.data()).toLowerCase().includes(filter.toLowerCase()));
-                const listEl = document.getElementById('resource-list');
-                if (!listEl) return;
-                listEl.innerHTML = filteredResources.length === 0 ? `<p class="p-6 text-center text-gray-500">No resources found.</p>` : filteredResources.map(doc => {
-                    const resource = doc.data();
-                    const content = resource.type === 'article' ? `<p class="font-semibold text-green-700">${resource.title}</p><p class="text-sm text-gray-600">${resource.summary}</p><a href="${resource.link}" target="_blank" class="text-xs text-blue-500">Read Article</a>` : `<p class="font-semibold text-green-700">${resource.name}</p><p class="text-sm text-gray-600">Specialty: ${resource.specialty}</p><p class="text-sm text-gray-600">Contact: ${resource.contact}</p>`;
-                    return `<div class="p-4 flex items-center justify-between hover:bg-gray-50"><div class="flex-1 min-w-0">${content}</div><button data-id="${doc.id}" data-name="${resource.title || resource.name}" class="delete-resource-btn text-gray-400 hover:text-red-500 p-2 rounded-full"><svg class="w-5 h-5" data-lucide="trash-2"></svg></button></div>`;
-                }).join('');
-                document.querySelectorAll('.delete-resource-btn').forEach(btn => btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    window.showConfirmModal('Delete Resource?', `Are you sure you want to delete "${btn.dataset.name}"?`, () => FirestoreDB.deleteResource(btn.dataset.id));
-                }));
-                if(window.lucide) window.lucide.createIcons();
-            },
             postRender() {
                 Layout.postRender();
                 const container = document.getElementById('resources-container');
@@ -425,7 +412,7 @@
                         </div>`;
                     
                     this.renderResourceList(querySnapshot.docs);
-
+                    
                     const modal = document.getElementById('resource-modal');
                     const form = document.getElementById('resource-form');
                     const typeSelect = document.getElementById('type');
@@ -455,19 +442,34 @@
                     document.getElementById('search-resource').addEventListener('input', (e) => this.renderResourceList(querySnapshot.docs, e.target.value));
                     if(window.lucide) window.lucide.createIcons();
                 });
-            }
+            },
+            renderResourceList(resources, filter = '') {
+                const filteredResources = resources.filter(doc => JSON.stringify(doc.data()).toLowerCase().includes(filter.toLowerCase()));
+                const listEl = document.getElementById('resource-list');
+                if (!listEl) return;
+                listEl.innerHTML = filteredResources.length === 0 ? `<p class="p-6 text-center text-gray-500">No resources found.</p>` : filteredResources.map(doc => {
+                    const resource = doc.data();
+                    const content = resource.type === 'article' ? `<p class="font-semibold text-green-700">${resource.title}</p><p class="text-sm text-gray-600">${resource.summary}</p><a href="${resource.link}" target="_blank" class="text-xs text-blue-500">Read Article</a>` : `<p class="font-semibold text-green-700">${resource.name}</p><p class="text-sm text-gray-600">Specialty: ${resource.specialty}</p><p class="text-sm text-gray-600">Contact: ${resource.contact}</p>`;
+                    return `<div class="p-4 flex items-center justify-between hover:bg-gray-50"><div class="flex-1 min-w-0">${content}</div><button data-id="${doc.id}" data-name="${resource.title || resource.name}" class="delete-resource-btn text-gray-400 hover:text-red-500 p-2 rounded-full"><svg class="w-5 h-5" data-lucide="trash-2"></svg></button></div>`;
+                }).join('');
+                document.querySelectorAll('.delete-resource-btn').forEach(btn => btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    window.showConfirmModal('Delete Resource?', `Are you sure you want to delete "${btn.dataset.name}"?`, () => FirestoreDB.deleteResource(btn.dataset.id));
+                }));
+                if(window.lucide) window.lucide.createIcons();
+            },
         };
 
         // --- App Initialization ---
         function initializeAndStartApp() {
             try {
                 // The hardcoded firebaseConfig from Step 1 is used here.
-                app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                db = getFirestore(app);
+                app = firebase.initializeApp(firebaseConfig);
+                auth = firebase.auth();
+                db = firebase.firestore();
 
                 // --- AUTHENTICATION & ROUTING ---
-                onAuthStateChanged(auth, (user) => {
+                auth.onAuthStateChanged((user) => {
                     if (user) {
                         userId = user.uid;
                         const currentPath = window.location.hash.slice(1);
@@ -480,11 +482,11 @@
                         AppRouter.navigate('/');
                         (async () => {
                             try {
-                                await signInAnonymously(auth);
+                                await auth.signInAnonymously();
                             } catch (error) {
                                 console.error("Authentication failed:", error);
                                 let errorMessage = "Authentication Failed. Please refresh and try again.";
-                                if (error.code === 'auth/configuration-not-found' || error.code === 'auth/admin-restricted-operation') {
+                                if (error.code === 'auth/operation-not-allowed' || error.code === 'auth/admin-restricted-operation') {
                                     errorMessage = `
                                         <div class="text-left">
                                             <p class="font-bold text-red-700 text-lg">Action Required: Enable Anonymous Sign-In</p>
