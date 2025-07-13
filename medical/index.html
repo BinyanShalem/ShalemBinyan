@@ -18,7 +18,7 @@
         .transition-all { transition: all 0.3s ease-in-out; }
         .input { margin-top: 0.25rem; display: block; width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #D1D5DB; border-radius: 0.375rem; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
         .input:focus { outline: none; --tw-ring-color: #3B82F6; box-shadow: 0 0 0 2px var(--tw-ring-color); border-color: #3B82F6; }
-        .loader { width: 48px; height: 48px; border: 5px solid #FFF; border-bottom-color: #3B82F6; border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 1s linear infinite; }
+        .loader { width: 48px; height: 48px; border: 5px solid #d1d5db; border-bottom-color: #3B82F6; border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 1s linear infinite; }
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .loading-overlay { position: absolute; inset: 0; background-color: rgba(255, 255, 255, 0.8); display: flex; align-items: center; justify-content: center; z-index: 10; }
         #initial-loader { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
@@ -39,9 +39,7 @@
 
     <script>
         // =================================================================================
-        // WORD-FOR-WORD INSTRUCTION:
-        // Paste the `firebaseConfig` object you copied from the Firebase console here.
-        // It should look like: const firebaseConfig = { apiKey: "...", ... };
+        // Firebase Configuration - This is now correctly filled in.
         // =================================================================================
         const firebaseConfig = {
           apiKey: "AIzaSyDMAZ_HJ7JIqNHxYAXcOgpVZN4tnLwWUWA",
@@ -170,14 +168,109 @@
             render() {
                 return `
                     <div class="min-h-screen flex items-center justify-center bg-gray-100">
-                        <div class="w-full max-w-md p-8 space-y-8 bg-white rounded-xl shadow-lg">
-                            <div class="text-center"><h1 class="text-3xl font-bold text-blue-600">Refuah Berurah</h1><p class="mt-2 text-gray-500">Sign in to your secure medical hub</p></div>
-                            <div class="text-center p-4"><div class="loader"></div><p class="mt-4 text-gray-600">Authenticating...</p></div>
+                        <div class="w-full max-w-md">
+                            <div id="auth-container" class="bg-white rounded-xl shadow-lg p-8 space-y-6">
+                                <!-- Login/Signup forms will be rendered here -->
+                            </div>
                         </div>
                     </div>
                 `;
             },
-            postRender() { /* Authentication handled by onAuthStateChanged */ }
+            renderLoginForm(error = '') {
+                return `
+                    <div class="text-center">
+                        <h1 class="text-3xl font-bold text-blue-600">Refuah Berurah</h1>
+                        <p class="mt-2 text-gray-500">Sign in to your secure medical hub</p>
+                    </div>
+                    <form id="login-form" class="space-y-4">
+                        <div>
+                            <label for="login-email" class="block text-sm font-medium text-gray-700">Email address</label>
+                            <input id="login-email" name="email" type="email" autocomplete="email" required class="input">
+                        </div>
+                        <div>
+                            <label for="login-password" class="block text-sm font-medium text-gray-700">Password</label>
+                            <input id="login-password" name="password" type="password" autocomplete="current-password" required class="input">
+                        </div>
+                        ${error ? `<p class="text-sm text-red-600">${error}</p>` : ''}
+                        <div>
+                            <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+                                Sign in
+                            </button>
+                        </div>
+                    </form>
+                    <p class="text-center text-sm text-gray-500">
+                        No account? <a href="#" id="show-signup" class="font-medium text-blue-600 hover:text-blue-500">Create one</a>
+                    </p>
+                `;
+            },
+            renderSignupForm(error = '') {
+                 return `
+                    <div class="text-center">
+                        <h1 class="text-3xl font-bold text-blue-600">Create Account</h1>
+                        <p class="mt-2 text-gray-500">Get started with your secure hub</p>
+                    </div>
+                    <form id="signup-form" class="space-y-4">
+                        <div>
+                            <label for="signup-email" class="block text-sm font-medium text-gray-700">Email address</label>
+                            <input id="signup-email" name="email" type="email" autocomplete="email" required class="input">
+                        </div>
+                        <div>
+                            <label for="signup-password" class="block text-sm font-medium text-gray-700">Password</label>
+                            <input id="signup-password" name="password" type="password" autocomplete="new-password" required class="input">
+                        </div>
+                         ${error ? `<p class="text-sm text-red-600">${error}</p>` : ''}
+                        <div>
+                            <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+                                Create Account
+                            </button>
+                        </div>
+                    </form>
+                    <p class="text-center text-sm text-gray-500">
+                        Already have an account? <a href="#" id="show-login" class="font-medium text-blue-600 hover:text-blue-500">Sign in</a>
+                    </p>
+                `;
+            },
+            postRender() {
+                const authContainer = document.getElementById('auth-container');
+                
+                const showLogin = (error = '') => {
+                    authContainer.innerHTML = this.renderLoginForm(error);
+                    document.getElementById('login-form').addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        const email = e.target.email.value;
+                        const password = e.target.password.value;
+                        try {
+                            await auth.signInWithEmailAndPassword(email, password);
+                        } catch (err) {
+                            showLogin(err.message);
+                        }
+                    });
+                    document.getElementById('show-signup').addEventListener('click', (e) => {
+                        e.preventDefault();
+                        showSignup();
+                    });
+                };
+
+                const showSignup = (error = '') => {
+                    authContainer.innerHTML = this.renderSignupForm(error);
+                    document.getElementById('signup-form').addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        const email = e.target.email.value;
+                        const password = e.target.password.value;
+                        try {
+                            await auth.createUserWithEmailAndPassword(email, password);
+                        } catch (err) {
+                            showSignup(err.message);
+                        }
+                    });
+                     document.getElementById('show-login').addEventListener('click', (e) => {
+                        e.preventDefault();
+                        showLogin();
+                    });
+                };
+
+                showLogin();
+            }
         };
 
         const DashboardComponent = {
@@ -480,35 +573,7 @@
                         }
                     } else {
                         AppRouter.navigate('/');
-                        (async () => {
-                            try {
-                                await auth.signInAnonymously();
-                            } catch (error) {
-                                console.error("Authentication failed:", error);
-                                let errorMessage = "Authentication Failed. Please refresh and try again.";
-                                if (error.code === 'auth/operation-not-allowed' || error.code === 'auth/admin-restricted-operation') {
-                                    errorMessage = `
-                                        <div class="text-left">
-                                            <p class="font-bold text-red-700 text-lg">Action Required: Enable Anonymous Sign-In</p>
-                                            <p class="mt-2 text-gray-600">This app requires a one-time setup step in your Firebase project to work correctly.</p>
-                                            <p class="mt-4 font-semibold text-gray-800">Please follow these steps:</p>
-                                            <ol class="list-decimal list-inside mt-2 space-y-2 text-gray-600 bg-gray-50 p-4 rounded-md border">
-                                                <li>Go to the <a href="https://console.firebase.google.com/" target="_blank" class="text-blue-600 hover:underline">Firebase Console</a>.</li>
-                                                <li>Select your project: <b>refuahberur</b>.</li>
-                                                <li>In the left menu, click <b>Build > Authentication</b>.</li>
-                                                <li>Go to the <b>Sign-in method</b> tab.</li>
-                                                <li>Find <b>Anonymous</b> in the provider list and click the pencil icon to edit.</li>
-                                                <li>Enable the toggle switch and click <b>Save</b>.</li>
-                                                <li>Once saved, refresh this page. The app will then load correctly.</li>
-                                            </ol>
-                                        </div>
-                                    `;
-                                    document.getElementById('app').innerHTML = `<div class="min-h-screen flex items-center justify-center bg-red-50"><div class="p-8 bg-white rounded-lg shadow-lg max-w-lg">${errorMessage}</div></div>`;
-                                } else {
-                                     document.getElementById('app').innerHTML = `<div class="p-4 text-red-600">${errorMessage} Details: ${error.message}</div>`;
-                                }
-                            }
-                        })();
+                        AppRouter.handleRouteChange();
                     }
                 });
 
@@ -517,7 +582,8 @@
                 AppRouter.addRoute('/patients', PatientsComponent);
                 AppRouter.addRoute('/patient/:id', PatientDetailComponent);
                 AppRouter.addRoute('/resources', ResourcesComponent);
-                AppRouter.init();
+                // Initial call to render based on current hash
+                AppRouter.handleRouteChange();
 
             } catch (e) {
                 console.error("Firebase initialization failed:", e);
