@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refuah Berurah - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/lucide-react@0.292.0/dist/lucide-react.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .transition-all { transition: all 0.3s ease-in-out; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="app">
+        <!-- App content will be rendered here -->
+    </div>
+
+    <script type="module">
+        // In a real-world HIPAA compliant application, all data would be managed on a secure server with a proper database
+        // and strong authentication. localStorage is used here ONLY for demonstration purposes.
+        const AppRouter = {
+            routes: {},
+            currentRoute: '',
+            init() {
+                window.addEventListener('hashchange', () => this.handleRouteChange());
+                window.addEventListener('load', () => this.handleRouteChange());
+            },
+            addRoute(route, component) {
+                this.routes[route] = component;
+            },
+            handleRouteChange() {
+                const hash = window.location.hash.slice(1) || '/';
+                if (this.currentRoute === hash) return;
+
+                const routeParts = hash.split('/');
+                let routeName = routeParts[0] || '/';
+                if (routeName === 'patient') {
+                    routeName = '/patient/:id';
+                }
+
+                const component = this.routes[routeName];
+                if (component) {
+                    this.currentRoute = hash;
+                    const params = this.getParams(hash, routeName);
+                    document.getElementById('app').innerHTML = component.render(params);
+                    if (component.postRender) component.postRender(params);
+                } else {
+                    // Fallback to login if route not found
+                    window.location.hash = '/';
+                }
+            },
+            getParams(hash, routeName) {
+                const hashParts = hash.split('/');
+                const routeParts = routeName.split('/');
+                const params = {};
+                routeParts.forEach((part, i) => {
+                    if (part.startsWith(':')) {
+                        params[part.slice(1)] = hashParts[i];
+                    }
+                });
+                return params;
+            },
+            navigate(path) {
+                window.location.hash = path;
+            }
+        };
+
+        // --- MOCK DATABASE (using localStorage for demo) ---
+        const DB = {
+            _get(key, defaultValue = []) {
+                try {
+                    const data = localStorage.getItem(key);
+                    return data ? JSON.parse(data) : defaultValue;
+                } catch (e) {
+                    console.error(`Error reading from localStorage: ${key}`, e);
+                    return defaultValue;
+                }
+            },
+            _set(key, value) {
+                try {
+                    localStorage.setItem(key, JSON.stringify(value));
+                } catch (e) {
+                    console.error(`Error writing to localStorage: ${key}`, e);
+                }
+            },
+            getPatients() { return this._get('patients'); },
+            getPatient(id) { return this.getPatients().find(p => p.id === id); },
+            savePatient(patient) {
+                let patients = this.getPatients();
+                const index = patients.findIndex(p => p.id === patient.id);
+                if (index > -1) {
+                    patients[index] = patient;
+                } else {
+                    patients.push(patient);
+                }
+                this._set('patients', patients);
+            },
+            addPatient(patientData) {
+                let patients = this.getPatients();
+                const newPatient = {
+                    id: `P${Date.now()}`,
+                    ...patientData,
+                    notes: [],
+                    files: [],
+                    credentials: []
+                };
+                patients.push(newPatient);
+                this._set('patients', patients);
+                return newPatient;
+            },
+            deletePatient(id) {
+                let patients = this.getPatients().filter(p => p.id !== id);
+                this._set('patients', patients);
+            },
+            getResources() { return this._get('resources'); },
+            addResource(resourceData) {
+                let resources = this.getResources();
+                const newResource = { id: `R${Date.now()}`, ...resourceData };
+                resources.push(newResource);
+                this._set('resources', resources);
+                return newResource;
+            },
+            deleteResource(id) {
+                let resources = this.getResources().filter(r => r.id !== id);
+                this._set('resources', resources);
+            },
+            // Initialize with some demo data if empty
+            initDemoData() {
+                if (!localStorage.getItem('patients')) {
+                    this._set('patients', [
+                        { id: 'P1', name: 'John Doe', dob: '1985-05-20', contact: '555-1234', notes: [{id: 'N1', text: 'Initial consultation notes.', timestamp: new Date().toISOString()}], files: [{id: 'F1', name: 'intake_form.pdf', size: '128 KB', type: 'pdf'}], credentials: [{id: 'C1', service: 'Hospital EMR', link: 'https://emr.hospital.com', username: 'johndoe', passwordRef: 'Stored in 1Password'}] },
+                        { id: 'P2', name: 'Jane Smith', dob: '1992-11-15', contact: '555-5678', notes: [], files: [], credentials: [] },
+                    ]);
+                }
+                if (!localStorage.getItem('resources')) {
+                    this._set('resources', [
+                        { id: 'R1', type: 'article', title: 'Advances in Cardiology', link: 'https://journalofmedicine.com/article1', summary: 'A review of recent breakthroughs.' },
+                        { id: 'R2', type: 'doctor', name: 'Dr. Emily Carter', specialty: 'Oncology', contact: 'City Hospital, 555-8765' },
+                    ]);
+                }
+            }
+        };
+
+        // --- COMPONENTS ---
+
+        const Layout = {
+            render(content, activeLink) {
+                const navLinks = [
+                    { path: '/dashboard', icon: 'LayoutDashboard', label: 'Dashboard' },
+                    { path: '/patients', icon: 'Users', label: 'Patients' },
+                    { path: '/resources', icon: 'BookMarked', label: 'Resources' },
+                ];
+                return `
+                    <div class="min-h-screen flex">
+                        <!-- Sidebar -->
+                        <nav class="w-64 bg-white border-r border-gray-200 flex-shrink-0">
+                            <div class="h-16 flex items-center justify-center border-b border-gray-200">
+                                <h1 class="text-2xl font-bold text-blue-600">Refuah Berurah</h1>
+                            </div>
+                            <div class="p-4">
+                                <ul>
+                                    ${navLinks.map(link => `
+                                        <li>
+                                            <a href="#${link.path}" class="flex items-center p-3 rounded-lg text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-all ${activeLink === link.label ? 'bg-blue-100 text-blue-700 font-semibold' : ''}">
+                                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-lucide="${link.icon.toLowerCase()}"></svg>
+                                                ${link.label}
+                                            </a>
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                            <div class="absolute bottom-0 w-64 p-4 border-t border-gray-200">
+                                <a href="#" id="logout-btn" class="flex items-center p-3 rounded-lg text-gray-600 hover:bg-red-50 hover:text-red-600 transition-all">
+                                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-lucide="log-out"></svg>
+                                    Logout
+                                </a>
+                            </div>
+                        </nav>
+
+                        <!-- Main Content -->
+                        <main class="flex-1 bg-gray-50 p-6 sm:p-8">
+                            ${content}
+                        </main>
+                    </div>
+                `;
+            },
+            postRender() {
+                // Use lucide-react's createIcons method
+                if (window.lucide) {
+                    window.lucide.createIcons();
+                }
+                document.getElementById('logout-btn').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    AppRouter.navigate('/');
+                });
+            }
+        };
+
+        const LoginComponent = {
+            render() {
+                return `
+                    <div class="min-h-screen flex items-center justify-center bg-gray-100">
+                        <div class="w-full max-w-md p-8 space-y-8 bg-white rounded-xl shadow-lg">
+                            <div class="text-center">
+                                <h1 class="text-3xl font-bold text-blue-600">Refuah Berurah</h1>
+                                <p class="mt-2 text-gray-500">Sign in to your secure medical hub</p>
+                            </div>
+                            <form id="login-form" class="mt-8 space-y-6">
+                                <div class="rounded-md shadow-sm -space-y-px">
+                                    <div>
+                                        <label for="email-address" class="sr-only">Email address</label>
+                                        <input id="email-address" name="email" type="email" autocomplete="email" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" placeholder="Email address" value="demo@refuah.com">
+                                    </div>
+                                    <div>
+                                        <label for="password" class="sr-only">Password</label>
+                                        <input id="password" name="password" type="password" autocomplete="current-password" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" placeholder="Password" value="password">
+                                    </div>
+                                </div>
+                                <div>
+                                    <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                        Sign in
+                                    </button>
+                                </div>
+                                <p class="text-xs text-center text-gray-500">For demo purposes, any email/password will work.</p>
+                            </form>
+                        </div>
+                    </div>
+                `;
+            },
+            postRender() {
+                document.getElementById('login-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    // In a real app, you'd perform actual authentication here
+                    AppRouter.navigate('/dashboard');
+                });
+            }
+        };
+
+        const DashboardComponent = {
+            render() {
+                const patients = DB.getPatients();
+                const resources = DB.getResources();
+                const content = `
+                    <div class="space-y-8">
+                        <div>
+                            <h2 class="text-3xl font-bold text-gray-800">Dashboard</h2>
+                            <p class="mt-1 text-gray-500">Welcome back! Here's a summary of your workspace.</p>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                                <div class="flex items-center">
+                                    <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-lucide="users"></svg>
+                                    </div>
+                                    <div class="ml-4">
+                                        <p class="text-sm font-medium text-gray-500">Total Patients</p>
+                                        <p class="text-2xl font-bold text-gray-800">${patients.length}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                                <div class="flex items-center">
+                                    <div class="p-3 rounded-full bg-green-100 text-green-600">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-lucide="book-marked"></svg>
+                                    </div>
+                                    <div class="ml-4">
+                                        <p class="text-sm font-medium text-gray-500">Total Resources</p>
+                                        <p class="text-2xl font-bold text-gray-800">${resources.length}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-800">Quick Actions</h3>
+                            <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <a href="#/patients" class="flex items-center justify-center p-4 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-all">
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-lucide="user-plus"></svg>
+                                    Add New Patient
+                                </a>
+                                <a href="#/resources" class="flex items-center justify-center p-4 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-all">
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-lucide="plus-circle"></svg>
+                                    Add New Resource
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return Layout.render(content, 'Dashboard');
+            },
+            postRender() {
+                Layout.postRender();
+            }
+        };
+
+        const PatientsComponent = {
+            render() {
+                const content = `
+                    <div class="space-y-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-3xl font-bold text-gray-800">Patients</h2>
+                                <p class="mt-1 text-gray-500">Manage your patient records.</p>
+                            </div>
+                            <button id="add-patient-btn" class="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition-all">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-lucide="user-plus"></svg>
+                                Add Patient
+                            </button>
+                        </div>
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                            <div class="p-4 border-b">
+                                <input id="search-patient" type="text" placeholder="Search patients by name..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div id="patient-list" class="divide-y divide-gray-200">
+                                <!-- Patient list rendered by JS -->
+                            </div>
+                        </div>
+                    </div>
+                    ${this.renderModal()}
+                `;
+                return Layout.render(content, 'Patients');
+            },
+            renderPatientList(filter = '') {
+                const patients = DB.getPatients().filter(p => p.name.toLowerCase().includes(filter.toLowerCase()));
+                const listEl = document.getElementById('patient-list');
+                if (patients.length === 0) {
+                    listEl.innerHTML = `<p class="p-6 text-center text-gray-500">No patients found.</p>`;
+                    return;
+                }
+                listEl.innerHTML = patients.map(patient => `
+                    <div class="p-4 flex items-center justify-between hover:bg-gray-50">
+                        <a href="#/patient/${patient.id}" class="flex-1">
+                            <p class="font-semibold text-blue-600">${patient.name}</p>
+                            <p class="text-sm text-gray-500">DOB: ${patient.dob} | Contact: ${patient.contact}</p>
+                        </a>
+                        <button data-id="${patient.id}" class="delete-patient-btn text-gray-400 hover:text-red-500 p-2 rounded-full">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-lucide="trash-2"></svg>
+                        </button>
+                    </div>
+                `).join('');
+
+                document.querySelectorAll('.delete-patient-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (confirm('Are you sure you want to delete this patient?')) {
+                            DB.deletePatient(btn.dataset.id);
+                            this.renderPatientList(document.getElementById('search-patient').value);
+                            if (window.lucide) window.lucide.createIcons();
+                        }
+                    });
+                });
+                if (window.lucide) window.lucide.createIcons();
+            },
+            renderModal() {
+                return `
+                    <div id="patient-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+                        <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-lg">
+                            <h3 class="text-2xl font-bold mb-4">Add New Patient</h3>
+                            <form id="patient-form">
+                                <div class="space-y-4">
+                                    <div>
+                                        <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
+                                        <input type="text" id="name" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                    </div>
+                                    <div>
+                                        <label for="dob" class="block text-sm font-medium text-gray-700">Date of Birth</label>
+                                        <input type="date" id="dob" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                    </div>
+                                    <div>
+                                        <label for="contact" class="block text-sm font-medium text-gray-700">Contact Info</label>
+                                        <input type="text" id="contact" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                    </div>
+                                </div>
+                                <div class="mt-6 flex justify-end space-x-3">
+                                    <button type="button" id="cancel-patient-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">Cancel</button>
+                                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Save Patient</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                `;
+            },
+            postRender() {
+                Layout.postRender();
+                this.renderPatientList();
+
+                const modal = document.getElementById('patient-modal');
+                const form = document.getElementById('patient-form');
+
+                document.getElementById('add-patient-btn').addEventListener('click', () => modal.classList.remove('hidden'));
+                document.getElementById('cancel-patient-btn').addEventListener('click', () => modal.classList.add('hidden'));
+
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const patientData = {
+                        name: form.name.value,
+                        dob: form.dob.value,
+                        contact: form.contact.value
+                    };
+                    DB.addPatient(patientData);
+                    modal.classList.add('hidden');
+                    form.reset();
+                    this.renderPatientList();
+                });
+
+                document.getElementById('search-patient').addEventListener('input', (e) => {
+                    this.renderPatientList(e.target.value);
+                });
+            }
+        };
+
+        const PatientDetailComponent = {
+            render(params) {
+                const patient = DB.getPatient(params.id);
+                if (!patient) return Layout.render('<p>Patient not found.</p>', 'Patients');
+
+                const content = `
+                    <div class="space-y-8">
+                        <div>
+                            <a href="#/patients" class="flex items-center text-sm text-blue-600 hover:underline mb-4">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-lucide="arrow-left"></svg>
+                                Back to Patients
+                            </a>
+                            <h2 class="text-3xl font-bold text-gray-800">${patient.name}</h2>
+                            <p class="mt-1 text-gray-500">DOB: ${patient.dob} | Contact: ${patient.contact}</p>
+                        </div>
+
+                        <!-- Tabs -->
+                        <div class="border-b border-gray-200">
+                            <nav class="-mb-px flex space-x-8" id="patient-tabs">
+                                <a href="#" data-tab="notes" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-blue-500 text-blue-600">Notes</a>
+                                <a href="#" data-tab="files" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Files</a>
+                                <a href="#" data-tab="credentials" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Chart Links & Credentials</a>
+                            </nav>
+                        </div>
+
+                        <!-- Tab Content -->
+                        <div id="tab-content">
+                            <!-- Content rendered by JS -->
+                        </div>
+                    </div>
+                `;
+                return Layout.render(content, 'Patients');
+            },
+            renderNotes(patient) {
+                return `
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                        <div class="p-4">
+                            <form id="note-form">
+                                <textarea id="note-text" placeholder="Add a new note..." required class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                                <button type="submit" class="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">Add Note</button>
+                            </form>
+                        </div>
+                        <div id="notes-list" class="divide-y divide-gray-200">
+                            ${patient.notes.length > 0 ? patient.notes.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).map(note => `
+                                <div class="p-4">
+                                    <p class="text-gray-800">${note.text.replace(/\n/g, '<br>')}</p>
+                                    <p class="text-xs text-gray-400 mt-2">${new Date(note.timestamp).toLocaleString()}</p>
+                                </div>
+                            `).join('') : '<p class="p-4 text-gray-500">No notes yet.</p>'}
+                        </div>
+                    </div>
+                `;
+            },
+            renderFiles(patient) {
+                 return `
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                        <div class="p-4 border-b">
+                            <label for="file-upload" class="cursor-pointer bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700">
+                                <span>Upload File</span>
+                                <input id="file-upload" type="file" class="hidden">
+                            </label>
+                            <p class="text-xs text-gray-500 mt-2">File uploads are simulated for this demo.</p>
+                        </div>
+                        <div id="files-list" class="divide-y divide-gray-200">
+                            ${patient.files.length > 0 ? patient.files.map(file => `
+                                <div class="p-4 flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <svg class="w-6 h-6 text-gray-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-lucide="file-text"></svg>
+                                        <div>
+                                            <p class="font-medium text-gray-800">${file.name}</p>
+                                            <p class="text-sm text-gray-500">${file.size}</p>
+                                        </div>
+                                    </div>
+                                    <button class="text-gray-400 hover:text-red-500 p-2 rounded-full"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-lucide="trash-2"></svg></button>
+                                </div>
+                            `).join('') : '<p class="p-4 text-gray-500">No files uploaded.</p>'}
+                        </div>
+                    </div>
+                `;
+            },
+            renderCredentials(patient) {
+                 return `
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                        <div class="p-4 border-b">
+                            <button id="add-credential-btn" class="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-purple-700">Add Credential</button>
+                        </div>
+                        <div id="credentials-list" class="divide-y divide-gray-200">
+                            ${patient.credentials.length > 0 ? patient.credentials.map(cred => `
+                                <div class="p-4">
+                                    <p class="font-semibold text-gray-800">${cred.service}</p>
+                                    <p class="text-sm text-gray-600">Link: <a href="${cred.link}" target="_blank" class="text-blue-500 hover:underline">${cred.link}</a></p>
+                                    <p class="text-sm text-gray-600">Username: ${cred.username}</p>
+                                    <p class="text-sm text-gray-600">Password Info: <span class="font-mono bg-gray-100 p-1 rounded text-red-600">${cred.passwordRef}</span></p>
+                                </div>
+                            `).join('') : '<p class="p-4 text-gray-500">No credentials saved.</p>'}
+                        </div>
+                    </div>
+                    ${this.renderCredentialModal()}
+                `;
+            },
+            renderCredentialModal() {
+                 return `
+                    <div id="credential-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+                        <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-lg">
+                            <h3 class="text-2xl font-bold mb-4">Add Credential</h3>
+                            <form id="credential-form">
+                                <div class="space-y-4">
+                                    <div><label for="service" class="block text-sm font-medium text-gray-700">Service/System Name</label><input type="text" id="service" required class="mt-1 block w-full input"></div>
+                                    <div><label for="link" class="block text-sm font-medium text-gray-700">URL/Link</label><input type="url" id="link" required class="mt-1 block w-full input"></div>
+                                    <div><label for="username" class="block text-sm font-medium text-gray-700">Username</label><input type="text" id="username" required class="mt-1 block w-full input"></div>
+                                    <div><label for="passwordRef" class="block text-sm font-medium text-gray-700">Password Location</label><input type="text" id="passwordRef" placeholder="e.g., Stored in 1Password" required class="mt-1 block w-full input"></div>
+                                    <p class="text-xs text-red-600">Reminder: Do not store actual passwords here. Note the location of the password in your secure password manager.</p>
+                                </div>
+                                <div class="mt-6 flex justify-end space-x-3">
+                                    <button type="button" id="cancel-cred-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">Cancel</button>
+                                    <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">Save</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                `;
+            },
+            postRender(params) {
+                Layout.postRender();
+                const patient = DB.getPatient(params.id);
+                const tabContent = document.getElementById('tab-content');
+
+                const switchTab = (tabName) => {
+                    document.querySelectorAll('.tab-link').forEach(link => {
+                        if (link.dataset.tab === tabName) {
+                            link.classList.add('border-blue-500', 'text-blue-600');
+                            link.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+                        } else {
+                            link.classList.remove('border-blue-500', 'text-blue-600');
+                            link.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+                        }
+                    });
+
+                    if (tabName === 'notes') {
+                        tabContent.innerHTML = this.renderNotes(patient);
+                        this.attachNoteHandlers(patient);
+                    } else if (tabName === 'files') {
+                        tabContent.innerHTML = this.renderFiles(patient);
+                        this.attachFileHandlers(patient);
+                    } else if (tabName === 'credentials') {
+                        tabContent.innerHTML = this.renderCredentials(patient);
+                        this.attachCredentialHandlers(patient);
+                    }
+                    if (window.lucide) window.lucide.createIcons();
+                };
+
+                document.querySelectorAll('.tab-link').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        switchTab(e.target.dataset.tab);
+                    });
+                });
+
+                // Initial tab
+                switchTab('notes');
+            },
+            attachNoteHandlers(patient) {
+                document.getElementById('note-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const text = document.getElementById('note-text').value;
+                    if (text.trim()) {
+                        patient.notes.push({ id: `N${Date.now()}`, text, timestamp: new Date().toISOString() });
+                        DB.savePatient(patient);
+                        this.postRender({ id: patient.id }); // Re-render component
+                    }
+                });
+            },
+            attachFileHandlers(patient) {
+                document.getElementById('file-upload').addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        patient.files.push({ id: `F${Date.now()}`, name: file.name, size: `${(file.size / 1024).toFixed(1)} KB`, type: file.type.split('/')[1] });
+                        DB.savePatient(patient);
+                        this.postRender({ id: patient.id });
+                    }
+                });
+            },
+            attachCredentialHandlers(patient) {
+                const modal = document.getElementById('credential-modal');
+                const form = document.getElementById('credential-form');
+
+                document.getElementById('add-credential-btn').addEventListener('click', () => modal.classList.remove('hidden'));
+                document.getElementById('cancel-cred-btn').addEventListener('click', () => modal.classList.add('hidden'));
+
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    patient.credentials.push({
+                        id: `C${Date.now()}`,
+                        service: form.service.value,
+                        link: form.link.value,
+                        username: form.username.value,
+                        passwordRef: form.passwordRef.value,
+                    });
+                    DB.savePatient(patient);
+                    modal.classList.add('hidden');
+                    form.reset();
+                    this.postRender({ id: patient.id });
+                });
+            }
+        };
+
+        const ResourcesComponent = {
+             render() {
+                const content = `
+                    <div class="space-y-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-3xl font-bold text-gray-800">Resources</h2>
+                                <p class="mt-1 text-gray-500">A general database for articles, doctors, and more.</p>
+                            </div>
+                            <button id="add-resource-btn" class="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-green-700 transition-all">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-lucide="plus-circle"></svg>
+                                Add Resource
+                            </button>
+                        </div>
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                            <div class="p-4 border-b">
+                                <input id="search-resource" type="text" placeholder="Search resources..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500">
+                            </div>
+                            <div id="resource-list" class="divide-y divide-gray-200">
+                                <!-- Resource list rendered by JS -->
+                            </div>
+                        </div>
+                    </div>
+                    ${this.renderModal()}
+                `;
+                return Layout.render(content, 'Resources');
+            },
+            renderResourceList(filter = '') {
+                const resources = DB.getResources().filter(r => 
+                    (r.title && r.title.toLowerCase().includes(filter.toLowerCase())) ||
+                    (r.name && r.name.toLowerCase().includes(filter.toLowerCase())) ||
+                    (r.specialty && r.specialty.toLowerCase().includes(filter.toLowerCase()))
+                );
+                const listEl = document.getElementById('resource-list');
+                if (resources.length === 0) {
+                    listEl.innerHTML = `<p class="p-6 text-center text-gray-500">No resources found.</p>`;
+                    return;
+                }
+                listEl.innerHTML = resources.map(resource => {
+                    if (resource.type === 'article') {
+                        return `
+                            <div class="p-4 flex items-center justify-between hover:bg-gray-50">
+                                <div class="flex-1">
+                                    <p class="font-semibold text-green-700">${resource.title}</p>
+                                    <p class="text-sm text-gray-600">${resource.summary}</p>
+                                    <a href="${resource.link}" target="_blank" class="text-xs text-blue-500 hover:underline">Read Article</a>
+                                </div>
+                                <button data-id="${resource.id}" class="delete-resource-btn text-gray-400 hover:text-red-500 p-2 rounded-full">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-lucide="trash-2"></svg>
+                                </button>
+                            </div>
+                        `;
+                    } else if (resource.type === 'doctor') {
+                         return `
+                            <div class="p-4 flex items-center justify-between hover:bg-gray-50">
+                                <div class="flex-1">
+                                    <p class="font-semibold text-green-700">${resource.name}</p>
+                                    <p class="text-sm text-gray-600">Specialty: ${resource.specialty}</p>
+                                    <p class="text-sm text-gray-600">Contact: ${resource.contact}</p>
+                                </div>
+                                <button data-id="${resource.id}" class="delete-resource-btn text-gray-400 hover:text-red-500 p-2 rounded-full">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-lucide="trash-2"></svg>
+                                </button>
+                            </div>
+                        `;
+                    }
+                    return '';
+                }).join('');
+                document.querySelectorAll('.delete-resource-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (confirm('Are you sure you want to delete this resource?')) {
+                            DB.deleteResource(btn.dataset.id);
+                            this.renderResourceList(document.getElementById('search-resource').value);
+                        }
+                    });
+                });
+                if (window.lucide) window.lucide.createIcons();
+            },
+            renderModal() {
+                return `
+                    <div id="resource-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+                        <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-lg">
+                            <h3 class="text-2xl font-bold mb-4">Add New Resource</h3>
+                            <form id="resource-form">
+                                <div class="space-y-4">
+                                    <div>
+                                        <label for="type" class="block text-sm font-medium text-gray-700">Resource Type</label>
+                                        <select id="type" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
+                                            <option value="article">Article</option>
+                                            <option value="doctor">Doctor</option>
+                                        </select>
+                                    </div>
+                                    <div id="form-fields">
+                                        <!-- Fields will be inserted here by JS -->
+                                    </div>
+                                </div>
+                                <div class="mt-6 flex justify-end space-x-3">
+                                    <button type="button" id="cancel-resource-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">Cancel</button>
+                                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">Save Resource</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                `;
+            },
+            getFormFields(type) {
+                if (type === 'article') {
+                    return `
+                        <div><label for="title" class="block text-sm font-medium text-gray-700">Title</label><input type="text" id="title" required class="mt-1 block w-full input"></div>
+                        <div><label for="link" class="block text-sm font-medium text-gray-700">Link</label><input type="url" id="link" required class="mt-1 block w-full input"></div>
+                        <div><label for="summary" class="block text-sm font-medium text-gray-700">Summary</label><textarea id="summary" class="mt-1 block w-full input"></textarea></div>
+                    `;
+                } else if (type === 'doctor') {
+                    return `
+                        <div><label for="name" class="block text-sm font-medium text-gray-700">Doctor's Name</label><input type="text" id="name" required class="mt-1 block w-full input"></div>
+                        <div><label for="specialty" class="block text-sm font-medium text-gray-700">Specialty</label><input type="text" id="specialty" required class="mt-1 block w-full input"></div>
+                        <div><label for="contact" class="block text-sm font-medium text-gray-700">Contact Info</label><input type="text" id="contact" required class="mt-1 block w-full input"></div>
+                    `;
+                }
+                return '';
+            },
+            postRender() {
+                Layout.postRender();
+                this.renderResourceList();
+
+                const modal = document.getElementById('resource-modal');
+                const form = document.getElementById('resource-form');
+                const typeSelect = document.getElementById('type');
+                const formFields = document.getElementById('form-fields');
+
+                const updateFormFields = () => {
+                    formFields.innerHTML = this.getFormFields(typeSelect.value);
+                };
+                
+                typeSelect.addEventListener('change', updateFormFields);
+                updateFormFields();
+
+                document.getElementById('add-resource-btn').addEventListener('click', () => modal.classList.remove('hidden'));
+                document.getElementById('cancel-resource-btn').addEventListener('click', () => modal.classList.add('hidden'));
+
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const type = typeSelect.value;
+                    let resourceData = { type };
+                    if (type === 'article') {
+                        resourceData = { ...resourceData, title: form.title.value, link: form.link.value, summary: form.summary.value };
+                    } else if (type === 'doctor') {
+                        resourceData = { ...resourceData, name: form.name.value, specialty: form.specialty.value, contact: form.contact.value };
+                    }
+                    DB.addResource(resourceData);
+                    modal.classList.add('hidden');
+                    form.reset();
+                    updateFormFields();
+                    this.renderResourceList();
+                });
+                
+                document.getElementById('search-resource').addEventListener('input', (e) => {
+                    this.renderResourceList(e.target.value);
+                });
+            }
+        };
+
+        // --- ROUTER SETUP ---
+        DB.initDemoData();
+        AppRouter.addRoute('/', LoginComponent);
+        AppRouter.addRoute('/dashboard', DashboardComponent);
+        AppRouter.addRoute('/patients', PatientsComponent);
+        AppRouter.addRoute('/patient/:id', PatientDetailComponent);
+        AppRouter.addRoute('/resources', ResourcesComponent);
+        AppRouter.init();
+
+    </script>
+</body>
+</html>
