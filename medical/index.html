@@ -42,45 +42,33 @@
             routes: {},
             currentRoute: '',
             init() {
-                // Listen for URL hash changes and on initial page load
                 window.addEventListener('hashchange', () => this.handleRouteChange());
                 window.addEventListener('load', () => this.handleRouteChange());
             },
             addRoute(route, component) {
                 this.routes[route] = component;
             },
-            /**
-             * [FIXED] This function now correctly handles static and dynamic routes.
-             * It matches the hash in the URL (e.g., '/dashboard' or '/patient/P123')
-             * to the corresponding component and renders it.
-             */
             handleRouteChange() {
                 const hash = window.location.hash.slice(1) || '/';
                 if (this.currentRoute === hash) return;
 
-                const routeParts = hash.split('/'); // e.g., for '/patient/P123', this is ['', 'patient', 'P123']
+                const routeParts = hash.split('/');
                 let component;
                 let params = {};
                 
-                // First, check for the specific dynamic route pattern for patients
                 if (routeParts[1] === 'patient' && routeParts.length === 3) {
                     component = this.routes['/patient/:id'];
                     params = { id: routeParts[2] };
                 } else {
-                    // Otherwise, look for a direct match in the static routes
                     component = this.routes[hash];
                 }
 
                 if (component) {
                     this.currentRoute = hash;
-                    // Render the main content and any modals the component needs
                     document.getElementById('app').innerHTML = component.render(params);
                     document.getElementById('modal-container').innerHTML = component.renderModals ? component.renderModals() : '';
-
-                    // Run any post-render scripts (like attaching event listeners)
                     if (component.postRender) component.postRender(params);
                 } else {
-                    // If no route is found, redirect to the login page as a fallback
                     console.warn(`No route found for hash: ${hash}. Redirecting to login.`);
                     window.location.hash = '/';
                 }
@@ -91,7 +79,6 @@
         };
 
         // --- MOCK DATABASE (using localStorage for demonstration) ---
-        // In a real HIPAA-compliant app, this would be replaced with secure server-side logic (e.g., Firebase Firestore).
         const DB = {
             _get(key, defaultValue = []) {
                 try {
@@ -123,7 +110,8 @@
             },
             addPatient(patientData) {
                 let patients = this.getPatients();
-                const newPatient = { id: `P${Date.now()}`, ...patientData, notes: [], files: [], credentials: [] };
+                // [NEW] Initialize new fields for mypage and linked resources
+                const newPatient = { id: `P${Date.now()}`, ...patientData, notes: [], files: [], credentials: [], mypageLink: '', linkedResourceIds: [] };
                 patients.push(newPatient);
                 this._set('patients', patients);
                 return newPatient;
@@ -147,8 +135,8 @@
             initDemoData() {
                 if (!localStorage.getItem('patients')) {
                     this._set('patients', [
-                        { id: 'P1', name: 'John Doe', dob: '1985-05-20', contact: '555-1234', notes: [{id: 'N1', text: 'Initial consultation notes.', timestamp: new Date().toISOString()}], files: [{id: 'F1', name: 'intake_form.pdf', size: '128 KB', type: 'pdf'}], credentials: [{id: 'C1', service: 'Hospital EMR', link: 'https://emr.hospital.com', username: 'johndoe', passwordRef: 'Stored in 1Password'}] },
-                        { id: 'P2', name: 'Jane Smith', dob: '1992-11-15', contact: '555-5678', notes: [], files: [], credentials: [] },
+                        { id: 'P1', name: 'John Doe', dob: '1985-05-20', contact: '555-1234', notes: [{id: 'N1', text: 'Initial consultation notes.', timestamp: new Date().toISOString()}], files: [{id: 'F1', name: 'intake_form.pdf', size: '128 KB', type: 'pdf'}], credentials: [{id: 'C1', service: 'Hospital EMR', link: 'https://emr.hospital.com', username: 'johndoe', passwordRef: 'Stored in 1Password'}], mypageLink: 'https://example.com/johndoe-mypage', linkedResourceIds: ['R1'] },
+                        { id: 'P2', name: 'Jane Smith', dob: '1992-11-15', contact: '555-5678', notes: [], files: [], credentials: [], mypageLink: '', linkedResourceIds: [] },
                     ]);
                 }
                 if (!localStorage.getItem('resources')) {
@@ -161,40 +149,18 @@
         };
 
         // --- GLOBAL MODAL HELPER ---
-        /**
-         * [NEW] A global function to show a confirmation dialog.
-         * This replaces the basic `window.confirm()` for a better user experience.
-         * @param {string} title - The title of the modal.
-         * @param {string} message - The confirmation message.
-         * @param {function} onConfirm - The function to execute if the user confirms.
-         */
         window.showConfirmModal = (title, message, onConfirm) => {
             const modal = document.getElementById('confirm-modal');
             document.getElementById('confirm-title').innerText = title;
             document.getElementById('confirm-message').innerText = message;
             
             const confirmBtn = document.getElementById('confirm-action-btn');
-            const cancelBtn = document.getElementById('cancel-confirm-btn');
-
-            // This cloning technique prevents multiple event listeners from stacking up
             const newConfirmBtn = confirmBtn.cloneNode(true);
             confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
-
-            newConfirmBtn.onclick = () => {
-                onConfirm();
-                modal.classList.add('hidden');
-            };
-
-            cancelBtn.onclick = () => {
-                modal.classList.add('hidden');
-            };
-
+            newConfirmBtn.onclick = () => { onConfirm(); modal.classList.add('hidden'); };
+            document.getElementById('cancel-confirm-btn').onclick = () => { modal.classList.add('hidden'); };
             modal.classList.remove('hidden');
-            if (window.lucide) {
-                window.lucide.createIcons({
-                    nodes: [modal.querySelector('[data-lucide]')]
-                });
-            }
+            if (window.lucide) window.lucide.createIcons({ nodes: [modal.querySelector('[data-lucide]')] });
         };
 
         // --- COMPONENTS ---
@@ -208,48 +174,23 @@
                 ];
                 return `
                     <div class="min-h-screen flex">
-                        <!-- Sidebar Navigation -->
                         <nav class="w-64 bg-white border-r border-gray-200 flex-shrink-0 flex flex-col">
-                            <div class="h-16 flex items-center justify-center border-b border-gray-200">
-                                <h1 class="text-2xl font-bold text-blue-600">Refuah Berurah</h1>
-                            </div>
-                            <div class="p-4 flex-grow">
-                                <ul>
-                                    ${navLinks.map(link => `
-                                        <li>
-                                            <a href="#${link.path}" class="flex items-center p-3 rounded-lg text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-all ${activeLink === link.label ? 'bg-blue-100 text-blue-700 font-semibold' : ''}">
-                                                <svg class="w-5 h-5 mr-3" data-lucide="${link.icon.toLowerCase()}"></svg>
-                                                ${link.label}
-                                            </a>
-                                        </li>
-                                    `).join('')}
-                                </ul>
-                            </div>
-                            <div class="p-4 border-t border-gray-200">
-                                <a href="#" id="logout-btn" class="flex items-center p-3 rounded-lg text-gray-600 hover:bg-red-50 hover:text-red-600 transition-all">
-                                    <svg class="w-5 h-5 mr-3" data-lucide="log-out"></svg>
-                                    Logout
-                                </a>
-                            </div>
+                            <div class="h-16 flex items-center justify-center border-b border-gray-200"><h1 class="text-2xl font-bold text-blue-600">Refuah Berurah</h1></div>
+                            <div class="p-4 flex-grow"><ul>
+                                ${navLinks.map(link => `<li><a href="#${link.path}" class="flex items-center p-3 rounded-lg text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-all ${activeLink === link.label ? 'bg-blue-100 text-blue-700 font-semibold' : ''}"><svg class="w-5 h-5 mr-3" data-lucide="${link.icon.toLowerCase()}"></svg>${link.label}</a></li>`).join('')}
+                            </ul></div>
+                            <div class="p-4 border-t border-gray-200"><a href="#" id="logout-btn" class="flex items-center p-3 rounded-lg text-gray-600 hover:bg-red-50 hover:text-red-600 transition-all"><svg class="w-5 h-5 mr-3" data-lucide="log-out"></svg>Logout</a></div>
                         </nav>
-                        <!-- Main Content Area -->
-                        <main class="flex-1 bg-gray-50 p-6 sm:p-8 overflow-y-auto">
-                            ${content}
-                        </main>
+                        <main class="flex-1 bg-gray-50 p-6 sm:p-8 overflow-y-auto">${content}</main>
                     </div>
                     ${this.renderConfirmModal()}
                 `;
             },
-            /**
-             * [NEW] Renders the confirmation modal structure. It's always in the DOM but hidden by default.
-             */
             renderConfirmModal() {
                 return `
                     <div id="confirm-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
                         <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm text-center">
-                            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
-                                <svg class="h-6 w-6 text-red-600" data-lucide="alert-triangle"></svg>
-                            </div>
+                            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100"><svg class="h-6 w-6 text-red-600" data-lucide="alert-triangle"></svg></div>
                             <h3 id="confirm-title" class="text-lg font-bold mt-3">Delete Item</h3>
                             <p id="confirm-message" class="text-sm text-gray-500 mt-2 mb-4">Are you sure? This action cannot be undone.</p>
                             <div class="flex justify-center space-x-3">
@@ -261,13 +202,9 @@
                 `;
             },
             postRender() {
-                if (window.lucide) {
-                    window.lucide.createIcons();
-                }
-                document.getElementById('logout-btn').addEventListener('click', (e) => {
-                    e.preventDefault();
-                    AppRouter.navigate('/');
-                });
+                if (window.lucide) window.lucide.createIcons();
+                const logoutBtn = document.getElementById('logout-btn');
+                if (logoutBtn) logoutBtn.addEventListener('click', (e) => { e.preventDefault(); AppRouter.navigate('/'); });
             }
         };
 
@@ -276,26 +213,13 @@
                 return `
                     <div class="min-h-screen flex items-center justify-center bg-gray-100">
                         <div class="w-full max-w-md p-8 space-y-8 bg-white rounded-xl shadow-lg">
-                            <div class="text-center">
-                                <h1 class="text-3xl font-bold text-blue-600">Refuah Berurah</h1>
-                                <p class="mt-2 text-gray-500">Sign in to your secure medical hub</p>
-                            </div>
+                            <div class="text-center"><h1 class="text-3xl font-bold text-blue-600">Refuah Berurah</h1><p class="mt-2 text-gray-500">Sign in to your secure medical hub</p></div>
                             <form id="login-form" class="mt-8 space-y-6">
                                 <div class="rounded-md shadow-sm -space-y-px">
-                                    <div>
-                                        <label for="email-address" class="sr-only">Email address</label>
-                                        <input id="email-address" name="email" type="email" autocomplete="email" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" placeholder="Email address" value="demo@refuah.com">
-                                    </div>
-                                    <div>
-                                        <label for="password" class="sr-only">Password</label>
-                                        <input id="password" name="password" type="password" autocomplete="current-password" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" placeholder="Password" value="password">
-                                    </div>
+                                    <div><label for="email-address" class="sr-only">Email address</label><input id="email-address" name="email" type="email" autocomplete="email" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" placeholder="Email address" value="demo@refuah.com"></div>
+                                    <div><label for="password" class="sr-only">Password</label><input id="password" name="password" type="password" autocomplete="current-password" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" placeholder="Password" value="password"></div>
                                 </div>
-                                <div>
-                                    <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                        Sign in
-                                    </button>
-                                </div>
+                                <div><button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Sign in</button></div>
                                 <p class="text-xs text-center text-gray-500">For demo purposes, any email/password will work.</p>
                             </form>
                         </div>
@@ -303,10 +227,7 @@
                 `;
             },
             postRender() {
-                document.getElementById('login-form').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    AppRouter.navigate('/dashboard');
-                });
+                document.getElementById('login-form').addEventListener('submit', (e) => { e.preventDefault(); AppRouter.navigate('/dashboard'); });
             }
         };
 
@@ -316,62 +237,40 @@
                 const resources = DB.getResources();
                 const content = `
                     <div class="space-y-8">
-                        <div>
-                            <h2 class="text-3xl font-bold text-gray-800">Dashboard</h2>
-                            <p class="mt-1 text-gray-500">Welcome back! Here's a summary of your workspace.</p>
-                        </div>
+                        <div><h2 class="text-3xl font-bold text-gray-800">Dashboard</h2><p class="mt-1 text-gray-500">Welcome back! Here's a summary of your workspace.</p></div>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex items-center">
-                                <div class="p-3 rounded-full bg-blue-100 text-blue-600"><svg class="w-6 h-6" data-lucide="users"></svg></div>
-                                <div class="ml-4"><p class="text-sm font-medium text-gray-500">Total Patients</p><p class="text-2xl font-bold text-gray-800">${patients.length}</p></div>
-                            </div>
-                            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex items-center">
-                                <div class="p-3 rounded-full bg-green-100 text-green-600"><svg class="w-6 h-6" data-lucide="book-marked"></svg></div>
-                                <div class="ml-4"><p class="text-sm font-medium text-gray-500">Total Resources</p><p class="text-2xl font-bold text-gray-800">${resources.length}</p></div>
-                            </div>
+                            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex items-center"><div class="p-3 rounded-full bg-blue-100 text-blue-600"><svg class="w-6 h-6" data-lucide="users"></svg></div><div class="ml-4"><p class="text-sm font-medium text-gray-500">Total Patients</p><p class="text-2xl font-bold text-gray-800">${patients.length}</p></div></div>
+                            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex items-center"><div class="p-3 rounded-full bg-green-100 text-green-600"><svg class="w-6 h-6" data-lucide="book-marked"></svg></div><div class="ml-4"><p class="text-sm font-medium text-gray-500">Total Resources</p><p class="text-2xl font-bold text-gray-800">${resources.length}</p></div></div>
                         </div>
                         <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
                             <h3 class="text-lg font-semibold text-gray-800">Quick Actions</h3>
                             <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <a href="#/patients" class="flex items-center justify-center p-4 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-all">
-                                    <svg class="w-5 h-5 mr-2" data-lucide="user-plus"></svg>Add New Patient
-                                </a>
-                                <a href="#/resources" class="flex items-center justify-center p-4 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-all">
-                                    <svg class="w-5 h-5 mr-2" data-lucide="plus-circle"></svg>Add New Resource
-                                </a>
+                                <a href="#/patients" class="flex items-center justify-center p-4 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-all"><svg class="w-5 h-5 mr-2" data-lucide="user-plus"></svg>Add New Patient</a>
+                                <a href="#/resources" class="flex items-center justify-center p-4 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-all"><svg class="w-5 h-5 mr-2" data-lucide="plus-circle"></svg>Add New Resource</a>
                             </div>
                         </div>
                     </div>
                 `;
                 return Layout.render(content, 'Dashboard');
             },
-            postRender() {
-                Layout.postRender();
-            }
+            postRender() { Layout.postRender(); }
         };
 
         const PatientsComponent = {
             render() {
-                return `
+                const content = `
                     <div class="space-y-6">
                         <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-                            <div>
-                                <h2 class="text-3xl font-bold text-gray-800">Patients</h2>
-                                <p class="mt-1 text-gray-500">Manage your patient records.</p>
-                            </div>
-                            <button id="add-patient-btn" class="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition-all w-full sm:w-auto">
-                                <svg class="w-5 h-5 mr-2" data-lucide="user-plus"></svg>
-                                Add Patient
-                            </button>
+                            <div><h2 class="text-3xl font-bold text-gray-800">Patients</h2><p class="mt-1 text-gray-500">Manage your patient records.</p></div>
+                            <button id="add-patient-btn" class="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition-all w-full sm:w-auto"><svg class="w-5 h-5 mr-2" data-lucide="user-plus"></svg>Add Patient</button>
                         </div>
                         <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                            <div class="p-4 border-b">
-                                <input id="search-patient" type="text" placeholder="Search patients by name..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                            </div>
+                            <div class="p-4 border-b"><input id="search-patient" type="text" placeholder="Search patients by name..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"></div>
                             <div id="patient-list" class="divide-y divide-gray-200"></div>
                         </div>
                     </div>
                 `;
+                return Layout.render(content, 'Patients');
             },
             renderModals() {
                 return `
@@ -395,47 +294,29 @@
                 const patients = DB.getPatients().filter(p => p.name.toLowerCase().includes(filter.toLowerCase()));
                 const listEl = document.getElementById('patient-list');
                 if (!listEl) return;
-                listEl.innerHTML = patients.length === 0 
-                    ? `<p class="p-6 text-center text-gray-500">No patients found.</p>`
-                    : patients.map(patient => `
-                        <div class="p-4 flex items-center justify-between hover:bg-gray-50">
-                            <a href="#/patient/${patient.id}" class="flex-1 min-w-0">
-                                <p class="font-semibold text-blue-600 truncate">${patient.name}</p>
-                                <p class="text-sm text-gray-500">DOB: ${patient.dob} | Contact: ${patient.contact}</p>
-                            </a>
-                            <button data-id="${patient.id}" class="delete-patient-btn text-gray-400 hover:text-red-500 p-2 rounded-full flex-shrink-0 ml-4">
-                                <svg class="w-5 h-5" data-lucide="trash-2"></svg>
-                            </button>
-                        </div>
-                    `).join('');
-
-                document.querySelectorAll('.delete-patient-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const patientId = btn.dataset.id;
-                        const patient = DB.getPatient(patientId);
-                        window.showConfirmModal(
-                            'Delete Patient?',
-                            `Are you sure you want to permanently delete ${patient.name}? This action cannot be undone.`,
-                            () => {
-                                DB.deletePatient(patientId);
-                                this.renderPatientList(document.getElementById('search-patient').value);
-                            }
-                        );
+                listEl.innerHTML = patients.length === 0 ? `<p class="p-6 text-center text-gray-500">No patients found.</p>` : patients.map(patient => `
+                    <div class="p-4 flex items-center justify-between hover:bg-gray-50">
+                        <a href="#/patient/${patient.id}" class="flex-1 min-w-0"><p class="font-semibold text-blue-600 truncate">${patient.name}</p><p class="text-sm text-gray-500">DOB: ${patient.dob} | Contact: ${patient.contact}</p></a>
+                        <button data-id="${patient.id}" class="delete-patient-btn text-gray-400 hover:text-red-500 p-2 rounded-full flex-shrink-0 ml-4"><svg class="w-5 h-5" data-lucide="trash-2"></svg></button>
+                    </div>`).join('');
+                document.querySelectorAll('.delete-patient-btn').forEach(btn => btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const patientId = btn.dataset.id;
+                    const patient = DB.getPatient(patientId);
+                    window.showConfirmModal('Delete Patient?', `Are you sure you want to permanently delete ${patient.name}? This action cannot be undone.`, () => {
+                        DB.deletePatient(patientId);
+                        this.renderPatientList(document.getElementById('search-patient').value);
                     });
-                });
+                }));
                 if (window.lucide) window.lucide.createIcons();
             },
             postRender() {
                 Layout.postRender();
                 this.renderPatientList();
-
                 const modal = document.getElementById('patient-modal');
                 const form = document.getElementById('patient-form');
-
                 document.getElementById('add-patient-btn').addEventListener('click', () => modal.classList.remove('hidden'));
                 document.getElementById('cancel-patient-btn').addEventListener('click', () => modal.classList.add('hidden'));
-
                 form.addEventListener('submit', (e) => {
                     e.preventDefault();
                     DB.addPatient({ name: form.name.value, dob: form.dob.value, contact: form.contact.value });
@@ -443,7 +324,6 @@
                     form.reset();
                     this.renderPatientList();
                 });
-
                 document.getElementById('search-patient').addEventListener('input', (e) => this.renderPatientList(e.target.value));
             }
         };
@@ -455,9 +335,7 @@
                 return Layout.render(`
                     <div class="space-y-8">
                         <div>
-                            <a href="#/patients" class="flex items-center text-sm text-blue-600 hover:underline mb-4">
-                                <svg class="w-4 h-4 mr-1" data-lucide="arrow-left"></svg>Back to Patients
-                            </a>
+                            <a href="#/patients" class="flex items-center text-sm text-blue-600 hover:underline mb-4"><svg class="w-4 h-4 mr-1" data-lucide="arrow-left"></svg>Back to Patients</a>
                             <h2 class="text-3xl font-bold text-gray-800">${patient.name}</h2>
                             <p class="mt-1 text-gray-500">DOB: ${patient.dob} | Contact: ${patient.contact}</p>
                         </div>
@@ -465,6 +343,7 @@
                             <a href="#" data-tab="notes" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-blue-500 text-blue-600">Notes</a>
                             <a href="#" data-tab="files" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Files</a>
                             <a href="#" data-tab="credentials" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Chart Links & Credentials</a>
+                            <a href="#" data-tab="links" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Links & Resources</a>
                         </nav></div>
                         <div id="tab-content"></div>
                     </div>
@@ -473,78 +352,70 @@
             renderModals() {
                 return `
                     <div id="credential-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
-                        <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-lg">
-                            <h3 class="text-2xl font-bold mb-4">Add Credential</h3>
-                            <form id="credential-form" class="space-y-4">
-                                <div><label for="service" class="block text-sm font-medium text-gray-700">Service/System Name</label><input type="text" id="service" required class="input"></div>
-                                <div><label for="link" class="block text-sm font-medium text-gray-700">URL/Link</label><input type="url" id="link" required class="input"></div>
-                                <div><label for="username" class="block text-sm font-medium text-gray-700">Username</label><input type="text" id="username" required class="input"></div>
-                                <div><label for="passwordRef" class="block text-sm font-medium text-gray-700">Password Location</label><input type="text" id="passwordRef" placeholder="e.g., Stored in 1Password" required class="input"></div>
-                                <p class="text-xs text-red-600">Reminder: Do not store actual passwords here. Note the location of the password in your secure password manager.</p>
-                                <div class="mt-6 flex justify-end space-x-3">
-                                    <button type="button" id="cancel-cred-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">Cancel</button>
-                                    <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">Save</button>
-                                </div>
-                            </form>
+                        <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-lg"><h3 class="text-2xl font-bold mb-4">Add Credential</h3><form id="credential-form" class="space-y-4">
+                            <div><label for="service" class="block text-sm font-medium text-gray-700">Service/System Name</label><input type="text" id="service" required class="input"></div>
+                            <div><label for="link" class="block text-sm font-medium text-gray-700">URL/Link</label><input type="url" id="link" required class="input"></div>
+                            <div><label for="username" class="block text-sm font-medium text-gray-700">Username</label><input type="text" id="username" required class="input"></div>
+                            <div><label for="passwordRef" class="block text-sm font-medium text-gray-700">Password Location</label><input type="text" id="passwordRef" placeholder="e.g., Stored in 1Password" required class="input"></div>
+                            <p class="text-xs text-red-600">Reminder: Do not store actual passwords here. Note the location of the password in your secure password manager.</p>
+                            <div class="mt-6 flex justify-end space-x-3"><button type="button" id="cancel-cred-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">Cancel</button><button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">Save</button></div>
+                        </form></div>
+                    </div>
+                    <div id="link-resource-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
+                        <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-2xl flex flex-col"><h3 class="text-2xl font-bold mb-4">Link Resources</h3>
+                            <div id="resource-link-list" class="flex-grow overflow-y-auto border-t border-b mb-4 divide-y"></div>
+                            <div class="flex justify-end space-x-3"><button type="button" id="cancel-link-resource-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">Cancel</button><button type="button" id="save-link-resource-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Save Links</button></div>
                         </div>
                     </div>
                 `;
             },
-            renderNotes: (patient) => `...`, // Render functions defined below for clarity
-            renderFiles: (patient) => `...`,
-            renderCredentials: (patient) => `...`,
             postRender(params) {
-                this.renderNotes = (patient) => `
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                        <div class="p-4"><form id="note-form">
-                            <textarea id="note-text" placeholder="Add a new note..." required class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
-                            <button type="submit" class="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">Add Note</button>
-                        </form></div>
-                        <div id="notes-list" class="divide-y divide-gray-200">
-                            ${patient.notes.length > 0 ? patient.notes.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).map(note => `
-                                <div class="p-4"><p class="text-gray-800">${note.text.replace(/\n/g, '<br>')}</p><p class="text-xs text-gray-400 mt-2">${new Date(note.timestamp).toLocaleString()}</p></div>
-                            `).join('') : '<p class="p-4 text-gray-500">No notes yet.</p>'}
-                        </div>
-                    </div>`;
-                this.renderFiles = (patient) => `
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                        <div class="p-4 border-b">
-                            <label for="file-upload" class="cursor-pointer inline-block bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700">
-                                <span>Upload File</span><input id="file-upload" type="file" class="hidden">
-                            </label>
-                            <p class="text-xs text-gray-500 mt-2">File uploads are simulated for this demo.</p>
-                        </div>
-                        <div id="files-list" class="divide-y divide-gray-200">
-                            ${patient.files.length > 0 ? patient.files.map(file => `
-                                <div class="p-4 flex items-center justify-between"><div class="flex items-center">
-                                    <svg class="w-6 h-6 text-gray-500 mr-3" data-lucide="file-text"></svg>
-                                    <div><p class="font-medium text-gray-800">${file.name}</p><p class="text-sm text-gray-500">${file.size}</p></div>
-                                </div></div>
-                            `).join('') : '<p class="p-4 text-gray-500">No files uploaded.</p>'}
-                        </div>
-                    </div>`;
-                this.renderCredentials = (patient) => `
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                        <div class="p-4 border-b">
-                            <button id="add-credential-btn" class="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-purple-700">Add Credential</button>
-                        </div>
-                        <div id="credentials-list" class="divide-y divide-gray-200">
-                            ${patient.credentials.length > 0 ? patient.credentials.map(cred => `
-                                <div class="p-4">
-                                    <p class="font-semibold text-gray-800">${cred.service}</p>
-                                    <p class="text-sm text-gray-600">Link: <a href="${cred.link}" target="_blank" class="text-blue-500 hover:underline">${cred.link}</a></p>
-                                    <p class="text-sm text-gray-600">Username: ${cred.username}</p>
-                                    <p class="text-sm text-gray-600">Password Info: <span class="font-mono bg-gray-100 p-1 rounded text-red-600">${cred.passwordRef}</span></p>
-                                </div>
-                            `).join('') : '<p class="p-4 text-gray-500">No credentials saved.</p>'}
-                        </div>
-                    </div>`;
-
-                Layout.postRender();
                 const patient = DB.getPatient(params.id);
                 if(!patient) return;
 
+                const renderNotes = (p) => `...`; // Define inside postRender to have access to patient data
+                const renderFiles = (p) => `...`;
+                const renderCredentials = (p) => `...`;
+                const renderLinks = (p) => `...`;
+
+                this.renderNotes = (p) => `<div class="bg-white rounded-lg shadow-sm border border-gray-200"><div class="p-4"><form id="note-form"><textarea id="note-text" placeholder="Add a new note..." required class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea><button type="submit" class="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">Add Note</button></form></div><div id="notes-list" class="divide-y divide-gray-200">${p.notes.length > 0 ? p.notes.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).map(note => `<div class="p-4"><p class="text-gray-800">${note.text.replace(/\n/g, '<br>')}</p><p class="text-xs text-gray-400 mt-2">${new Date(note.timestamp).toLocaleString()}</p></div>`).join('') : '<p class="p-4 text-gray-500">No notes yet.</p>'}</div></div>`;
+                this.renderFiles = (p) => `<div class="bg-white rounded-lg shadow-sm border border-gray-200"><div class="p-4 border-b"><label for="file-upload" class="cursor-pointer inline-block bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700"><span>Upload File</span><input id="file-upload" type="file" class="hidden"></label><p class="text-xs text-gray-500 mt-2">File uploads are simulated for this demo.</p></div><div id="files-list" class="divide-y divide-gray-200">${p.files.length > 0 ? p.files.map(file => `<div class="p-4 flex items-center justify-between"><div class="flex items-center"><svg class="w-6 h-6 text-gray-500 mr-3" data-lucide="file-text"></svg><div><p class="font-medium text-gray-800">${file.name}</p><p class="text-sm text-gray-500">${file.size}</p></div></div></div>`).join('') : '<p class="p-4 text-gray-500">No files uploaded.</p>'}</div></div>`;
+                this.renderCredentials = (p) => `<div class="bg-white rounded-lg shadow-sm border border-gray-200"><div class="p-4 border-b"><button id="add-credential-btn" class="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-purple-700">Add Credential</button></div><div id="credentials-list" class="divide-y divide-gray-200">${p.credentials.length > 0 ? p.credentials.map(cred => `<div class="p-4"><p class="font-semibold text-gray-800">${cred.service}</p><p class="text-sm text-gray-600">Link: <a href="${cred.link}" target="_blank" class="text-blue-500 hover:underline">${cred.link}</a></p><p class="text-sm text-gray-600">Username: ${cred.username}</p><p class="text-sm text-gray-600">Password Info: <span class="font-mono bg-gray-100 p-1 rounded text-red-600">${cred.passwordRef}</span></p></div>`).join('') : '<p class="p-4 text-gray-500">No credentials saved.</p>'}</div></div>`;
+                
+                this.renderLinks = (p) => {
+                    const allResources = DB.getResources();
+                    const linkedResources = p.linkedResourceIds.map(id => allResources.find(r => r.id === id)).filter(Boolean);
+                    
+                    return `
+                        <div class="space-y-6">
+                            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                                <h3 class="font-semibold text-lg">Patient MyPage Link</h3>
+                                <div class="flex gap-2 mt-2">
+                                    <input type="url" id="mypage-link-input" class="input flex-grow" value="${p.mypageLink || ''}" placeholder="https://example.com/patient-page">
+                                    <button id="save-mypage-link" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">Save</button>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                                <div class="p-4 border-b flex justify-between items-center">
+                                    <h3 class="font-semibold text-lg">Linked Resources</h3>
+                                    <button id="open-link-resource-modal" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700">Link New Resource</button>
+                                </div>
+                                <div id="linked-resources-list" class="divide-y divide-gray-200">
+                                    ${linkedResources.length > 0 ? linkedResources.map(resource => {
+                                        const content = resource.type === 'article'
+                                            ? `<p class="font-semibold text-green-700">${resource.title}</p><p class="text-sm text-gray-600">${resource.summary}</p><a href="${resource.link}" target="_blank" class="text-xs text-blue-500 hover:underline">Read Article</a>`
+                                            : `<p class="font-semibold text-green-700">${resource.name}</p><p class="text-sm text-gray-600">Specialty: ${resource.specialty}</p><p class="text-sm text-gray-600">Contact: ${resource.contact}</p>`;
+                                        return `<div class="p-4 flex items-center justify-between hover:bg-gray-50"><div class="flex-1 min-w-0">${content}</div><button data-id="${resource.id}" class="unlink-resource-btn text-gray-400 hover:text-red-500 p-2 rounded-full flex-shrink-0 ml-4"><svg class="w-5 h-5" data-lucide="unlink-2"></svg></button></div>`;
+                                    }).join('') : '<p class="p-4 text-gray-500">No resources linked to this patient yet.</p>'}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                };
+
+                Layout.postRender();
                 const tabContent = document.getElementById('tab-content');
+
                 const switchTab = (tabName) => {
                     document.querySelectorAll('.tab-link').forEach(link => {
                         const isSelected = link.dataset.tab === tabName;
@@ -556,38 +427,53 @@
                     
                     if (tabName === 'notes') {
                         tabContent.innerHTML = this.renderNotes(patient);
-                        document.getElementById('note-form').addEventListener('submit', (e) => {
-                            e.preventDefault();
-                            const textEl = document.getElementById('note-text');
-                            if (textEl.value.trim()) {
-                                patient.notes.push({ id: `N${Date.now()}`, text: textEl.value, timestamp: new Date().toISOString() });
-                                DB.savePatient(patient);
-                                switchTab('notes'); // Re-render tab
-                            }
-                        });
+                        document.getElementById('note-form').addEventListener('submit', (e) => { e.preventDefault(); const textEl = document.getElementById('note-text'); if (textEl.value.trim()) { patient.notes.push({ id: `N${Date.now()}`, text: textEl.value, timestamp: new Date().toISOString() }); DB.savePatient(patient); switchTab('notes'); } });
                     } else if (tabName === 'files') {
                         tabContent.innerHTML = this.renderFiles(patient);
-                        document.getElementById('file-upload').addEventListener('change', (e) => {
-                            const file = e.target.files[0];
-                            if (file) {
-                                patient.files.push({ id: `F${Date.now()}`, name: file.name, size: `${(file.size / 1024).toFixed(1)} KB`, type: file.type.split('/')[1] });
-                                DB.savePatient(patient);
-                                switchTab('files'); // Re-render tab
-                            }
-                        });
+                        document.getElementById('file-upload').addEventListener('change', (e) => { const file = e.target.files[0]; if (file) { patient.files.push({ id: `F${Date.now()}`, name: file.name, size: `${(file.size / 1024).toFixed(1)} KB`, type: file.type.split('/')[1] }); DB.savePatient(patient); switchTab('files'); } });
                     } else if (tabName === 'credentials') {
                         tabContent.innerHTML = this.renderCredentials(patient);
                         const modal = document.getElementById('credential-modal');
                         const form = document.getElementById('credential-form');
                         document.getElementById('add-credential-btn').addEventListener('click', () => modal.classList.remove('hidden'));
                         document.getElementById('cancel-cred-btn').addEventListener('click', () => modal.classList.add('hidden'));
-                        form.addEventListener('submit', (e) => {
-                            e.preventDefault();
-                            patient.credentials.push({ id: `C${Date.now()}`, service: form.service.value, link: form.link.value, username: form.username.value, passwordRef: form.passwordRef.value });
+                        form.addEventListener('submit', (e) => { e.preventDefault(); patient.credentials.push({ id: `C${Date.now()}`, service: form.service.value, link: form.link.value, username: form.username.value, passwordRef: form.passwordRef.value }); DB.savePatient(patient); modal.classList.add('hidden'); form.reset(); switchTab('credentials'); });
+                    } else if (tabName === 'links') {
+                        tabContent.innerHTML = this.renderLinks(patient);
+                        document.getElementById('save-mypage-link').addEventListener('click', () => {
+                            patient.mypageLink = document.getElementById('mypage-link-input').value;
                             DB.savePatient(patient);
-                            modal.classList.add('hidden');
-                            form.reset();
-                            switchTab('credentials'); // Re-render tab
+                            alert('Link saved!');
+                        });
+                        document.getElementById('open-link-resource-modal').addEventListener('click', () => {
+                            const modal = document.getElementById('link-resource-modal');
+                            const listEl = document.getElementById('resource-link-list');
+                            const allResources = DB.getResources();
+                            listEl.innerHTML = allResources.map(r => `
+                                <label class="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50">
+                                    <div>
+                                        <p class="font-semibold">${r.title || r.name}</p>
+                                        <p class="text-sm text-gray-500">${r.summary || r.specialty}</p>
+                                    </div>
+                                    <input type="checkbox" value="${r.id}" class="resource-link-checkbox h-5 w-5 rounded text-blue-600 focus:ring-blue-500" ${patient.linkedResourceIds.includes(r.id) ? 'checked' : ''}>
+                                </label>
+                            `).join('');
+                            modal.classList.remove('hidden');
+                        });
+                        document.querySelectorAll('.unlink-resource-btn').forEach(btn => btn.addEventListener('click', (e) => {
+                            const resourceId = e.currentTarget.dataset.id;
+                            patient.linkedResourceIds = patient.linkedResourceIds.filter(id => id !== resourceId);
+                            DB.savePatient(patient);
+                            switchTab('links');
+                        }));
+                        
+                        document.getElementById('cancel-link-resource-btn').addEventListener('click', () => document.getElementById('link-resource-modal').classList.add('hidden'));
+                        document.getElementById('save-link-resource-btn').addEventListener('click', () => {
+                            const selectedIds = Array.from(document.querySelectorAll('.resource-link-checkbox:checked')).map(cb => cb.value);
+                            patient.linkedResourceIds = selectedIds;
+                            DB.savePatient(patient);
+                            document.getElementById('link-resource-modal').classList.add('hidden');
+                            switchTab('links');
                         });
                     }
                     if (window.lucide) window.lucide.createIcons();
@@ -600,16 +486,11 @@
 
         const ResourcesComponent = {
              render() {
-                return `
+                const content = `
                     <div class="space-y-6">
                         <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-                            <div>
-                                <h2 class="text-3xl font-bold text-gray-800">Resources</h2>
-                                <p class="mt-1 text-gray-500">A general database for articles, doctors, and more.</p>
-                            </div>
-                            <button id="add-resource-btn" class="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-green-700 transition-all w-full sm:w-auto">
-                                <svg class="w-5 h-5 mr-2" data-lucide="plus-circle"></svg>Add Resource
-                            </button>
+                            <div><h2 class="text-3xl font-bold text-gray-800">Resources</h2><p class="mt-1 text-gray-500">A general database for articles, doctors, and more.</p></div>
+                            <button id="add-resource-btn" class="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-green-700 transition-all w-full sm:w-auto"><svg class="w-5 h-5 mr-2" data-lucide="plus-circle"></svg>Add Resource</button>
                         </div>
                         <div class="bg-white rounded-lg shadow-sm border border-gray-200">
                             <div class="p-4 border-b"><input id="search-resource" type="text" placeholder="Search resources..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"></div>
@@ -617,23 +498,16 @@
                         </div>
                     </div>
                 `;
-            },
+                return Layout.render(content, 'Resources');
+             },
             renderModals() {
                 return `
                     <div id="resource-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
-                        <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-lg">
-                            <h3 class="text-2xl font-bold mb-4">Add New Resource</h3>
-                            <form id="resource-form" class="space-y-4">
-                                <div><label for="type" class="block text-sm font-medium text-gray-700">Resource Type</label>
-                                    <select id="type" class="input mt-1"><option value="article">Article</option><option value="doctor">Doctor</option></select>
-                                </div>
-                                <div id="form-fields" class="space-y-4"></div>
-                                <div class="mt-6 flex justify-end space-x-3">
-                                    <button type="button" id="cancel-resource-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">Cancel</button>
-                                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">Save Resource</button>
-                                </div>
-                            </form>
-                        </div>
+                        <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-lg"><h3 class="text-2xl font-bold mb-4">Add New Resource</h3><form id="resource-form" class="space-y-4">
+                            <div><label for="type" class="block text-sm font-medium text-gray-700">Resource Type</label><select id="type" class="input mt-1"><option value="article">Article</option><option value="doctor">Doctor</option></select></div>
+                            <div id="form-fields" class="space-y-4"></div>
+                            <div class="mt-6 flex justify-end space-x-3"><button type="button" id="cancel-resource-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">Cancel</button><button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">Save Resource</button></div>
+                        </form></div>
                     </div>
                 `;
             },
@@ -641,42 +515,24 @@
                 const resources = DB.getResources().filter(r => JSON.stringify(r).toLowerCase().includes(filter.toLowerCase()));
                 const listEl = document.getElementById('resource-list');
                 if (!listEl) return;
-                listEl.innerHTML = resources.length === 0
-                    ? `<p class="p-6 text-center text-gray-500">No resources found.</p>`
-                    : resources.map(resource => {
-                        const content = resource.type === 'article'
-                            ? `<p class="font-semibold text-green-700">${resource.title}</p><p class="text-sm text-gray-600">${resource.summary}</p><a href="${resource.link}" target="_blank" class="text-xs text-blue-500 hover:underline">Read Article</a>`
-                            : `<p class="font-semibold text-green-700">${resource.name}</p><p class="text-sm text-gray-600">Specialty: ${resource.specialty}</p><p class="text-sm text-gray-600">Contact: ${resource.contact}</p>`;
-                        return `
-                            <div class="p-4 flex items-center justify-between hover:bg-gray-50">
-                                <div class="flex-1 min-w-0">${content}</div>
-                                <button data-id="${resource.id}" data-name="${resource.title || resource.name}" class="delete-resource-btn text-gray-400 hover:text-red-500 p-2 rounded-full flex-shrink-0 ml-4">
-                                    <svg class="w-5 h-5" data-lucide="trash-2"></svg>
-                                </button>
-                            </div>`;
-                    }).join('');
-
-                document.querySelectorAll('.delete-resource-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const resourceId = btn.dataset.id;
-                        const resourceName = btn.dataset.name;
-                        window.showConfirmModal(
-                            'Delete Resource?',
-                            `Are you sure you want to delete the resource "${resourceName}"?`,
-                            () => {
-                                DB.deleteResource(resourceId);
-                                this.renderResourceList(document.getElementById('search-resource').value);
-                            }
-                        );
+                listEl.innerHTML = resources.length === 0 ? `<p class="p-6 text-center text-gray-500">No resources found.</p>` : resources.map(resource => {
+                    const content = resource.type === 'article' ? `<p class="font-semibold text-green-700">${resource.title}</p><p class="text-sm text-gray-600">${resource.summary}</p><a href="${resource.link}" target="_blank" class="text-xs text-blue-500 hover:underline">Read Article</a>` : `<p class="font-semibold text-green-700">${resource.name}</p><p class="text-sm text-gray-600">Specialty: ${resource.specialty}</p><p class="text-sm text-gray-600">Contact: ${resource.contact}</p>`;
+                    return `<div class="p-4 flex items-center justify-between hover:bg-gray-50"><div class="flex-1 min-w-0">${content}</div><button data-id="${resource.id}" data-name="${resource.title || resource.name}" class="delete-resource-btn text-gray-400 hover:text-red-500 p-2 rounded-full flex-shrink-0 ml-4"><svg class="w-5 h-5" data-lucide="trash-2"></svg></button></div>`;
+                }).join('');
+                document.querySelectorAll('.delete-resource-btn').forEach(btn => btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const resourceId = btn.dataset.id;
+                    const resourceName = btn.dataset.name;
+                    window.showConfirmModal('Delete Resource?', `Are you sure you want to delete the resource "${resourceName}"?`, () => {
+                        DB.deleteResource(resourceId);
+                        this.renderResourceList(document.getElementById('search-resource').value);
                     });
-                });
+                }));
                 if (window.lucide) window.lucide.createIcons();
             },
             postRender() {
                 Layout.postRender();
                 this.renderResourceList();
-
                 const modal = document.getElementById('resource-modal');
                 const form = document.getElementById('resource-form');
                 const typeSelect = document.getElementById('type');
@@ -687,13 +543,10 @@
                     return '';
                 };
                 const updateFormFields = () => { formFields.innerHTML = getFormFields(typeSelect.value); };
-                
                 typeSelect.addEventListener('change', updateFormFields);
                 updateFormFields();
-
                 document.getElementById('add-resource-btn').addEventListener('click', () => modal.classList.remove('hidden'));
                 document.getElementById('cancel-resource-btn').addEventListener('click', () => modal.classList.add('hidden'));
-
                 form.addEventListener('submit', (e) => {
                     e.preventDefault();
                     const type = typeSelect.value;
@@ -706,7 +559,6 @@
                     updateFormFields();
                     this.renderResourceList();
                 });
-                
                 document.getElementById('search-resource').addEventListener('input', (e) => this.renderResourceList(e.target.value));
             }
         };
