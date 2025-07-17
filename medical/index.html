@@ -8,7 +8,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/lucide-react@0.292.0/dist/lucide-react.min.js"></script>
     
-    <!-- Firebase SDKs (Classic Scripts) -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -34,8 +33,7 @@
         </div>
     </div>
     <div id="modal-container">
-        <!-- Modals will be rendered here -->
-    </div>
+        </div>
 
     <script>
         // =================================================================================
@@ -62,17 +60,21 @@
             currentRoute: '',
             init() {
                 window.addEventListener('hashchange', () => this.handleRouteChange());
-                window.addEventListener('load', () => this.handleRouteChange());
+                window.addEventListener('load', () => {
+                    // On load, the auth listener will handle the first route change.
+                });
             },
             addRoute(route, component) { this.routes[route] = component; },
             handleRouteChange() {
                 const hash = window.location.hash.slice(1) || '/';
-                if (this.currentRoute === hash && hash !== '/') return;
+                // Avoid re-rendering the same route unless it's a detail page reload
+                if (this.currentRoute === hash && !hash.startsWith('/patient/')) return;
 
                 const routeParts = hash.split('/');
                 let component;
                 let params = {};
                 
+                // Handle dynamic routes like /patient/:id
                 if (routeParts[1] === 'patient' && routeParts.length === 3) {
                     component = this.routes['/patient/:id'];
                     params = { id: routeParts[2] };
@@ -86,6 +88,7 @@
                     document.getElementById('modal-container').innerHTML = component.renderModals ? component.renderModals() : '';
                     if (component.postRender) component.postRender(params);
                 } else {
+                    // Fallback to login page if route doesn't exist
                     window.location.hash = '/';
                 }
             },
@@ -111,7 +114,7 @@
             document.getElementById('confirm-message').innerText = message;
             
             const confirmBtn = document.getElementById('confirm-action-btn');
-            const newConfirmBtn = confirmBtn.cloneNode(true);
+            const newConfirmBtn = confirmBtn.cloneNode(true); // Clone to remove old listeners
             confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
             newConfirmBtn.onclick = () => { onConfirm(); modal.classList.add('hidden'); };
             document.getElementById('cancel-confirm-btn').onclick = () => { modal.classList.add('hidden'); };
@@ -160,7 +163,7 @@
             postRender() {
                 if (window.lucide) window.lucide.createIcons();
                 const logoutBtn = document.getElementById('logout-btn');
-                if (logoutBtn) logoutBtn.addEventListener('click', async (e) => { e.preventDefault(); await auth.signOut(); AppRouter.navigate('/'); });
+                if (logoutBtn) logoutBtn.addEventListener('click', async (e) => { e.preventDefault(); await auth.signOut(); });
             }
         };
 
@@ -170,8 +173,7 @@
                     <div class="min-h-screen flex items-center justify-center bg-gray-100">
                         <div class="w-full max-w-md">
                             <div id="auth-container" class="bg-white rounded-xl shadow-lg p-8 space-y-6">
-                                <!-- Login/Signup forms will be rendered here -->
-                            </div>
+                                </div>
                         </div>
                     </div>
                 `;
@@ -561,29 +563,36 @@
                 auth = firebase.auth();
                 db = firebase.firestore();
 
-                // --- AUTHENTICATION & ROUTING ---
-                auth.onAuthStateChanged((user) => {
-                    if (user) {
-                        userId = user.uid;
-                        const currentPath = window.location.hash.slice(1);
-                        if (!currentPath || currentPath === '/') {
-                            AppRouter.navigate('/dashboard');
-                        } else {
-                            AppRouter.handleRouteChange();
-                        }
-                    } else {
-                        AppRouter.navigate('/');
-                        AppRouter.handleRouteChange();
-                    }
-                });
-
+                // --- ROUTING & AUTHENTICATION (CORRECTED LOGIC) ---
+                
+                // 1. Initialize router and add routes
+                AppRouter.init();
                 AppRouter.addRoute('/', LoginComponent);
                 AppRouter.addRoute('/dashboard', DashboardComponent);
                 AppRouter.addRoute('/patients', PatientsComponent);
                 AppRouter.addRoute('/patient/:id', PatientDetailComponent);
                 AppRouter.addRoute('/resources', ResourcesComponent);
-                // Initial call to render based on current hash
-                AppRouter.handleRouteChange();
+                
+                // 2. Set up the auth state listener. This is the main controller.
+                auth.onAuthStateChanged((user) => {
+                    if (user) {
+                        // User is signed in.
+                        userId = user.uid;
+                        const currentPath = window.location.hash.slice(1);
+                        // If user is logged in but on the root/login page, redirect to dashboard.
+                        if (!currentPath || currentPath === '/') {
+                            AppRouter.navigate('/dashboard');
+                        } else {
+                            // Otherwise, process the route they are currently on.
+                            AppRouter.handleRouteChange();
+                        }
+                    } else {
+                        // User is signed out.
+                        userId = null;
+                        AppRouter.navigate('/');
+                        AppRouter.handleRouteChange();
+                    }
+                });
 
             } catch (e) {
                 console.error("Firebase initialization failed:", e);
