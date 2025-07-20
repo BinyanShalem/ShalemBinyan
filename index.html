@@ -5,33 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Binyan Shalem | Empowering Homes</title>
     
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-    <script>
-        // This script makes the jsPDF constructor globally available for the autoTable plugin.
-        window.jsPDF = window.jspdf.jsPDF;
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.5.23/dist/jspdf.autotable.min.js"></script>
-    
+    <!-- Custom Tailwind Configuration -->
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        'custom-deep-purple': '#723358', // rgba(114,51,88,1)
-                        'custom-slate-gray': '#4B5562', // rgba(75, 85, 98, 1)
-                        'custom-beige': '#BAA68E',       // rgba(186,166,142,1)
+                        'custom-deep-purple': '#723358',
+                        'custom-slate-gray': '#4B5562',
+                        'custom-beige': '#BAA68E',
                     }
                 }
             }
         }
     </script>
 
+    <!-- Custom Styles -->
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -60,25 +57,11 @@
         #main-header.scrolled .header-text {
             color: #1f2937;
         }
-        .form-section {
-            transition: opacity 0.5s ease-in-out, max-height 0.5s ease-in-out;
-            max-height: 0;
-            opacity: 0;
-            overflow: hidden;
-        }
-        .form-section.active {
-            max-height: 2000px;
-            opacity: 1;
-        }
-        .mandatory-star {
-            color: #ef4444; /* red-500 */
-            font-weight: bold;
-            margin-left: 2px;
-        }
     </style>
 </head>
 <body class="text-slate-800">
 
+    <!-- Header -->
     <header id="main-header" class="fixed w-full top-0 z-50 transition-all duration-300">
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
             <div class="flex items-center space-x-3">
@@ -105,8 +88,9 @@
         </div>
     </header>
 
+    <!-- Main Content -->
     <main>
-        <section id="home" class="relative min-h-screen flex items-center justify-center text-center text-white bg-cover bg-center bg-fixed" style="background-image: url('https://raw.githubusercontent.com/BinyanShalem/ShalemBinyan/refs/heads/main/gametime.png')">
+        <section id="home" class="relative min-h-screen flex items-center justify-center text-center text-white bg-cover bg-center bg-fixed" style="background-image: url('https://raw.githubusercontent.com/BinyanShalem/ShalemBinyan/refs/heads/main/gametime.png');">
             <div class="absolute inset-0 bg-black opacity-40"></div>
             <div class="relative z-10 container mx-auto px-6">
                 <h2 class="text-4xl md:text-6xl font-bold leading-tight mb-4">Empowering Homes within a Torah Framework.</h2>
@@ -145,64 +129,23 @@
 
             <section id="contact" class="bg-white py-20 md:py-28">
                 <div class="container mx-auto px-6">
-                    <div class="max-w-2xl mx-auto text-center">
+                    <div class="max-w-4xl mx-auto text-center">
                         <h3 class="text-3xl md:text-4xl font-bold text-slate-900">Take the First Step</h3>
                         <p class="text-lg text-slate-600 mt-3 mb-8">Reach out through the secure form below. All submissions are seen only by Rabbi Shaul Haber and are completely confidential.</p>
-                    </div>
-                    <div class="max-w-lg mx-auto bg-white p-8 rounded-xl shadow-2xl border border-slate-200">
-                        <form id="contact-form" novalidate>
-                            <div id="form-content">
-                                <div id="step-1">
-                                    <div class="mb-6">
-                                        <label for="email" class="block text-sm font-medium text-slate-700 mb-2">Email<span class="mandatory-star">*</span></label>
-                                        <input type="email" id="email" name="email" required class="w-full px-4 py-2 border border-slate-300 rounded-lg">
-                                    </div>
-                                    <div class="mb-6">
-                                        <label class="block text-sm font-medium text-slate-700 mb-2">Who is submitting this form?<span class="mandatory-star">*</span></label>
-                                        <div class="space-y-2">
-                                            <div class="flex items-center"><input type="radio" id="husband-wife" name="submitter" value="Husband/Wife" class="h-4 w-4 text-custom-deep-purple"><label for="husband-wife" class="ml-3 block text-sm text-slate-800">Husband / Wife</label></div>
-                                            <div class="flex items-center"><input type="radio" id="someone-else" name="submitter" value="Someone else" class="h-4 w-4 text-custom-deep-purple"><label for="someone-else" class="ml-3 block text-sm text-slate-800">Someone else</label></div>
-                                        </div>
-                                    </div>
-                                </div>
+                        
+                        <!-- Google Form Iframe -->
+                        <div class="w-full mx-auto" style="height: 1500px;">
+                             <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSd3EUkZ2qbEdENGZRZQfp-fL2Cii8J_KoVFRyni3idgPhipWg/viewform?embedded=true" 
+                                     width="100%" 
+                                     height="100%" 
+                                     frameborder="0" 
+                                     marginheight="0" 
+                                     marginwidth="0"
+                                     class="rounded-xl shadow-2xl border border-slate-200">
+                                     Loading…
+                             </iframe>
+                        </div>
 
-                                <div id="relationship-step" class="form-section">
-                                    <hr class="my-6 border-slate-200">
-                                    <div class="mb-6">
-                                        <label for="relationship" class="block text-sm font-medium text-slate-700 mb-2">What is your relationship to the couple?<span class="mandatory-star">*</span></label>
-                                        <input type="text" id="relationship" name="relationship" class="w-full px-4 py-2 border border-slate-300 rounded-lg">
-                                    </div>
-                                </div>
-
-                                <div id="couple-details-form" class="form-section">
-                                    <hr class="my-6 border-slate-200">
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
-                                        <div><label for="husband_name" class="block text-sm font-medium text-slate-700 mb-1">Husband (First and Last)<span class="mandatory-star">*</span></label><input type="text" id="husband_name" name="husband_name" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
-                                        <div><label for="wife_name" class="block text-sm font-medium text-slate-700 mb-1">Wife (First and Maiden)<span class="mandatory-star">*</span></label><input type="text" id="wife_name" name="wife_name" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
-                                        <div><label for="husband_cell" class="block text-sm font-medium text-slate-700 mb-1">Husband Cell<span class="mandatory-star" id="husband_cell_star">*</span></label><input type="tel" id="husband_cell" name="husband_cell" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
-                                        <div><label for="husband_email" class="block text-sm font-medium text-slate-700 mb-1">Husband Email</label><input type="email" id="husband_email" name="husband_email" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
-                                        <div><label for="wife_cell" class="block text-sm font-medium text-slate-700 mb-1">Wife Cell<span class="mandatory-star" id="wife_cell_star">*</span></label><input type="tel" id="wife_cell" name="wife_cell" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
-                                        <div><label for="wife_email" class="block text-sm font-medium text-slate-700 mb-1">Wife Email</label><input type="email" id="wife_email" name="wife_email" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
-                                        <div><label for="husband_age" class="block text-sm font-medium text-slate-700 mb-1">Husband Age<span class="mandatory-star" id="husband_age_star">*</span></label><input type="text" id="husband_age" name="husband_age" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
-                                        <div><label for="wife_age" class="block text-sm font-medium text-slate-700 mb-1">Wife Age<span class="mandatory-star" id="wife_age_star">*</span></label><input type="text" id="wife_age" name="wife_age" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
-                                        <div class="md:col-span-2"><label for="address" class="block text-sm font-medium text-slate-700 mb-1">Address<span class="mandatory-star" id="address_star">*</span></label><textarea id="address" name="address" rows="3" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></textarea></div>
-                                        <div class="md:col-span-2"><label for="years_married" class="block text-sm font-medium text-slate-700 mb-1">How many years married?<span class="mandatory-star" id="years_married_star">*</span></label><input type="text" id="years_married" name="years_married" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
-                                        <div class="md:col-span-2"><label for="issue" class="block text-sm font-medium text-slate-700 mb-1">Issue Presenting<span class="mandatory-star">*</span></label><textarea id="issue" name="issue" required rows="4" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></textarea></div>
-                                        <div><label for="family_rabbi" class="block text-sm font-medium text-slate-700 mb-1">Family Rabbi</label><input type="text" id="family_rabbi" name="family_rabbi" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
-                                        <div><label for="kids_count" class="block text-sm font-medium text-slate-700 mb-1">How many kids?<span class="mandatory-star" id="kids_count_star">*</span></label><input type="text" id="kids_count" name="kids_count" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
-                                        <div class="md:col-span-2"><label for="involved_parties" class="block text-sm font-medium text-slate-700 mb-1">Anyone else involved</label><input type="text" id="involved_parties" name="involved_parties" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
-                                        <div class="md:col-span-2"><label for="parents_names" class="block text-sm font-medium text-slate-700 mb-1">Husband & Wife's parents names<span class="mandatory-star" id="parents_names_star">*</span></label><input type="text" id="parents_names" name="parents_names" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
-                                    </div>
-                                    <div class="mt-8">
-                                        <button type="submit" id="submit-btn" class="w-full bg-custom-deep-purple text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity text-lg font-semibold shadow-md">
-                                            Send Form
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                        <div id="form-success-message" class="hidden mt-6 text-center p-4 bg-green-100 text-green-800 rounded-lg">
-                            </div>
                     </div>
                 </div>
             </section>
@@ -261,164 +204,15 @@
                     if (entry.isIntersecting) {
                         const id = entry.target.getAttribute('id');
                         navLinks.forEach(link => link.classList.remove('active'));
-                        document.querySelector(`.nav-link[href="#${id}"]`)?.classList.add('active');
+                        const activeLink = document.querySelector(`.nav-link[href="#${id}"]`);
+                        if (activeLink) {
+                            activeLink.classList.add('active');
+                        }
                     }
                 });
             }, { rootMargin: "-30% 0px -60% 0px" });
 
             sections.forEach(section => sectionObserver.observe(section));
-            
-            // --- Multi-step Form Logic ---
-            const contactForm = document.getElementById('contact-form');
-            const relationshipStep = document.getElementById('relationship-step');
-            const coupleDetailsForm = document.getElementById('couple-details-form');
-            
-            const mandatoryForHusbandWife = ['husband_cell', 'wife_cell', 'husband_age', 'wife_age', 'address', 'years_married', 'kids_count', 'parents_names'];
-            const mandatoryForSomeoneElse = ['issue'];
-
-            function setRequiredFields(submitterType) {
-                const allFields = [...mandatoryForHusbandWife, ...mandatoryForSomeoneElse, 'husband_name', 'wife_name', 'relationship', 'issue'];
-                
-                allFields.forEach(id => {
-                    const el = document.getElementById(id);
-                    if(el) {
-                        el.required = false;
-                        const star = document.getElementById(`${id}_star`);
-                        if (star) star.style.display = 'none';
-                    }
-                });
-                
-                if (submitterType === 'Husband/Wife') {
-                    [...mandatoryForHusbandWife, 'husband_name', 'wife_name', 'issue'].forEach(id => {
-                        const el = document.getElementById(id);
-                        if (el) el.required = true;
-                        const star = document.getElementById(`${id}_star`);
-                        if (star) star.style.display = 'inline';
-                    });
-                } else if (submitterType === 'Someone else') {
-                    ['relationship', 'husband_name', 'wife_name', 'issue'].forEach(id => {
-                        const el = document.getElementById(id);
-                        if (el) el.required = true;
-                    });
-                }
-            }
-            
-            contactForm.elements.submitter.forEach(radio => {
-                radio.addEventListener('change', (event) => {
-                    const value = event.target.value;
-                    coupleDetailsForm.classList.add('active');
-                    if (value === 'Someone else') {
-                        relationshipStep.classList.add('active');
-                    } else {
-                        relationshipStep.classList.remove('active');
-                    }
-                    setRequiredFields(value);
-                });
-            });
-
-            // --- PDF and Gofile Upload on Submit ---
-            const submitBtn = document.getElementById('submit-btn');
-            const formContent = document.getElementById('form-content');
-            const successMessageContainer = document.getElementById('form-success-message');
-
-            contactForm.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                if (!contactForm.checkValidity()) {
-                    contactForm.reportValidity();
-                    return;
-                }
-                
-                submitBtn.disabled = true;
-                submitBtn.textContent = 'Uploading...';
-
-                try {
-                    // 1. Generate PDF
-                    const doc = new window.jsPDF();
-                    const formData = new FormData(contactForm);
-                    const husbandName = formData.get('husband_name') || 'Unknown';
-                    const wifeName = formData.get('wife_name') || 'Unknown';
-                    const pdfTitle = `Binyan Shalem Intake - ${husbandName} & ${wifeName}`;
-                    const fileName = `Intake - ${husbandName} - ${wifeName}.pdf`;
-
-                    doc.setFontSize(18);
-                    doc.text(pdfTitle, 14, 22);
-                    doc.setFontSize(11);
-                    doc.setTextColor(100);
-                    doc.text(`Submission Date: ${new Date().toLocaleDateString()}`, 14, 30);
-                    
-                    const tableData = [];
-                    for (const [key, value] of formData.entries()) {
-                        if (value) {
-                            const labelElement = document.querySelector(`label[for=${key}]`);
-                            let labelText = key;
-                            if (labelElement) {
-                                const clone = labelElement.cloneNode(true);
-                                const star = clone.querySelector('.mandatory-star');
-                                if (star) star.remove();
-                                labelText = clone.textContent.trim();
-                            } else if (key === 'submitter') {
-                                labelText = 'Submitter Type'; // Handle special cases not directly linked to a label
-                            }
-                            tableData.push([labelText, value]);
-                        }
-                    }
-                    
-                    doc.autoTable({
-                        head: [['Field', 'Response']],
-                        body: tableData,
-                        startY: 40,
-                        theme: 'grid',
-                        headStyles: { fillColor: [114, 51, 88] },
-                    });
-                    
-                    const pdfBlob = doc.output('blob');
-
-                    // 2. Upload to Gofile using Bearer Token (Simplified Endpoint)
-                    // WARNING: This API Key will be publicly exposed in the browser's source code.
-                    // This is NOT secure for production environments.
-                    const GOFILE_API_KEY = 'KTlhggWrtt6D84BXJ1nqj56ZbutZeJCR'; 
-                    const uploadUrl = 'https://upload.gofile.io/uploadFile';
-
-                    const uploadFormData = new FormData();
-                    uploadFormData.append('file', pdfBlob, fileName);
-
-                    const uploadResponse = await fetch(uploadUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${GOFILE_API_KEY}`
-                        },
-                        body: uploadFormData,
-                    });
-                    
-                    if (!uploadResponse.ok) {
-                        const errorText = await uploadResponse.text();
-                        throw new Error(`Upload failed with status ${uploadResponse.status}: ${errorText}`);
-                    }
-                    
-                    const uploadData = await uploadResponse.json();
-                    if (uploadData.status !== 'ok') {
-                        throw new Error(`GoFile API returned an error: ${uploadData.data?.message || 'Unknown reason'}`);
-                    }
-                    
-                    // 3. Show Generic Success Message to the user
-                    formContent.style.display = 'none';
-                    successMessageContainer.innerHTML = `
-                        <p class="font-semibold">Thank you!</p>
-                        <p class="mt-2">Your form has been securely submitted.</p>
-                        <p class="mt-2 text-sm text-slate-500">A copy of your submission has been saved.</p>
-                    `;
-                    successMessageContainer.classList.remove('hidden');
-
-                } catch (error) {
-                    console.error("Process failed:", error);
-                    successMessageContainer.innerHTML = `<p class="font-semibold text-red-700">Error</p><p class="mt-2 text-red-600">Sorry, there was an error submitting the form. Please try again.</p><p class="mt-2 text-red-600 text-sm">Error details: ${error.message}</p>`;
-                    successMessageContainer.classList.remove('hidden', 'bg-green-100', 'text-green-800');
-                    successMessageContainer.classList.add('bg-red-100', 'text-red-800');
-
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Send Form';
-                }
-            });
         });
     </script>
 </body>
