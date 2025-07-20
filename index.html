@@ -15,6 +15,10 @@
 
     <!-- PDF Generation Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- FIX: This script bridges the two libraries so autoTable can find jsPDF -->
+    <script>
+        window.jsPDF = window.jspdf.jsPDF;
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf-autotable.min.js"></script>
     
     <!-- Custom Tailwind Configuration -->
@@ -39,15 +43,6 @@
             background-color: #f8fafc; /* slate-50 */
             scroll-behavior: smooth;
         }
-        .scroll-fade-in {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-        }
-        .scroll-fade-in.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
         .nav-link.active {
             font-weight: 700;
             color: white;
@@ -57,19 +52,15 @@
             background-color: white;
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
         }
-        #main-header.scrolled .nav-link:not([href="#donate"]) {
+        #main-header.scrolled .nav-link:not(.donate-btn) {
             color: #4B5562;
         }
-        #main-header.scrolled .nav-link.active:not([href="#donate"]) {
+        #main-header.scrolled .nav-link.active:not(.donate-btn) {
             color: #723358;
             background-color: rgba(186, 166, 142, 0.2);
         }
-        #main-header.scrolled .nav-link[href="#donate"] {
-            color: white;
-        }
-        .nav-link[href="#donate"].active {
-            background-color: #BAA68E;
-            color: white;
+        #main-header.scrolled .donate-btn {
+            color: white !important;
         }
         #main-header.scrolled .header-text {
             color: #1f2937;
@@ -106,7 +97,7 @@
                 <a href="#home" class="nav-link transition-colors px-3 py-2 rounded-md">Home</a>
                 <a href="#mission" class="nav-link transition-colors px-3 py-2 rounded-md">Our Mission</a>
                 <a href="#contact" class="nav-link transition-colors px-3 py-2 rounded-md">Get Help</a>
-                <a href="donate.html" class="nav-link bg-custom-deep-purple text-white px-4 py-2 rounded-lg hover:opacity-90 transition-all shadow ml-6">Donate</a>
+                <a href="donate.html" class="nav-link donate-btn bg-custom-deep-purple text-white px-4 py-2 rounded-lg hover:opacity-90 transition-all shadow ml-6">Donate</a>
             </nav>
             <button id="mobile-menu-button" class="md:hidden text-white focus:outline-none">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
@@ -116,7 +107,7 @@
             <a href="#home" class="nav-link block py-2 text-slate-700">Home</a>
             <a href="#mission" class="nav-link block py-2 text-slate-700">Our Mission</a>
             <a href="#contact" class="nav-link block py-2 text-slate-700">Get Help</a>
-            <a href="donate.html" class="nav-link block mt-2 text-center bg-custom-deep-purple text-white px-4 py-2 rounded-lg shadow">Donate</a>
+            <a href="donate.html" class="nav-link donate-btn block mt-2 text-center bg-custom-deep-purple text-white px-4 py-2 rounded-lg shadow">Donate</a>
         </div>
     </header>
 
@@ -143,17 +134,17 @@
                         <p class="text-lg text-slate-600 mt-2">Our approach is built on three core principles.</p>
                     </div>
                     <div class="grid md:grid-cols-3 gap-10">
-                        <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200 scroll-fade-in">
+                        <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200 text-center">
                             <h4 class="text-2xl font-bold text-custom-deep-purple mb-4">1. Our Mission</h4>
-                            <p class="text-slate-600">We aim to help Jewish couples strengthen their marriages by offering expert guidance, support, and tools tailored to their unique needs.</p>
+                            <p class="text-slate-600">We recognize the common pitfalls of generic marriage advice. We aim to help Jewish couples strengthen their marriages by offering expert guidance, support, and tools tailored to their unique needs.</p>
                         </div>
-                        <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200 scroll-fade-in" style="transition-delay: 150ms;">
+                        <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200 text-center">
                             <h4 class="text-2xl font-bold text-custom-deep-purple mb-4">2. Tailored Support</h4>
-                            <p class="text-slate-600">Rabbi Shaul Haber meets with couples, offering thoughtful, practical direction rooted in Torah values and partnering with trusted professionals.</p>
+                            <p class="text-slate-600">Rabbi Shaul Haber meets with couples, offering thoughtful, practical direction rooted in Torah values. We partner with a wide network of trusted professionals to ensure the highest level of care.</p>
                         </div>
-                        <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200 scroll-fade-in" style="transition-delay: 300ms;">
+                        <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200 text-center">
                             <h4 class="text-2xl font-bold text-custom-deep-purple mb-4">3. Absolute Confidentiality</h4>
-                            <p class="text-slate-600">We prioritize your privacy above all else, ensuring a safe and secure space to work through challenges without fear of judgment.</p>
+                            <p class="text-slate-600">We prioritize your privacy above all else. Our services are built on a foundation of 100% confidentiality, ensuring a safe and secure space to work through challenges without fear of judgment.</p>
                         </div>
                     </div>
                 </div>
@@ -291,12 +282,11 @@
             const coupleDetailsForm = document.getElementById('couple-details-form');
             
             const mandatoryForHusbandWife = ['husband_cell', 'wife_cell', 'husband_age', 'wife_age', 'address', 'years_married', 'kids_count', 'parents_names'];
-            const mandatoryForSomeoneElse = ['issue']; // All others are optional for this case
+            const mandatoryForSomeoneElse = ['issue'];
 
             function setRequiredFields(submitterType) {
                 const allFields = [...mandatoryForHusbandWife, ...mandatoryForSomeoneElse, 'husband_name', 'wife_name', 'relationship', 'issue'];
                 
-                // Reset all fields first
                 allFields.forEach(id => {
                     const el = document.getElementById(id);
                     if(el) {
@@ -306,7 +296,6 @@
                     }
                 });
                 
-                // Set required based on type
                 if (submitterType === 'Husband/Wife') {
                     [...mandatoryForHusbandWife, 'husband_name', 'wife_name', 'issue'].forEach(id => {
                         const el = document.getElementById(id);
@@ -344,46 +333,48 @@
                     return;
                 }
 
-                // In a real application, you would send this data to a server.
-                // Here, we generate a PDF for the user to download.
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
+                try {
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF();
 
-                const formData = new FormData(contactForm);
-                const husbandName = formData.get('husband_name') || 'Unknown';
-                const wifeName = formData.get('wife_name') || 'Unknown';
-                const husbandLastName = husbandName.split(' ').pop();
-                const pdfTitle = `Binyan Shalem Intake - ${husbandName} & ${wifeName}`;
-                const fileName = `Intake - ${husbandName} - ${wifeName}.pdf`;
+                    const formData = new FormData(contactForm);
+                    const husbandName = formData.get('husband_name') || 'Unknown';
+                    const wifeName = formData.get('wife_name') || 'Unknown';
+                    const pdfTitle = `Binyan Shalem Intake - ${husbandName} & ${wifeName}`;
+                    const fileName = `Intake - ${husbandName} - ${wifeName}.pdf`;
 
-                doc.setFontSize(18);
-                doc.text(pdfTitle, 14, 22);
-                doc.setFontSize(11);
-                doc.setTextColor(100);
-                doc.text(`Submission Date: ${new Date().toLocaleDateString()}`, 14, 30);
-                
-                const tableData = [];
-                const headers = [['Field', 'Response']];
-                
-                for (const [key, value] of formData.entries()) {
-                    if (value) {
-                        const label = document.querySelector(`[for=${key}]`)?.textContent.replace('*','').trim() || key;
-                        tableData.push([label, value]);
+                    doc.setFontSize(18);
+                    doc.text(pdfTitle, 14, 22);
+                    doc.setFontSize(11);
+                    doc.setTextColor(100);
+                    doc.text(`Submission Date: ${new Date().toLocaleDateString()}`, 14, 30);
+                    
+                    const tableData = [];
+                    const headers = [['Field', 'Response']];
+                    
+                    for (const [key, value] of formData.entries()) {
+                        if (value) {
+                            const label = document.querySelector(`label[for=${key}]`)?.textContent.replace('*','').trim() || key;
+                            tableData.push([label, value]);
+                        }
                     }
+                    
+                    doc.autoTable({
+                        head: headers,
+                        body: tableData,
+                        startY: 40,
+                        theme: 'grid',
+                        headStyles: { fillColor: [114, 51, 88] }, // custom-deep-purple
+                    });
+                    
+                    doc.save(fileName);
+                    
+                    contactForm.style.display = 'none';
+                    successMessage.classList.remove('hidden');
+                } catch (error) {
+                    console.error("Failed to generate PDF:", error);
+                    alert("Sorry, there was an error generating the PDF. Please check the console for details and try again.");
                 }
-                
-                doc.autoTable({
-                    head: headers,
-                    body: tableData,
-                    startY: 40,
-                    theme: 'grid',
-                    headStyles: { fillColor: [114, 51, 88] }, // custom-deep-purple
-                });
-                
-                doc.save(fileName);
-                
-                contactForm.style.display = 'none';
-                successMessage.classList.remove('hidden');
             });
         });
     </script>
