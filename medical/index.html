@@ -489,6 +489,9 @@
                     }));
                     if(window.lucide) window.lucide.createIcons();
                 });
+                
+                // Setup the resource modal for this context
+                ResourcesComponent.setupModal("resource-modal-patient");
             },
             switchTab(tabName, patient) {
                 const tabContent = document.getElementById('tab-content');
@@ -669,6 +672,50 @@
                 
                 modal.classList.remove('hidden');
             },
+            setupModal(modalId) {
+                const modal = document.getElementById(modalId);
+                if (!modal) return;
+                const form = document.getElementById(`${modalId}-form`);
+                const typeSelect = document.getElementById(`${modalId}-type`);
+                const formFields = document.getElementById(`${modalId}-form-fields`);
+                const linkPatientsSelect = document.getElementById(`${modalId}-link-patients`);
+
+                const getFormFields = (type) => {
+                    if (type === 'article') return `<div><label for="${modalId}-title" class="block text-sm">Title</label><input type="text" id="${modalId}-title" required class="input"></div><div><label for="${modalId}-link" class="block text-sm">Link</label><input type="url" id="${modalId}-link" required class="input"></div><div><label for="${modalId}-summary" class="block text-sm">Summary</label><textarea id="${modalId}-summary" class="input"></textarea></div>`;
+                    if (type === 'doctor') return `<div><label for="${modalId}-name" class="block text-sm">Doctor's Name</label><input type="text" id="${modalId}-name" required class="input"></div><div><label for="${modalId}-specialty" class="block text-sm">Specialty</label><input type="text" id="${modalId}-specialty" required class="input"></div><div><label for="${modalId}-contact" class="block text-sm">Contact Info</label><input type="text" id="${modalId}-contact" required class="input"></div>`;
+                    return '';
+                };
+                const updateFormFields = () => { if(formFields) formFields.innerHTML = getFormFields(typeSelect.value); };
+                
+                typeSelect.addEventListener('change', updateFormFields);
+                updateFormFields();
+                document.getElementById(`${modalId}-cancel-btn`).addEventListener('click', () => modal.classList.add('hidden'));
+
+                form.onsubmit = async (e) => {
+                    e.preventDefault();
+                    const type = typeSelect.value;
+                    let resourceData = { type };
+                    if (type === 'article') resourceData = { ...resourceData, title: document.getElementById(`${modalId}-title`).value, link: document.getElementById(`${modalId}-link`).value, summary: document.getElementById(`${modalId}-summary`).value };
+                    if (type === 'doctor') resourceData = { ...resourceData, name: document.getElementById(`${modalId}-name`).value, specialty: document.getElementById(`${modalId}-specialty`).value, contact: document.getElementById(`${modalId}-contact`).value };
+                    
+                    const newResource = await FirestoreDB.addResource(resourceData);
+                    
+                    const selectedPatientIds = Array.from(linkPatientsSelect.selectedOptions).map(opt => opt.value);
+                    
+                    for (const patientId of selectedPatientIds) {
+                        const patientDoc = await db.collection(`artifacts/${appId}/users/${userId}/patients`).doc(patientId).get();
+                        if (patientDoc.exists) {
+                            const patientData = patientDoc.data();
+                            const linkedResourceIds = [...(patientData.linkedResourceIds || []), newResource.id];
+                            await FirestoreDB.savePatient(patientId, { linkedResourceIds });
+                        }
+                    }
+
+                    modal.classList.add('hidden');
+                    form.reset();
+                    updateFormFields();
+                };
+            },
             postRender() {
                 Layout.postRender();
                 const container = document.getElementById('resources-container');
@@ -686,54 +733,7 @@
                         </div>
                     </div>`;
 
-                const setupModal = (modalId) => {
-                    const modal = document.getElementById(modalId);
-                    if (!modal) return;
-                    const form = document.getElementById(`${modalId}-form`);
-                    const typeSelect = document.getElementById(`${modalId}-type`);
-                    const formFields = document.getElementById(`${modalId}-form-fields`);
-                    const linkPatientsSelect = document.getElementById(`${modalId}-link-patients`);
-
-                    const getFormFields = (type) => {
-                        if (type === 'article') return `<div><label for="${modalId}-title" class="block text-sm">Title</label><input type="text" id="${modalId}-title" required class="input"></div><div><label for="${modalId}-link" class="block text-sm">Link</label><input type="url" id="${modalId}-link" required class="input"></div><div><label for="${modalId}-summary" class="block text-sm">Summary</label><textarea id="${modalId}-summary" class="input"></textarea></div>`;
-                        if (type === 'doctor') return `<div><label for="${modalId}-name" class="block text-sm">Doctor's Name</label><input type="text" id="${modalId}-name" required class="input"></div><div><label for="${modalId}-specialty" class="block text-sm">Specialty</label><input type="text" id="${modalId}-specialty" required class="input"></div><div><label for="${modalId}-contact" class="block text-sm">Contact Info</label><input type="text" id="${modalId}-contact" required class="input"></div>`;
-                        return '';
-                    };
-                    const updateFormFields = () => { if(formFields) formFields.innerHTML = getFormFields(typeSelect.value); };
-                    
-                    typeSelect.addEventListener('change', updateFormFields);
-                    updateFormFields();
-                    document.getElementById(`${modalId}-cancel-btn`).addEventListener('click', () => modal.classList.add('hidden'));
-
-                    form.onsubmit = async (e) => {
-                        e.preventDefault();
-                        const type = typeSelect.value;
-                        let resourceData = { type };
-                        if (type === 'article') resourceData = { ...resourceData, title: document.getElementById(`${modalId}-title`).value, link: document.getElementById(`${modalId}-link`).value, summary: document.getElementById(`${modalId}-summary`).value };
-                        if (type === 'doctor') resourceData = { ...resourceData, name: document.getElementById(`${modalId}-name`).value, specialty: document.getElementById(`${modalId}-specialty`).value, contact: document.getElementById(`${modalId}-contact`).value };
-                        
-                        const newResource = await FirestoreDB.addResource(resourceData);
-                        
-                        const selectedPatientIds = Array.from(linkPatientsSelect.selectedOptions).map(opt => opt.value);
-                        
-                        for (const patientId of selectedPatientIds) {
-                            const patientDoc = await db.collection(`artifacts/${appId}/users/${userId}/patients`).doc(patientId).get();
-                            if (patientDoc.exists) {
-                                const patientData = patientDoc.data();
-                                const linkedResourceIds = [...(patientData.linkedResourceIds || []), newResource.id];
-                                await FirestoreDB.savePatient(patientId, { linkedResourceIds });
-                            }
-                        }
-
-                        modal.classList.add('hidden');
-                        form.reset();
-                        updateFormFields();
-                    };
-                };
-                
-                setupModal("resource-modal");
-                setupModal("resource-modal-patient");
-
+                this.setupModal("resource-modal");
                 document.getElementById('add-resource-btn')?.addEventListener('click', () => this.openModal());
 
                 let resourceDocs = [];
