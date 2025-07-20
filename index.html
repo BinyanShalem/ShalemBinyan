@@ -5,19 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Binyan Shalem | Empowering Homes</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- PDF Generation Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf-autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script>
+        // This script makes the jsPDF constructor globally available for the autoTable plugin.
+        window.jsPDF = window.jspdf.jsPDF;
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.5.23/dist/jspdf.autotable.min.js"></script>
     
-    <!-- Custom Tailwind Configuration -->
     <script>
         tailwind.config = {
             theme: {
@@ -25,14 +25,13 @@
                     colors: {
                         'custom-deep-purple': '#723358', // rgba(114,51,88,1)
                         'custom-slate-gray': '#4B5562', // rgba(75, 85, 98, 1)
-                        'custom-beige': '#BAA68E',      // rgba(186,166,142,1)
+                        'custom-beige': '#BAA68E',       // rgba(186,166,142,1)
                     }
                 }
             }
         }
     </script>
 
-    <!-- Custom Styles -->
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -80,11 +79,10 @@
 </head>
 <body class="text-slate-800">
 
-    <!-- Header -->
     <header id="main-header" class="fixed w-full top-0 z-50 transition-all duration-300">
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
             <div class="flex items-center space-x-3">
-                <img src="https://www.binyan-shalem.com/Binyan%20Shalem_files/8594235c61f23b5d99cd2a2dbf37c8b5.jpg" alt="Binyan Shalem Logo" class="h-12 w-auto">
+                <img src="https://www.binyan-shalem.com/Binyan%20Shalem_files/8594235c61f23b5d99cd2a2dbf37c8b5.jpg" alt="Binyan Shalem Logo" class="h-12 w-auto" onerror="this.onerror=null;this.src='https://placehold.co/100x50/723358/FFFFFF?text=Logo';">
                 <div class="header-text text-white">
                     <h1 class="text-xl font-bold tracking-tight">BINYAN SHALEM</h1>
                 </div>
@@ -107,7 +105,6 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <main>
         <section id="home" class="relative min-h-screen flex items-center justify-center text-center text-white bg-cover bg-center bg-fixed" style="background-image: url('https://raw.githubusercontent.com/BinyanShalem/ShalemBinyan/refs/heads/main/gametime.png')">
             <div class="absolute inset-0 bg-black opacity-40"></div>
@@ -155,7 +152,6 @@
                     <div class="max-w-lg mx-auto bg-white p-8 rounded-xl shadow-2xl border border-slate-200">
                         <form id="contact-form" novalidate>
                             <div id="form-content">
-                                <!-- Step 1: Initial Info -->
                                 <div id="step-1">
                                     <div class="mb-6">
                                         <label for="email" class="block text-sm font-medium text-slate-700 mb-2">Email<span class="mandatory-star">*</span></label>
@@ -170,7 +166,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Step 2: Conditional Questions -->
                                 <div id="relationship-step" class="form-section">
                                     <hr class="my-6 border-slate-200">
                                     <div class="mb-6">
@@ -207,8 +202,7 @@
                             </div>
                         </form>
                         <div id="form-success-message" class="hidden mt-6 text-center p-4 bg-green-100 text-green-800 rounded-lg">
-                            <!-- Success message and link will be inserted here -->
-                        </div>
+                            </div>
                     </div>
                 </div>
             </section>
@@ -252,7 +246,7 @@
             document.querySelectorAll('#mobile-menu a, #main-header nav a').forEach(link => {
                 link.addEventListener('click', () => {
                     if (!mobileMenu.classList.contains('hidden')) {
-                       mobileMenu.classList.add('hidden');
+                        mobileMenu.classList.add('hidden');
                     }
                 });
             });
@@ -339,7 +333,7 @@
 
                 try {
                     // 1. Generate PDF
-                    const doc = new jsPDF();
+                    const doc = new window.jsPDF();
                     const formData = new FormData(contactForm);
                     const husbandName = formData.get('husband_name') || 'Unknown';
                     const wifeName = formData.get('wife_name') || 'Unknown';
@@ -355,8 +349,17 @@
                     const tableData = [];
                     for (const [key, value] of formData.entries()) {
                         if (value) {
-                            const label = document.querySelector(`label[for=${key}]`)?.textContent.replace('*','').trim() || key;
-                            tableData.push([label, value]);
+                            const labelElement = document.querySelector(`label[for=${key}]`);
+                            let labelText = key;
+                            if (labelElement) {
+                                const clone = labelElement.cloneNode(true);
+                                const star = clone.querySelector('.mandatory-star');
+                                if (star) star.remove();
+                                labelText = clone.textContent.trim();
+                            } else if (key === 'submitter') {
+                                labelText = 'Submitter Type'; // Handle special cases not directly linked to a label
+                            }
+                            tableData.push([labelText, value]);
                         }
                     }
                     
@@ -370,44 +373,48 @@
                     
                     const pdfBlob = doc.output('blob');
 
-                    // 2. Upload to Gofile
-                    // IMPORTANT: This is NOT secure for a production website.
-                    // Your API key is exposed. This should be handled by a backend server.
-                    const GOFILE_API_KEY = 'KTlhggWrtt6D84BXJ1nqj56ZbutZeJCR';
+                    // 2. Upload to Gofile using Bearer Token (Simplified Endpoint)
+                    // WARNING: This API Key will be publicly exposed in the browser's source code.
+                    // This is NOT secure for production environments.
+                    const GOFILE_API_KEY = 'KTlhggWrtt6D84BXJ1nqj56ZbutZeJCR'; 
+                    const uploadUrl = 'https://upload.gofile.io/uploadFile';
 
-                    // Get Gofile server
-                    const serverResponse = await fetch('https://api.gofile.io/getServer');
-                    const serverData = await serverResponse.json();
-                    if (serverData.status !== 'ok') throw new Error('Could not get Gofile server.');
-                    const serverName = serverData.data.server;
-
-                    // Prepare file for upload
                     const uploadFormData = new FormData();
                     uploadFormData.append('file', pdfBlob, fileName);
-                    uploadFormData.append('token', GOFILE_API_KEY);
 
-                    // Upload the file
-                    const uploadResponse = await fetch(`https://${serverName}.gofile.io/uploadFile`, {
+                    const uploadResponse = await fetch(uploadUrl, {
                         method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${GOFILE_API_KEY}`
+                        },
                         body: uploadFormData,
                     });
-                    const uploadData = await uploadResponse.json();
-                    if (uploadData.status !== 'ok') throw new Error('File upload to Gofile failed.');
                     
-                    const downloadLink = uploadData.data.downloadPage;
-
-                    // 3. Show Success Message
+                    if (!uploadResponse.ok) {
+                        const errorText = await uploadResponse.text();
+                        throw new Error(`Upload failed with status ${uploadResponse.status}: ${errorText}`);
+                    }
+                    
+                    const uploadData = await uploadResponse.json();
+                    if (uploadData.status !== 'ok') {
+                        throw new Error(`GoFile API returned an error: ${uploadData.data?.message || 'Unknown reason'}`);
+                    }
+                    
+                    // 3. Show Generic Success Message to the user
                     formContent.style.display = 'none';
                     successMessageContainer.innerHTML = `
-                        <p class="font-semibold">Thank you! Your form has been submitted.</p>
-                        <p class="mt-2">A PDF has been generated and uploaded.</p>
-                        <a href="${downloadLink}" target="_blank" class="inline-block mt-4 text-white bg-custom-deep-purple font-semibold py-2 px-4 rounded-lg hover:opacity-90">View Uploaded PDF</a>
+                        <p class="font-semibold">Thank you!</p>
+                        <p class="mt-2">Your form has been securely submitted.</p>
+                        <p class="mt-2 text-sm text-slate-500">A copy of your submission has been saved.</p>
                     `;
                     successMessageContainer.classList.remove('hidden');
 
                 } catch (error) {
                     console.error("Process failed:", error);
-                    alert("Sorry, there was an error submitting the form. Please try again.");
+                    successMessageContainer.innerHTML = `<p class="font-semibold text-red-700">Error</p><p class="mt-2 text-red-600">Sorry, there was an error submitting the form. Please try again.</p><p class="mt-2 text-red-600 text-sm">Error details: ${error.message}</p>`;
+                    successMessageContainer.classList.remove('hidden', 'bg-green-100', 'text-green-800');
+                    successMessageContainer.classList.add('bg-red-100', 'text-red-800');
+
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Send Form';
                 }
