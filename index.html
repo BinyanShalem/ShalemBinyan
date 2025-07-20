@@ -12,6 +12,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- PDF Generation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf-autotable.min.js"></script>
     
     <!-- Custom Tailwind Configuration -->
     <script>
@@ -35,7 +39,6 @@
             background-color: #f8fafc; /* slate-50 */
             scroll-behavior: smooth;
         }
-        /* Simple animation for elements on scroll */
         .scroll-fade-in {
             opacity: 0;
             transform: translateY(20px);
@@ -45,39 +48,32 @@
             opacity: 1;
             transform: translateY(0);
         }
-        /* Style for the active navigation link (Top of page) */
         .nav-link.active {
             font-weight: 700;
             color: white;
-            background-color: rgba(186, 166, 142, 0.3); /* custom-beige with transparency */
+            background-color: rgba(186, 166, 142, 0.3);
         }
-        /* Style for the scrolled header state */
         #main-header.scrolled {
             background-color: white;
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
         }
-        /* Change nav link colors on scroll, but NOT the donate button */
         #main-header.scrolled .nav-link:not([href="#donate"]) {
-            color: #4B5562; /* custom-slate-gray */
+            color: #4B5562;
         }
-        /* Active style for regular links when header is scrolled */
         #main-header.scrolled .nav-link.active:not([href="#donate"]) {
-            color: #723358; /* custom-deep-purple */
+            color: #723358;
             background-color: rgba(186, 166, 142, 0.2);
         }
-        /* Keep donate button text white when scrolled */
         #main-header.scrolled .nav-link[href="#donate"] {
             color: white;
         }
-        /* Active style for Donate button (scrolled or not) */
         .nav-link[href="#donate"].active {
-            background-color: #BAA68E; /* custom-beige */
+            background-color: #BAA68E;
             color: white;
         }
         #main-header.scrolled .header-text {
-            color: #1f2937; /* gray-800 */
+            color: #1f2937;
         }
-        /* Styling for form sections */
         .form-section {
             transition: opacity 0.5s ease-in-out, max-height 0.5s ease-in-out;
             max-height: 0;
@@ -85,8 +81,13 @@
             overflow: hidden;
         }
         .form-section.active {
-            max-height: 2000px; /* Adjust as needed for content */
+            max-height: 2000px;
             opacity: 1;
+        }
+        .mandatory-star {
+            color: #ef4444; /* red-500 */
+            font-weight: bold;
+            margin-left: 2px;
         }
     </style>
 </head>
@@ -95,43 +96,38 @@
     <!-- Header -->
     <header id="main-header" class="fixed w-full top-0 z-50 transition-all duration-300">
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <!-- Logo -->
             <div class="flex items-center space-x-3">
                 <img src="https://www.binyan-shalem.com/Binyan%20Shalem_files/8594235c61f23b5d99cd2a2dbf37c8b5.jpg" alt="Binyan Shalem Logo" class="h-12 w-auto">
                 <div class="header-text text-white">
                     <h1 class="text-xl font-bold tracking-tight">BINYAN SHALEM</h1>
                 </div>
             </div>
-            <!-- Desktop Navigation -->
             <nav class="hidden md:flex items-center space-x-2 text-white">
                 <a href="#home" class="nav-link transition-colors px-3 py-2 rounded-md">Home</a>
                 <a href="#mission" class="nav-link transition-colors px-3 py-2 rounded-md">Our Mission</a>
                 <a href="#contact" class="nav-link transition-colors px-3 py-2 rounded-md">Get Help</a>
-                <a href="#donate" class="nav-link bg-custom-deep-purple text-white px-4 py-2 rounded-lg hover:opacity-90 transition-all shadow ml-6">Donate</a>
+                <a href="donate.html" class="nav-link bg-custom-deep-purple text-white px-4 py-2 rounded-lg hover:opacity-90 transition-all shadow ml-6">Donate</a>
             </nav>
-            <!-- Mobile Menu Button -->
             <button id="mobile-menu-button" class="md:hidden text-white focus:outline-none">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
             </button>
         </div>
-        <!-- Mobile Menu -->
         <div id="mobile-menu" class="hidden md:hidden px-6 pb-4 bg-white/95 backdrop-blur-sm rounded-b-lg">
             <a href="#home" class="nav-link block py-2 text-slate-700">Home</a>
             <a href="#mission" class="nav-link block py-2 text-slate-700">Our Mission</a>
             <a href="#contact" class="nav-link block py-2 text-slate-700">Get Help</a>
-            <a href="#donate" class="nav-link block mt-2 text-center bg-custom-deep-purple text-white px-4 py-2 rounded-lg shadow">Donate</a>
+            <a href="donate.html" class="nav-link block mt-2 text-center bg-custom-deep-purple text-white px-4 py-2 rounded-lg shadow">Donate</a>
         </div>
     </header>
 
     <!-- Main Content -->
     <main>
-        <!-- Hero Section with Background Image -->
         <section id="home" class="relative min-h-screen flex items-center justify-center text-center text-white bg-cover bg-center bg-fixed" style="background-image: url('https://raw.githubusercontent.com/BinyanShalem/ShalemBinyan/refs/heads/main/gametime.png')">
-            <div class="absolute inset-0 bg-black opacity-40"></div> <!-- Overlay for text readability -->
+            <div class="absolute inset-0 bg-black opacity-40"></div>
             <div class="relative z-10 container mx-auto px-6">
                 <h2 class="text-4xl md:text-6xl font-bold leading-tight mb-4">Empowering Homes within a Torah Framework.</h2>
                 <p class="text-lg md:text-2xl text-slate-200 max-w-3xl mx-auto mb-8">
-                    At Binyan Shalem, we understand that marriages have challenges. Our goal is to provide couples with personalized, practical support within the framework of rabbinical guidance to help you build a stronger, more fulfilling marriage—at no cost to you.
+                    Our goal is to provide couples with personalized, practical support within the framework of rabbinical guidance to help you build a stronger, more fulfilling marriage—at no cost to you.
                 </p>
                 <div>
                     <a href="#contact" class="bg-custom-deep-purple text-white px-8 py-3 rounded-lg hover:opacity-90 transition-opacity text-lg font-semibold shadow-lg">Your journey starts here</a>
@@ -139,9 +135,7 @@
             </div>
         </section>
 
-        <!-- The rest of the content scrolls over the hero image -->
         <div class="relative z-20 bg-slate-50">
-            <!-- Increased padding on this section -->
             <section id="mission" class="py-28 md:py-40 bg-custom-beige">
                 <div class="container mx-auto px-6">
                     <div class="text-center mb-16">
@@ -151,15 +145,15 @@
                     <div class="grid md:grid-cols-3 gap-10">
                         <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200 scroll-fade-in">
                             <h4 class="text-2xl font-bold text-custom-deep-purple mb-4">1. Our Mission</h4>
-                            <p class="text-slate-600">We recognize the common pitfalls of generic marriage advice. We aim to help Jewish couples strengthen their marriages by offering expert guidance, support, and tools tailored to their unique needs.</p>
+                            <p class="text-slate-600">We aim to help Jewish couples strengthen their marriages by offering expert guidance, support, and tools tailored to their unique needs.</p>
                         </div>
                         <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200 scroll-fade-in" style="transition-delay: 150ms;">
                             <h4 class="text-2xl font-bold text-custom-deep-purple mb-4">2. Tailored Support</h4>
-                            <p class="text-slate-600">Rabbi Shaul Haber meets with couples, offering thoughtful, practical direction rooted in Torah values. We partner with a wide network of trusted professionals to ensure the highest level of care.</p>
+                            <p class="text-slate-600">Rabbi Shaul Haber meets with couples, offering thoughtful, practical direction rooted in Torah values and partnering with trusted professionals.</p>
                         </div>
                         <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200 scroll-fade-in" style="transition-delay: 300ms;">
                             <h4 class="text-2xl font-bold text-custom-deep-purple mb-4">3. Absolute Confidentiality</h4>
-                            <p class="text-slate-600">We prioritize your privacy above all else. Our services are built on a foundation of 100% confidentiality, ensuring a safe and secure space to work through challenges without fear of judgment.</p>
+                            <p class="text-slate-600">We prioritize your privacy above all else, ensuring a safe and secure space to work through challenges without fear of judgment.</p>
                         </div>
                     </div>
                 </div>
@@ -169,27 +163,21 @@
                 <div class="container mx-auto px-6">
                     <div class="max-w-2xl mx-auto text-center">
                         <h3 class="text-3xl md:text-4xl font-bold text-slate-900">Take the First Step</h3>
-                        <p class="text-lg text-slate-600 mt-3 mb-8">Reach out to us through the secure form below. All submissions are seen only by Rabbi Shaul Haber and are completely confidential.</p>
+                        <p class="text-lg text-slate-600 mt-3 mb-8">Reach out through the secure form below. All submissions are seen only by Rabbi Shaul Haber and are completely confidential.</p>
                     </div>
                     <div class="max-w-lg mx-auto bg-white p-8 rounded-xl shadow-2xl border border-slate-200">
-                        <form id="contact-form">
+                        <form id="contact-form" novalidate>
                             <!-- Step 1: Initial Info -->
                             <div id="step-1">
                                 <div class="mb-6">
-                                    <label for="email" class="block text-sm font-medium text-slate-700 mb-2">Email <span class="text-red-500">*</span></label>
-                                    <input type="email" id="email" name="email" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-custom-deep-purple focus:border-custom-deep-purple transition" placeholder="you@example.com">
+                                    <label for="email" class="block text-sm font-medium text-slate-700 mb-2">Email<span class="mandatory-star">*</span></label>
+                                    <input type="email" id="email" name="email" required class="w-full px-4 py-2 border border-slate-300 rounded-lg">
                                 </div>
                                 <div class="mb-6">
-                                    <label class="block text-sm font-medium text-slate-700 mb-2">Who is submitting this form? <span class="text-red-500">*</span></label>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">Who is submitting this form?<span class="mandatory-star">*</span></label>
                                     <div class="space-y-2">
-                                        <div class="flex items-center">
-                                            <input type="radio" id="husband-wife" name="submitter" value="Husband/Wife" class="h-4 w-4 text-custom-deep-purple border-slate-300 focus:ring-custom-deep-purple">
-                                            <label for="husband-wife" class="ml-3 block text-sm text-slate-800">Husband / Wife</label>
-                                        </div>
-                                        <div class="flex items-center">
-                                            <input type="radio" id="someone-else" name="submitter" value="Someone else" class="h-4 w-4 text-custom-deep-purple border-slate-300 focus:ring-custom-deep-purple">
-                                            <label for="someone-else" class="ml-3 block text-sm text-slate-800">Someone else</label>
-                                        </div>
+                                        <div class="flex items-center"><input type="radio" id="husband-wife" name="submitter" value="Husband/Wife" class="h-4 w-4 text-custom-deep-purple"><label for="husband-wife" class="ml-3 block text-sm text-slate-800">Husband / Wife</label></div>
+                                        <div class="flex items-center"><input type="radio" id="someone-else" name="submitter" value="Someone else" class="h-4 w-4 text-custom-deep-purple"><label for="someone-else" class="ml-3 block text-sm text-slate-800">Someone else</label></div>
                                     </div>
                                 </div>
                             </div>
@@ -198,39 +186,39 @@
                             <div id="relationship-step" class="form-section">
                                 <hr class="my-6 border-slate-200">
                                 <div class="mb-6">
-                                    <label for="relationship" class="block text-sm font-medium text-slate-700 mb-2">What is your relationship to the couple? <span class="text-red-500">*</span></label>
-                                    <input type="text" id="relationship" name="relationship" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-custom-deep-purple focus:border-custom-deep-purple transition" placeholder="e.g., Parent, Sibling, Friend">
+                                    <label for="relationship" class="block text-sm font-medium text-slate-700 mb-2">What is your relationship to the couple?<span class="mandatory-star">*</span></label>
+                                    <input type="text" id="relationship" name="relationship" class="w-full px-4 py-2 border border-slate-300 rounded-lg">
                                 </div>
                             </div>
 
                             <div id="couple-details-form" class="form-section">
                                 <hr class="my-6 border-slate-200">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
-                                    <input type="text" name="husband_name" placeholder="Husband (First and Last)" class="w-full px-4 py-2 border border-slate-300 rounded-lg">
-                                    <input type="text" name="wife_name" placeholder="Wife (First and Maiden)" class="w-full px-4 py-2 border border-slate-300 rounded-lg">
-                                    <input type="tel" name="husband_cell" placeholder="Husband Cell" class="w-full px-4 py-2 border border-slate-300 rounded-lg">
-                                    <input type="email" name="husband_email" placeholder="Husband Email" class="w-full px-4 py-2 border border-slate-300 rounded-lg">
-                                    <input type="tel" name="wife_cell" placeholder="Wife Cell" class="w-full px-4 py-2 border border-slate-300 rounded-lg">
-                                    <input type="email" name="wife_email" placeholder="Wife Email" class="w-full px-4 py-2 border border-slate-300 rounded-lg">
-                                    <input type="text" name="husband_age" placeholder="Husband Age" class="w-full px-4 py-2 border border-slate-300 rounded-lg">
-                                    <input type="text" name="wife_age" placeholder="Wife Age" class="w-full px-4 py-2 border border-slate-300 rounded-lg">
-                                    <input type="text" name="years_married" placeholder="How many years married? *" required class="md:col-span-2 w-full px-4 py-2 border border-slate-300 rounded-lg">
-                                    <textarea name="address" placeholder="Address" rows="3" class="md:col-span-2 w-full px-4 py-2 border border-slate-300 rounded-lg"></textarea>
-                                    <textarea name="issue" placeholder="Issue Presenting *" required rows="4" class="md:col-span-2 w-full px-4 py-2 border border-slate-300 rounded-lg"></textarea>
-                                    <input type="text" name="family_rabbi" placeholder="Family Rabbi" class="w-full px-4 py-2 border border-slate-300 rounded-lg">
-                                    <input type="text" name="kids_count" placeholder="How many kids? *" required class="w-full px-4 py-2 border border-slate-300 rounded-lg">
-                                    <input type="text" name="involved_parties" placeholder="Anyone else involved" class="md:col-span-2 w-full px-4 py-2 border border-slate-300 rounded-lg">
-                                    <input type="text" name="parents_names" placeholder="Husband & Wife's parents names" class="md:col-span-2 w-full px-4 py-2 border border-slate-300 rounded-lg">
+                                    <div><label for="husband_name" class="block text-sm font-medium text-slate-700 mb-1">Husband (First and Last)<span class="mandatory-star">*</span></label><input type="text" id="husband_name" name="husband_name" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
+                                    <div><label for="wife_name" class="block text-sm font-medium text-slate-700 mb-1">Wife (First and Maiden)<span class="mandatory-star">*</span></label><input type="text" id="wife_name" name="wife_name" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
+                                    <div><label for="husband_cell" class="block text-sm font-medium text-slate-700 mb-1">Husband Cell<span class="mandatory-star" id="husband_cell_star">*</span></label><input type="tel" id="husband_cell" name="husband_cell" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
+                                    <div><label for="husband_email" class="block text-sm font-medium text-slate-700 mb-1">Husband Email</label><input type="email" id="husband_email" name="husband_email" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
+                                    <div><label for="wife_cell" class="block text-sm font-medium text-slate-700 mb-1">Wife Cell<span class="mandatory-star" id="wife_cell_star">*</span></label><input type="tel" id="wife_cell" name="wife_cell" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
+                                    <div><label for="wife_email" class="block text-sm font-medium text-slate-700 mb-1">Wife Email</label><input type="email" id="wife_email" name="wife_email" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
+                                    <div><label for="husband_age" class="block text-sm font-medium text-slate-700 mb-1">Husband Age<span class="mandatory-star" id="husband_age_star">*</span></label><input type="text" id="husband_age" name="husband_age" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
+                                    <div><label for="wife_age" class="block text-sm font-medium text-slate-700 mb-1">Wife Age<span class="mandatory-star" id="wife_age_star">*</span></label><input type="text" id="wife_age" name="wife_age" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
+                                    <div class="md:col-span-2"><label for="address" class="block text-sm font-medium text-slate-700 mb-1">Address<span class="mandatory-star" id="address_star">*</span></label><textarea id="address" name="address" rows="3" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></textarea></div>
+                                    <div class="md:col-span-2"><label for="years_married" class="block text-sm font-medium text-slate-700 mb-1">How many years married?<span class="mandatory-star" id="years_married_star">*</span></label><input type="text" id="years_married" name="years_married" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
+                                    <div class="md:col-span-2"><label for="issue" class="block text-sm font-medium text-slate-700 mb-1">Issue Presenting<span class="mandatory-star">*</span></label><textarea id="issue" name="issue" required rows="4" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></textarea></div>
+                                    <div><label for="family_rabbi" class="block text-sm font-medium text-slate-700 mb-1">Family Rabbi</label><input type="text" id="family_rabbi" name="family_rabbi" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
+                                    <div><label for="kids_count" class="block text-sm font-medium text-slate-700 mb-1">How many kids?<span class="mandatory-star" id="kids_count_star">*</span></label><input type="text" id="kids_count" name="kids_count" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
+                                    <div class="md:col-span-2"><label for="involved_parties" class="block text-sm font-medium text-slate-700 mb-1">Anyone else involved</label><input type="text" id="involved_parties" name="involved_parties" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
+                                    <div class="md:col-span-2"><label for="parents_names" class="block text-sm font-medium text-slate-700 mb-1">Husband & Wife's parents names<span class="mandatory-star" id="parents_names_star">*</span></label><input type="text" id="parents_names" name="parents_names" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
                                 </div>
                                 <div class="mt-8">
                                     <button type="submit" class="w-full bg-custom-deep-purple text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity text-lg font-semibold shadow-md">
-                                        Send Secure Message
+                                        Save and Generate PDF
                                     </button>
                                 </div>
                             </div>
                         </form>
                         <div id="form-success-message" class="hidden mt-6 text-center p-4 bg-green-100 text-green-800 rounded-lg">
-                            Thank you! Your message has been sent securely.
+                            Thank you! Your submission PDF has been downloaded.
                         </div>
                     </div>
                 </div>
@@ -238,21 +226,18 @@
 
             <section id="donate" class="py-20 md:py-28">
                 <div class="container mx-auto px-6 text-center">
-                    <h3 class="text-3xl md:text-4xl font-bold text-slate-900 scroll-fade-in">Support Our Mission</h3>
-                    <p class="text-lg text-slate-600 max-w-2xl mx-auto mt-4 mb-8 scroll-fade-in">
-                        Your generous contribution allows us to continue offering our services free of charge, helping couples build stronger, healthier homes in our community.
+                    <h3 class="text-3xl md:text-4xl font-bold text-slate-900">Support Our Mission</h3>
+                    <p class="text-lg text-slate-600 max-w-2xl mx-auto mt-4 mb-8">
+                        Your generous contribution allows us to continue offering our services free of charge.
                     </p>
-                    <div class="scroll-fade-in">
-                        <a href="#" class="bg-custom-deep-purple text-white px-10 py-4 rounded-lg hover:opacity-90 transition-opacity text-xl font-bold shadow-lg">
-                            Click Here to Donate
-                        </a>
-                    </div>
+                    <a href="donate.html" class="bg-custom-deep-purple text-white px-10 py-4 rounded-lg hover:opacity-90 transition-opacity text-xl font-bold shadow-lg">
+                        Click Here to Donate
+                    </a>
                 </div>
             </section>
         </div>
     </main>
 
-    <!-- Footer -->
     <footer class="bg-custom-slate-gray text-slate-300 relative z-20">
         <div class="container mx-auto px-6 py-8 text-center">
             <p>&copy; 2025 Binyan Shalem. All Rights Reserved.</p>
@@ -262,96 +247,141 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // --- Basic Page Setup ---
             const header = document.getElementById('main-header');
             const mobileMenuButton = document.getElementById('mobile-menu-button');
             const mobileMenu = document.getElementById('mobile-menu');
 
-            // Header scroll effect
             window.addEventListener('scroll', () => {
-                if (window.scrollY > 50) {
-                    header.classList.add('scrolled');
-                } else {
-                    header.classList.remove('scrolled');
-                }
+                header.classList.toggle('scrolled', window.scrollY > 50);
             });
 
-            // Mobile menu toggle
             mobileMenuButton.addEventListener('click', () => {
                 mobileMenu.classList.toggle('hidden');
             });
 
-            // Close mobile menu when a link is clicked
             document.querySelectorAll('#mobile-menu a, #main-header nav a').forEach(link => {
                 link.addEventListener('click', () => {
-                    if(mobileMenu.classList.contains('hidden') === false) {
+                    if (!mobileMenu.classList.contains('hidden')) {
                        mobileMenu.classList.add('hidden');
                     }
                 });
             });
 
-            // Scroll-fade-in animation observer
-            const fadeObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                    }
-                });
-            }, { threshold: 0.1 });
-
-            document.querySelectorAll('.scroll-fade-in').forEach(el => {
-                fadeObserver.observe(el);
-            });
-
-            // Active nav link on scroll observer
+            // --- Active Nav Link on Scroll ---
             const sections = document.querySelectorAll('main section');
             const navLinks = document.querySelectorAll('.nav-link');
-            
-            // Set 'Home' as active by default
             document.querySelector('.nav-link[href="#home"]').classList.add('active');
-
 
             const sectionObserver = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         const id = entry.target.getAttribute('id');
-                        navLinks.forEach(link => {
-                            link.classList.remove('active');
-                        });
-                        document.querySelector(`.nav-link[href="#${id}"]`).classList.add('active');
+                        navLinks.forEach(link => link.classList.remove('active'));
+                        document.querySelector(`.nav-link[href="#${id}"]`)?.classList.add('active');
                     }
                 });
-            }, { 
-                rootMargin: "-30% 0px -60% 0px" // Triggers when a section is in the upper part of the viewport
-            }); 
+            }, { rootMargin: "-30% 0px -60% 0px" });
 
-            sections.forEach(section => {
-                sectionObserver.observe(section);
-            });
+            sections.forEach(section => sectionObserver.observe(section));
             
-            // Multi-step form logic
+            // --- Multi-step Form Logic ---
             const contactForm = document.getElementById('contact-form');
             const relationshipStep = document.getElementById('relationship-step');
             const coupleDetailsForm = document.getElementById('couple-details-form');
             
+            const mandatoryForHusbandWife = ['husband_cell', 'wife_cell', 'husband_age', 'wife_age', 'address', 'years_married', 'kids_count', 'parents_names'];
+            const mandatoryForSomeoneElse = ['issue']; // All others are optional for this case
+
+            function setRequiredFields(submitterType) {
+                const allFields = [...mandatoryForHusbandWife, ...mandatoryForSomeoneElse, 'husband_name', 'wife_name', 'relationship', 'issue'];
+                
+                // Reset all fields first
+                allFields.forEach(id => {
+                    const el = document.getElementById(id);
+                    if(el) {
+                        el.required = false;
+                        const star = document.getElementById(`${id}_star`);
+                        if (star) star.style.display = 'none';
+                    }
+                });
+                
+                // Set required based on type
+                if (submitterType === 'Husband/Wife') {
+                    [...mandatoryForHusbandWife, 'husband_name', 'wife_name', 'issue'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.required = true;
+                        const star = document.getElementById(`${id}_star`);
+                        if (star) star.style.display = 'inline';
+                    });
+                } else if (submitterType === 'Someone else') {
+                    ['relationship', 'husband_name', 'wife_name', 'issue'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.required = true;
+                    });
+                }
+            }
+            
             contactForm.elements.submitter.forEach(radio => {
                 radio.addEventListener('change', (event) => {
                     const value = event.target.value;
-                    if (value === 'Husband/Wife') {
-                        relationshipStep.classList.remove('active');
-                        coupleDetailsForm.classList.add('active');
-                    } else if (value === 'Someone else') {
+                    coupleDetailsForm.classList.add('active');
+                    if (value === 'Someone else') {
                         relationshipStep.classList.add('active');
-                        coupleDetailsForm.classList.add('active');
+                    } else {
+                        relationshipStep.classList.remove('active');
                     }
+                    setRequiredFields(value);
                 });
             });
 
-
-            // Handle form submission
+            // --- PDF Generation on Submit ---
             const successMessage = document.getElementById('form-success-message');
             contactForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-                // In a real application, you would collect and send form data here.
+                if (!contactForm.checkValidity()) {
+                    contactForm.reportValidity();
+                    return;
+                }
+
+                // In a real application, you would send this data to a server.
+                // Here, we generate a PDF for the user to download.
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                const formData = new FormData(contactForm);
+                const husbandName = formData.get('husband_name') || 'Unknown';
+                const wifeName = formData.get('wife_name') || 'Unknown';
+                const husbandLastName = husbandName.split(' ').pop();
+                const pdfTitle = `Binyan Shalem Intake - ${husbandName} & ${wifeName}`;
+                const fileName = `Intake - ${husbandName} - ${wifeName}.pdf`;
+
+                doc.setFontSize(18);
+                doc.text(pdfTitle, 14, 22);
+                doc.setFontSize(11);
+                doc.setTextColor(100);
+                doc.text(`Submission Date: ${new Date().toLocaleDateString()}`, 14, 30);
+                
+                const tableData = [];
+                const headers = [['Field', 'Response']];
+                
+                for (const [key, value] of formData.entries()) {
+                    if (value) {
+                        const label = document.querySelector(`[for=${key}]`)?.textContent.replace('*','').trim() || key;
+                        tableData.push([label, value]);
+                    }
+                }
+                
+                doc.autoTable({
+                    head: headers,
+                    body: tableData,
+                    startY: 40,
+                    theme: 'grid',
+                    headStyles: { fillColor: [114, 51, 88] }, // custom-deep-purple
+                });
+                
+                doc.save(fileName);
+                
                 contactForm.style.display = 'none';
                 successMessage.classList.remove('hidden');
             });
