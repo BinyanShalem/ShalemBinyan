@@ -6,12 +6,11 @@
     <title>Refuah Berurah - Production Ready</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/lucide-react@0.292.0/dist/lucide-react.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
         .transition-all { transition: all 0.3s ease-in-out; }
@@ -22,6 +21,10 @@
         .loading-overlay { position: absolute; inset: 0; background-color: rgba(255, 255, 255, 0.8); display: flex; align-items: center; justify-content: center; z-index: 10; }
         #initial-loader { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
         .spinner { width: 16px; height: 16px; border: 2px solid #fff; border-bottom-color: transparent; border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 1s linear infinite; }
+        
+        /* Styles for mobile navigation */
+        #mobile-menu { transform: translateX(-100%); }
+        #mobile-menu.open { transform: translateX(0); }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -54,7 +57,7 @@
 
         // =================================================================================
         // --- App State ---
-        let app, auth, db, storage, userId;
+        let app, auth, db, userId;
         const appId = 'refuah-berurah-prod';
         // --- ROUTER: Handles navigation within the single-page application ---
         const AppRouter = {
@@ -98,7 +101,7 @@
             addResource: (resourceData) => db.collection(`artifacts/${appId}/users/${userId}/resources`).add(resourceData),
             deleteResource: (resourceId) => db.collection(`artifacts/${appId}/users/${userId}/resources`).doc(resourceId).delete(),
         };
-        // --- GLOBAL MODAL HELPER ---
+        // --- GLOBAL MODAL HELPERS ---
         window.showConfirmModal = (title, message, onConfirm) => {
             const modal = document.getElementById('confirm-modal');
             if (!modal) return;
@@ -113,6 +116,7 @@
             modal.classList.remove('hidden');
             if (window.lucide) window.lucide.createIcons({ nodes: [modal.querySelector('[data-lucide]')] });
         };
+
         // --- COMPONENTS ---
         const Layout = {
             render(content, activeLink) {
@@ -121,16 +125,37 @@
                     { path: '/patients', icon: 'Users', label: 'Patients' },
                     { path: '/resources', icon: 'BookMarked', label: 'Resources' },
                 ];
+                const navLinksHtml = navLinks.map(link => `<li><a href="#${link.path}" class="flex items-center p-3 rounded-lg text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-all ${activeLink === link.label ? 'bg-blue-100 text-blue-700 font-semibold' : ''}"><svg class="w-5 h-5 mr-3" data-lucide="${link.icon.toLowerCase()}"></svg>${link.label}</a></li>`).join('');
+
                 return `
                     <div class="min-h-screen flex">
-                        <nav class="w-64 bg-white border-r border-gray-200 flex-shrink-0 flex flex-col">
+                        <!-- Desktop Sidebar -->
+                        <nav class="hidden md:flex w-64 bg-white border-r border-gray-200 flex-shrink-0 flex-col">
                             <div class="h-16 flex items-center justify-center border-b border-gray-200"><h1 class="text-2xl font-bold text-blue-600">Refuah Berurah</h1></div>
-                            <div class="p-4 flex-grow"><ul>
-                                ${navLinks.map(link => `<li><a href="#${link.path}" class="flex items-center p-3 rounded-lg text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-all ${activeLink === link.label ? 'bg-blue-100 text-blue-700 font-semibold' : ''}"><svg class="w-5 h-5 mr-3" data-lucide="${link.icon.toLowerCase()}"></svg>${link.label}</a></li>`).join('')}
-                            </ul></div>
+                            <div class="p-4 flex-grow"><ul>${navLinksHtml}</ul></div>
                             <div class="p-4 border-t border-gray-200"><a href="#" id="logout-btn" class="flex items-center p-3 rounded-lg text-gray-600 hover:bg-red-50 hover:text-red-600 transition-all"><svg class="w-5 h-5 mr-3" data-lucide="log-out"></svg>Logout</a></div>
                         </nav>
-                        <main class="flex-1 bg-gray-50 p-6 sm:p-8 overflow-y-auto relative">${content}</main>
+                        
+                        <!-- Mobile Menu -->
+                        <div id="mobile-menu-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
+                        <nav id="mobile-menu" class="fixed top-0 left-0 h-full w-64 bg-white z-40 flex flex-col transition-all md:hidden">
+                             <div class="h-16 flex items-center justify-between border-b border-gray-200 px-4">
+                                <h1 class="text-xl font-bold text-blue-600">Refuah Berurah</h1>
+                                <button id="close-mobile-menu-btn" class="p-2"><svg class="w-6 h-6" data-lucide="x"></svg></button>
+                             </div>
+                            <div class="p-4 flex-grow"><ul>${navLinksHtml}</ul></div>
+                            <div class="p-4 border-t border-gray-200"><a href="#" id="mobile-logout-btn" class="flex items-center p-3 rounded-lg text-gray-600 hover:bg-red-50 hover:text-red-600 transition-all"><svg class="w-5 h-5 mr-3" data-lucide="log-out"></svg>Logout</a></div>
+                        </nav>
+
+                        <div class="flex-1 flex flex-col">
+                            <!-- Mobile Header -->
+                            <header class="md:hidden h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4">
+                                <button id="open-mobile-menu-btn" class="p-2"><svg class="w-6 h-6" data-lucide="menu"></svg></button>
+                                <h1 class="text-xl font-bold text-blue-600">Refuah Berurah</h1>
+                                <div class="w-8"></div> <!-- Spacer -->
+                            </header>
+                            <main class="flex-1 bg-gray-50 p-6 sm:p-8 overflow-y-auto relative">${content}</main>
+                        </div>
                     </div>
                     ${this.renderConfirmModal()}
                 `;
@@ -152,8 +177,28 @@
             },
             postRender() {
                 if (window.lucide) window.lucide.createIcons();
-                const logoutBtn = document.getElementById('logout-btn');
-                if (logoutBtn) logoutBtn.addEventListener('click', async (e) => { e.preventDefault(); await auth.signOut(); });
+                const logout = async (e) => { e.preventDefault(); await auth.signOut(); };
+                document.getElementById('logout-btn')?.addEventListener('click', logout);
+                document.getElementById('mobile-logout-btn')?.addEventListener('click', logout);
+                
+                // Mobile menu logic
+                const mobileMenu = document.getElementById('mobile-menu');
+                const overlay = document.getElementById('mobile-menu-overlay');
+                const openBtn = document.getElementById('open-mobile-menu-btn');
+                const closeBtn = document.getElementById('close-mobile-menu-btn');
+
+                const openMenu = () => {
+                    mobileMenu.classList.add('open');
+                    overlay.classList.remove('hidden');
+                };
+                const closeMenu = () => {
+                    mobileMenu.classList.remove('open');
+                    overlay.classList.add('hidden');
+                };
+
+                openBtn?.addEventListener('click', openMenu);
+                closeBtn?.addEventListener('click', closeMenu);
+                overlay?.addEventListener('click', closeMenu);
             }
         };
         const LoginComponent = {
@@ -311,35 +356,52 @@
             postRender() {
                 Layout.postRender();
                 const container = document.getElementById('patients-container');
-                FirestoreDB.getPatients(querySnapshot => {
-                    if (!container) return;
-                    container.innerHTML = `
-                        <div class="space-y-6">
-                            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-                                <div><h2 class="text-3xl font-bold text-gray-800">Patients</h2><p class="mt-1 text-gray-500">Manage your patient records.</p></div>
-                                <button id="add-patient-btn" class="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition-all w-full sm:w-auto"><svg class="w-5 h-5 mr-2" data-lucide="user-plus"></svg>Add Patient</button>
-                            </div>
-                            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                                <div class="p-4 border-b"><input id="search-patient" type="text" placeholder="Search patients by name..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"></div>
-                                <div id="patient-list" class="divide-y divide-gray-200"></div>
-                            </div>
-                        </div>`;
-                    
-                    this.renderPatientList(querySnapshot.docs);
-                    
-                    const modal = document.getElementById('patient-modal');
-                    const form = document.getElementById('patient-form');
+                if (!container) return;
+
+                // Render the static shell of the page
+                container.innerHTML = `
+                    <div class="space-y-6">
+                        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div><h2 class="text-3xl font-bold text-gray-800">Patients</h2><p class="mt-1 text-gray-500">Manage your patient records.</p></div>
+                            <button id="add-patient-btn" class="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition-all w-full sm:w-auto"><svg class="w-5 h-5 mr-2" data-lucide="user-plus"></svg>Add Patient</button>
+                        </div>
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                            <div class="p-4 border-b"><input id="search-patient" type="text" placeholder="Search patients by name..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"></div>
+                            <div id="patient-list" class="divide-y divide-gray-200"><div class="p-6 text-center text-gray-500">Loading patients...</div></div>
+                        </div>
+                    </div>`;
+
+                // Set up modal listeners ONCE
+                const modal = document.getElementById('patient-modal');
+                const form = document.getElementById('patient-form');
+                if (modal && form) {
                     document.getElementById('add-patient-btn').addEventListener('click', () => modal.classList.remove('hidden'));
                     document.getElementById('cancel-patient-btn').addEventListener('click', () => modal.classList.add('hidden'));
-                    form.addEventListener('submit', async (e) => {
+                    
+                    form.onsubmit = async (e) => {
                         e.preventDefault();
                         await FirestoreDB.addPatient({ name: form.name.value, dob: form.dob.value, contact: form.contact.value, mypageLink: '', linkedResourceIds: [] });
                         modal.classList.add('hidden');
                         form.reset();
-                    });
-                    document.getElementById('search-patient').addEventListener('input', (e) => this.renderPatientList(querySnapshot.docs, e.target.value));
-                    if(window.lucide) window.lucide.createIcons();
+                    };
+                }
+
+                let patientDocs = []; // Keep a local copy for searching
+
+                // Set up the Firestore listener to ONLY update the list
+                FirestoreDB.getPatients(querySnapshot => {
+                    patientDocs = querySnapshot.docs;
+                    const searchInput = document.getElementById('search-patient');
+                    const currentFilter = searchInput ? searchInput.value : '';
+                    this.renderPatientList(patientDocs, currentFilter);
                 });
+
+                // Set up search listener ONCE
+                document.getElementById('search-patient').addEventListener('input', (e) => {
+                    this.renderPatientList(patientDocs, e.target.value);
+                });
+
+                if(window.lucide) window.lucide.createIcons();
             },
             renderPatientList(patients, filter = '') {
                 const filteredPatients = patients.filter(p => p.data().name.toLowerCase().includes(filter.toLowerCase()));
@@ -384,6 +446,7 @@
                         </div>
                     </div>
                     ${GoFileUploader.renderModal()}
+                    ${ResourcesComponent.renderModals(true)} 
                 `;
             },
             postRender(params) {
@@ -454,15 +517,21 @@
                             <div class="divide-y divide-gray-200">${(patient.files || []).map((file, index) => `
                                 <div class="p-4 hover:bg-gray-50">
                                     <div class="flex items-center justify-between">
-                                        <div class="flex items-center min-w-0">
+                                        <div class="flex items-center min-w-0 cursor-pointer view-file-link" data-url="${file.url}">
                                             <svg class="w-6 h-6 text-purple-500 mr-4 flex-shrink-0" data-lucide="share-2"></svg>
                                             <div class="min-w-0">
                                                 <p class="font-medium text-gray-800 truncate">${file.name}</p>
                                                 <p class="text-sm text-gray-500">Stored via GoFile</p>
                                             </div>
                                         </div>
-                                        <div class="flex items-center gap-2 ml-4 flex-shrink-0">
-                                            <a href="${file.url}" target="_blank" class="bg-blue-100 text-blue-700 px-3 py-1 rounded-md text-sm hover:bg-blue-200">View File</a>
+                                        <div class="relative">
+                                            <button class="file-actions-btn p-2 rounded-full hover:bg-gray-200" data-index="${index}">
+                                                <svg class="w-5 h-5 text-gray-600" data-lucide="more-vertical"></svg>
+                                            </button>
+                                            <div id="file-actions-dropdown-${index}" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border">
+                                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 view-file-link" data-url="${file.url}">View File</a>
+                                                <a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 delete-file-link" data-index="${index}">Delete File</a>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="mt-4 pl-10">
@@ -483,6 +552,36 @@
                         GoFileUploader.openModal(patient);
                     });
                     
+                    document.querySelectorAll('.view-file-link').forEach(link => {
+                        link.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            window.open(e.currentTarget.dataset.url, '_blank');
+                        });
+                    });
+
+                    document.querySelectorAll('.delete-file-link').forEach(link => {
+                        link.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            const fileIndex = parseInt(e.currentTarget.dataset.index, 10);
+                            const fileName = (patient.files[fileIndex] || {}).name;
+                            window.showConfirmModal('Delete File?', `Are you sure you want to delete the file "${fileName}"?`, async () => {
+                                const updatedFiles = patient.files.filter((_, i) => i !== fileIndex);
+                                await FirestoreDB.savePatient(patient.id, { files: updatedFiles });
+                            });
+                        });
+                    });
+
+                    document.querySelectorAll('.file-actions-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            const index = e.currentTarget.dataset.index;
+                            document.querySelectorAll('[id^="file-actions-dropdown-"]').forEach(d => {
+                                if (d.id !== `file-actions-dropdown-${index}`) d.classList.add('hidden');
+                            });
+                            document.getElementById(`file-actions-dropdown-${index}`).classList.toggle('hidden');
+                        });
+                    });
+
                     document.querySelectorAll('.add-file-note-form').forEach(form => {
                         form.addEventListener('submit', async (e) => {
                             e.preventDefault();
@@ -497,7 +596,6 @@
                             updatedFiles[fileIndex].notes.push(noteText);
                             
                             await FirestoreDB.savePatient(patient.id, { files: updatedFiles });
-                            // The onSnapshot listener will re-render the UI, including the new note.
                         });
                     });
 
@@ -518,7 +616,7 @@
                         
                         tabContentAfterFetch.innerHTML = `<div class="space-y-6">
                             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4"><h3 class="font-semibold text-lg">Patient MyPage Link</h3><div class="flex gap-2 mt-2"><input type="url" id="mypage-link-input" class="input flex-grow" value="${patient.mypageLink || ''}" placeholder="https://example.com/patient-page"><button id="save-mypage-link" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">Save</button></div></div>
-                            <div class="bg-white rounded-lg shadow-sm border border-gray-200"><div class="p-4 border-b flex justify-between items-center"><h3 class="font-semibold text-lg">Linked Resources</h3><button id="open-link-resource-modal" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm">Link New Resource</button></div><div class="divide-y divide-gray-200">${linkedResources.map(resource => `<div class="p-4 flex items-center justify-between"><div class="flex-1 min-w-0">${resource.type === 'article' ? `<p class="font-semibold text-green-700">${resource.title}</p><p class="text-sm text-gray-600">${resource.summary}</p><a href="${resource.link}" target="_blank" class="text-xs text-blue-500">Read Article</a>` : `<p class="font-semibold text-green-700">${resource.name}</p><p class="text-sm text-gray-600">Specialty: ${resource.specialty}</p><p class="text-sm text-gray-600">Contact: ${resource.contact}</p>`}</div><button data-id="${resource.id}" class="unlink-resource-btn text-gray-400 hover:text-red-500 p-2 rounded-full"><svg class="w-5 h-5" data-lucide="unlink-2"></svg></button></div>`).join('') || '<p class="p-4 text-gray-500">No resources linked.</p>'}</div></div>
+                            <div class="bg-white rounded-lg shadow-sm border border-gray-200"><div class="p-4 border-b flex justify-between items-center gap-4"><h3 class="font-semibold text-lg">Linked Resources</h3><div class="flex gap-2"><button id="open-link-resource-modal" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">Link Existing</button><button id="create-link-resource-modal-btn" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm">Create & Link New</button></div></div><div class="divide-y divide-gray-200">${linkedResources.map(resource => `<div class="p-4 flex items-center justify-between"><div class="flex-1 min-w-0">${resource.type === 'article' ? `<p class="font-semibold text-green-700">${resource.title}</p><p class="text-sm text-gray-600">${resource.summary}</p><a href="${resource.link}" target="_blank" class="text-xs text-blue-500">Read Article</a>` : `<p class="font-semibold text-green-700">${resource.name}</p><p class="text-sm text-gray-600">Specialty: ${resource.specialty}</p><p class="text-sm text-gray-600">Contact: ${resource.contact}</p>`}</div><button data-id="${resource.id}" class="unlink-resource-btn text-gray-400 hover:text-red-500 p-2 rounded-full"><svg class="w-5 h-5" data-lucide="unlink-2"></svg></button></div>`).join('') || '<p class="p-4 text-gray-500">No resources linked.</p>'}</div></div>
                         </div>`;
                         
                         document.getElementById('save-mypage-link').addEventListener('click', async () => { await FirestoreDB.savePatient(patient.id, { mypageLink: document.getElementById('mypage-link-input').value }); alert('Link saved!'); });
@@ -526,6 +624,9 @@
                             const modal = document.getElementById('link-resource-modal');
                             document.getElementById('resource-link-list').innerHTML = allResources.map(r => `<label class="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50"><div><p class="font-semibold">${r.title || r.name}</p><p class="text-sm text-gray-500">${r.summary || r.specialty}</p></div><input type="checkbox" value="${r.id}" class="resource-link-checkbox h-5 w-5 rounded" ${(patient.linkedResourceIds || []).includes(r.id) ? 'checked' : ''}></label>`).join('');
                             modal.classList.remove('hidden');
+                        });
+                        document.getElementById('create-link-resource-modal-btn').addEventListener('click', () => {
+                            ResourcesComponent.openModal(patient.id);
                         });
                         document.querySelectorAll('.unlink-resource-btn').forEach(btn => btn.addEventListener('click', async (e) => { const resourceId = e.currentTarget.dataset.id; await FirestoreDB.savePatient(patient.id, { linkedResourceIds: (patient.linkedResourceIds || []).filter(id => id !== resourceId) }); }));
                         document.getElementById('cancel-link-resource-btn').addEventListener('click', () => document.getElementById('link-resource-modal').classList.add('hidden'));
@@ -539,63 +640,112 @@
 
         const ResourcesComponent = {
             render() { return Layout.render(`<div id="resources-container"><div class="loading-overlay"><div class="loader"></div></div></div>`, 'Resources'); },
-            renderModals() {
+            renderModals(isForPatientPage = false) {
+                const modalId = isForPatientPage ? "resource-modal-patient" : "resource-modal";
                 return `
-                    <div id="resource-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
-                        <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-lg"><h3 class="text-2xl font-bold mb-4">Add New Resource</h3><form id="resource-form" class="space-y-4">
-                            <div><label for="type" class="block text-sm font-medium text-gray-700">Resource Type</label><select id="type" class="input mt-1"><option value="article">Article</option><option value="doctor">Doctor</option></select></div>
-                            <div id="form-fields" class="space-y-4"></div>
-                            <div class="mt-6 flex justify-end space-x-3"><button type="button" id="cancel-resource-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg">Cancel</button><button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg">Save Resource</button></div>
+                    <div id="${modalId}" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
+                        <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-lg"><h3 class="text-2xl font-bold mb-4">Add New Resource</h3><form id="${modalId}-form" class="space-y-4">
+                            <div><label for="${modalId}-type" class="block text-sm font-medium text-gray-700">Resource Type</label><select id="${modalId}-type" class="input mt-1"><option value="article">Article</option><option value="doctor">Doctor</option></select></div>
+                            <div id="${modalId}-form-fields" class="space-y-4"></div>
+                            <div><label for="${modalId}-link-patients" class="block text-sm font-medium text-gray-700">Link to Patients (optional)</label><select id="${modalId}-link-patients" multiple class="input mt-1 h-32"></select></div>
+                            <div class="mt-6 flex justify-end space-x-3"><button type="button" id="${modalId}-cancel-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg">Cancel</button><button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg">Save Resource</button></div>
                         </form></div>
                     </div>`;
+            },
+            openModal(preselectedPatientId = null) {
+                const isPatientContext = !!preselectedPatientId;
+                const modalId = isPatientContext ? "resource-modal-patient" : "resource-modal";
+                const modal = document.getElementById(modalId);
+                if (!modal) return;
+
+                const linkPatientsSelect = document.getElementById(`${modalId}-link-patients`);
+                
+                // Populate patients dropdown
+                FirestoreDB.getPatients(snapshot => {
+                    const patients = [];
+                    snapshot.forEach(doc => patients.push({id: doc.id, ...doc.data()}));
+                    linkPatientsSelect.innerHTML = patients.map(p => `<option value="${p.id}" ${p.id === preselectedPatientId ? 'selected' : ''}>${p.name}</option>`).join('');
+                });
+                
+                modal.classList.remove('hidden');
             },
             postRender() {
                 Layout.postRender();
                 const container = document.getElementById('resources-container');
-                FirestoreDB.getResources(querySnapshot => {
-                    if (!container) return;
-                    container.innerHTML = `
-                        <div class="space-y-6">
-                            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-                                <div><h2 class="text-3xl font-bold text-gray-800">Resources</h2><p class="mt-1 text-gray-500">A general database for articles, doctors, and more.</p></div>
-                                <button id="add-resource-btn" class="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-green-700 transition-all w-full sm:w-auto"><svg class="w-5 h-5 mr-2" data-lucide="plus-circle"></svg>Add Resource</button>
-                            </div>
-                            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                                <div class="p-4 border-b"><input id="search-resource" type="text" placeholder="Search resources..." class="w-full px-3 py-2 border border-gray-300 rounded-md"></div>
-                                <div id="resource-list" class="divide-y divide-gray-200"></div>
-                            </div>
-                        </div>`;
-                    
-                    this.renderResourceList(querySnapshot.docs);
-                    
-                    const modal = document.getElementById('resource-modal');
-                    const form = document.getElementById('resource-form');
-                    const typeSelect = document.getElementById('type');
-                    const formFields = document.getElementById('form-fields');
+                if (!container) return;
+
+                container.innerHTML = `
+                    <div class="space-y-6">
+                        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div><h2 class="text-3xl font-bold text-gray-800">Resources</h2><p class="mt-1 text-gray-500">A general database for articles, doctors, and more.</p></div>
+                            <button id="add-resource-btn" class="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-green-700 transition-all w-full sm:w-auto"><svg class="w-5 h-5 mr-2" data-lucide="plus-circle"></svg>Add Resource</button>
+                        </div>
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                            <div class="p-4 border-b"><input id="search-resource" type="text" placeholder="Search resources..." class="w-full px-3 py-2 border border-gray-300 rounded-md"></div>
+                            <div id="resource-list" class="divide-y divide-gray-200"><div class="p-6 text-center text-gray-500">Loading resources...</div></div>
+                        </div>
+                    </div>`;
+
+                const setupModal = (modalId) => {
+                    const modal = document.getElementById(modalId);
+                    if (!modal) return;
+                    const form = document.getElementById(`${modalId}-form`);
+                    const typeSelect = document.getElementById(`${modalId}-type`);
+                    const formFields = document.getElementById(`${modalId}-form-fields`);
+                    const linkPatientsSelect = document.getElementById(`${modalId}-link-patients`);
+
                     const getFormFields = (type) => {
-                        if (type === 'article') return `<div><label for="title" class="block text-sm">Title</label><input type="text" id="title" required class="input"></div><div><label for="link" class="block text-sm">Link</label><input type="url" id="link" required class="input"></div><div><label for="summary" class="block text-sm">Summary</label><textarea id="summary" class="input"></textarea></div>`;
-                        if (type === 'doctor') return `<div><label for="name" class="block text-sm">Doctor's Name</label><input type="text" id="name" required class="input"></div><div><label for="specialty" class="block text-sm">Specialty</label><input type="text" id="specialty" required class="input"></div><div><label for="contact" class="block text-sm">Contact Info</label><input type="text" id="contact" required class="input"></div>`;
+                        if (type === 'article') return `<div><label for="${modalId}-title" class="block text-sm">Title</label><input type="text" id="${modalId}-title" required class="input"></div><div><label for="${modalId}-link" class="block text-sm">Link</label><input type="url" id="${modalId}-link" required class="input"></div><div><label for="${modalId}-summary" class="block text-sm">Summary</label><textarea id="${modalId}-summary" class="input"></textarea></div>`;
+                        if (type === 'doctor') return `<div><label for="${modalId}-name" class="block text-sm">Doctor's Name</label><input type="text" id="${modalId}-name" required class="input"></div><div><label for="${modalId}-specialty" class="block text-sm">Specialty</label><input type="text" id="${modalId}-specialty" required class="input"></div><div><label for="${modalId}-contact" class="block text-sm">Contact Info</label><input type="text" id="${modalId}-contact" required class="input"></div>`;
                         return '';
                     };
                     const updateFormFields = () => { if(formFields) formFields.innerHTML = getFormFields(typeSelect.value); };
+                    
                     typeSelect.addEventListener('change', updateFormFields);
                     updateFormFields();
-                    document.getElementById('add-resource-btn').addEventListener('click', () => modal.classList.remove('hidden'));
-                    document.getElementById('cancel-resource-btn').addEventListener('click', () => modal.classList.add('hidden'));
-                    form.addEventListener('submit', async (e) => {
+                    document.getElementById(`${modalId}-cancel-btn`).addEventListener('click', () => modal.classList.add('hidden'));
+
+                    form.onsubmit = async (e) => {
                         e.preventDefault();
                         const type = typeSelect.value;
                         let resourceData = { type };
-                        if (type === 'article') resourceData = { ...resourceData, title: form.title.value, link: form.link.value, summary: form.summary.value };
-                        if (type === 'doctor') resourceData = { ...resourceData, name: form.name.value, specialty: form.specialty.value, contact: form.contact.value };
-                        await FirestoreDB.addResource(resourceData);
+                        if (type === 'article') resourceData = { ...resourceData, title: document.getElementById(`${modalId}-title`).value, link: document.getElementById(`${modalId}-link`).value, summary: document.getElementById(`${modalId}-summary`).value };
+                        if (type === 'doctor') resourceData = { ...resourceData, name: document.getElementById(`${modalId}-name`).value, specialty: document.getElementById(`${modalId}-specialty`).value, contact: document.getElementById(`${modalId}-contact`).value };
+                        
+                        const newResource = await FirestoreDB.addResource(resourceData);
+                        
+                        const selectedPatientIds = Array.from(linkPatientsSelect.selectedOptions).map(opt => opt.value);
+                        
+                        for (const patientId of selectedPatientIds) {
+                            const patientDoc = await db.collection(`artifacts/${appId}/users/${userId}/patients`).doc(patientId).get();
+                            if (patientDoc.exists) {
+                                const patientData = patientDoc.data();
+                                const linkedResourceIds = [...(patientData.linkedResourceIds || []), newResource.id];
+                                await FirestoreDB.savePatient(patientId, { linkedResourceIds });
+                            }
+                        }
+
                         modal.classList.add('hidden');
                         form.reset();
                         updateFormFields();
-                    });
-                    document.getElementById('search-resource').addEventListener('input', (e) => this.renderResourceList(querySnapshot.docs, e.target.value));
-                    if(window.lucide) window.lucide.createIcons();
+                    };
+                };
+                
+                setupModal("resource-modal");
+                setupModal("resource-modal-patient");
+
+                document.getElementById('add-resource-btn')?.addEventListener('click', () => this.openModal());
+
+                let resourceDocs = [];
+                FirestoreDB.getResources(querySnapshot => {
+                    resourceDocs = querySnapshot.docs;
+                    const searchInput = document.getElementById('search-resource');
+                    const currentFilter = searchInput ? searchInput.value : '';
+                    this.renderResourceList(resourceDocs, currentFilter);
                 });
+
+                document.getElementById('search-resource')?.addEventListener('input', (e) => this.renderResourceList(resourceDocs, e.target.value));
+                if(window.lucide) window.lucide.createIcons();
             },
             renderResourceList(resources, filter = '') {
                 const filteredResources = resources.filter(doc => JSON.stringify(doc.data()).toLowerCase().includes(filter.toLowerCase()));
@@ -793,7 +943,6 @@
                 app = firebase.initializeApp(firebaseConfig);
                 auth = firebase.auth();
                 db = firebase.firestore();
-                storage = firebase.storage();
                 AppRouter.init();
                 AppRouter.addRoute('/', LoginComponent);
                 AppRouter.addRoute('/dashboard', DashboardComponent);
@@ -816,6 +965,16 @@
                         AppRouter.handleRouteChange();
                     }
                 });
+
+                // Close dropdowns if clicked outside
+                window.addEventListener('click', function(e) {   
+                    document.querySelectorAll('[id^="file-actions-dropdown-"]').forEach(dropdown => {
+                        if (!dropdown.contains(e.target) && !e.target.closest('.file-actions-btn')) {
+                            dropdown.classList.add('hidden');
+                        }
+                    });
+                });
+
             } catch (e) {
                 console.error("Firebase initialization failed:", e);
                 document.getElementById('app').innerHTML = `<div class="min-h-screen flex items-center justify-center bg-red-50"><div class="text-center p-8 bg-white rounded-lg shadow-lg"><h2 class="text-2xl font-bold text-red-700">Error: Firebase Initialization Failed</h2><p class="mt-2 text-gray-600">The application could not connect to the database. Please check your Firebase configuration values.</p><p class="mt-4 text-sm text-gray-500">Details: ${e.message}</p></div></div>`;
