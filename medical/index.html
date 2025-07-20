@@ -8,11 +8,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/lucide-react@0.292.0/dist/lucide-react.min.js"></script>
     
-    <!-- Firebase SDKs (Classic Scripts) -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
         .transition-all { transition: all 0.3s ease-in-out; }
@@ -35,9 +34,7 @@
         </div>
     </div>
     <div id="modal-container">
-        <!-- Modals will be rendered here -->
-    </div>
-
+        </div>
     <script>
         // =================================================================================
         // Firebase Configuration
@@ -52,11 +49,9 @@
           measurementId: "G-0XREW3ZGYZ"
         };
         // =================================================================================
-
         // --- App State ---
-        let app, auth, db, userId;
+        let app, auth, db, storage, userId;
         const appId = 'refuah-berurah-prod';
-
         // --- ROUTER: Handles navigation within the single-page application ---
         const AppRouter = {
             routes: {},
@@ -68,7 +63,6 @@
             handleRouteChange() {
                 const hash = window.location.hash.slice(1) || '/';
                 if (this.currentRoute === hash && !hash.startsWith('/patient/')) return;
-
                 const routeParts = hash.split('/');
                 let component;
                 let params = {};
@@ -79,7 +73,6 @@
                 } else {
                     component = this.routes[hash];
                 }
-
                 if (component) {
                     this.currentRoute = hash;
                     document.getElementById('app').innerHTML = component.render(params);
@@ -91,7 +84,6 @@
             },
             navigate(path) { window.location.hash = path; }
         };
-
         // --- Firestore Database Layer ---
         const FirestoreDB = {
             getPatients: (callback) => db.collection(`artifacts/${appId}/users/${userId}/patients`).onSnapshot(callback),
@@ -102,7 +94,6 @@
             addResource: (resourceData) => db.collection(`artifacts/${appId}/users/${userId}/resources`).add(resourceData),
             deleteResource: (resourceId) => db.collection(`artifacts/${appId}/users/${userId}/resources`).doc(resourceId).delete(),
         };
-
         // --- GLOBAL MODAL HELPER ---
         window.showConfirmModal = (title, message, onConfirm) => {
             const modal = document.getElementById('confirm-modal');
@@ -118,9 +109,7 @@
             modal.classList.remove('hidden');
             if (window.lucide) window.lucide.createIcons({ nodes: [modal.querySelector('[data-lucide]')] });
         };
-
         // --- COMPONENTS ---
-
         const Layout = {
             render(content, activeLink) {
                 const navLinks = [
@@ -163,15 +152,13 @@
                 if (logoutBtn) logoutBtn.addEventListener('click', async (e) => { e.preventDefault(); await auth.signOut(); });
             }
         };
-
         const LoginComponent = {
             render() {
                 return `
                     <div class="min-h-screen flex items-center justify-center bg-gray-100">
                         <div class="w-full max-w-md">
                             <div id="auth-container" class="bg-white rounded-xl shadow-lg p-8 space-y-6">
-                                <!-- Login/Signup forms will be rendered here -->
-                            </div>
+                                </div>
                         </div>
                     </div>
                 `;
@@ -251,7 +238,6 @@
                         showSignup();
                     });
                 };
-
                 const showSignup = (error = '') => {
                     if (!authContainer) return;
                     authContainer.innerHTML = this.renderSignupForm(error);
@@ -270,11 +256,9 @@
                         showLogin();
                     });
                 };
-
                 showLogin();
             }
         };
-
         const DashboardComponent = {
             render() { return Layout.render(`<div id="dashboard-content"><div class="loading-overlay"><div class="loader"></div></div></div>`, 'Dashboard'); },
             async postRender() {
@@ -284,13 +268,11 @@
                     const countEl = document.querySelector('#patient-count');
                     if (countEl) countEl.innerText = patientCount;
                 });
-
                 FirestoreDB.getResources(resourceQuerySnapshot => {
                     const resourceCount = resourceQuerySnapshot.size;
                     const countEl = document.querySelector('#resource-count');
                     if(countEl) countEl.innerText = resourceCount;
                 });
-
                 document.getElementById('dashboard-content').innerHTML = `
                     <div class="space-y-8">
                         <div><h2 class="text-3xl font-bold text-gray-800">Dashboard</h2><p class="mt-1 text-gray-500">Welcome back! Here's a real-time summary of your workspace.</p></div>
@@ -309,7 +291,6 @@
                 if(window.lucide) window.lucide.createIcons();
             }
         };
-
         const PatientsComponent = {
             render() { return Layout.render(`<div id="patients-container"><div class="loading-overlay"><div class="loader"></div></div></div>`, 'Patients'); },
             renderModals() {
@@ -376,7 +357,6 @@
                 if (window.lucide) window.lucide.createIcons();
             },
         };
-
         const PatientDetailComponent = {
             activeTab: 'notes', 
             render() { return Layout.render(`<div id="patient-detail-container"><div class="loading-overlay"><div class="loader"></div></div></div>`, 'Patients'); },
@@ -398,15 +378,6 @@
                             <div class="flex justify-end space-x-3"><button type="button" id="cancel-link-resource-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">Cancel</button><button type="button" id="save-link-resource-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Save Links</button></div>
                         </div>
                     </div>
-                    <div id="pdf-preview-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50 p-4">
-                        <div class="bg-white rounded-lg shadow-xl w-full h-full flex flex-col">
-                           <div class="p-4 border-b flex justify-between items-center">
-                                <h3 id="pdf-title" class="text-lg font-bold">PDF Preview</h3>
-                                <button id="close-pdf-preview-btn" class="p-2 rounded-full hover:bg-gray-200"><svg class="w-6 h-6" data-lucide="x"></svg></button>
-                           </div>
-                           <iframe id="pdf-iframe" class="w-full h-full" src=""></iframe>
-                        </div>
-                    </div>
                 `;
             },
             postRender(params) {
@@ -422,7 +393,6 @@
                     
                     const tabContentEl = document.getElementById('tab-content');
                     const scrollPos = tabContentEl ? tabContentEl.scrollTop : 0;
-
                     container.innerHTML = `
                         <div class="space-y-8">
                             <div>
@@ -443,7 +413,6 @@
                     
                     const newTabContentEl = document.getElementById('tab-content');
                     if (newTabContentEl) newTabContentEl.scrollTop = scrollPos;
-
                     document.querySelectorAll('.tab-link').forEach(link => link.addEventListener('click', (e) => { 
                         e.preventDefault(); 
                         this.activeTab = e.target.dataset.tab;
@@ -455,7 +424,6 @@
             switchTab(tabName, patient) {
                 const tabContent = document.getElementById('tab-content');
                 if (!tabContent) return;
-
                 document.querySelectorAll('.tab-link').forEach(link => {
                     const isSelected = link.dataset.tab === tabName;
                     link.classList.toggle('border-blue-500', isSelected);
@@ -463,116 +431,89 @@
                     link.classList.toggle('border-transparent', !isSelected);
                     link.classList.toggle('text-gray-500', !isSelected);
                 });
-
                 if (tabName === 'notes') {
                     tabContent.innerHTML = `<div class="bg-white rounded-lg shadow-sm border border-gray-200"><div class="p-4"><form id="note-form"><textarea id="note-text" placeholder="Add a new note..." required class="w-full p-2 border border-gray-300 rounded-md"></textarea><button type="submit" class="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">Add Note</button></form></div><div class="divide-y divide-gray-200">${(patient.notes || []).sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).map(note => `<div class="p-4"><p class="text-gray-800">${note.text.replace(/\n/g, '<br>')}</p><p class="text-xs text-gray-400 mt-2">${new Date(note.timestamp).toLocaleString()}</p></div>`).join('') || '<p class="p-4 text-gray-500">No notes yet.</p>'}</div></div>`;
                     document.getElementById('note-form').addEventListener('submit', async (e) => { e.preventDefault(); const textEl = document.getElementById('note-text'); if (textEl.value.trim()) { const updatedNotes = [...(patient.notes || []), { text: textEl.value, timestamp: new Date().toISOString() }]; await FirestoreDB.savePatient(patient.id, { notes: updatedNotes }); } });
                 } else if (tabName === 'files') {
-                    // ** NEW: Hardcoded GitHub Upload UI **
                     tabContent.innerHTML = `
                         <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                            <div class="p-4 border-b space-y-4">
-                                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
-                                    <div class="flex">
-                                        <div class="flex-shrink-0"><svg class="h-5 w-5 text-yellow-400" data-lucide="alert-triangle"></svg></div>
-                                        <div class="ml-3"><p class="text-sm text-yellow-700">File uploads are configured to save to the <strong>BinyanShalem/ShalemBinyan</strong> repository. Ensure your Personal Access Token is set in the code.</p></div>
-                                    </div>
-                                </div>
+                            <div class="p-4 border-b space-y-2">
+                                <h4 class="text-lg font-semibold text-gray-800">Upload Files</h4>
+                                <p class="text-sm text-gray-500">Files are securely stored using Firebase Storage.</p>
                                 <div>
-                                    <label for="file-upload" id="file-upload-label" class="cursor-pointer inline-flex items-center bg-green-600 text-white px-4 py-2 rounded-lg text-sm"><span><svg class="w-5 h-5 mr-2" data-lucide="upload-cloud"></svg></span><span>Select & Upload PDF to GitHub</span><input id="file-upload" type="file" accept=".pdf" class="hidden"></label>
+                                    <label for="file-upload" id="file-upload-label" class="cursor-pointer inline-flex items-center bg-green-600 text-white px-4 py-2 rounded-lg text-sm shadow-sm hover:bg-green-700 transition-all">
+                                        <span><svg class="w-5 h-5 mr-2" data-lucide="upload-cloud"></svg></span>
+                                        <span>Select & Upload File</span>
+                                        <input id="file-upload" type="file" class="hidden">
+                                    </label>
                                     <p id="upload-status" class="text-sm text-gray-500 mt-2"></p>
                                 </div>
                             </div>
-                            <div class="divide-y divide-gray-200">${(patient.files || []).map(file => `<div class="p-4 flex items-center justify-between"><div class="flex items-center"><svg class="w-6 h-6 text-gray-500 mr-4 flex-shrink-0" data-lucide="file-text"></svg><div><p class="font-medium text-gray-800">${file.name}</p><p class="text-sm text-gray-500">${file.size} - Stored on GitHub</p></div></div><div class="flex items-center gap-2"><a href="${file.url}" target="_blank" class="bg-blue-100 text-blue-700 px-3 py-1 rounded-md text-sm hover:bg-blue-200">View on GitHub</a></div></div>`).join('') || '<p class="p-4 text-gray-500">No files uploaded.</p>'}</div>
+                            <div class="divide-y divide-gray-200">${(patient.files || []).map(file => `
+                                <div class="p-4 flex items-center justify-between hover:bg-gray-50">
+                                    <div class="flex items-center min-w-0">
+                                        <svg class="w-6 h-6 text-gray-500 mr-4 flex-shrink-0" data-lucide="file-text"></svg>
+                                        <div class="min-w-0">
+                                            <p class="font-medium text-gray-800 truncate">${file.name}</p>
+                                            <p class="text-sm text-gray-500">${file.size} - Stored via Firebase</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2 ml-4 flex-shrink-0">
+                                        <a href="${file.url}" target="_blank" class="bg-blue-100 text-blue-700 px-3 py-1 rounded-md text-sm hover:bg-blue-200">View File</a>
+                                    </div>
+                                </div>`).join('') || '<p class="p-4 text-center text-gray-500">No files uploaded.</p>'}
+                            </div>
                         </div>`;
                     
                     document.getElementById('file-upload').addEventListener('change', async (e) => {
                         const file = e.target.files[0];
                         if (!file) return;
 
-                        // --- GITHUB CONFIGURATION ---
-                        const owner = "BinyanShalem";
-                        const repo = "ShalemBinyan";
-                        // ** IMPORTANT: PASTE YOUR PERSONAL ACCESS TOKEN (PAT) HERE **
-                        const pat = "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"; // e.g., "ghp_YourTokenHere..."
-                        // -----------------------------
-
                         const uploadStatus = document.getElementById('upload-status');
                         const uploadLabel = document.getElementById('file-upload-label');
-
-                        if (!pat) {
-                            uploadStatus.innerText = "Error: GitHub Personal Access Token is not set in the code.";
-                            uploadStatus.classList.add('text-red-600');
-                            return;
-                        }
-                        uploadStatus.classList.remove('text-red-600');
-
                         const originalButtonText = uploadLabel.querySelector('span:last-child').innerText;
                         const originalButtonIcon = uploadLabel.querySelector('span:first-child').innerHTML;
                         
                         uploadLabel.classList.add('opacity-50', 'cursor-not-allowed');
                         uploadLabel.querySelector('span:last-child').innerText = 'Uploading...';
                         uploadLabel.querySelector('span:first-child').innerHTML = '<div class="spinner mr-2"></div>';
-                        uploadStatus.innerText = `Uploading "${file.name}" to GitHub...`;
+                        uploadStatus.innerText = `Uploading "${file.name}"...`;
+                        uploadStatus.classList.remove('text-red-600');
+                        
+                        const path = `patients/${patient.id}/${Date.now()}-${file.name}`;
+                        const storageRef = storage.ref(path);
+                        const uploadTask = storageRef.put(file);
 
-                        try {
-                            const reader = new FileReader();
-                            reader.readAsDataURL(file);
-                            reader.onload = async () => {
-                                const base64Content = reader.result.split(',')[1];
-                                const path = `patients/${patient.id}/${Date.now()}-${file.name}`; // Add timestamp to avoid overwrites
-                                const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
-
-                                const response = await fetch(url, {
-                                    method: 'PUT',
-                                    headers: {
-                                        'Authorization': `Bearer ${pat}`,
-                                        'Accept': 'application/vnd.github.v3+json',
-                                        'Content-Type': 'application/json'
-                                    },
-                                    body: JSON.stringify({
-                                        message: `Upload patient file: ${file.name} for patient ${patient.id}`,
-                                        content: base64Content
-                                    })
-                                });
-
-                                if (!response.ok) {
-                                    const errorData = await response.json();
-                                    throw new Error(`GitHub API Error: ${errorData.message}`);
+                        uploadTask.on('state_changed',
+                            (snapshot) => { /* Can be used for progress bar if needed */ },
+                            (error) => {
+                                console.error("Upload failed:", error);
+                                if (uploadStatus) {
+                                    uploadStatus.innerText = `Upload failed: ${error.code}`;
+                                    uploadStatus.classList.add('text-red-600');
                                 }
-
-                                const result = await response.json();
-
-                                const newFile = {
-                                    name: file.name,
-                                    size: `${(file.size / 1024).toFixed(1)} KB`,
-                                    url: result.content.html_url,
-                                    storage: 'github'
-                                };
-                                const updatedFiles = [...(patient.files || []), newFile];
-                                await FirestoreDB.savePatient(patient.id, { files: updatedFiles });
-                            };
-                            reader.onerror = (error) => {
-                                throw new Error("Failed to read file.");
-                            };
-
-                        } catch (error) {
-                            console.error("Upload failed:", error);
-                            const currentUploadStatus = document.getElementById('upload-status');
-                            if (currentUploadStatus) {
-                                currentUploadStatus.innerText = `Upload failed: ${error.message}. Check console for details.`;
-                                currentUploadStatus.classList.add('text-red-600');
+                                if (uploadLabel) {
+                                     uploadLabel.classList.remove('opacity-50', 'cursor-not-allowed');
+                                     uploadLabel.querySelector('span:last-child').innerText = originalButtonText;
+                                     uploadLabel.querySelector('span:first-child').innerHTML = originalButtonIcon;
+                                     if(window.lucide) window.lucide.createIcons();
+                                }
+                            },
+                            () => {
+                                uploadTask.snapshot.ref.getDownloadURL().then(async (downloadURL) => {
+                                    const newFile = {
+                                        name: file.name,
+                                        size: `${(file.size / 1024).toFixed(1)} KB`,
+                                        url: downloadURL,
+                                        storage: 'firebase'
+                                    };
+                                    const updatedFiles = [...(patient.files || []), newFile];
+                                    await FirestoreDB.savePatient(patient.id, { files: updatedFiles });
+                                    // The onSnapshot listener will handle re-rendering the UI.
+                                });
                             }
-                            const currentUploadLabel = document.getElementById('file-upload-label');
-                            if(currentUploadLabel) {
-                                currentUploadLabel.classList.remove('opacity-50', 'cursor-not-allowed');
-                                currentUploadLabel.querySelector('span:last-child').innerText = originalButtonText;
-                                currentUploadLabel.querySelector('span:first-child').innerHTML = originalButtonIcon;
-                                if(window.lucide) window.lucide.createIcons();
-                            }
-                        }
+                        );
                     });
-
                 } else if (tabName === 'credentials') {
                     tabContent.innerHTML = `<div class="bg-white rounded-lg shadow-sm border border-gray-200"><div class="p-4 border-b"><button id="add-credential-btn" class="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm">Add Credential</button></div><div class="divide-y divide-gray-200">${(patient.credentials || []).map(cred => `<div class="p-4"><p class="font-semibold text-gray-800">${cred.service}</p><p class="text-sm text-gray-600">Link: <a href="${cred.link}" target="_blank" class="text-blue-500 hover:underline">${cred.link}</a></p><p class="text-sm text-gray-600">Username: ${cred.username}</p><p class="text-sm text-gray-600">Password Info: <span class="font-mono bg-gray-100 p-1 rounded text-red-600">${cred.passwordRef}</span></p></div>`).join('') || '<p class="p-4 text-gray-500">No credentials saved.</p>'}</div></div>`;
                     const modal = document.getElementById('credential-modal');
@@ -608,7 +549,6 @@
                 if(window.lucide) window.lucide.createIcons();
             }
         };
-
         const ResourcesComponent = {
             render() { return Layout.render(`<div id="resources-container"><div class="loading-overlay"><div class="loader"></div></div></div>`, 'Resources'); },
             renderModals() {
@@ -652,7 +592,6 @@
                     const updateFormFields = () => { if(formFields) formFields.innerHTML = getFormFields(typeSelect.value); };
                     typeSelect.addEventListener('change', updateFormFields);
                     updateFormFields();
-
                     document.getElementById('add-resource-btn').addEventListener('click', () => modal.classList.remove('hidden'));
                     document.getElementById('cancel-resource-btn').addEventListener('click', () => modal.classList.add('hidden'));
                     form.addEventListener('submit', async (e) => {
@@ -686,14 +625,13 @@
                 if(window.lucide) window.lucide.createIcons();
             },
         };
-
         // --- App Initialization ---
         function initializeAndStartApp() {
             try {
                 app = firebase.initializeApp(firebaseConfig);
                 auth = firebase.auth();
                 db = firebase.firestore();
-
+                storage = firebase.storage();
                 AppRouter.init();
                 AppRouter.addRoute('/', LoginComponent);
                 AppRouter.addRoute('/dashboard', DashboardComponent);
@@ -716,16 +654,13 @@
                         AppRouter.handleRouteChange();
                     }
                 });
-
             } catch (e) {
                 console.error("Firebase initialization failed:", e);
                 document.getElementById('app').innerHTML = `<div class="min-h-screen flex items-center justify-center bg-red-50"><div class="text-center p-8 bg-white rounded-lg shadow-lg"><h2 class="text-2xl font-bold text-red-700">Error: Firebase Initialization Failed</h2><p class="mt-2 text-gray-600">The application could not connect to the database. Please check your Firebase configuration values.</p><p class="mt-4 text-sm text-gray-500">Details: ${e.message}</p></div></div>`;
             }
         }
-
         // --- Start the App ---
         initializeAndStartApp();
-
     </script>
 </body>
 </html>
