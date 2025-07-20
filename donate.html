@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donate - Binyan Shalem</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'custom-deep-purple': '#723358', // rgba(114,51,88,1)
+                        'custom-slate-gray': '#4B5562', // rgba(75, 85, 98, 1)
+                        'custom-beige': '#BAA68E',      // rgba(186,166,142,1)
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom Styles -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        /* Style for selected donation amount */
+        .donation-label.selected {
+            border-color: #723358; /* custom-deep-purple */
+            background-color: rgba(114, 51, 88, 0.05);
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- Header -->
+    <header id="main-header" class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <!-- Logo -->
+            <a href="index.html" class="flex items-center space-x-3">
+                <img src="https://www.binyan-shalem.com/Binyan%20Shalem_files/8594235c61f23b5d99cd2a2dbf37c8b5.jpg" alt="Binyan Shalem Logo" class="h-12 w-auto">
+                <div class="text-slate-800">
+                    <h1 class="text-xl font-bold tracking-tight">BINYAN SHALEM</h1>
+                </div>
+            </a>
+            <!-- Desktop Navigation -->
+            <nav class="hidden md:flex items-center space-x-2 text-custom-slate-gray">
+                <a href="index.html#home" class="nav-link transition-colors px-3 py-2 rounded-md hover:text-custom-deep-purple">Home</a>
+                <a href="index.html#mission" class="nav-link transition-colors px-3 py-2 rounded-md hover:text-custom-deep-purple">Our Mission</a>
+                <a href="index.html#contact" class="nav-link transition-colors px-3 py-2 rounded-md hover:text-custom-deep-purple">Get Help</a>
+                <a href="donate.html" class="nav-link bg-custom-deep-purple text-white px-4 py-2 rounded-lg hover:opacity-90 transition-all shadow ml-6">Donate</a>
+            </nav>
+            <!-- Mobile Menu Button -->
+            <button id="mobile-menu-button" class="md:hidden text-slate-700 focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4 bg-white/95 backdrop-blur-sm rounded-b-lg">
+            <a href="index.html#home" class="nav-link block py-2 text-slate-700">Home</a>
+            <a href="index.html#mission" class="nav-link block py-2 text-slate-700">Our Mission</a>
+            <a href="index.html#contact" class="nav-link block py-2 text-slate-700">Get Help</a>
+            <a href="donate.html" class="nav-link block mt-2 text-center bg-custom-deep-purple text-white px-4 py-2 rounded-lg shadow">Donate</a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="py-20 md:py-28">
+        <div class="container mx-auto px-6">
+            <div class="max-w-2xl mx-auto text-center">
+                <h3 class="text-3xl md:text-4xl font-bold text-slate-900">Donate</h3>
+                <p class="text-lg text-slate-600 mt-3 mb-8">Your generous contribution allows us to continue offering our services free of charge, helping couples build stronger, healthier homes in our community.</p>
+            </div>
+            <div class="max-w-lg mx-auto bg-white p-8 rounded-xl shadow-2xl border border-slate-200">
+                <form id="donate-form">
+                    <div class="space-y-6">
+                        <div>
+                            <label for="donate-email" class="block text-sm font-medium text-slate-700 mb-2">Email <span class="text-red-500">*</span></label>
+                            <input type="email" id="donate-email" name="donate-email" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-custom-deep-purple focus:border-custom-deep-purple transition" placeholder="you@example.com">
+                            <p class="text-xs text-slate-500 mt-1">Make sure email is valid because the charge will not go through if not valid.</p>
+                        </div>
+                        <div>
+                            <label for="donate-name" class="block text-sm font-medium text-slate-700 mb-2">Name <span class="text-red-500">*</span></label>
+                            <input type="text" id="donate-name" name="donate-name" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-custom-deep-purple focus:border-custom-deep-purple transition" placeholder="Your Name">
+                        </div>
+                        <div>
+                            <a href="#" class="text-custom-deep-purple hover:underline font-semibold">Click Here To Use Venmo</a>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-3">Donate Amount (USD) <span class="text-red-500">*</span></label>
+                            <div id="donation-options" class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                                <!-- Donation amounts will be generated by script -->
+                            </div>
+                        </div>
+                        <div id="custom-amount-wrapper" class="hidden">
+                             <label for="custom-amount" class="block text-sm font-medium text-slate-700 mb-2">Custom Amount (USD)</label>
+                             <input type="number" id="custom-amount" name="custom_amount" min="1" step="1" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-custom-deep-purple focus:border-custom-deep-purple transition" placeholder="e.g., 180">
+                        </div>
+                        <div class="mt-8">
+                            <button type="submit" class="w-full bg-custom-deep-purple text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity text-lg font-semibold shadow-md">
+                                Next
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                <div id="donate-success-message" class="hidden mt-6 text-center p-4 bg-green-100 text-green-800 rounded-lg">
+                    Thank you for your generous support!
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-custom-slate-gray text-slate-300 relative z-20">
+        <div class="container mx-auto px-6 py-8 text-center">
+            <p>&copy; 2025 Binyan Shalem. All Rights Reserved.</p>
+            <p class="text-sm text-slate-400 mt-2">A dedicated resource for building stronger Jewish homes.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Mobile Menu ---
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // --- Donation Form Logic ---
+            const donationOptionsContainer = document.getElementById('donation-options');
+            const customAmountWrapper = document.getElementById('custom-amount-wrapper');
+            const customAmountInput = document.getElementById('custom-amount');
+            const amounts = ['52', '101', '252', '1000', '1800', '5000', '10000'];
+
+            // Create donation amount buttons
+            amounts.forEach(amount => {
+                const label = document.createElement('label');
+                label.className = 'donation-label flex items-center space-x-3 border border-slate-300 rounded-lg p-3 hover:bg-slate-50 cursor-pointer transition-colors';
+                label.innerHTML = `
+                    <input type="radio" name="donate_amount" value="${amount}" class="h-5 w-5 text-custom-deep-purple focus:ring-custom-deep-purple focus:ring-offset-0">
+                    <span class="text-slate-800 font-medium">$${new Intl.NumberFormat().format(amount)}</span>
+                `;
+                donationOptionsContainer.appendChild(label);
+            });
+            
+            // Create "Custom Amount" button
+            const customLabel = document.createElement('label');
+            customLabel.className = 'donation-label flex items-center space-x-3 border border-slate-300 rounded-lg p-3 hover:bg-slate-50 cursor-pointer transition-colors';
+            customLabel.innerHTML = `
+                <input type="radio" name="donate_amount" value="custom" class="h-5 w-5 text-custom-deep-purple focus:ring-custom-deep-purple focus:ring-offset-0">
+                <span class="text-slate-800 font-medium">Custom</span>
+            `;
+            donationOptionsContainer.appendChild(customLabel);
+
+            // Handle selection styling and custom amount field visibility
+            const donationLabels = document.querySelectorAll('.donation-label');
+            donationOptionsContainer.addEventListener('change', (e) => {
+                if (e.target.name === 'donate_amount') {
+                    donationLabels.forEach(label => label.classList.remove('selected'));
+                    const selectedLabel = e.target.closest('label');
+                    selectedLabel.classList.add('selected');
+                    
+                    if (e.target.value === 'custom') {
+                        customAmountWrapper.classList.remove('hidden');
+                        customAmountInput.focus();
+                    } else {
+                        customAmountWrapper.classList.add('hidden');
+                    }
+                }
+            });
+
+            // Handle form submission
+            const donateForm = document.getElementById('donate-form');
+            const successMessage = document.getElementById('donate-success-message');
+            donateForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                // In a real application, you would integrate with a payment processor here.
+                donateForm.style.display = 'none';
+                successMessage.classList.remove('hidden');
+            });
+        });
+    </script>
+</body>
+</html>
