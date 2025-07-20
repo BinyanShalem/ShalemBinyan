@@ -15,7 +15,6 @@
 
     <!-- PDF Generation Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <!-- FIX: This script bridges the two libraries so autoTable can find jsPDF -->
     <script>
         window.jsPDF = window.jspdf.jsPDF;
     </script>
@@ -158,58 +157,60 @@
                     </div>
                     <div class="max-w-lg mx-auto bg-white p-8 rounded-xl shadow-2xl border border-slate-200">
                         <form id="contact-form" novalidate>
-                            <!-- Step 1: Initial Info -->
-                            <div id="step-1">
-                                <div class="mb-6">
-                                    <label for="email" class="block text-sm font-medium text-slate-700 mb-2">Email<span class="mandatory-star">*</span></label>
-                                    <input type="email" id="email" name="email" required class="w-full px-4 py-2 border border-slate-300 rounded-lg">
-                                </div>
-                                <div class="mb-6">
-                                    <label class="block text-sm font-medium text-slate-700 mb-2">Who is submitting this form?<span class="mandatory-star">*</span></label>
-                                    <div class="space-y-2">
-                                        <div class="flex items-center"><input type="radio" id="husband-wife" name="submitter" value="Husband/Wife" class="h-4 w-4 text-custom-deep-purple"><label for="husband-wife" class="ml-3 block text-sm text-slate-800">Husband / Wife</label></div>
-                                        <div class="flex items-center"><input type="radio" id="someone-else" name="submitter" value="Someone else" class="h-4 w-4 text-custom-deep-purple"><label for="someone-else" class="ml-3 block text-sm text-slate-800">Someone else</label></div>
+                            <div id="form-content">
+                                <!-- Step 1: Initial Info -->
+                                <div id="step-1">
+                                    <div class="mb-6">
+                                        <label for="email" class="block text-sm font-medium text-slate-700 mb-2">Email<span class="mandatory-star">*</span></label>
+                                        <input type="email" id="email" name="email" required class="w-full px-4 py-2 border border-slate-300 rounded-lg">
+                                    </div>
+                                    <div class="mb-6">
+                                        <label class="block text-sm font-medium text-slate-700 mb-2">Who is submitting this form?<span class="mandatory-star">*</span></label>
+                                        <div class="space-y-2">
+                                            <div class="flex items-center"><input type="radio" id="husband-wife" name="submitter" value="Husband/Wife" class="h-4 w-4 text-custom-deep-purple"><label for="husband-wife" class="ml-3 block text-sm text-slate-800">Husband / Wife</label></div>
+                                            <div class="flex items-center"><input type="radio" id="someone-else" name="submitter" value="Someone else" class="h-4 w-4 text-custom-deep-purple"><label for="someone-else" class="ml-3 block text-sm text-slate-800">Someone else</label></div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <!-- Step 2: Conditional Questions -->
-                            <div id="relationship-step" class="form-section">
-                                <hr class="my-6 border-slate-200">
-                                <div class="mb-6">
-                                    <label for="relationship" class="block text-sm font-medium text-slate-700 mb-2">What is your relationship to the couple?<span class="mandatory-star">*</span></label>
-                                    <input type="text" id="relationship" name="relationship" class="w-full px-4 py-2 border border-slate-300 rounded-lg">
+                                <!-- Step 2: Conditional Questions -->
+                                <div id="relationship-step" class="form-section">
+                                    <hr class="my-6 border-slate-200">
+                                    <div class="mb-6">
+                                        <label for="relationship" class="block text-sm font-medium text-slate-700 mb-2">What is your relationship to the couple?<span class="mandatory-star">*</span></label>
+                                        <input type="text" id="relationship" name="relationship" class="w-full px-4 py-2 border border-slate-300 rounded-lg">
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div id="couple-details-form" class="form-section">
-                                <hr class="my-6 border-slate-200">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
-                                    <div><label for="husband_name" class="block text-sm font-medium text-slate-700 mb-1">Husband (First and Last)<span class="mandatory-star">*</span></label><input type="text" id="husband_name" name="husband_name" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
-                                    <div><label for="wife_name" class="block text-sm font-medium text-slate-700 mb-1">Wife (First and Maiden)<span class="mandatory-star">*</span></label><input type="text" id="wife_name" name="wife_name" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
-                                    <div><label for="husband_cell" class="block text-sm font-medium text-slate-700 mb-1">Husband Cell<span class="mandatory-star" id="husband_cell_star">*</span></label><input type="tel" id="husband_cell" name="husband_cell" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
-                                    <div><label for="husband_email" class="block text-sm font-medium text-slate-700 mb-1">Husband Email</label><input type="email" id="husband_email" name="husband_email" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
-                                    <div><label for="wife_cell" class="block text-sm font-medium text-slate-700 mb-1">Wife Cell<span class="mandatory-star" id="wife_cell_star">*</span></label><input type="tel" id="wife_cell" name="wife_cell" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
-                                    <div><label for="wife_email" class="block text-sm font-medium text-slate-700 mb-1">Wife Email</label><input type="email" id="wife_email" name="wife_email" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
-                                    <div><label for="husband_age" class="block text-sm font-medium text-slate-700 mb-1">Husband Age<span class="mandatory-star" id="husband_age_star">*</span></label><input type="text" id="husband_age" name="husband_age" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
-                                    <div><label for="wife_age" class="block text-sm font-medium text-slate-700 mb-1">Wife Age<span class="mandatory-star" id="wife_age_star">*</span></label><input type="text" id="wife_age" name="wife_age" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
-                                    <div class="md:col-span-2"><label for="address" class="block text-sm font-medium text-slate-700 mb-1">Address<span class="mandatory-star" id="address_star">*</span></label><textarea id="address" name="address" rows="3" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></textarea></div>
-                                    <div class="md:col-span-2"><label for="years_married" class="block text-sm font-medium text-slate-700 mb-1">How many years married?<span class="mandatory-star" id="years_married_star">*</span></label><input type="text" id="years_married" name="years_married" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
-                                    <div class="md:col-span-2"><label for="issue" class="block text-sm font-medium text-slate-700 mb-1">Issue Presenting<span class="mandatory-star">*</span></label><textarea id="issue" name="issue" required rows="4" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></textarea></div>
-                                    <div><label for="family_rabbi" class="block text-sm font-medium text-slate-700 mb-1">Family Rabbi</label><input type="text" id="family_rabbi" name="family_rabbi" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
-                                    <div><label for="kids_count" class="block text-sm font-medium text-slate-700 mb-1">How many kids?<span class="mandatory-star" id="kids_count_star">*</span></label><input type="text" id="kids_count" name="kids_count" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
-                                    <div class="md:col-span-2"><label for="involved_parties" class="block text-sm font-medium text-slate-700 mb-1">Anyone else involved</label><input type="text" id="involved_parties" name="involved_parties" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
-                                    <div class="md:col-span-2"><label for="parents_names" class="block text-sm font-medium text-slate-700 mb-1">Husband & Wife's parents names<span class="mandatory-star" id="parents_names_star">*</span></label><input type="text" id="parents_names" name="parents_names" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
-                                </div>
-                                <div class="mt-8">
-                                    <button type="submit" class="w-full bg-custom-deep-purple text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity text-lg font-semibold shadow-md">
-                                        Save and Generate PDF
-                                    </button>
+                                <div id="couple-details-form" class="form-section">
+                                    <hr class="my-6 border-slate-200">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
+                                        <div><label for="husband_name" class="block text-sm font-medium text-slate-700 mb-1">Husband (First and Last)<span class="mandatory-star">*</span></label><input type="text" id="husband_name" name="husband_name" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
+                                        <div><label for="wife_name" class="block text-sm font-medium text-slate-700 mb-1">Wife (First and Maiden)<span class="mandatory-star">*</span></label><input type="text" id="wife_name" name="wife_name" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
+                                        <div><label for="husband_cell" class="block text-sm font-medium text-slate-700 mb-1">Husband Cell<span class="mandatory-star" id="husband_cell_star">*</span></label><input type="tel" id="husband_cell" name="husband_cell" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
+                                        <div><label for="husband_email" class="block text-sm font-medium text-slate-700 mb-1">Husband Email</label><input type="email" id="husband_email" name="husband_email" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
+                                        <div><label for="wife_cell" class="block text-sm font-medium text-slate-700 mb-1">Wife Cell<span class="mandatory-star" id="wife_cell_star">*</span></label><input type="tel" id="wife_cell" name="wife_cell" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
+                                        <div><label for="wife_email" class="block text-sm font-medium text-slate-700 mb-1">Wife Email</label><input type="email" id="wife_email" name="wife_email" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
+                                        <div><label for="husband_age" class="block text-sm font-medium text-slate-700 mb-1">Husband Age<span class="mandatory-star" id="husband_age_star">*</span></label><input type="text" id="husband_age" name="husband_age" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
+                                        <div><label for="wife_age" class="block text-sm font-medium text-slate-700 mb-1">Wife Age<span class="mandatory-star" id="wife_age_star">*</span></label><input type="text" id="wife_age" name="wife_age" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
+                                        <div class="md:col-span-2"><label for="address" class="block text-sm font-medium text-slate-700 mb-1">Address<span class="mandatory-star" id="address_star">*</span></label><textarea id="address" name="address" rows="3" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></textarea></div>
+                                        <div class="md:col-span-2"><label for="years_married" class="block text-sm font-medium text-slate-700 mb-1">How many years married?<span class="mandatory-star" id="years_married_star">*</span></label><input type="text" id="years_married" name="years_married" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
+                                        <div class="md:col-span-2"><label for="issue" class="block text-sm font-medium text-slate-700 mb-1">Issue Presenting<span class="mandatory-star">*</span></label><textarea id="issue" name="issue" required rows="4" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></textarea></div>
+                                        <div><label for="family_rabbi" class="block text-sm font-medium text-slate-700 mb-1">Family Rabbi</label><input type="text" id="family_rabbi" name="family_rabbi" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
+                                        <div><label for="kids_count" class="block text-sm font-medium text-slate-700 mb-1">How many kids?<span class="mandatory-star" id="kids_count_star">*</span></label><input type="text" id="kids_count" name="kids_count" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
+                                        <div class="md:col-span-2"><label for="involved_parties" class="block text-sm font-medium text-slate-700 mb-1">Anyone else involved</label><input type="text" id="involved_parties" name="involved_parties" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
+                                        <div class="md:col-span-2"><label for="parents_names" class="block text-sm font-medium text-slate-700 mb-1">Husband & Wife's parents names<span class="mandatory-star" id="parents_names_star">*</span></label><input type="text" id="parents_names" name="parents_names" class="w-full px-4 py-2 border border-slate-300 rounded-lg"></div>
+                                    </div>
+                                    <div class="mt-8">
+                                        <button type="submit" id="submit-btn" class="w-full bg-custom-deep-purple text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity text-lg font-semibold shadow-md">
+                                            Send Form
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </form>
                         <div id="form-success-message" class="hidden mt-6 text-center p-4 bg-green-100 text-green-800 rounded-lg">
-                            Thank you! Your submission PDF has been downloaded.
+                            <!-- Success message and link will be inserted here -->
                         </div>
                     </div>
                 </div>
@@ -324,19 +325,24 @@
                 });
             });
 
-            // --- PDF Generation on Submit ---
-            const successMessage = document.getElementById('form-success-message');
-            contactForm.addEventListener('submit', function(e) {
+            // --- PDF and Gofile Upload on Submit ---
+            const submitBtn = document.getElementById('submit-btn');
+            const formContent = document.getElementById('form-content');
+            const successMessageContainer = document.getElementById('form-success-message');
+
+            contactForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 if (!contactForm.checkValidity()) {
                     contactForm.reportValidity();
                     return;
                 }
+                
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Uploading...';
 
                 try {
-                    const { jsPDF } = window.jspdf;
+                    // 1. Generate PDF
                     const doc = new jsPDF();
-
                     const formData = new FormData(contactForm);
                     const husbandName = formData.get('husband_name') || 'Unknown';
                     const wifeName = formData.get('wife_name') || 'Unknown';
@@ -350,8 +356,6 @@
                     doc.text(`Submission Date: ${new Date().toLocaleDateString()}`, 14, 30);
                     
                     const tableData = [];
-                    const headers = [['Field', 'Response']];
-                    
                     for (const [key, value] of formData.entries()) {
                         if (value) {
                             const label = document.querySelector(`label[for=${key}]`)?.textContent.replace('*','').trim() || key;
@@ -360,20 +364,55 @@
                     }
                     
                     doc.autoTable({
-                        head: headers,
+                        head: [['Field', 'Response']],
                         body: tableData,
                         startY: 40,
                         theme: 'grid',
-                        headStyles: { fillColor: [114, 51, 88] }, // custom-deep-purple
+                        headStyles: { fillColor: [114, 51, 88] },
                     });
                     
-                    doc.save(fileName);
+                    const pdfBlob = doc.output('blob');
+
+                    // 2. Upload to Gofile
+                    // IMPORTANT: This is NOT secure for a production website.
+                    // Your API key is exposed. This should be handled by a backend server.
+                    const GOFILE_API_KEY = 'KTlhggWrtt6D84BXJ1nqj56ZbutZeJCR';
+
+                    // Get Gofile server
+                    const serverResponse = await fetch('https://api.gofile.io/getServer');
+                    const serverData = await serverResponse.json();
+                    if (serverData.status !== 'ok') throw new Error('Could not get Gofile server.');
+                    const serverName = serverData.data.server;
+
+                    // Prepare file for upload
+                    const uploadFormData = new FormData();
+                    uploadFormData.append('file', pdfBlob, fileName);
+                    uploadFormData.append('token', GOFILE_API_KEY);
+
+                    // Upload the file
+                    const uploadResponse = await fetch(`https://${serverName}.gofile.io/uploadFile`, {
+                        method: 'POST',
+                        body: uploadFormData,
+                    });
+                    const uploadData = await uploadResponse.json();
+                    if (uploadData.status !== 'ok') throw new Error('File upload to Gofile failed.');
                     
-                    contactForm.style.display = 'none';
-                    successMessage.classList.remove('hidden');
+                    const downloadLink = uploadData.data.downloadPage;
+
+                    // 3. Show Success Message
+                    formContent.style.display = 'none';
+                    successMessageContainer.innerHTML = `
+                        <p class="font-semibold">Thank you! Your form has been submitted.</p>
+                        <p class="mt-2">A PDF has been generated and uploaded.</p>
+                        <a href="${downloadLink}" target="_blank" class="inline-block mt-4 text-white bg-custom-deep-purple font-semibold py-2 px-4 rounded-lg hover:opacity-90">View Uploaded PDF</a>
+                    `;
+                    successMessageContainer.classList.remove('hidden');
+
                 } catch (error) {
-                    console.error("Failed to generate PDF:", error);
-                    alert("Sorry, there was an error generating the PDF. Please check the console for details and try again.");
+                    console.error("Process failed:", error);
+                    alert("Sorry, there was an error submitting the form. Please try again.");
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Send Form';
                 }
             });
         });
