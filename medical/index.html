@@ -54,9 +54,31 @@
         .btn-secondary { background-color: #14b8a6; color: white; } .btn-secondary:hover { background-color: #0d9488; }
         .btn-danger { background-color: #ef4444; color: white; } .btn-danger:hover { background-color: #dc2626; }
         .btn-light { background-color: #e2e8f0; color: #334155; } .btn-light:hover { background-color: #cbd5e1; }
+        .btn:disabled { opacity: 0.7; cursor: not-allowed; }
+        @keyframes spinner-rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .spinner-inside-button { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spinner-rotation 0.8s linear infinite; }
+        
+        /* Notification Styles */
+        .notification {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            color: white;
+            z-index: 100;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .notification.show { opacity: 1; transform: translateY(0); }
+        .notification.success { background-color: #14b8a6; }
+        .notification.error { background-color: #ef4444; }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-700">
+    <div id="notification-area"></div>
     <div id="app">
         <div id="initial-loader">
             <div class="text-center">
@@ -88,6 +110,25 @@
         // --- App State ---
         let app, auth, db, userId;
         const appId = 'refuah-berurah-prod';
+        
+        // --- GLOBAL NOTIFICATION HELPER ---
+        window.showNotification = (message, type = 'success') => {
+            const container = document.getElementById('notification-area');
+            if (!container) return;
+            const notifId = `notif-${Date.now()}`;
+            const notifDiv = document.createElement('div');
+            notifDiv.id = notifId;
+            notifDiv.className = `notification ${type}`;
+            notifDiv.innerText = message;
+            container.appendChild(notifDiv);
+
+            setTimeout(() => { notifDiv.classList.add('show'); }, 10);
+            setTimeout(() => {
+                notifDiv.classList.remove('show');
+                notifDiv.addEventListener('transitionend', () => notifDiv.remove());
+            }, 3000);
+        };
+
         // --- ROUTER: Handles navigation within the single-page application ---
         const AppRouter = {
             routes: {},
@@ -192,7 +233,7 @@
             renderConfirmModal() {
                 return `
                     <div id="confirm-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
-                        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm text-center transform transition-all" style="--tw-translate-y: -1.25rem; opacity: 0;" x-data="{ show: false }" x-show="show" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
+                        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm text-center transform transition-all">
                             <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100"><svg class="h-6 w-6 text-red-600" data-lucide="alert-triangle"></svg></div>
                             <h3 id="confirm-title" class="text-lg font-bold text-slate-800 mt-3">Delete Item</h3>
                             <p id="confirm-message" class="text-sm text-slate-500 mt-2 mb-4">Are you sure? This action cannot be undone.</p>
@@ -409,9 +450,30 @@
                     
                     form.onsubmit = async (e) => {
                         e.preventDefault();
-                        await FirestoreDB.addPatient({ name: form.name.value, dob: form.dob.value, contact: form.contact.value, mypageLink: '', linkedResourceIds: [] });
-                        modal.classList.add('hidden');
-                        form.reset();
+                        const saveButton = form.querySelector('button[type="submit"]');
+                        const originalButtonText = saveButton.innerHTML;
+                        saveButton.disabled = true;
+                        saveButton.innerHTML = `<div class="spinner-inside-button"></div>`;
+
+                        try {
+                            await FirestoreDB.addPatient({ 
+                                name: form.name.value, 
+                                dob: form.dob.value, 
+                                contact: form.contact.value, 
+                                mypageLink: '', 
+                                linkedResourceIds: [],
+                                createdAt: new Date().toISOString()
+                            });
+                            modal.classList.add('hidden');
+                            form.reset();
+                            window.showNotification('Patient added successfully!', 'success');
+                        } catch (error) {
+                            console.error("Error adding patient:", error);
+                            window.showNotification(`Error: ${error.message}`, 'error');
+                        } finally {
+                            saveButton.disabled = false;
+                            saveButton.innerHTML = originalButtonText;
+                        }
                     };
                 }
 
@@ -423,7 +485,7 @@
                     this.renderPatientList(patientDocs, currentFilter);
                 });
 
-                document.getElementById('search-patient').addEventListener('input', (e) => {
+                document.getElementById('search-patient')?.addEventListener('input', (e) => {
                     this.renderPatientList(patientDocs, e.target.value);
                 });
 
@@ -715,27 +777,41 @@
 
                 form.onsubmit = async (e) => {
                     e.preventDefault();
-                    const type = typeSelect.value;
-                    let resourceData = { type };
-                    if (type === 'article') resourceData = { ...resourceData, title: document.getElementById(`${modalId}-title`).value, link: document.getElementById(`${modalId}-link`).value, summary: document.getElementById(`${modalId}-summary`).value };
-                    if (type === 'doctor') resourceData = { ...resourceData, name: document.getElementById(`${modalId}-name`).value, specialty: document.getElementById(`${modalId}-specialty`).value, contact: document.getElementById(`${modalId}-contact`).value };
-                    
-                    const newResource = await FirestoreDB.addResource(resourceData);
-                    
-                    const selectedPatientIds = Array.from(linkPatientsSelect.selectedOptions).map(opt => opt.value);
-                    
-                    for (const patientId of selectedPatientIds) {
-                        const patientDoc = await db.collection(`artifacts/${appId}/users/${userId}/patients`).doc(patientId).get();
-                        if (patientDoc.exists) {
-                            const patientData = patientDoc.data();
-                            const linkedResourceIds = [...(patientData.linkedResourceIds || []), newResource.id];
-                            await FirestoreDB.savePatient(patientId, { linkedResourceIds });
-                        }
-                    }
+                    const saveButton = form.querySelector('button[type="submit"]');
+                    const originalButtonText = saveButton.innerHTML;
+                    saveButton.disabled = true;
+                    saveButton.innerHTML = `<div class="spinner-inside-button"></div>`;
 
-                    modal.classList.add('hidden');
-                    form.reset();
-                    updateFormFields();
+                    try {
+                        const type = typeSelect.value;
+                        let resourceData = { type, createdAt: new Date().toISOString() };
+                        if (type === 'article') resourceData = { ...resourceData, title: document.getElementById(`${modalId}-title`).value, link: document.getElementById(`${modalId}-link`).value, summary: document.getElementById(`${modalId}-summary`).value };
+                        if (type === 'doctor') resourceData = { ...resourceData, name: document.getElementById(`${modalId}-name`).value, specialty: document.getElementById(`${modalId}-specialty`).value, contact: document.getElementById(`${modalId}-contact`).value };
+                        
+                        const newResource = await FirestoreDB.addResource(resourceData);
+                        
+                        const selectedPatientIds = Array.from(linkPatientsSelect.selectedOptions).map(opt => opt.value);
+                        
+                        for (const patientId of selectedPatientIds) {
+                            const patientDoc = await db.collection(`artifacts/${appId}/users/${userId}/patients`).doc(patientId).get();
+                            if (patientDoc.exists) {
+                                const patientData = patientDoc.data();
+                                const linkedResourceIds = [...(patientData.linkedResourceIds || []), newResource.id];
+                                await FirestoreDB.savePatient(patientId, { linkedResourceIds });
+                            }
+                        }
+
+                        modal.classList.add('hidden');
+                        form.reset();
+                        updateFormFields();
+                        window.showNotification('Resource added successfully!', 'success');
+                    } catch (error) {
+                        console.error("Error adding resource:", error);
+                        window.showNotification(`Error: ${error.message}`, 'error');
+                    } finally {
+                        saveButton.disabled = false;
+                        saveButton.innerHTML = originalButtonText;
+                    }
                 };
             },
             postRender() {
@@ -963,7 +1039,8 @@
                 
                 auth.onAuthStateChanged((user) => {
                     if (user) {
-                        userId = user.email;
+                        // *** FIX: Use user.uid for security rules instead of email ***
+                        userId = user.uid; 
                         const currentPath = window.location.hash.slice(1);
                         if (!currentPath || currentPath === '/') {
                             AppRouter.navigate('/dashboard');
