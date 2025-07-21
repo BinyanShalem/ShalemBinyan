@@ -941,7 +941,10 @@
                 
                 auth.onAuthStateChanged((user) => {
                     if (user) {
-                        userId = user.uid;
+                        // Using user's email as the primary identifier for their data collections.
+                        // Note: This is a specific design choice. Using the immutable `user.uid` is
+                        // generally recommended to handle cases where a user might change their email.
+                        userId = user.email;
                         const currentPath = window.location.hash.slice(1);
                         if (!currentPath || currentPath === '/') {
                             AppRouter.navigate('/dashboard');
