@@ -105,6 +105,7 @@
 
         // GoFile API Token
         const GOFILE_API_KEY = 'KTlhggWrtt6D84BXJ1nqj56ZbutZeJCR'; 
+        const GOFILE_ROOT_FOLDER_NAME = 'refuah berurah';
 
         // =================================================================================
         // --- App State ---
@@ -648,13 +649,22 @@
                     });
 
                     document.querySelectorAll('.delete-file-link').forEach(link => {
-                        link.addEventListener('click', (e) => {
+                        link.addEventListener('click', async (e) => {
                             e.preventDefault();
                             const fileIndex = parseInt(e.currentTarget.dataset.index, 10);
-                            const fileName = (patient.files[fileIndex] || {}).name;
-                            window.showConfirmModal('Delete File?', `Are you sure you want to delete the file "${fileName}"?`, async () => {
-                                const updatedFiles = patient.files.filter((_, i) => i !== fileIndex);
-                                await FirestoreDB.savePatient(patient.id, { files: updatedFiles });
+                            const fileToDelete = patient.files[fileIndex];
+                            if (!fileToDelete) return;
+
+                            window.showConfirmModal('Delete File?', `Are you sure you want to permanently delete the file "${fileToDelete.name}"? This will also remove it from GoFile.`, async () => {
+                                try {
+                                    await GoFileUploader.deleteFile(fileToDelete);
+                                    const updatedFiles = patient.files.filter((_, i) => i !== fileIndex);
+                                    await FirestoreDB.savePatient(patient.id, { files: updatedFiles });
+                                    window.showNotification('File deleted successfully.', 'success');
+                                } catch (error) {
+                                    console.error("Error deleting file:", error);
+                                    window.showNotification(`Error deleting file: ${error.message}`, 'error');
+                                }
                             });
                         });
                     });
@@ -866,6 +876,59 @@
         const GoFileUploader = {
             selectedFile: null,
             activePatient: null,
+            rootFolderId: null,
+
+            async getRootFolderId() {
+                if (this.rootFolderId) return this.rootFolderId;
+                try {
+                    const res = await fetch(`https://api.gofile.io/getAccountDetails?token=${GOFILE_API_KEY}`);
+                    const data = await res.json();
+                    if (data.status !== 'ok') throw new Error('Could not verify GoFile account.');
+                    this.rootFolderId = data.data.rootFolder;
+                    return this.rootFolderId;
+                } catch (e) {
+                    console.error("GoFile Auth Error:", e);
+                    this.showError("Could not connect to GoFile account. Check API Key.");
+                    return null;
+                }
+            },
+
+            async getOrCreateFolder(parentFolderId, folderName) {
+                // This is a simplified check. A robust solution might need pagination.
+                const contentRes = await fetch(`https://api.gofile.io/getContent?contentId=${parentFolderId}&token=${GOFILE_API_KEY}`);
+                const contentData = await contentRes.json();
+                if (contentData.status !== 'ok') throw new Error('Could not read root folder contents.');
+                
+                const existingFolder = Object.values(contentData.data.contents).find(c => c.type === 'folder' && c.name === folderName);
+                if (existingFolder) return existingFolder.id;
+
+                // Create folder if not found
+                const createRes = await fetch(`https://api.gofile.io/createFolder`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ parentFolderId, folderName, token: GOFILE_API_KEY })
+                });
+                const createData = await createRes.json();
+                if (createData.status !== 'ok') throw new Error('Could not create user folder in GoFile.');
+                return createData.data.id;
+            },
+            
+            async deleteFile(file) {
+                if (!file || !file.gofile || !file.gofile.fileId || !file.gofile.adminCode) {
+                    throw new Error("File data is incomplete for deletion.");
+                }
+                const res = await fetch(`https://api.gofile.io/deleteContent`, {
+                    method: 'DELETE',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ contentsId: file.gofile.fileId, token: GOFILE_API_KEY })
+                });
+                const data = await res.json();
+                if (data.status !== 'ok') {
+                    // It might have already been deleted, so we don't always throw an error
+                    console.warn("Could not delete file from GoFile, it may already be gone:", data);
+                }
+                return true;
+            },
 
             renderModal() {
                 return `
@@ -981,34 +1044,40 @@
                 this.fileInfo.classList.add('hidden');
 
                 try {
+                    const rootFolderId = await this.getRootFolderId();
+                    if (!rootFolderId) return; // Error was already shown
+
+                    const mainAppFolderId = await this.getOrCreateFolder(rootFolderId, GOFILE_ROOT_FOLDER_NAME);
+                    const userFolderId = await this.getOrCreateFolder(mainAppFolderId, userId);
+
                     const serverRes = await fetch('https://api.gofile.io/servers');
-                    const serverText = await serverRes.text();
-                    let serverData;
-                    try { serverData = JSON.parse(serverText); } catch (e) { throw new Error("Invalid response from GoFile server."); }
-                    if (serverData.status !== 'ok' || !serverData.data.servers || serverData.data.servers.length === 0) { throw new Error('Could not find an upload server.'); }
+                    const serverData = await serverRes.json();
+                    if (serverData.status !== 'ok' || !serverData.data.servers.length) throw new Error('Could not find an upload server.');
                     const server = serverData.data.servers[0].name;
 
                     const formData = new FormData();
                     formData.append("file", file);
                     formData.append("token", GOFILE_API_KEY);
+                    formData.append("folderId", userFolderId);
 
                     const uploadRes = await fetch(`https://${server}.gofile.io/uploadFile`, { 
                         method: "POST", 
                         body: formData
                     });
 
-                    const uploadText = await uploadRes.text();
-                    let uploadData;
-                    try { uploadData = JSON.parse(uploadText); } catch (e) { throw new Error("Invalid response after upload."); }
+                    const uploadData = await uploadRes.json();
+                    if (uploadData.status !== 'ok') throw new Error(uploadData.data?.error || 'File upload failed.');
 
-                    if (uploadData.status !== 'ok') { throw new Error(uploadData.data?.error || 'File upload failed.'); }
-
-                    // Save to Firestore
+                    // Save to Firestore with GoFile details for deletion
                     const newFile = { 
                         name: file.name, 
                         url: uploadData.data.downloadPage, 
                         storage: 'gofile',
-                        notes: [] // Initialize with an empty notes array
+                        gofile: {
+                            fileId: uploadData.data.fileId,
+                            adminCode: uploadData.data.adminCode
+                        },
+                        notes: []
                     };
                     const updatedFiles = [...(this.activePatient.files || []), newFile];
                     await FirestoreDB.savePatient(this.activePatient.id, { files: updatedFiles });
@@ -1039,7 +1108,6 @@
                 
                 auth.onAuthStateChanged((user) => {
                     if (user) {
-                        // *** FIX: Use user.uid for security rules instead of email ***
                         userId = user.uid; 
                         const currentPath = window.location.hash.slice(1);
                         if (!currentPath || currentPath === '/') {
