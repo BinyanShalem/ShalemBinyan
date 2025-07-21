@@ -798,13 +798,8 @@
                             </div>
                         </div>
                         <div id="gofile-result-section" class="hidden mt-6 p-4 bg-green-50 border border-green-200 rounded-lg text-center">
-                            <h3 class="text-lg font-semibold text-green-800">Upload Complete!</h3>
-                            <p class="text-sm text-gray-600">The file link has been saved to the patient's record.</p>
-                            <div class="mt-4 flex items-center border rounded-md">
-                                <input id="gofile-link-output" type="text" readonly class="flex-grow p-2 bg-white border-r text-sm text-gray-700 focus:outline-none rounded-l-md">
-                                <button id="gofile-copy-btn" class="bg-blue-600 text-white px-4 py-2 rounded-r-md hover:bg-blue-700 text-sm font-semibold">Copy</button>
-                            </div>
-                            <p id="gofile-copy-feedback" class="text-sm text-green-600 mt-2 h-4"></p>
+                            <h3 class="text-lg font-semibold text-green-800">Done!</h3>
+                            <p class="text-sm text-gray-600">The file has been saved to the patient's record.</p>
                         </div>
                     </div>
                 </div>`;
@@ -833,9 +828,6 @@
                 this.errorMessage = document.getElementById('gofile-error-message');
                 this.uploadingSpinner = document.getElementById('gofile-uploading-spinner');
                 this.resultSection = document.getElementById('gofile-result-section');
-                this.linkOutput = document.getElementById('gofile-link-output');
-                this.copyBtn = document.getElementById('gofile-copy-btn');
-                this.copyFeedback = document.getElementById('gofile-copy-feedback');
                 this.cancelBtn = document.getElementById('gofile-cancel-btn');
 
                 this.dropZone.addEventListener('click', () => this.fileInput.click());
@@ -845,7 +837,6 @@
                 this.fileInput.addEventListener('change', (e) => { if (e.target.files.length) this.handleFile(e.target.files[0]); });
                 this.removeFileBtn.addEventListener('click', () => this.resetUI());
                 this.uploadBtn.addEventListener('click', () => { if (this.selectedFile) this.uploadFile(this.selectedFile); });
-                this.copyBtn.addEventListener('click', () => { this.linkOutput.select(); document.execCommand('copy'); this.copyFeedback.textContent = 'Copied!'; setTimeout(() => { this.copyFeedback.textContent = ''; }, 2000); });
                 this.cancelBtn.addEventListener('click', () => this.closeModal());
 
                 this.resetUI();
@@ -861,7 +852,6 @@
                 this.errorMessage.textContent = '';
                 this.uploadingSpinner.classList.add('hidden');
                 this.resultSection.classList.add('hidden');
-                this.copyFeedback.textContent = '';
                 this.dropZone.classList.remove('border-green-500', 'bg-green-50');
             },
             
@@ -927,7 +917,6 @@
 
                     this.uploadingSpinner.classList.add('hidden');
                     this.resultSection.classList.remove('hidden');
-                    this.linkOutput.value = uploadData.data.downloadPage;
 
                 } catch (error) {
                     console.error("GoFile Upload Error:", error);
