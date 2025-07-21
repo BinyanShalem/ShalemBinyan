@@ -11,28 +11,57 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script>
+        // Custom Tailwind theme for a more modern look
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { // Replaces blue
+                            DEFAULT: '#0ea5e9',
+                            '50': '#f0f9ff', '100': '#e0f2fe', '200': '#bae6fd',
+                            '300': '#7dd3fc', '400': '#38bdf8', '500': '#0ea5e9',
+                            '600': '#0284c7', '700': '#0369a1', '800': '#075985',
+                            '900': '#0c4a6e'
+                        },
+                        secondary: { // Replaces green
+                           DEFAULT: '#14b8a6',
+                           '50': '#f0fdfa', '100': '#ccfbf1', '200': '#99f6e4',
+                           '300': '#5eead4', '400': '#2dd4bf', '500': '#14b8a6',
+                           '600': '#0d9488', '700': '#0f766e', '800': '#115e59',
+                           '900': '#134e4a'
+                        },
+                        // Using slate for a cooler gray palette
+                        slate: { '50': '#f8fafc', '100': '#f1f5f9', '200': '#e2e8f0', '300': '#cbd5e1', '400': '#94a3b8', '500': '#64748b', '600': '#475569', '700': '#334155', '800': '#1e293b', '900': '#0f172a' }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
         body { font-family: 'Inter', sans-serif; }
         .transition-all { transition: all 0.3s ease-in-out; }
-        .input { margin-top: 0.25rem; display: block; width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #D1D5DB; border-radius: 0.375rem; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
-        .input:focus { outline: none; --tw-ring-color: #3B82F6; box-shadow: 0 0 0 2px var(--tw-ring-color); border-color: #3B82F6; }
-        .loader { width: 48px; height: 48px; border: 5px solid #d1d5db; border-bottom-color: #3B82F6; border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 1s linear infinite; }
+        .input { margin-top: 0.25rem; display: block; width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #cbd5e1; border-radius: 0.375rem; background-color: white; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+        .input:focus { outline: none; --tw-ring-color: #38bdf8; box-shadow: 0 0 0 2px var(--tw-ring-color); border-color: #38bdf8; }
+        .loader { width: 48px; height: 48px; border: 5px solid #e2e8f0; border-bottom-color: #0ea5e9; border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 1s linear infinite; }
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .loading-overlay { position: absolute; inset: 0; background-color: rgba(255, 255, 255, 0.8); display: flex; align-items: center; justify-content: center; z-index: 10; }
+        .loading-overlay { position: absolute; inset: 0; background-color: rgba(248, 250, 252, 0.8); display: flex; align-items: center; justify-content: center; z-index: 10; }
         #initial-loader { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-        .spinner { width: 16px; height: 16px; border: 2px solid #fff; border-bottom-color: transparent; border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 1s linear infinite; }
-        
-        /* Styles for mobile navigation */
         #mobile-menu { transform: translateX(-100%); }
         #mobile-menu.open { transform: translateX(0); }
+        .btn { display: inline-flex; align-items: center; justify-content: center; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 500; transition: all 0.2s; box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1); }
+        .btn-primary { background-color: #0ea5e9; color: white; } .btn-primary:hover { background-color: #0284c7; }
+        .btn-secondary { background-color: #14b8a6; color: white; } .btn-secondary:hover { background-color: #0d9488; }
+        .btn-danger { background-color: #ef4444; color: white; } .btn-danger:hover { background-color: #dc2626; }
+        .btn-light { background-color: #e2e8f0; color: #334155; } .btn-light:hover { background-color: #cbd5e1; }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-slate-100 text-slate-700">
     <div id="app">
         <div id="initial-loader">
             <div class="text-center">
                 <img src="https://raw.githubusercontent.com/BinyanShalem/ShalemBinyan/refs/heads/main/logosss.png" alt="Refuah Berurah Logo" class="h-12 w-auto mx-auto">
-                <p class="mt-2 text-gray-600">Connecting to services...</p>
+                <p class="mt-4 text-slate-500 animate-pulse">Connecting to services...</p>
             </div>
         </div>
     </div>
@@ -43,13 +72,13 @@
         // API Keys & Configuration
         // =================================================================================
         const firebaseConfig = {
-          apiKey: "AIzaSyDMAZ_HJ7JIqNHxYAXcOgpVZN4tnLwWUWA",
-          authDomain: "refuahberur.firebaseapp.com",
-          projectId: "refuahberur",
-          storageBucket: "refuahberur.appspot.com",
-          messagingSenderId: "345766239268",
-          appId: "1:345766239268:web:9b7fcf947760b5ea53ccb1",
-          measurementId: "G-0XREW3ZGYZ"
+            apiKey: "AIzaSyDMAZ_HJ7JIqNHxYAXcOgpVZN4tnLwWUWA",
+            authDomain: "refuahberur.firebaseapp.com",
+            projectId: "refuahberur",
+            storageBucket: "refuahberur.appspot.com",
+            messagingSenderId: "345766239268",
+            appId: "1:345766239268:web:9b7fcf947760b5ea53ccb1",
+            measurementId: "G-0XREW3ZGYZ"
         };
 
         // GoFile API Token
@@ -125,36 +154,36 @@
                     { path: '/patients', icon: 'users', label: 'Patients' },
                     { path: '/resources', icon: 'book-marked', label: 'Resources' },
                 ];
-                const navLinksHtml = navLinks.map(link => `<li><a href="#${link.path}" class="flex items-center p-3 rounded-lg text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-all ${activeLink === link.label ? 'bg-blue-100 text-blue-700 font-semibold' : ''}"><svg class="w-5 h-5 mr-3" data-lucide="${link.icon}"></svg>${link.label}</a></li>`).join('');
+                const navLinksHtml = navLinks.map(link => `<li><a href="#${link.path}" class="flex items-center p-3 rounded-lg text-slate-600 hover:bg-primary-50 hover:text-primary-600 font-medium transition-all ${activeLink === link.label ? 'bg-primary-100 text-primary-700 font-semibold' : ''}"><svg class="w-5 h-5 mr-3" data-lucide="${link.icon}"></svg>${link.label}</a></li>`).join('');
 
                 return `
                     <div class="min-h-screen flex">
                         <!-- Desktop Sidebar -->
-                        <nav class="hidden md:flex w-64 bg-white border-r border-gray-200 flex-shrink-0 flex-col">
-                            <div class="h-16 flex items-center justify-center border-b border-gray-200 p-4"><img src="https://raw.githubusercontent.com/BinyanShalem/ShalemBinyan/refs/heads/main/logosss.png" alt="Refuah Berurah Logo" class="h-10 w-auto"></div>
-                            <div class="p-4 flex-grow"><ul>${navLinksHtml}</ul></div>
-                            <div class="p-4 border-t border-gray-200"><a href="#" id="logout-btn" class="flex items-center p-3 rounded-lg text-gray-600 hover:bg-red-50 hover:text-red-600 transition-all"><svg class="w-5 h-5 mr-3" data-lucide="log-out"></svg>Logout</a></div>
+                        <nav class="hidden md:flex w-64 bg-white border-r border-slate-200 flex-shrink-0 flex-col">
+                            <div class="h-16 flex items-center justify-center border-b border-slate-200 p-4"><img src="https://raw.githubusercontent.com/BinyanShalem/ShalemBinyan/refs/heads/main/logosss.png" alt="Refuah Berurah Logo" class="h-10 w-auto"></div>
+                            <div class="p-4 flex-grow"><ul class="space-y-2">${navLinksHtml}</ul></div>
+                            <div class="p-4 border-t border-slate-200"><a href="#" id="logout-btn" class="flex items-center p-3 rounded-lg text-slate-600 hover:bg-red-50 hover:text-red-600 font-medium transition-all"><svg class="w-5 h-5 mr-3" data-lucide="log-out"></svg>Logout</a></div>
                         </nav>
                         
                         <!-- Mobile Menu -->
-                        <div id="mobile-menu-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
-                        <nav id="mobile-menu" class="fixed top-0 left-0 h-full w-64 bg-white z-40 flex flex-col transition-all md:hidden">
-                             <div class="h-16 flex items-center justify-between border-b border-gray-200 px-4">
+                        <div id="mobile-menu-overlay" class="fixed inset-0 bg-black bg-opacity-60 z-30 hidden md:hidden"></div>
+                        <nav id="mobile-menu" class="fixed top-0 left-0 h-full w-64 bg-white z-40 flex flex-col transition-all md:hidden shadow-xl">
+                             <div class="h-16 flex items-center justify-between border-b border-slate-200 px-4">
                                  <img src="https://raw.githubusercontent.com/BinyanShalem/ShalemBinyan/refs/heads/main/logosss.png" alt="Refuah Berurah Logo" class="h-8 w-auto">
-                                 <button id="close-mobile-menu-btn" class="p-2"><svg class="w-6 h-6" data-lucide="x"></svg></button>
+                                 <button id="close-mobile-menu-btn" class="p-2 text-slate-500 hover:text-slate-800"><svg class="w-6 h-6" data-lucide="x"></svg></button>
                              </div>
-                            <div class="p-4 flex-grow"><ul>${navLinksHtml}</ul></div>
-                            <div class="p-4 border-t border-gray-200"><a href="#" id="mobile-logout-btn" class="flex items-center p-3 rounded-lg text-gray-600 hover:bg-red-50 hover:text-red-600 transition-all"><svg class="w-5 h-5 mr-3" data-lucide="log-out"></svg>Logout</a></div>
+                            <div class="p-4 flex-grow"><ul class="space-y-2">${navLinksHtml}</ul></div>
+                            <div class="p-4 border-t border-slate-200"><a href="#" id="mobile-logout-btn" class="flex items-center p-3 rounded-lg text-slate-600 hover:bg-red-50 hover:text-red-600 transition-all"><svg class="w-5 h-5 mr-3" data-lucide="log-out"></svg>Logout</a></div>
                         </nav>
 
                         <div class="flex-1 flex flex-col">
                             <!-- Mobile Header -->
-                            <header class="md:hidden h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4">
-                                <button id="open-mobile-menu-btn" class="p-2"><svg class="w-6 h-6" data-lucide="menu"></svg></button>
+                            <header class="md:hidden h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sticky top-0 z-20">
+                                <button id="open-mobile-menu-btn" class="p-2 text-slate-600"><svg class="w-6 h-6" data-lucide="menu"></svg></button>
                                 <img src="https://raw.githubusercontent.com/BinyanShalem/ShalemBinyan/refs/heads/main/logosss.png" alt="Refuah Berurah Logo" class="h-8 w-auto">
                                 <div class="w-8"></div> <!-- Spacer -->
                             </header>
-                            <main class="flex-1 bg-gray-50 p-6 sm:p-8 overflow-y-auto relative">${content}</main>
+                            <main class="flex-1 bg-slate-100 p-4 sm:p-6 lg:p-8 overflow-y-auto relative">${content}</main>
                         </div>
                     </div>
                     ${this.renderConfirmModal()}
@@ -162,14 +191,14 @@
             },
             renderConfirmModal() {
                 return `
-                    <div id="confirm-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-                        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm text-center">
+                    <div id="confirm-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
+                        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm text-center transform transition-all" style="--tw-translate-y: -1.25rem; opacity: 0;" x-data="{ show: false }" x-show="show" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
                             <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100"><svg class="h-6 w-6 text-red-600" data-lucide="alert-triangle"></svg></div>
-                            <h3 id="confirm-title" class="text-lg font-bold mt-3">Delete Item</h3>
-                            <p id="confirm-message" class="text-sm text-gray-500 mt-2 mb-4">Are you sure? This action cannot be undone.</p>
+                            <h3 id="confirm-title" class="text-lg font-bold text-slate-800 mt-3">Delete Item</h3>
+                            <p id="confirm-message" class="text-sm text-slate-500 mt-2 mb-4">Are you sure? This action cannot be undone.</p>
                             <div class="flex justify-center space-x-3">
-                                <button id="cancel-confirm-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 w-24">Cancel</button>
-                                <button id="confirm-action-btn" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 w-24">Delete</button>
+                                <button id="cancel-confirm-btn" class="btn btn-light w-24">Cancel</button>
+                                <button id="confirm-action-btn" class="btn btn-danger w-24">Delete</button>
                             </div>
                         </div>
                     </div>
@@ -204,9 +233,9 @@
         const LoginComponent = {
             render() {
                 return `
-                    <div class="min-h-screen flex items-center justify-center bg-gray-100">
+                    <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-primary-100 p-4">
                         <div class="w-full max-w-md">
-                            <div id="auth-container" class="bg-white rounded-xl shadow-lg p-8 space-y-6">
+                            <div id="auth-container" class="bg-white/80 backdrop-blur-sm rounded-xl shadow-2xl shadow-slate-300/50 p-8 space-y-6">
                             </div>
                         </div>
                     </div>
@@ -216,53 +245,55 @@
                 return `
                     <div class="text-center">
                         <img src="https://raw.githubusercontent.com/BinyanShalem/ShalemBinyan/refs/heads/main/logosss.png" alt="Refuah Berurah Logo" class="h-12 w-auto mx-auto">
-                        <p class="mt-2 text-gray-500">Sign in to your secure medical hub</p>
+                        <h2 class="mt-6 text-2xl font-bold tracking-tight text-slate-900">Sign in to your account</h2>
+                        <p class="mt-2 text-slate-600">Your secure medical hub</p>
                     </div>
-                    <form id="login-form" class="space-y-4">
+                    <form id="login-form" class="space-y-4 pt-6">
                         <div>
-                            <label for="login-email" class="block text-sm font-medium text-gray-700">Email address</label>
+                            <label for="login-email" class="block text-sm font-medium text-slate-700">Email address</label>
                             <input id="login-email" name="email" type="email" autocomplete="email" required class="input">
                         </div>
                         <div>
-                            <label for="login-password" class="block text-sm font-medium text-gray-700">Password</label>
+                            <label for="login-password" class="block text-sm font-medium text-slate-700">Password</label>
                             <input id="login-password" name="password" type="password" autocomplete="current-password" required class="input">
                         </div>
                         ${error ? `<p class="text-sm text-red-600">${error}</p>` : ''}
                         <div>
-                            <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+                            <button type="submit" class="w-full flex justify-center py-3 px-4 rounded-lg shadow-md text-sm font-semibold text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 transition-all transform hover:scale-105">
                                 Sign in
                             </button>
                         </div>
                     </form>
-                    <p class="text-center text-sm text-gray-500">
-                        No account? <a href="#" id="show-signup" class="font-medium text-blue-600 hover:text-blue-500">Create one</a>
+                    <p class="text-center text-sm text-slate-500 pt-4">
+                        No account? <a href="#" id="show-signup" class="font-medium text-primary-600 hover:text-primary-500">Create one</a>
                     </p>
                 `;
             },
             renderSignupForm(error = '') {
                  return `
                     <div class="text-center">
-                        <h1 class="text-3xl font-bold text-blue-600">Create Account</h1>
-                        <p class="mt-2 text-gray-500">Get started with your secure hub</p>
+                         <img src="https://raw.githubusercontent.com/BinyanShalem/ShalemBinyan/refs/heads/main/logosss.png" alt="Refuah Berurah Logo" class="h-12 w-auto mx-auto">
+                        <h2 class="mt-6 text-2xl font-bold tracking-tight text-slate-900">Create your account</h2>
+                        <p class="mt-2 text-slate-600">Get started with your secure hub</p>
                     </div>
-                    <form id="signup-form" class="space-y-4">
+                    <form id="signup-form" class="space-y-4 pt-6">
                         <div>
-                            <label for="signup-email" class="block text-sm font-medium text-gray-700">Email address</label>
+                            <label for="signup-email" class="block text-sm font-medium text-slate-700">Email address</label>
                             <input id="signup-email" name="email" type="email" autocomplete="email" required class="input">
                         </div>
                         <div>
-                            <label for="signup-password" class="block text-sm font-medium text-gray-700">Password</label>
+                            <label for="signup-password" class="block text-sm font-medium text-slate-700">Password</label>
                             <input id="signup-password" name="password" type="password" autocomplete="new-password" required class="input">
                         </div>
                          ${error ? `<p class="text-sm text-red-600">${error}</p>` : ''}
                         <div>
-                            <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+                            <button type="submit" class="w-full flex justify-center py-3 px-4 rounded-lg shadow-md text-sm font-semibold text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 transition-all transform hover:scale-105">
                                 Create Account
                             </button>
                         </div>
                     </form>
-                    <p class="text-center text-sm text-gray-500">
-                        Already have an account? <a href="#" id="show-login" class="font-medium text-blue-600 hover:text-blue-500">Sign in</a>
+                    <p class="text-center text-sm text-slate-500 pt-4">
+                        Already have an account? <a href="#" id="show-login" class="font-medium text-primary-600 hover:text-primary-500">Sign in</a>
                     </p>
                 `;
             },
@@ -300,10 +331,10 @@
                             showSignup(err.message);
                         }
                     });
-                         document.getElementById('show-login').addEventListener('click', (e) => {
-                            e.preventDefault();
-                            showLogin();
-                        });
+                           document.getElementById('show-login').addEventListener('click', (e) => {
+                                e.preventDefault();
+                                showLogin();
+                            });
                 };
                 showLogin();
             }
@@ -324,16 +355,16 @@
                 });
                 document.getElementById('dashboard-content').innerHTML = `
                     <div class="space-y-8">
-                        <div><h2 class="text-3xl font-bold text-gray-800">Dashboard</h2><p class="mt-1 text-gray-500">Welcome back! Here's a real-time summary of your workspace.</p></div>
+                        <div><h2 class="text-3xl font-bold tracking-tight text-slate-900">Dashboard</h2><p class="mt-1 text-slate-500">Welcome back! Here's a real-time summary of your workspace.</p></div>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex items-center"><div class="p-3 rounded-full bg-blue-100 text-blue-600"><svg class="w-6 h-6" data-lucide="users"></svg></div><div class="ml-4"><p class="text-sm font-medium text-gray-500">Total Patients</p><p id="patient-count" class="text-2xl font-bold text-gray-800">0</p></div></div>
-                            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex items-center"><div class="p-3 rounded-full bg-green-100 text-green-600"><svg class="w-6 h-6" data-lucide="book-marked"></svg></div><div class="ml-4"><p class="text-sm font-medium text-gray-500">Total Resources</p><p id="resource-count" class="text-2xl font-bold text-gray-800">0</p></div></div>
+                            <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-primary-400 flex items-center"><div class="p-3 rounded-full bg-primary-100 text-primary-600"><svg class="w-7 h-7" data-lucide="users"></svg></div><div class="ml-4"><p class="text-sm font-medium text-slate-500">Total Patients</p><p id="patient-count" class="text-3xl font-bold text-slate-800">0</p></div></div>
+                            <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-secondary-400 flex items-center"><div class="p-3 rounded-full bg-secondary-100 text-secondary-600"><svg class="w-7 h-7" data-lucide="book-marked"></svg></div><div class="ml-4"><p class="text-sm font-medium text-slate-500">Total Resources</p><p id="resource-count" class="text-2xl font-bold text-slate-800">0</p></div></div>
                         </div>
-                        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                            <h3 class="text-lg font-semibold text-gray-800">Quick Actions</h3>
+                        <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
+                            <h3 class="text-lg font-semibold text-slate-800">Quick Actions</h3>
                             <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <a href="#/patients" class="flex items-center justify-center p-4 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-all"><svg class="w-5 h-5 mr-2" data-lucide="user-plus"></svg>Add New Patient</a>
-                                <a href="#/resources" class="flex items-center justify-center p-4 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-all"><svg class="w-5 h-5 mr-2" data-lucide="plus-circle"></svg>Add New Resource</a>
+                                <a href="#/patients" class="flex items-center justify-center p-4 bg-primary-50 text-primary-700 font-semibold rounded-lg hover:bg-primary-100 transition-all"><svg class="w-5 h-5 mr-2" data-lucide="user-plus"></svg>Add New Patient</a>
+                                <a href="#/resources" class="flex items-center justify-center p-4 bg-secondary-50 text-secondary-700 font-semibold rounded-lg hover:bg-secondary-100 transition-all"><svg class="w-5 h-5 mr-2" data-lucide="plus-circle"></svg>Add New Resource</a>
                             </div>
                         </div>
                     </div>`;
@@ -345,11 +376,11 @@
             renderModals() {
                 return `
                     <div id="patient-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
-                        <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-lg"><h3 class="text-2xl font-bold mb-4">Add New Patient</h3><form id="patient-form" class="space-y-4">
-                            <div><label for="name" class="block text-sm font-medium text-gray-700">Full Name</label><input type="text" id="name" required class="input"></div>
-                            <div><label for="dob" class="block text-sm font-medium text-gray-700">Date of Birth</label><input type="date" id="dob" required class="input"></div>
-                            <div><label for="contact" class="block text-sm font-medium text-gray-700">Contact Info</label><input type="text" id="contact" required class="input"></div>
-                            <div class="mt-6 flex justify-end space-x-3"><button type="button" id="cancel-patient-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">Cancel</button><button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Save Patient</button></div>
+                        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg"><h3 class="text-2xl font-bold mb-4 text-slate-800">Add New Patient</h3><form id="patient-form" class="space-y-4">
+                            <div><label for="name" class="block text-sm font-medium text-slate-700">Full Name</label><input type="text" id="name" required class="input"></div>
+                            <div><label for="dob" class="block text-sm font-medium text-slate-700">Date of Birth</label><input type="date" id="dob" required class="input"></div>
+                            <div><label for="contact" class="block text-sm font-medium text-slate-700">Contact Info</label><input type="text" id="contact" required class="input"></div>
+                            <div class="mt-6 flex justify-end space-x-3"><button type="button" id="cancel-patient-btn" class="btn btn-light">Cancel</button><button type="submit" class="btn btn-primary">Save Patient</button></div>
                         </form></div>
                     </div>`;
             },
@@ -358,20 +389,18 @@
                 const container = document.getElementById('patients-container');
                 if (!container) return;
 
-                // Render the static shell of the page
                 container.innerHTML = `
                     <div class="space-y-6">
                         <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-                            <div><h2 class="text-3xl font-bold text-gray-800">Patients</h2><p class="mt-1 text-gray-500">Manage your patient records.</p></div>
-                            <button id="add-patient-btn" class="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition-all w-full sm:w-auto"><svg class="w-5 h-5 mr-2" data-lucide="user-plus"></svg>Add Patient</button>
+                            <div><h2 class="text-3xl font-bold tracking-tight text-slate-900">Patients</h2><p class="mt-1 text-slate-500">Manage your patient records.</p></div>
+                            <button id="add-patient-btn" class="btn btn-primary w-full sm:w-auto"><svg class="w-5 h-5 mr-2" data-lucide="user-plus"></svg>Add Patient</button>
                         </div>
-                        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                            <div class="p-4 border-b"><input id="search-patient" type="text" placeholder="Search patients by name..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"></div>
-                            <div id="patient-list" class="divide-y divide-gray-200"><div class="p-6 text-center text-gray-500">Loading patients...</div></div>
+                        <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-slate-200">
+                            <div class="p-4 border-b border-slate-200"><input id="search-patient" type="text" placeholder="Search patients by name..." class="input w-full"></div>
+                            <div id="patient-list" class="divide-y divide-slate-200"><div class="p-6 text-center text-slate-500">Loading patients...</div></div>
                         </div>
                     </div>`;
 
-                // Set up modal listeners ONCE
                 const modal = document.getElementById('patient-modal');
                 const form = document.getElementById('patient-form');
                 if (modal && form) {
@@ -386,9 +415,7 @@
                     };
                 }
 
-                let patientDocs = []; // Keep a local copy for searching
-
-                // Set up the Firestore listener to ONLY update the list
+                let patientDocs = []; 
                 FirestoreDB.getPatients(querySnapshot => {
                     patientDocs = querySnapshot.docs;
                     const searchInput = document.getElementById('search-patient');
@@ -396,7 +423,6 @@
                     this.renderPatientList(patientDocs, currentFilter);
                 });
 
-                // Set up search listener ONCE
                 document.getElementById('search-patient').addEventListener('input', (e) => {
                     this.renderPatientList(patientDocs, e.target.value);
                 });
@@ -407,11 +433,11 @@
                 const filteredPatients = patients.filter(p => p.data().name.toLowerCase().includes(filter.toLowerCase()));
                 const listEl = document.getElementById('patient-list');
                 if (!listEl) return;
-                listEl.innerHTML = filteredPatients.length === 0 ? `<p class="p-6 text-center text-gray-500">No patients found.</p>` : filteredPatients.map(doc => {
+                listEl.innerHTML = filteredPatients.length === 0 ? `<p class="p-6 text-center text-slate-500">No patients found.</p>` : filteredPatients.map(doc => {
                     const patient = doc.data();
-                    return `<div class="p-4 flex items-center justify-between hover:bg-gray-50">
-                        <a href="#/patient/${doc.id}" class="flex-1 min-w-0"><p class="font-semibold text-blue-600 truncate">${patient.name}</p><p class="text-sm text-gray-500">DOB: ${patient.dob} | Contact: ${patient.contact}</p></a>
-                        <button data-id="${doc.id}" data-name="${patient.name}" class="delete-patient-btn text-gray-400 hover:text-red-500 p-2 rounded-full flex-shrink-0 ml-4"><svg class="w-5 h-5" data-lucide="trash-2"></svg></button>
+                    return `<div class="p-4 flex items-center justify-between hover:bg-primary-50/50 transition-colors duration-150">
+                        <a href="#/patient/${doc.id}" class="flex-1 min-w-0"><p class="font-semibold text-primary-700 hover:text-primary-800 truncate">${patient.name}</p><p class="text-sm text-slate-500">DOB: ${patient.dob} | Contact: ${patient.contact}</p></a>
+                        <button data-id="${doc.id}" data-name="${patient.name}" class="delete-patient-btn text-slate-400 hover:text-red-500 p-2 rounded-full flex-shrink-0 ml-4"><svg class="w-5 h-5" data-lucide="trash-2"></svg></button>
                     </div>`
                 }).join('');
                 document.querySelectorAll('.delete-patient-btn').forEach(btn => btn.addEventListener('click', (e) => {
@@ -430,19 +456,19 @@
             renderModals() {
                 return `
                     <div id="credential-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
-                        <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-lg"><h3 class="text-2xl font-bold mb-4">Add Credential</h3><form id="credential-form" class="space-y-4">
-                            <div><label for="service" class="block text-sm font-medium text-gray-700">Service/System Name</label><input type="text" id="service" required class="input"></div>
-                            <div><label for="link" class="block text-sm font-medium text-gray-700">URL/Link</label><input type="url" id="link" required class="input"></div>
-                            <div><label for="username" class="block text-sm font-medium text-gray-700">Username</label><input type="text" id="username" required class="input"></div>
-                            <div><label for="passwordRef" class="block text-sm font-medium text-gray-700">Password Location</label><input type="text" id="passwordRef" placeholder="e.g., Stored in 1Password" required class="input"></div>
+                        <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-lg"><h3 class="text-2xl font-bold mb-4 text-slate-800">Add Credential</h3><form id="credential-form" class="space-y-4">
+                            <div><label for="service" class="block text-sm font-medium text-slate-700">Service/System Name</label><input type="text" id="service" required class="input"></div>
+                            <div><label for="link" class="block text-sm font-medium text-slate-700">URL/Link</label><input type="url" id="link" required class="input"></div>
+                            <div><label for="username" class="block text-sm font-medium text-slate-700">Username</label><input type="text" id="username" required class="input"></div>
+                            <div><label for="passwordRef" class="block text-sm font-medium text-slate-700">Password Location</label><input type="text" id="passwordRef" placeholder="e.g., Stored in 1Password" required class="input"></div>
                             <p class="text-xs text-red-600">Reminder: Do not store actual passwords here.</p>
-                            <div class="mt-6 flex justify-end space-x-3"><button type="button" id="cancel-cred-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">Cancel</button><button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">Save</button></div>
+                            <div class="mt-6 flex justify-end space-x-3"><button type="button" id="cancel-cred-btn" class="btn btn-light">Cancel</button><button type="submit" class="btn bg-purple-600 hover:bg-purple-700 text-white">Save</button></div>
                         </form></div>
                     </div>
                     <div id="link-resource-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
-                        <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-2xl flex flex-col"><h3 class="text-2xl font-bold mb-4">Link Resources</h3>
-                            <div id="resource-link-list" class="flex-grow overflow-y-auto border-t border-b mb-4 divide-y"></div>
-                            <div class="flex justify-end space-x-3"><button type="button" id="cancel-link-resource-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">Cancel</button><button type="button" id="save-link-resource-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Save Links</button></div>
+                        <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-2xl flex flex-col" style="max-height: 90vh;"><h3 class="text-2xl font-bold mb-4 text-slate-800">Link Resources</h3>
+                            <div id="resource-link-list" class="flex-grow overflow-y-auto border-t border-b border-slate-200 mb-4 divide-y divide-slate-200"></div>
+                            <div class="flex justify-end space-x-3 mt-4"><button type="button" id="cancel-link-resource-btn" class="btn btn-light">Cancel</button><button type="button" id="save-link-resource-btn" class="btn btn-primary">Save Links</button></div>
                         </div>
                     </div>
                     ${GoFileUploader.renderModal()}
@@ -463,13 +489,13 @@
                     const tabContentEl = document.getElementById('tab-content');
                     const scrollPos = tabContentEl ? tabContentEl.scrollTop : 0;
                     container.innerHTML = `
-                        <div class="space-y-8">
+                        <div class="space-y-6">
                             <div>
-                                <a href="#/patients" class="flex items-center text-sm text-blue-600 hover:underline mb-4"><svg class="w-4 h-4 mr-1" data-lucide="arrow-left"></svg>Back to Patients</a>
-                                <h2 class="text-3xl font-bold text-gray-800">${patient.name}</h2>
-                                <p class="mt-1 text-gray-500">DOB: ${patient.dob} | Contact: ${patient.contact}</p>
+                                <a href="#/patients" class="flex items-center text-sm text-primary-600 hover:underline mb-4 font-medium"><svg class="w-4 h-4 mr-1" data-lucide="arrow-left"></svg>Back to Patients</a>
+                                <h2 class="text-3xl font-bold tracking-tight text-slate-900">${patient.name}</h2>
+                                <p class="mt-1 text-slate-500">DOB: ${patient.dob} | Contact: ${patient.contact}</p>
                             </div>
-                            <div class="border-b border-gray-200"><nav class="-mb-px flex flex-wrap gap-x-8 gap-y-2" id="patient-tabs">
+                            <div class="border-b border-slate-200"><nav class="-mb-px flex flex-wrap gap-x-8 gap-y-2" id="patient-tabs">
                                 <a href="#" data-tab="notes" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Notes</a>
                                 <a href="#" data-tab="files" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Files</a>
                                 <a href="#" data-tab="credentials" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Chart Links & Credentials</a>
@@ -490,7 +516,6 @@
                     if(window.lucide) window.lucide.createIcons();
                 });
                 
-                // Setup the resource modal for this context
                 ResourcesComponent.setupModal("resource-modal-patient");
             },
             switchTab(tabName, patient) {
@@ -498,56 +523,54 @@
                 if (!tabContent) return;
                 document.querySelectorAll('.tab-link').forEach(link => {
                     const isSelected = link.dataset.tab === tabName;
-                    link.classList.toggle('border-blue-500', isSelected);
-                    link.classList.toggle('text-blue-600', isSelected);
+                    link.classList.toggle('border-primary-500', isSelected);
+                    link.classList.toggle('text-primary-600', isSelected);
                     link.classList.toggle('border-transparent', !isSelected);
-                    link.classList.toggle('text-gray-500', !isSelected);
+                    link.classList.toggle('text-slate-500', !isSelected);
+                    link.classList.toggle('hover:text-slate-700', !isSelected);
+                    link.classList.toggle('hover:border-slate-300', !isSelected);
                 });
                 if (tabName === 'notes') {
-                    tabContent.innerHTML = `<div class="bg-white rounded-lg shadow-sm border border-gray-200"><div class="p-4"><form id="note-form"><textarea id="note-text" placeholder="Add a new note..." required class="w-full p-2 border border-gray-300 rounded-md"></textarea><button type="submit" class="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">Add Note</button></form></div><div class="divide-y divide-gray-200">${(patient.notes || []).sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).map(note => `<div class="p-4"><p class="text-gray-800">${note.text.replace(/\n/g, '<br>')}</p><p class="text-xs text-gray-400 mt-2">${new Date(note.timestamp).toLocaleString()}</p></div>`).join('') || '<p class="p-4 text-gray-500">No notes yet.</p>'}</div></div>`;
+                    tabContent.innerHTML = `<div class="bg-white rounded-xl shadow-lg border border-slate-200"><div class="p-4"><form id="note-form"><textarea id="note-text" placeholder="Add a new note..." required class="w-full p-2 border border-slate-300 rounded-md focus:ring-primary-500 focus:border-primary-500"></textarea><button type="submit" class="mt-2 btn btn-primary text-sm">Add Note</button></form></div><div class="divide-y divide-slate-200">${(patient.notes || []).sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).map(note => `<div class="p-4"><p class="text-slate-800">${note.text.replace(/\n/g, '<br>')}</p><p class="text-xs text-slate-400 mt-2">${new Date(note.timestamp).toLocaleString()}</p></div>`).join('') || '<p class="p-4 text-slate-500">No notes yet.</p>'}</div></div>`;
                     document.getElementById('note-form').addEventListener('submit', async (e) => { e.preventDefault(); const textEl = document.getElementById('note-text'); if (textEl.value.trim()) { const updatedNotes = [...(patient.notes || []), { text: textEl.value, timestamp: new Date().toISOString() }]; await FirestoreDB.savePatient(patient.id, { notes: updatedNotes }); } });
                 } else if (tabName === 'files') {
                     tabContent.innerHTML = `
-                        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                            <div class="p-4 border-b space-y-3">
-                                <h4 class="text-lg font-semibold text-gray-800">Upload Files</h4>
-                                <button id="gofile-upload-btn" class="cursor-pointer inline-flex items-center bg-green-600 text-white px-4 py-2 rounded-lg text-sm shadow-sm hover:bg-green-700 transition-all">
-                                    <span><svg class="w-5 h-5 mr-2" data-lucide="upload-cloud"></svg></span>
-                                    <span>Upload File</span>
-                                </button>
-                                 <p id="upload-status" class="text-sm text-gray-500 mt-2"></p>
+                        <div class="bg-white rounded-xl shadow-lg border border-slate-200">
+                            <div class="p-4 border-b border-slate-200 space-y-3">
+                                <h4 class="text-lg font-semibold text-slate-800">Upload Files</h4>
+                                <button id="gofile-upload-btn" class="btn btn-secondary"><svg class="w-5 h-5 mr-2" data-lucide="upload-cloud"></svg>Upload File</button>
                             </div>
-                            <div class="divide-y divide-gray-200">${(patient.files || []).map((file, index) => `
-                                <div class="p-4 hover:bg-gray-50">
+                            <div class="divide-y divide-slate-200">${(patient.files || []).map((file, index) => `
+                                <div class="p-4 hover:bg-slate-50/50">
                                     <div class="flex items-center justify-between">
                                         <div class="flex items-center min-w-0 cursor-pointer view-file-link" data-url="${file.url}">
-                                            <svg class="w-6 h-6 text-purple-500 mr-4 flex-shrink-0" data-lucide="share-2"></svg>
+                                            <svg class="w-8 h-8 text-indigo-500 mr-4 flex-shrink-0" data-lucide="file-text"></svg>
                                             <div class="min-w-0">
-                                                <p class="font-medium text-gray-800 truncate">${file.name}</p>
-                                                <p class="text-sm text-gray-500">Stored via GoFile</p>
+                                                <p class="font-medium text-slate-800 truncate">${file.name}</p>
+                                                <p class="text-sm text-slate-500">Stored via GoFile</p>
                                             </div>
                                         </div>
                                         <div class="relative">
-                                            <button class="file-actions-btn p-2 rounded-full hover:bg-gray-200" data-index="${index}">
-                                                <svg class="w-5 h-5 text-gray-600" data-lucide="more-vertical"></svg>
+                                            <button class="file-actions-btn p-2 rounded-full hover:bg-slate-200" data-index="${index}">
+                                                <svg class="w-5 h-5 text-slate-600" data-lucide="more-vertical"></svg>
                                             </button>
-                                            <div id="file-actions-dropdown-${index}" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border">
-                                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 view-file-link" data-url="${file.url}">View File</a>
-                                                <a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 delete-file-link" data-index="${index}">Delete File</a>
+                                            <div id="file-actions-dropdown-${index}" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-slate-200">
+                                                <a href="#" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 view-file-link" data-url="${file.url}">View File</a>
+                                                <a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-slate-100 delete-file-link" data-index="${index}">Delete File</a>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="mt-4 pl-10">
-                                        <h5 class="text-sm font-semibold text-gray-700">Notes:</h5>
-                                        <div class="text-sm text-gray-600 mt-1 space-y-1">
-                                            ${(file.notes || []).map(note => `<p class="p-2 bg-gray-100 rounded">${note}</p>`).join('') || '<p class="text-xs text-gray-400">No notes for this file.</p>'}
+                                    <div class="mt-4 pl-12">
+                                        <h5 class="text-sm font-semibold text-slate-700">Notes:</h5>
+                                        <div class="text-sm text-slate-600 mt-1 space-y-1">
+                                            ${(file.notes || []).map(note => `<p class="p-2 bg-slate-100 rounded">${note}</p>`).join('') || '<p class="text-xs text-slate-400">No notes for this file.</p>'}
                                         </div>
                                         <form class="add-file-note-form mt-2" data-file-index="${index}">
-                                            <textarea class="input text-sm" placeholder="Add a note..."></textarea>
-                                            <button type="submit" class="mt-1 bg-gray-200 text-gray-700 px-3 py-1 rounded text-xs hover:bg-gray-300">Save Note</button>
+                                            <textarea class="input text-sm p-1.5" placeholder="Add a note..."></textarea>
+                                            <button type="submit" class="mt-1 bg-slate-200 text-slate-700 px-3 py-1 rounded text-xs hover:bg-slate-300 font-medium">Save Note</button>
                                         </form>
                                     </div>
-                                </div>`).join('') || '<p class="p-4 text-center text-gray-500">No files uploaded.</p>'}
+                                </div>`).join('') || '<p class="p-4 text-center text-slate-500">No files uploaded.</p>'}
                             </div>
                         </div>`;
                     
@@ -603,7 +626,7 @@
                     });
 
                 } else if (tabName === 'credentials') {
-                    tabContent.innerHTML = `<div class="bg-white rounded-lg shadow-sm border border-gray-200"><div class="p-4 border-b"><button id="add-credential-btn" class="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm">Add Credential</button></div><div class="divide-y divide-gray-200">${(patient.credentials || []).map(cred => `<div class="p-4"><p class="font-semibold text-gray-800">${cred.service}</p><p class="text-sm text-gray-600">Link: <a href="${cred.link}" target="_blank" class="text-blue-500 hover:underline">${cred.link}</a></p><p class="text-sm text-gray-600">Username: ${cred.username}</p><p class="text-sm text-gray-600">Password Info: <span class="font-mono bg-gray-100 p-1 rounded text-red-600">${cred.passwordRef}</span></p></div>`).join('') || '<p class="p-4 text-gray-500">No credentials saved.</p>'}</div></div>`;
+                    tabContent.innerHTML = `<div class="bg-white rounded-xl shadow-lg border border-slate-200"><div class="p-4 border-b border-slate-200"><button id="add-credential-btn" class="btn bg-purple-600 hover:bg-purple-700 text-white text-sm">Add Credential</button></div><div class="divide-y divide-slate-200">${(patient.credentials || []).map(cred => `<div class="p-4"><p class="font-semibold text-slate-800">${cred.service}</p><p class="text-sm text-slate-600">Link: <a href="${cred.link}" target="_blank" class="text-primary-500 hover:underline">${cred.link}</a></p><p class="text-sm text-slate-600">Username: ${cred.username}</p><p class="text-sm text-slate-600">Password Info: <span class="font-mono bg-slate-100 p-1 rounded text-red-600">${cred.passwordRef}</span></p></div>`).join('') || '<p class="p-4 text-slate-500">No credentials saved.</p>'}</div></div>`;
                     const modal = document.getElementById('credential-modal');
                     document.getElementById('add-credential-btn').addEventListener('click', () => modal.classList.remove('hidden'));
                     document.getElementById('cancel-cred-btn').addEventListener('click', () => modal.classList.add('hidden'));
@@ -618,14 +641,14 @@
                         const linkedResources = (patient.linkedResourceIds || []).map(id => allResources.find(r => r.id === id)).filter(Boolean);
                         
                         tabContentAfterFetch.innerHTML = `<div class="space-y-6">
-                            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4"><h3 class="font-semibold text-lg">Patient MyPage Link</h3><div class="flex gap-2 mt-2"><input type="url" id="mypage-link-input" class="input flex-grow" value="${patient.mypageLink || ''}" placeholder="https://example.com/patient-page"><button id="save-mypage-link" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">Save</button></div></div>
-                            <div class="bg-white rounded-lg shadow-sm border border-gray-200"><div class="p-4 border-b flex justify-between items-center gap-4"><h3 class="font-semibold text-lg">Linked Resources</h3><div class="flex gap-2"><button id="open-link-resource-modal" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">Link Existing</button><button id="create-link-resource-modal-btn" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm">Create & Link New</button></div></div><div class="divide-y divide-gray-200">${linkedResources.map(resource => `<div class="p-4 flex items-center justify-between"><div class="flex-1 min-w-0">${resource.type === 'article' ? `<p class="font-semibold text-green-700">${resource.title}</p><p class="text-sm text-gray-600">${resource.summary}</p><a href="${resource.link}" target="_blank" class="text-xs text-blue-500">Read Article</a>` : `<p class="font-semibold text-green-700">${resource.name}</p><p class="text-sm text-gray-600">Specialty: ${resource.specialty}</p><p class="text-sm text-gray-600">Contact: ${resource.contact}</p>`}</div><button data-id="${resource.id}" class="unlink-resource-btn text-gray-400 hover:text-red-500 p-2 rounded-full"><svg class="w-5 h-5" data-lucide="unlink-2"></svg></button></div>`).join('') || '<p class="p-4 text-gray-500">No resources linked.</p>'}</div></div>
+                            <div class="bg-white rounded-xl shadow-lg border border-slate-200 p-4"><h3 class="font-semibold text-lg text-slate-800">Patient MyPage Link</h3><div class="flex gap-2 mt-2"><input type="url" id="mypage-link-input" class="input flex-grow" value="${patient.mypageLink || ''}" placeholder="https://example.com/patient-page"><button id="save-mypage-link" class="btn btn-primary text-sm">Save</button></div></div>
+                            <div class="bg-white rounded-xl shadow-lg border border-slate-200"><div class="p-4 border-b border-slate-200 flex flex-wrap justify-between items-center gap-4"><h3 class="font-semibold text-lg text-slate-800">Linked Resources</h3><div class="flex gap-2"><button id="open-link-resource-modal" class="btn btn-primary text-sm">Link Existing</button><button id="create-link-resource-modal-btn" class="btn btn-secondary text-sm">Create & Link New</button></div></div><div class="divide-y divide-slate-200">${linkedResources.map(resource => `<div class="p-4 flex items-center justify-between"><div class="flex-1 min-w-0">${resource.type === 'article' ? `<p class="font-semibold text-secondary-700">${resource.title}</p><p class="text-sm text-slate-600">${resource.summary}</p><a href="${resource.link}" target="_blank" class="text-xs text-primary-500 font-medium">Read Article</a>` : `<p class="font-semibold text-secondary-700">${resource.name}</p><p class="text-sm text-slate-600">Specialty: ${resource.specialty}</p><p class="text-sm text-slate-600">Contact: ${resource.contact}</p>`}</div><button data-id="${resource.id}" class="unlink-resource-btn text-slate-400 hover:text-red-500 p-2 rounded-full"><svg class="w-5 h-5" data-lucide="unlink-2"></svg></button></div>`).join('') || '<p class="p-4 text-slate-500">No resources linked.</p>'}</div></div>
                         </div>`;
                         
                         document.getElementById('save-mypage-link').addEventListener('click', async () => { await FirestoreDB.savePatient(patient.id, { mypageLink: document.getElementById('mypage-link-input').value }); alert('Link saved!'); });
                         document.getElementById('open-link-resource-modal').addEventListener('click', () => {
                             const modal = document.getElementById('link-resource-modal');
-                            document.getElementById('resource-link-list').innerHTML = allResources.map(r => `<label class="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50"><div><p class="font-semibold">${r.title || r.name}</p><p class="text-sm text-gray-500">${r.summary || r.specialty}</p></div><input type="checkbox" value="${r.id}" class="resource-link-checkbox h-5 w-5 rounded" ${(patient.linkedResourceIds || []).includes(r.id) ? 'checked' : ''}></label>`).join('');
+                            document.getElementById('resource-link-list').innerHTML = allResources.map(r => `<label class="p-4 flex items-center justify-between cursor-pointer hover:bg-slate-100"><div class="pr-4"><p class="font-semibold text-slate-700">${r.title || r.name}</p><p class="text-sm text-slate-500">${r.summary || r.specialty}</p></div><input type="checkbox" value="${r.id}" class="resource-link-checkbox h-5 w-5 rounded text-primary-600 focus:ring-primary-500" ${(patient.linkedResourceIds || []).includes(r.id) ? 'checked' : ''}></label>`).join('');
                             modal.classList.remove('hidden');
                         });
                         document.getElementById('create-link-resource-modal-btn').addEventListener('click', () => {
@@ -647,11 +670,11 @@
                 const modalId = isForPatientPage ? "resource-modal-patient" : "resource-modal";
                 return `
                     <div id="${modalId}" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
-                        <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-lg"><h3 class="text-2xl font-bold mb-4">Add New Resource</h3><form id="${modalId}-form" class="space-y-4">
-                            <div><label for="${modalId}-type" class="block text-sm font-medium text-gray-700">Resource Type</label><select id="${modalId}-type" class="input mt-1"><option value="article">Article</option><option value="doctor">Doctor</option></select></div>
+                        <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-lg"><h3 class="text-2xl font-bold mb-4 text-slate-800">Add New Resource</h3><form id="${modalId}-form" class="space-y-4">
+                            <div><label for="${modalId}-type" class="block text-sm font-medium text-slate-700">Resource Type</label><select id="${modalId}-type" class="input mt-1"><option value="article">Article</option><option value="doctor">Doctor</option></select></div>
                             <div id="${modalId}-form-fields" class="space-y-4"></div>
-                            <div><label for="${modalId}-link-patients" class="block text-sm font-medium text-gray-700">Link to Patients (optional)</label><select id="${modalId}-link-patients" multiple class="input mt-1 h-32"></select></div>
-                            <div class="mt-6 flex justify-end space-x-3"><button type="button" id="${modalId}-cancel-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg">Cancel</button><button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg">Save Resource</button></div>
+                            <div><label for="${modalId}-link-patients" class="block text-sm font-medium text-slate-700">Link to Patients (optional)</label><select id="${modalId}-link-patients" multiple class="input mt-1 h-32"></select></div>
+                            <div class="mt-6 flex justify-end space-x-3"><button type="button" id="${modalId}-cancel-btn" class="btn btn-light">Cancel</button><button type="submit" class="btn btn-secondary">Save Resource</button></div>
                         </form></div>
                     </div>`;
             },
@@ -663,7 +686,6 @@
 
                 const linkPatientsSelect = document.getElementById(`${modalId}-link-patients`);
                 
-                // Populate patients dropdown
                 FirestoreDB.getPatients(snapshot => {
                     const patients = [];
                     snapshot.forEach(doc => patients.push({id: doc.id, ...doc.data()}));
@@ -724,12 +746,12 @@
                 container.innerHTML = `
                     <div class="space-y-6">
                         <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-                            <div><h2 class="text-3xl font-bold text-gray-800">Resources</h2><p class="mt-1 text-gray-500">A general database for articles, doctors, and more.</p></div>
-                            <button id="add-resource-btn" class="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-green-700 transition-all w-full sm:w-auto"><svg class="w-5 h-5 mr-2" data-lucide="plus-circle"></svg>Add Resource</button>
+                            <div><h2 class="text-3xl font-bold tracking-tight text-slate-900">Resources</h2><p class="mt-1 text-slate-500">A general database for articles, doctors, and more.</p></div>
+                            <button id="add-resource-btn" class="btn btn-secondary w-full sm:w-auto"><svg class="w-5 h-5 mr-2" data-lucide="plus-circle"></svg>Add Resource</button>
                         </div>
-                        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                            <div class="p-4 border-b"><input id="search-resource" type="text" placeholder="Search resources..." class="w-full px-3 py-2 border border-gray-300 rounded-md"></div>
-                            <div id="resource-list" class="divide-y divide-gray-200"><div class="p-6 text-center text-gray-500">Loading resources...</div></div>
+                        <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-slate-200">
+                            <div class="p-4 border-b border-slate-200"><input id="search-resource" type="text" placeholder="Search resources..." class="input w-full"></div>
+                            <div id="resource-list" class="divide-y divide-slate-200"><div class="p-6 text-center text-slate-500">Loading resources...</div></div>
                         </div>
                     </div>`;
 
@@ -751,10 +773,10 @@
                 const filteredResources = resources.filter(doc => JSON.stringify(doc.data()).toLowerCase().includes(filter.toLowerCase()));
                 const listEl = document.getElementById('resource-list');
                 if (!listEl) return;
-                listEl.innerHTML = filteredResources.length === 0 ? `<p class="p-6 text-center text-gray-500">No resources found.</p>` : filteredResources.map(doc => {
+                listEl.innerHTML = filteredResources.length === 0 ? `<p class="p-6 text-center text-slate-500">No resources found.</p>` : filteredResources.map(doc => {
                     const resource = doc.data();
-                    const content = resource.type === 'article' ? `<p class="font-semibold text-green-700">${resource.title}</p><p class="text-sm text-gray-600">${resource.summary}</p><a href="${resource.link}" target="_blank" class="text-xs text-blue-500">Read Article</a>` : `<p class="font-semibold text-green-700">${resource.name}</p><p class="text-sm text-gray-600">Specialty: ${resource.specialty}</p><p class="text-sm text-gray-600">Contact: ${resource.contact}</p>`;
-                    return `<div class="p-4 flex items-center justify-between hover:bg-gray-50"><div class="flex-1 min-w-0">${content}</div><button data-id="${doc.id}" data-name="${resource.title || resource.name}" class="delete-resource-btn text-gray-400 hover:text-red-500 p-2 rounded-full"><svg class="w-5 h-5" data-lucide="trash-2"></svg></button></div>`;
+                    const content = resource.type === 'article' ? `<p class="font-semibold text-secondary-700">${resource.title}</p><p class="text-sm text-slate-600">${resource.summary}</p><a href="${resource.link}" target="_blank" class="text-xs text-primary-500 font-medium">Read Article</a>` : `<p class="font-semibold text-secondary-700">${resource.name}</p><p class="text-sm text-slate-600">Specialty: ${resource.specialty}</p><p class="text-sm text-slate-600">Contact: ${resource.contact}</p>`;
+                    return `<div class="p-4 flex items-center justify-between hover:bg-slate-50/50"><div class="flex-1 min-w-0">${content}</div><button data-id="${doc.id}" data-name="${resource.title || resource.name}" class="delete-resource-btn text-slate-400 hover:text-red-500 p-2 rounded-full"><svg class="w-5 h-5" data-lucide="trash-2"></svg></button></div>`;
                 }).join('');
                 document.querySelectorAll('.delete-resource-btn').forEach(btn => btn.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -771,35 +793,35 @@
 
             renderModal() {
                 return `
-                <div id="gofile-upload-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
+                <div id="gofile-upload-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden z-50 p-4">
                     <div class="bg-white rounded-xl shadow-lg p-6 md:p-8 w-full max-w-lg mx-4">
                         <div class="flex justify-between items-center mb-4">
-                           <h1 class="text-2xl font-bold text-gray-800">Upload PDF to GoFile</h1>
-                           <button id="gofile-cancel-btn" class="text-gray-500 hover:text-gray-800">&times;</button>
+                            <h1 class="text-2xl font-bold text-slate-800">Upload PDF to GoFile</h1>
+                            <button id="gofile-cancel-btn" class="text-slate-500 hover:text-slate-800 text-3xl font-light">&times;</button>
                         </div>
-                        <div id="gofile-drop-zone" class="mt-6 border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500 hover:bg-gray-50 transition-all duration-300">
+                        <div id="gofile-drop-zone" class="mt-6 border-2 border-dashed border-slate-300 rounded-lg p-8 text-center cursor-pointer hover:border-primary-500 hover:bg-slate-50 transition-all duration-300">
                             <input type="file" id="gofile-file-input" class="hidden" accept="application/pdf">
                             <div class="flex flex-col items-center">
-                                <svg class="w-12 h-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l-3.75 3.75M12 9.75l3.75 3.75M3 17.25V8.25c0-1.12.93-2.037 2.07-1.99a4.504 4.504 0 013.635-3.497c1.52-.343 3.056.343 4.135 1.595a4.504 4.504 0 013.497 3.635c.343 1.52-.343 3.056-1.595 4.135a4.504 4.504 0 01-3.635 3.497H5.07C3.93 19.287 3 18.37 3 17.25z" /></svg>
-                                <p class="mt-4 text-lg text-gray-600"><span class="font-semibold text-blue-600">Click to upload</span> or drag and drop</p>
-                                <p class="text-sm text-gray-500 mt-1">PDF files only</p>
+                                <svg class="w-12 h-12 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l-3.75 3.75M12 9.75l3.75 3.75M3 17.25V8.25c0-1.12.93-2.037 2.07-1.99a4.504 4.504 0 013.635-3.497c1.52-.343 3.056.343 4.135 1.595a4.504 4.504 0 013.497 3.635c.343 1.52-.343 3.056-1.595 4.135a4.504 4.504 0 01-3.635 3.497H5.07C3.93 19.287 3 18.37 3 17.25z" /></svg>
+                                <p class="mt-4 text-lg text-slate-600"><span class="font-semibold text-primary-600">Click to upload</span> or drag and drop</p>
+                                <p class="text-sm text-slate-500 mt-1">PDF files only</p>
                             </div>
                         </div>
                         <div id="gofile-status-section" class="mt-6 space-y-4">
-                            <div id="gofile-file-info" class="hidden items-center justify-between bg-gray-100 p-3 rounded-lg">
-                                <p id="gofile-file-name" class="text-sm font-medium text-gray-700 truncate"></p>
-                                <button id="gofile-remove-file-btn" class="text-red-500 hover:text-red-700">&times;</button>
+                            <div id="gofile-file-info" class="hidden items-center justify-between bg-slate-100 p-3 rounded-lg">
+                                <p id="gofile-file-name" class="text-sm font-medium text-slate-700 truncate"></p>
+                                <button id="gofile-remove-file-btn" class="text-red-500 hover:text-red-700 font-bold">&times;</button>
                             </div>
                             <div id="gofile-error-message" class="hidden text-red-600 text-sm font-medium p-3 bg-red-50 rounded-lg text-center"></div>
-                            <button id="gofile-upload-action-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed">Upload File</button>
-                            <div id="gofile-uploading-spinner" class="hidden flex items-center justify-center space-x-2 text-gray-600">
-                                <svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                            <button id="gofile-upload-action-btn" class="w-full bg-primary-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-primary-700 disabled:bg-slate-400 disabled:cursor-not-allowed">Upload File</button>
+                            <div id="gofile-uploading-spinner" class="hidden flex items-center justify-center space-x-2 text-slate-600">
+                                <svg class="animate-spin h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                                 <span>Uploading, please wait...</span>
                             </div>
                         </div>
                         <div id="gofile-result-section" class="hidden mt-6 p-4 bg-green-50 border border-green-200 rounded-lg text-center">
                             <h3 class="text-lg font-semibold text-green-800">Done!</h3>
-                            <p class="text-sm text-gray-600">The file has been saved to the patient's record.</p>
+                            <p class="text-sm text-slate-600">The file has been saved to the patient's record.</p>
                         </div>
                     </div>
                 </div>`;
@@ -831,9 +853,9 @@
                 this.cancelBtn = document.getElementById('gofile-cancel-btn');
 
                 this.dropZone.addEventListener('click', () => this.fileInput.click());
-                this.dropZone.addEventListener('dragover', (e) => { e.preventDefault(); this.dropZone.classList.add('border-blue-500', 'bg-blue-50'); });
-                this.dropZone.addEventListener('dragleave', (e) => { e.preventDefault(); this.dropZone.classList.remove('border-blue-500', 'bg-blue-50'); });
-                this.dropZone.addEventListener('drop', (e) => { e.preventDefault(); this.dropZone.classList.remove('border-blue-500', 'bg-blue-50'); if (e.dataTransfer.files.length) this.handleFile(e.dataTransfer.files[0]); });
+                this.dropZone.addEventListener('dragover', (e) => { e.preventDefault(); this.dropZone.classList.add('border-primary-500', 'bg-primary-50'); });
+                this.dropZone.addEventListener('dragleave', (e) => { e.preventDefault(); this.dropZone.classList.remove('border-primary-500', 'bg-primary-50'); });
+                this.dropZone.addEventListener('drop', (e) => { e.preventDefault(); this.dropZone.classList.remove('border-primary-500', 'bg-primary-50'); if (e.dataTransfer.files.length) this.handleFile(e.dataTransfer.files[0]); });
                 this.fileInput.addEventListener('change', (e) => { if (e.target.files.length) this.handleFile(e.target.files[0]); });
                 this.removeFileBtn.addEventListener('click', () => this.resetUI());
                 this.uploadBtn.addEventListener('click', () => { if (this.selectedFile) this.uploadFile(this.selectedFile); });
@@ -941,9 +963,6 @@
                 
                 auth.onAuthStateChanged((user) => {
                     if (user) {
-                        // Using user's email as the primary identifier for their data collections.
-                        // Note: This is a specific design choice. Using the immutable `user.uid` is
-                        // generally recommended to handle cases where a user might change their email.
                         userId = user.email;
                         const currentPath = window.location.hash.slice(1);
                         if (!currentPath || currentPath === '/') {
@@ -959,7 +978,7 @@
                 });
 
                 // Close dropdowns if clicked outside
-                window.addEventListener('click', function(e) {    
+                window.addEventListener('click', function(e) {   
                     document.querySelectorAll('[id^="file-actions-dropdown-"]').forEach(dropdown => {
                         if (!dropdown.contains(e.target) && !e.target.closest('.file-actions-btn')) {
                             dropdown.classList.add('hidden');
@@ -969,7 +988,7 @@
 
             } catch (e) {
                 console.error("Firebase initialization failed:", e);
-                document.getElementById('app').innerHTML = `<div class="min-h-screen flex items-center justify-center bg-red-50"><div class="text-center p-8 bg-white rounded-lg shadow-lg"><h2 class="text-2xl font-bold text-red-700">Error: Firebase Initialization Failed</h2><p class="mt-2 text-gray-600">The application could not connect to the database. Please check your Firebase configuration values.</p><p class="mt-4 text-sm text-gray-500">Details: ${e.message}</p></div></div>`;
+                document.getElementById('app').innerHTML = `<div class="min-h-screen flex items-center justify-center bg-red-50"><div class="text-center p-8 bg-white rounded-lg shadow-lg"><h2 class="text-2xl font-bold text-red-700">Error: Firebase Initialization Failed</h2><p class="mt-2 text-slate-600">The application could not connect to the database. Please check your Firebase configuration values.</p><p class="mt-4 text-sm text-slate-500">Details: ${e.message}</p></div></div>`;
             }
         }
         // --- Start the App ---
