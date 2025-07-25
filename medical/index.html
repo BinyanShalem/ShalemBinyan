@@ -29,11 +29,11 @@
                             '900': '#0c4a6e'
                         },
                         secondary: { // Replaces green
-                           DEFAULT: '#14b8a6',
-                           '50': '#f0fdfa', '100': '#ccfbf1', '200': '#99f6e4',
-                           '300': '#5eead4', '400': '#2dd4bf', '500': '#14b8a6',
-                           '600': '#0d9488', '700': '#0f766e', '800': '#115e59',
-                           '900': '#134e4a'
+                            DEFAULT: '#14b8a6',
+                            '50': '#f0fdfa', '100': '#ccfbf1', '200': '#99f6e4',
+                            '300': '#5eead4', '400': '#2dd4bf', '500': '#14b8a6',
+                            '600': '#0d9488', '700': '#0f766e', '800': '#115e59',
+                            '900': '#134e4a'
                         },
                         // Using slate for a cooler gray palette
                         slate: { '50': '#f8fafc', '100': '#f1f5f9', '200': '#e2e8f0', '300': '#cbd5e1', '400': '#94a3b8', '500': '#64748b', '600': '#475569', '700': '#334155', '800': '#1e293b', '900': '#0f172a' }
@@ -242,10 +242,10 @@
                         
                         <div id="mobile-menu-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
                         <nav id="mobile-menu" class="fixed top-0 left-0 h-full w-64 bg-white z-40 flex flex-col transition-all md:hidden">
-                             <div class="h-16 flex items-center justify-between border-b border-gray-200 px-4">
-                                 <img src="https://raw.githubusercontent.com/BinyanShalem/ShalemBinyan/refs/heads/main/logosss.png" alt="Refuah Berurah Logo" class="h-8 w-auto">
-                                 <button id="close-mobile-menu-btn" class="p-2"><svg class="w-6 h-6" data-lucide="x"></svg></button>
-                             </div>
+                                <div class="h-16 flex items-center justify-between border-b border-gray-200 px-4">
+                                    <img src="https://raw.githubusercontent.com/BinyanShalem/ShalemBinyan/refs/heads/main/logosss.png" alt="Refuah Berurah Logo" class="h-8 w-auto">
+                                    <button id="close-mobile-menu-btn" class="p-2"><svg class="w-6 h-6" data-lucide="x"></svg></button>
+                                </div>
                             <div class="p-4 flex-grow"><ul class="space-y-2">${navLinksHtml}</ul></div>
                             <div class="p-4 border-t border-slate-200"><a href="#" id="mobile-logout-btn" class="flex items-center p-3 rounded-lg text-slate-600 hover:bg-red-50 hover:text-red-600 transition-all"><svg class="w-5 h-5 mr-3" data-lucide="log-out"></svg>Logout</a></div>
                         </nav>
@@ -345,31 +345,31 @@
                 `;
             },
             renderSignupForm(error = '') {
-                   return `
-                    <div class="text-center">
-                           <img src="https://raw.githubusercontent.com/BinyanShalem/ShalemBinyan/refs/heads/main/logosss.png" alt="Refuah Berurah Logo" class="h-12 w-auto mx-auto">
-                         <h2 class="mt-6 text-2xl font-bold tracking-tight text-slate-900">Create your account</h2>
-                         <p class="mt-2 text-slate-600">Get started with your secure hub</p>
-                    </div>
-                    <form id="signup-form" class="space-y-4 pt-6">
-                        <div>
-                            <label for="signup-email" class="block text-sm font-medium text-slate-700">Email address</label>
-                            <input type="email" id="signup-email" name="email" autocomplete="email" required class="input">
-                        </div>
-                        <div>
-                            <label for="signup-password" class="block text-sm font-medium text-slate-700">Password</label>
-                            <input type="password" id="signup-password" name="password" autocomplete="new-password" required class="input">
-                        </div>
-                           ${error ? `<p class="text-sm text-red-600">${error}</p>` : ''}
-                        <div>
-                            <button type="submit" class="w-full flex justify-center py-3 px-4 rounded-lg shadow-md text-sm font-semibold text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 transition-all transform hover:scale-105">
-                                Create Account
-                            </button>
-                        </div>
-                    </form>
-                    <p class="text-center text-sm text-slate-500 pt-4">
-                        Already have an account? <a href="#" id="show-login" class="font-medium text-primary-600 hover:text-primary-500">Sign in</a>
-                    </p>
+                    return `
+                     <div class="text-center">
+                            <img src="https://raw.githubusercontent.com/BinyanShalem/ShalemBinyan/refs/heads/main/logosss.png" alt="Refuah Berurah Logo" class="h-12 w-auto mx-auto">
+                           <h2 class="mt-6 text-2xl font-bold tracking-tight text-slate-900">Create your account</h2>
+                           <p class="mt-2 text-slate-600">Get started with your secure hub</p>
+                     </div>
+                     <form id="signup-form" class="space-y-4 pt-6">
+                         <div>
+                             <label for="signup-email" class="block text-sm font-medium text-slate-700">Email address</label>
+                             <input type="email" id="signup-email" name="email" autocomplete="email" required class="input">
+                         </div>
+                         <div>
+                             <label for="signup-password" class="block text-sm font-medium text-slate-700">Password</label>
+                             <input type="password" id="signup-password" name="password" autocomplete="new-password" required class="input">
+                         </div>
+                            ${error ? `<p class="text-sm text-red-600">${error}</p>` : ''}
+                         <div>
+                             <button type="submit" class="w-full flex justify-center py-3 px-4 rounded-lg shadow-md text-sm font-semibold text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 transition-all transform hover:scale-105">
+                                 Create Account
+                             </button>
+                         </div>
+                     </form>
+                     <p class="text-center text-sm text-slate-500 pt-4">
+                         Already have an account? <a href="#" id="show-login" class="font-medium text-primary-600 hover:text-primary-500">Sign in</a>
+                     </p>
                 `;
             },
             postRender() {
@@ -406,10 +406,10 @@
                             showSignup(err.message);
                         }
                     });
-                           document.getElementById('show-login').addEventListener('click', (e) => {
-                                e.preventDefault();
-                                showLogin();
-                            });
+                            document.getElementById('show-login').addEventListener('click', (e) => {
+                                 e.preventDefault();
+                                 showLogin();
+                             });
                 };
                 showLogin(); // Show login form by default
             }
@@ -780,6 +780,191 @@
             }
         };
 
+        // --- Resources Component (FIXED AND ADDED) ---
+        const ResourcesComponent = {
+            render() {
+                return Layout.render(`<div id="resources-container"><div class="loading-overlay"><div class="loader"></div></div></div>`, 'Resources');
+            },
+            renderModals(isForPatientLinking = false) {
+                const modalId = isForPatientLinking ? 'resource-modal-patient' : 'resource-modal';
+                return `
+                    <div id="${modalId}" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
+                        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg transform transition-all">
+                            <h3 class="text-2xl font-bold mb-4 text-slate-800">Add New Resource</h3>
+                            <form id="${modalId}-form" class="space-y-4">
+                                <input type="hidden" id="${modalId}-patient-link-id">
+                                <div>
+                                    <label for="${modalId}-type" class="block text-sm font-medium text-slate-700">Resource Type</label>
+                                    <select id="${modalId}-type" class="input">
+                                        <option value="article">Article/Link</option>
+                                        <option value="professional">Professional/Contact</option>
+                                    </select>
+                                </div>
+                                <div id="${modalId}-fields"></div>
+                                <div class="mt-6 flex justify-end space-x-3">
+                                    <button type="button" id="${modalId}-cancel-btn" class="btn btn-light">Cancel</button>
+                                    <button type="submit" class="btn btn-secondary">Save Resource</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                `;
+            },
+            renderFormFields(type, containerId) {
+                const fieldsContainer = document.getElementById(containerId);
+                if (!fieldsContainer) return;
+                if (type === 'article') {
+                    fieldsContainer.innerHTML = `
+                        <div><label for="title" class="block text-sm font-medium text-slate-700">Title</label><input type="text" id="title" required class="input"></div>
+                        <div><label for="summary" class="block text-sm font-medium text-slate-700">Summary</label><textarea id="summary" required class="input"></textarea></div>
+                        <div><label for="link" class="block text-sm font-medium text-slate-700">URL/Link</label><input type="url" id="link" required class="input"></div>
+                    `;
+                } else { // professional
+                    fieldsContainer.innerHTML = `
+                        <div><label for="name" class="block text-sm font-medium text-slate-700">Name</label><input type="text" id="name" required class="input"></div>
+                        <div><label for="specialty" class="block text-sm font-medium text-slate-700">Specialty</label><input type="text" id="specialty" required class="input"></div>
+                        <div><label for="contact" class="block text-sm font-medium text-slate-700">Contact Info</label><input type="text" id="contact" required class="input"></div>
+                    `;
+                }
+            },
+            setupModal(modalId) {
+                const modal = document.getElementById(modalId);
+                const form = document.getElementById(`${modalId}-form`);
+                const typeSelector = document.getElementById(`${modalId}-type`);
+                const fieldsContainerId = `${modalId}-fields`;
+
+                if (!modal || !form || !typeSelector) return;
+
+                const closeModal = () => {
+                    modal.classList.add('hidden');
+                    form.reset();
+                };
+
+                document.getElementById(`${modalId}-cancel-btn`).addEventListener('click', closeModal);
+                typeSelector.addEventListener('change', (e) => this.renderFormFields(e.target.value, fieldsContainerId));
+
+                form.onsubmit = async (e) => {
+                    e.preventDefault();
+                    const patientToLinkId = document.getElementById(`${modalId}-patient-link-id`).value;
+                    const type = typeSelector.value;
+                    let resourceData = { type, createdAt: new Date().toISOString() };
+
+                    if (type === 'article') {
+                        resourceData = { ...resourceData, title: form.title.value, summary: form.summary.value, link: form.link.value };
+                    } else {
+                        resourceData = { ...resourceData, name: form.name.value, specialty: form.specialty.value, contact: form.contact.value };
+                    }
+
+                    try {
+                        const docRef = await FirestoreDB.addResource(resourceData);
+                        window.showNotification('Resource added successfully!', 'success');
+
+                        if (patientToLinkId) {
+                            const patientDoc = await db.collection(`artifacts/${appId}/users/${userId}/patients`).doc(patientToLinkId).get();
+                            if(patientDoc.exists) {
+                                const patientData = patientDoc.data();
+                                const updatedLinks = [...(patientData.linkedResourceIds || []), docRef.id];
+                                await FirestoreDB.savePatient(patientToLinkId, { linkedResourceIds: updatedLinks });
+                                window.showNotification('Resource linked to patient!', 'success');
+                            }
+                        }
+                        closeModal();
+                    } catch (error) {
+                        console.error("Error adding resource:", error);
+                        window.showNotification(`Error: ${error.message}`, 'error');
+                    }
+                };
+                this.renderFormFields(typeSelector.value, fieldsContainerId);
+            },
+            openModal(patientToLink = null) {
+                const modalId = patientToLink ? 'resource-modal-patient' : 'resource-modal';
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    document.getElementById(`${modalId}-patient-link-id`).value = patientToLink || '';
+                    modal.classList.remove('hidden');
+                }
+            },
+            postRender() {
+                Layout.postRender();
+                const container = document.getElementById('resources-container');
+                if (!container) return;
+
+                container.innerHTML = `
+                    <div class="space-y-6">
+                        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div><h2 class="text-3xl font-bold tracking-tight text-slate-900">Resources</h2><p class="mt-1 text-slate-500">Manage your articles and professional contacts.</p></div>
+                            <button id="add-resource-btn" class="btn btn-secondary w-full sm:w-auto"><svg class="w-5 h-5 mr-2" data-lucide="plus-circle"></svg>Add Resource</button>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-slate-200">
+                            <div class="p-4 border-b border-slate-200"><input type="text" id="search-resource" placeholder="Search resources..." class="input w-full"></div>
+                            <div id="resource-list" class="divide-y divide-slate-200"><div class="p-6 text-center text-slate-500">Loading resources...</div></div>
+                        </div>
+                    </div>`;
+                
+                document.getElementById('modal-container').innerHTML += this.renderModals();
+                this.setupModal('resource-modal');
+
+                document.getElementById('add-resource-btn').addEventListener('click', () => this.openModal());
+
+                let resourceDocs = [];
+                FirestoreDB.getResources(querySnapshot => {
+                    resourceDocs = querySnapshot.docs;
+                    const searchInput = document.getElementById('search-resource');
+                    const currentFilter = searchInput ? searchInput.value : '';
+                    this.renderResourceList(resourceDocs, currentFilter);
+                });
+
+                document.getElementById('search-resource')?.addEventListener('input', (e) => {
+                    this.renderResourceList(resourceDocs, e.target.value);
+                });
+
+                if (window.lucide) window.lucide.createIcons();
+            },
+            renderResourceList(resources, filter = '') {
+                const filteredResources = resources.filter(r => {
+                    const data = r.data();
+                    const name = data.name || data.title || '';
+                    return name.toLowerCase().includes(filter.toLowerCase());
+                });
+
+                const listEl = document.getElementById('resource-list');
+                if (!listEl) return;
+
+                listEl.innerHTML = filteredResources.length === 0 ? `<p class="p-6 text-center text-slate-500">No resources found.</p>` : filteredResources.map(doc => {
+                    const resource = doc.data();
+                    const id = doc.id;
+                    let contentHtml = '';
+                    if (resource.type === 'article') {
+                        contentHtml = `
+                            <p class="font-semibold text-secondary-700">${resource.title}</p>
+                            <p class="text-sm text-slate-600">${resource.summary}</p>
+                            <a href="${resource.link}" target="_blank" class="text-xs text-primary-500 font-medium hover:underline">Read Article</a>
+                        `;
+                    } else { // professional
+                        contentHtml = `
+                            <p class="font-semibold text-secondary-700">${resource.name}</p>
+                            <p class="text-sm text-slate-600">Specialty: ${resource.specialty}</p>
+                            <p class="text-sm text-slate-600">Contact: ${resource.contact}</p>
+                        `;
+                    }
+
+                    return `<div class="p-4 flex items-center justify-between hover:bg-secondary-50/50 transition-colors duration-150">
+                                <div class="flex-1 min-w-0">${contentHtml}</div>
+                                <button data-id="${id}" data-name="${resource.name || resource.title}" class="delete-resource-btn text-slate-400 hover:text-red-500 p-2 rounded-full flex-shrink-0 ml-4"><svg class="w-5 h-5" data-lucide="trash-2"></svg></button>
+                            </div>`;
+                }).join('');
+
+                document.querySelectorAll('.delete-resource-btn').forEach(btn => btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const resourceId = btn.dataset.id;
+                    const resourceName = btn.dataset.name;
+                    window.showConfirmModal('Delete Resource?', `Are you sure you want to permanently delete "${resourceName}"?`, () => FirestoreDB.deleteResource(resourceId));
+                }));
+
+                if (window.lucide) window.lucide.createIcons();
+            }
+        };
+
         // =================================================================================
         // --- GoFile Uploader Integration ---
         const GoFileUploader = {
@@ -1095,7 +1280,7 @@
                 AppRouter.addRoute('/dashboard', DashboardComponent);
                 AppRouter.addRoute('/patients', PatientsComponent);
                 AppRouter.addRoute('/patient/:id', PatientDetailComponent);
-                AppRouter.addRoute('/resources', ResourcesComponent); // ResourcesComponent should now be defined
+                AppRouter.addRoute('/resources', ResourcesComponent); // ResourcesComponent is now defined
 
                 // Listen for Firebase Auth state changes
                 auth.onAuthStateChanged((user) => {
