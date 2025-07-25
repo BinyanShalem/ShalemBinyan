@@ -1056,9 +1056,14 @@
             },
             
             async deleteFile(file) {
+                // If the file object or the gofile-specific data is missing,
+                // we can't delete it from the GoFile service. Log a warning
+                // and return, allowing the app to still remove the reference from Firestore.
                 if (!file || !file.gofile || !file.gofile.fileId) {
-                    throw new Error("File data is incomplete for deletion.");
+                    console.warn("File data is incomplete for deletion from GoFile service. The file reference will be removed from the app, but the file may remain on GoFile servers if it was ever uploaded.", file);
+                    return; // Exit gracefully without throwing an error
                 }
+                
                 // contentsId parameter expects a comma-separated list, even for a single ID
                 const contentsIdToDelete = file.gofile.fileId; 
 
@@ -1075,8 +1080,6 @@
                     // GoFile's deleteContent might return an error if the file is already gone or permission denied.
                     // Log a warning but don't re-throw if the goal is just to remove it from the app.
                     console.warn("Could not delete file from GoFile, it may already be gone or permissions are insufficient:", data);
-                    // Optionally, you might still want to throw an error if this is a critical operation
-                    // throw new Error(data.data?.error || 'Failed to delete file from GoFile.');
                 }
                 return true;
             },
