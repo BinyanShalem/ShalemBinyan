@@ -220,7 +220,7 @@
         };
 
         // =================================================================================
-        // --- UI COMPONENTS ---
+        // --- UI COMPONENTS (Defined in order to avoid 'is not defined' errors) ---
 
         // --- Layout Component (Sidebar, Header, Confirmation Modal) ---
         const Layout = {
@@ -978,9 +978,11 @@
 
             resetUI() {
                 // Ensure elements are initialized before trying to access their properties
+                // This 'if' check is crucial for preventing TypeError if resetUI runs too early
                 if (this.fileInput) this.fileInput.value = '';
                 this.selectedFile = null;
-                // Ensure elements exist before trying to access properties
+                
+                // Added checks for other elements as well for robustness
                 if (this.fileInfo) this.fileInfo.classList.add('hidden');
                 if (this.uploadBtn) {
                     this.uploadBtn.classList.remove('hidden');
@@ -998,7 +1000,8 @@
             handleFile(file) {
                 if (file.type !== "application/pdf") {
                     this.showError("Please choose a PDF file.");
-                    this.fileInput.value = '';
+                    // Ensure fileInput exists before setting its value
+                    if (this.fileInput) this.fileInput.value = '';
                     return;
                 }
                 this.selectedFile = file;
@@ -1092,8 +1095,8 @@
                 AppRouter.addRoute('/dashboard', DashboardComponent);
                 AppRouter.addRoute('/patients', PatientsComponent);
                 AppRouter.addRoute('/patient/:id', PatientDetailComponent);
-                AppRouter.addRoute('/resources', ResourcesComponent);
-                
+                AppRouter.addRoute('/resources', ResourcesComponent); // Now ResourcesComponent should be defined
+
                 // Listen for Firebase Auth state changes
                 auth.onAuthStateChanged((user) => {
                     if (user) {
@@ -1129,8 +1132,9 @@
             }
         }
 
-        // --- Start the App ---
-        initializeAndStartApp();
+        // --- Start the App after the DOM is fully loaded ---
+        // This ensures all component objects are defined before initializeAndStartApp runs.
+        document.addEventListener('DOMContentLoaded', initializeAndStartApp);
     </script>
 </body>
 </html>
