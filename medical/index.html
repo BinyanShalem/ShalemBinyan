@@ -434,8 +434,24 @@
                     <div class="space-y-8">
                         <div><h2 class="text-3xl font-bold tracking-tight text-slate-900">Dashboard</h2><p class="mt-1 text-slate-500">Welcome back! Here's a real-time summary of your workspace.</p></div>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-primary-400 flex items-center"><div class="p-3 rounded-full bg-primary-100 text-primary-600"><svg class="w-7 h-7" data-lucide="users"></svg></div><div class="ml-4"><p class="text-sm font-medium text-slate-500">Total Patients</p><p id="patient-count" class="text-3xl font-bold text-slate-800">0</p></div></div>
-                            <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-secondary-400 flex items-center"><div class="p-3 rounded-full bg-secondary-100 text-secondary-600"><svg class="w-7 h-7" data-lucide="book-marked"></svg></div><div class="ml-4"><p class="text-sm font-medium text-slate-500">Total Resources</p><p id="resource-count" class="text-2xl font-bold text-slate-800">0</p></div></div>
+                            <a href="#/patients" class="block bg-white p-6 rounded-xl shadow-lg border-t-4 border-primary-400 hover:shadow-xl hover:-translate-y-1 transition-all">
+                                <div class="flex items-center">
+                                    <div class="p-3 rounded-full bg-primary-100 text-primary-600"><svg class="w-7 h-7" data-lucide="users"></svg></div>
+                                    <div class="ml-4">
+                                        <p class="text-sm font-medium text-slate-500">Total Patients</p>
+                                        <p id="patient-count" class="text-3xl font-bold text-slate-800">0</p>
+                                    </div>
+                                </div>
+                            </a>
+                            <a href="#/resources" class="block bg-white p-6 rounded-xl shadow-lg border-t-4 border-secondary-400 hover:shadow-xl hover:-translate-y-1 transition-all">
+                                <div class="flex items-center">
+                                    <div class="p-3 rounded-full bg-secondary-100 text-secondary-600"><svg class="w-7 h-7" data-lucide="book-marked"></svg></div>
+                                    <div class="ml-4">
+                                        <p class="text-sm font-medium text-slate-500">Total Resources</p>
+                                        <p id="resource-count" class="text-2xl font-bold text-slate-800">0</p>
+                                    </div>
+                                </div>
+                            </a>
                         </div>
                         <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
                             <h3 class="text-lg font-semibold text-slate-800">Quick Actions</h3>
