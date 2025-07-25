@@ -326,11 +326,11 @@
                     <form id="login-form" class="space-y-4 pt-6">
                         <div>
                             <label for="login-email" class="block text-sm font-medium text-slate-700">Email address</label>
-                            <input id="login-email" name="email" type="email" autocomplete="email" required class="input">
+                            <input type="email" id="login-email" name="email" autocomplete="email" required class="input">
                         </div>
                         <div>
                             <label for="login-password" class="block text-sm font-medium text-slate-700">Password</label>
-                            <input id="login-password" name="password" type="password" autocomplete="current-password" required class="input">
+                            <input type="password" id="login-password" name="password" autocomplete="current-password" required class="input">
                         </div>
                         ${error ? `<p class="text-sm text-red-600">${error}</p>` : ''}
                         <div>
@@ -354,11 +354,11 @@
                     <form id="signup-form" class="space-y-4 pt-6">
                         <div>
                             <label for="signup-email" class="block text-sm font-medium text-slate-700">Email address</label>
-                            <input id="signup-email" name="email" type="email" autocomplete="email" required class="input">
+                            <input type="email" id="signup-email" name="email" autocomplete="email" required class="input">
                         </div>
                         <div>
                             <label for="signup-password" class="block text-sm font-medium text-slate-700">Password</label>
-                            <input id="signup-password" name="password" type="password" autocomplete="new-password" required class="input">
+                            <input type="password" id="signup-password" name="password" autocomplete="new-password" required class="input">
                         </div>
                            ${error ? `<p class="text-sm text-red-600">${error}</p>` : ''}
                         <div>
@@ -475,7 +475,7 @@
                             <button id="add-patient-btn" class="btn btn-primary w-full sm:w-auto"><svg class="w-5 h-5 mr-2" data-lucide="user-plus"></svg>Add Patient</button>
                         </div>
                         <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-slate-200">
-                            <div class="p-4 border-b border-slate-200"><input id="search-patient" type="text" placeholder="Search patients by name..." class="input w-full"></div>
+                            <div class="p-4 border-b border-slate-200"><input type="text" id="search-patient" placeholder="Search patients by name..." class="input w-full"></div>
                             <div id="patient-list" class="divide-y divide-slate-200"><div class="p-6 text-center text-slate-500">Loading patients...</div></div>
                         </div>
                     </div>`;
@@ -883,7 +883,7 @@
                             <button id="add-resource-btn" class="btn btn-secondary w-full sm:w-auto"><svg class="w-5 h-5 mr-2" data-lucide="plus-circle"></svg>Add Resource</button>
                         </div>
                         <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-slate-200">
-                            <div class="p-4 border-b border-slate-200"><input id="search-resource" type="text" placeholder="Search resources..." class="input w-full"></div>
+                            <div class="p-4 border-b border-slate-200"><input type="text" id="search-resource" placeholder="Search resources..." class="input w-full"></div>
                             <div id="resource-list" class="divide-y divide-slate-200"><div class="p-6 text-center text-slate-500">Loading resources...</div></div>
                         </div>
                     </div>`;
@@ -1075,6 +1075,7 @@
                 this.activePatient = patient;
                 const modal = document.getElementById('gofile-upload-modal');
                 modal.classList.remove('hidden');
+                this.resetUI(); // Reset UI state on open
                 this.init(); // Initialize event listeners for the modal elements
             },
 
@@ -1108,21 +1109,26 @@
                 this.uploadBtn.addEventListener('click', () => { if (this.selectedFile) this.uploadFile(this.selectedFile); });
                 this.cancelBtn.addEventListener('click', () => this.closeModal());
 
-                this.resetUI(); // Call resetUI initially to set correct state
+                // No initial call to resetUI here, as it's done in openModal now.
                 this._listenersInitialized = true; // Mark listeners as initialized
             },
 
             resetUI() {
                 this.fileInput.value = '';
                 this.selectedFile = null;
-                this.fileInfo.classList.add('hidden');
-                this.uploadBtn.classList.remove('hidden');
-                this.uploadBtn.disabled = true;
-                this.errorMessage.classList.add('hidden');
-                this.errorMessage.textContent = '';
-                this.uploadingSpinner.classList.add('hidden');
-                this.resultSection.classList.add('hidden');
-                this.dropZone.classList.remove('border-green-500', 'bg-green-50');
+                // Ensure elements exist before trying to access properties
+                if (this.fileInfo) this.fileInfo.classList.add('hidden');
+                if (this.uploadBtn) {
+                    this.uploadBtn.classList.remove('hidden');
+                    this.uploadBtn.disabled = true;
+                }
+                if (this.errorMessage) {
+                    this.errorMessage.classList.add('hidden');
+                    this.errorMessage.textContent = '';
+                }
+                if (this.uploadingSpinner) this.uploadingSpinner.classList.add('hidden');
+                if (this.resultSection) this.resultSection.classList.add('hidden');
+                if (this.dropZone) this.dropZone.classList.remove('border-green-500', 'bg-green-50');
             },
             
             handleFile(file) {
@@ -1174,18 +1180,21 @@
                     });
 
                     const uploadData = await uploadRes.json();
+                    console.log('GoFile Upload Success Response:', uploadData); // FOR DEBUGGING THE UNDEFINED ERROR
+
                     if (uploadData.status !== 'ok') {
                         throw new Error(uploadData.data?.error || 'File upload failed.');
                     }
 
                     // Save to Firestore with GoFile details for deletion and retrieval
+                    // Explicitly set properties to null if they are undefined or missing from response
                     const newFile = { 
                         name: file.name, 
-                        url: uploadData.data.downloadPage, 
+                        url: uploadData.data?.downloadPage || null, // Safeguard against undefined
                         storage: 'gofile',
                         gofile: {
-                            fileId: uploadData.data.fileId,
-                            adminCode: uploadData.data.adminCode // Required for some operations, good to save
+                            fileId: uploadData.data?.fileId || null,     // Safeguard against undefined
+                            adminCode: uploadData.data?.adminCode || null // Safeguard against undefined
                         },
                         notes: []
                     };
