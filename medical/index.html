@@ -200,14 +200,12 @@
 
                 return `
                     <div class="min-h-screen flex">
-                        <!-- Desktop Sidebar -->
                         <nav class="hidden md:flex w-64 bg-white border-r border-gray-200 flex-shrink-0 flex-col">
                             <div class="h-16 flex items-center justify-center border-b border-gray-200 p-4"><img src="https://raw.githubusercontent.com/BinyanShalem/ShalemBinyan/refs/heads/main/logosss.png" alt="Refuah Berurah Logo" class="h-10 w-auto"></div>
                             <div class="p-4 flex-grow"><ul>${navLinksHtml}</ul></div>
                             <div class="p-4 border-t border-gray-200"><a href="#" id="logout-btn" class="flex items-center p-3 rounded-lg text-gray-600 hover:bg-red-50 hover:text-red-600 transition-all"><svg class="w-5 h-5 mr-3" data-lucide="log-out"></svg>Logout</a></div>
                         </nav>
                         
-                        <!-- Mobile Menu -->
                         <div id="mobile-menu-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
                         <nav id="mobile-menu" class="fixed top-0 left-0 h-full w-64 bg-white z-40 flex flex-col transition-all md:hidden">
                              <div class="h-16 flex items-center justify-between border-b border-gray-200 px-4">
@@ -219,12 +217,10 @@
                         </nav>
 
                         <div class="flex-1 flex flex-col">
-                            <!-- Mobile Header -->
                             <header class="md:hidden h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4">
                                 <button id="open-mobile-menu-btn" class="p-2"><svg class="w-6 h-6" data-lucide="menu"></svg></button>
                                 <img src="https://raw.githubusercontent.com/BinyanShalem/ShalemBinyan/refs/heads/main/logosss.png" alt="Refuah Berurah Logo" class="h-8 w-auto">
-                                <div class="w-8"></div> <!-- Spacer -->
-                            </header>
+                                <div class="w-8"></div> </header>
                             <main class="flex-1 bg-slate-100 p-4 sm:p-6 lg:p-8 overflow-y-auto relative">${content}</main>
                         </div>
                     </div>
@@ -311,11 +307,11 @@
                 `;
             },
             renderSignupForm(error = '') {
-                 return `
+                   return `
                     <div class="text-center">
-                         <img src="https://raw.githubusercontent.com/BinyanShalem/ShalemBinyan/refs/heads/main/logosss.png" alt="Refuah Berurah Logo" class="h-12 w-auto mx-auto">
-                        <h2 class="mt-6 text-2xl font-bold tracking-tight text-slate-900">Create your account</h2>
-                        <p class="mt-2 text-slate-600">Get started with your secure hub</p>
+                           <img src="https://raw.githubusercontent.com/BinyanShalem/ShalemBinyan/refs/heads/main/logosss.png" alt="Refuah Berurah Logo" class="h-12 w-auto mx-auto">
+                         <h2 class="mt-6 text-2xl font-bold tracking-tight text-slate-900">Create your account</h2>
+                         <p class="mt-2 text-slate-600">Get started with your secure hub</p>
                     </div>
                     <form id="signup-form" class="space-y-4 pt-6">
                         <div>
@@ -326,7 +322,7 @@
                             <label for="signup-password" class="block text-sm font-medium text-slate-700">Password</label>
                             <input id="signup-password" name="password" type="password" autocomplete="new-password" required class="input">
                         </div>
-                         ${error ? `<p class="text-sm text-red-600">${error}</p>` : ''}
+                           ${error ? `<p class="text-sm text-red-600">${error}</p>` : ''}
                         <div>
                             <button type="submit" class="w-full flex justify-center py-3 px-4 rounded-lg shadow-md text-sm font-semibold text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 transition-all transform hover:scale-105">
                                 Create Account
@@ -875,51 +871,91 @@
         const GoFileUploader = {
             selectedFile: null,
             activePatient: null,
-            rootFolderId: null,
+            rootFolderId: null, // This will store the actual root folder ID for the user
+            userAccountId: null, // This will store the user's GoFile account ID
 
             async getRootFolderId() {
-                if (this.rootFolderId) return this.rootFolderId;
+                if (this.rootFolderId) return this.rootFolderId; // If already fetched, return it
+
                 try {
-                    const res = await fetch(`https://api.gofile.io/getAccountDetails?token=${GOFILE_API_KEY}`);
-                    const data = await res.json();
-                    if (data.status !== 'ok') throw new Error('Could not verify GoFile account.');
-                    this.rootFolderId = data.data.rootFolder;
+                    // Step 1: Get the account ID using the new endpoint
+                    const idRes = await fetch(`https://api.gofile.io/accounts/getid?token=${GOFILE_API_KEY}`);
+                    if (!idRes.ok) {
+                        const errorText = await idRes.text();
+                        throw new Error(`GoFile API error getting ID: ${idRes.status} ${idRes.statusText} - ${errorText}`);
+                    }
+                    const idData = await idRes.json();
+                    if (idData.status !== 'ok' || !idData.data?.id) {
+                        throw new Error(idData.data?.error || 'Could not retrieve GoFile account ID.');
+                    }
+                    this.userAccountId = idData.data.id; // Store the account ID
+
+                    // Step 2: Get account details using the account ID to find the root folder
+                    const detailsRes = await fetch(`https://api.gofile.io/accounts/${this.userAccountId}?token=${GOFILE_API_KEY}`);
+                    if (!detailsRes.ok) {
+                        const errorText = await detailsRes.text();
+                        throw new Error(`GoFile API error getting details: ${detailsRes.status} ${detailsRes.statusText} - ${errorText}`);
+                    }
+                    const detailsData = await detailsRes.json();
+                    if (detailsData.status !== 'ok' || !detailsData.data?.rootFolder) {
+                        throw new Error(detailsData.data?.error || 'Could not retrieve GoFile root folder from account details.');
+                    }
+                    this.rootFolderId = detailsData.data.rootFolder; // Store the root folder ID
                     return this.rootFolderId;
+
                 } catch (e) {
                     console.error("GoFile Auth Error:", e);
-                    this.showError("Could not connect to GoFile account. Check API Key.");
+                    this.showError(`GoFile account connection error: ${e.message}. Check API Key and GoFile status.`);
                     return null;
                 }
             },
 
             async getOrCreateFolder(parentFolderId, folderName) {
-                // This is a simplified check. A robust solution might need pagination.
-                const contentRes = await fetch(`https://api.gofile.io/getContent?contentId=${parentFolderId}&token=${GOFILE_API_KEY}`);
+                // Get contents of the parent folder to check for existing subfolder
+                const contentRes = await fetch(`https://api.gofile.io/contents/${parentFolderId}?token=${GOFILE_API_KEY}`);
                 const contentData = await contentRes.json();
-                if (contentData.status !== 'ok') throw new Error('Could not read root folder contents.');
                 
-                const existingFolder = Object.values(contentData.data.contents).find(c => c.type === 'folder' && c.name === folderName);
-                if (existingFolder) return existingFolder.id;
+                if (contentData.status !== 'ok') {
+                    // GoFile API can return 'error-notFound' for getContent if parentFolderId is invalid or content is not found.
+                    // If it's a new user and 'parentFolderId' is the root, and the root is empty, this is okay.
+                    // Otherwise, it might be an issue. For now, we'll proceed to create if not found.
+                    // A more robust check might be needed for specific error codes vs empty content.
+                    console.warn(`Could not read contents of folder ${parentFolderId}. Proceeding to create. Error: ${contentData.data?.error || contentData.status}`);
+                } else {
+                    const existingFolder = Object.values(contentData.data.contents).find(c => c.type === 'folder' && c.name === folderName);
+                    if (existingFolder) return existingFolder.id;
+                }
 
                 // Create folder if not found
-                const createRes = await fetch(`https://api.gofile.io/createFolder`, {
-                    method: 'PUT',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ parentFolderId, folderName, token: GOFILE_API_KEY })
+                const createRes = await fetch(`https://api.gofile.io/contents/createFolder`, {
+                    method: 'POST', // Changed to POST as per documentation
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${GOFILE_API_KEY}` // Added Authorization header as per docs
+                    },
+                    body: JSON.stringify({ parentFolderId, folderName }) // No token in body for createFolder
                 });
                 const createData = await createRes.json();
-                if (createData.status !== 'ok') throw new Error('Could not create user folder in GoFile.');
+                if (createData.status !== 'ok') {
+                    // If the folder already exists and was missed by the getContent check (e.g., due to pagination),
+                    // GoFile might return an error indicating that. We'll need to re-check or handle it.
+                    // For simplicity now, we assume this means a real error creating.
+                    throw new Error(createData.data?.error || 'Could not create folder in GoFile.');
+                }
                 return createData.data.id;
             },
             
             async deleteFile(file) {
-                if (!file || !file.gofile || !file.gofile.fileId || !file.gofile.adminCode) {
+                if (!file || !file.gofile || !file.gofile.fileId) { // adminCode is not required for deleteContents
                     throw new Error("File data is incomplete for deletion.");
                 }
-                const res = await fetch(`https://api.gofile.io/deleteContent`, {
+                const res = await fetch(`https://api.gofile.io/contents`, {
                     method: 'DELETE',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ contentsId: file.gofile.fileId, token: GOFILE_API_KEY })
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${GOFILE_API_KEY}` // Added Authorization header as per docs
+                    },
+                    body: JSON.stringify({ contentsId: file.gofile.fileId }) // Changed contentsId to string for single ID
                 });
                 const data = await res.json();
                 if (data.status !== 'ok') {
@@ -1049,14 +1085,15 @@
                     const mainAppFolderId = await this.getOrCreateFolder(rootFolderId, GOFILE_ROOT_FOLDER_NAME);
                     const userFolderId = await this.getOrCreateFolder(mainAppFolderId, userId);
 
-                    const serverRes = await fetch('https://api.gofile.io/servers');
+                    // Changed from /servers to serverlist as per docs
+                    const serverRes = await fetch('https://api.gofile.io/serverlist'); 
                     const serverData = await serverRes.json();
                     if (serverData.status !== 'ok' || !serverData.data.servers.length) throw new Error('Could not find an upload server.');
                     const server = serverData.data.servers[0].name;
 
                     const formData = new FormData();
                     formData.append("file", file);
-                    formData.append("token", GOFILE_API_KEY);
+                    formData.append("token", GOFILE_API_KEY); // Token can be passed as form data or header for uploadFile
                     formData.append("folderId", userFolderId);
 
                     const uploadRes = await fetch(`https://${server}.gofile.io/uploadFile`, { 
@@ -1122,7 +1159,7 @@
                 });
 
                 // Close dropdowns if clicked outside
-                window.addEventListener('click', function(e) {   
+                window.addEventListener('click', function(e) {    
                     document.querySelectorAll('[id^="file-actions-dropdown-"]').forEach(dropdown => {
                         if (!dropdown.contains(e.target) && !e.target.closest('.file-actions-btn')) {
                             dropdown.classList.add('hidden');
