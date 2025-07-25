@@ -5,15 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Binyan Shalem | Empowering Homes</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Custom Tailwind Configuration -->
     <script>
         tailwind.config = {
             theme: {
@@ -28,7 +25,6 @@
         }
     </script>
 
-    <!-- Custom Styles -->
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -54,21 +50,20 @@
         #main-header.scrolled .donate-btn {
             color: white !important;
         }
-        #main-header.scrolled .header-text {
+        #main-header.scrolled .header-text,
+        #main-header.scrolled #mobile-menu-button { /* Change icon color on scroll */
             color: #1f2937;
         }
     </style>
 </head>
 <body class="text-slate-800">
 
-    <!-- Header -->
     <header id="main-header" class="fixed w-full top-0 z-50 transition-all duration-300">
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
             <div class="flex items-center space-x-3">
                 <img src="https://www.binyan-shalem.com/Binyan%20Shalem_files/8594235c61f23b5d99cd2a2dbf37c8b5.jpg" alt="Binyan Shalem Logo" class="h-12 w-auto" onerror="this.onerror=null;this.src='https://placehold.co/100x50/723358/FFFFFF?text=Logo';">
                 <div class="header-text text-white">
                     <h1 class="text-lg sm:text-xl font-bold tracking-tight">BINYAN SHALEM</h1>
-                    <!-- Slogan added here -->
                     <p class="text-xs sm:text-sm md:text-base font-medium">Your Marriage, Your Path, Our Support.</p>
                 </div>
             </div>
@@ -79,9 +74,10 @@
                 <a href="donate.html" class="nav-link donate-btn bg-custom-deep-purple text-white px-4 py-2 rounded-lg hover:opacity-90 transition-all shadow ml-6">Donate</a>
             </nav>
             <button id="mobile-menu-button" class="md:hidden text-white focus:outline-none">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                <svg id="hamburger-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                <svg id="close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
-        </div>
+            </div>
         <div id="mobile-menu" class="hidden md:hidden px-6 pb-4 bg-white/95 backdrop-blur-sm rounded-b-lg">
             <a href="#home" class="nav-link block py-2 text-slate-700">Home</a>
             <a href="#mission" class="nav-link block py-2 text-slate-700">Our Mission</a>
@@ -90,7 +86,6 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <main>
         <section id="home" class="relative min-h-screen flex items-center justify-center text-center text-white bg-contain bg-no-repeat bg-center md:bg-cover lg:bg-fixed" style="background-image: url('https://www.binyan-shalem.com/Binyan%20Shalem_files/8594235c61f23b5d99cd2a2dbf37c8b5.jpg');">
             <div class="absolute inset-0 bg-black opacity-40"></div>
@@ -99,10 +94,8 @@
                 <p class="text-base md:text-lg lg:text-2xl text-slate-200 max-w-3xl mx-auto mb-8">
                     Our goal is to provide couples with personalized, practical support within the framework of rabbinical guidance to help you build a stronger, more fulfilling marriage—at no cost to you.
                 </p>
-                <!-- Buttons container for horizontal layout -->
                 <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
                     <a href="#contact" class="bg-custom-deep-purple text-white px-8 py-3 rounded-lg hover:opacity-90 transition-opacity text-lg font-semibold shadow-lg">Your journey starts here</a>
-                    <!-- Donate button added to cover screen -->
                     <a href="donate.html" class="bg-custom-beige text-custom-deep-purple px-8 py-3 rounded-lg hover:opacity-90 transition-opacity text-lg font-semibold shadow-lg border border-custom-deep-purple">Donate Now</a>
                 </div>
             </div>
@@ -138,9 +131,8 @@
                         <h3 class="text-3xl md:text-4xl font-bold text-slate-900">Take the First Step</h3>
                         <p class="text-lg text-slate-600 mt-3 mb-8">Reach out through the secure form below. All submissions are seen only by Rabbi Shaul Haber and are completely confidential.</p>
                         
-                        <!-- Google Form Iframe -->
                         <div class="w-full mx-auto" style="height: 1500px;">
-                               <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSd3EUkZ2qbEdENGZRZQfp-fL2Cii8J_KoVFRyni3idgPhipWg/viewform?embedded=true" 
+                                <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSd3EUkZ2qbEdENGZRZQfp-fL2Cii8J_KoVFRyni3idgPhipWg/viewform?embedded=true" 
                                         width="100%" 
                                         height="100%" 
                                         frameborder="0" 
@@ -148,9 +140,8 @@
                                         marginwidth="0"
                                         class="rounded-xl shadow-2xl border border-slate-200">
                                         Loading…
-                               </iframe>
+                                </iframe>
                         </div>
-
                     </div>
                 </div>
             </section>
@@ -179,24 +170,30 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- Basic Page Setup ---
             const header = document.getElementById('main-header');
             const mobileMenuButton = document.getElementById('mobile-menu-button');
             const mobileMenu = document.getElementById('mobile-menu');
+            // ▼▼▼ CHANGE 2: Get icon elements by ID ▼▼▼
+            const hamburgerIcon = document.getElementById('hamburger-icon');
+            const closeIcon = document.getElementById('close-icon');
 
             window.addEventListener('scroll', () => {
                 header.classList.toggle('scrolled', window.scrollY > 50);
             });
 
+            // ▼▼▼ CHANGE 3: Update click listener logic ▼▼▼
             mobileMenuButton.addEventListener('click', () => {
                 mobileMenu.classList.toggle('hidden');
+                hamburgerIcon.classList.toggle('hidden');
+                closeIcon.classList.toggle('hidden');
             });
 
-            document.querySelectorAll('#mobile-menu a, #main-header nav a').forEach(link => {
+            // Close menu and reset icon when a mobile link is clicked
+            document.querySelectorAll('#mobile-menu a').forEach(link => {
                 link.addEventListener('click', () => {
-                    if (!mobileMenu.classList.contains('hidden')) {
-                        mobileMenu.classList.add('hidden');
-                    }
+                    mobileMenu.classList.add('hidden');
+                    hamburgerIcon.classList.remove('hidden');
+                    closeIcon.classList.add('hidden');
                 });
             });
 
@@ -221,5 +218,5 @@
             sections.forEach(section => sectionObserver.observe(section));
         });
     </script>
-</body>
+    </body>
 </html>
