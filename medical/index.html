@@ -4,13 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Refuah Berurah - Production Ready</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    
     <script>
         // Custom Tailwind theme for a more modern look
         tailwind.config = {
@@ -39,22 +43,33 @@
         }
     </script>
     <style>
+        /* Global Styles */
         body { font-family: 'Inter', sans-serif; }
         .transition-all { transition: all 0.3s ease-in-out; }
+
+        /* Input Field Styles */
         .input { margin-top: 0.25rem; display: block; width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #cbd5e1; border-radius: 0.375rem; background-color: white; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
         .input:focus { outline: none; --tw-ring-color: #38bdf8; box-shadow: 0 0 0 2px var(--tw-ring-color); border-color: #38bdf8; }
+
+        /* Loader Styles */
         .loader { width: 48px; height: 48px; border: 5px solid #e2e8f0; border-bottom-color: #0ea5e9; border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 1s linear infinite; }
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .loading-overlay { position: absolute; inset: 0; background-color: rgba(248, 250, 252, 0.8); display: flex; align-items: center; justify-content: center; z-index: 10; }
         #initial-loader { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+
+        /* Mobile Menu Animation */
         #mobile-menu { transform: translateX(-100%); }
         #mobile-menu.open { transform: translateX(0); }
+
+        /* Button Styles */
         .btn { display: inline-flex; align-items: center; justify-content: center; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 500; transition: all 0.2s; box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1); }
         .btn-primary { background-color: #0ea5e9; color: white; } .btn-primary:hover { background-color: #0284c7; }
         .btn-secondary { background-color: #14b8a6; color: white; } .btn-secondary:hover { background-color: #0d9488; }
         .btn-danger { background-color: #ef4444; color: white; } .btn-danger:hover { background-color: #dc2626; }
         .btn-light { background-color: #e2e8f0; color: #334155; } .btn-light:hover { background-color: #cbd5e1; }
         .btn:disabled { opacity: 0.7; cursor: not-allowed; }
+
+        /* Spinner inside Button */
         @keyframes spinner-rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .spinner-inside-button { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spinner-rotation 0.8s linear infinite; }
         
@@ -89,6 +104,7 @@
     </div>
     <div id="modal-container">
     </div>
+
     <script>
         // =================================================================================
         // API Keys & Configuration
@@ -108,9 +124,12 @@
         const GOFILE_ROOT_FOLDER_NAME = 'refuah berurah';
 
         // =================================================================================
-        // --- App State ---
+        // --- App State (Global variables for Firebase and current user) ---
         let app, auth, db, userId;
         const appId = 'refuah-berurah-prod';
+        
+        // =================================================================================
+        // --- GLOBAL UTILITY HELPERS ---
         
         // --- GLOBAL NOTIFICATION HELPER ---
         window.showNotification = (message, type = 'success') => {
@@ -130,6 +149,23 @@
             }, 3000);
         };
 
+        // --- GLOBAL MODAL HELPERS ---
+        window.showConfirmModal = (title, message, onConfirm) => {
+            const modal = document.getElementById('confirm-modal');
+            if (!modal) return;
+            document.getElementById('confirm-title').innerText = title;
+            document.getElementById('confirm-message').innerText = message;
+            
+            const confirmBtn = document.getElementById('confirm-action-btn');
+            const newConfirmBtn = confirmBtn.cloneNode(true); // Clone to remove existing event listeners
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+            newConfirmBtn.onclick = () => { onConfirm(); modal.classList.add('hidden'); };
+            document.getElementById('cancel-confirm-btn').onclick = () => { modal.classList.add('hidden'); };
+            modal.classList.remove('hidden');
+            if (window.lucide) window.lucide.createIcons({ nodes: [modal.querySelector('[data-lucide]')] });
+        };
+
+        // =================================================================================
         // --- ROUTER: Handles navigation within the single-page application ---
         const AppRouter = {
             routes: {},
@@ -140,55 +176,53 @@
             addRoute(route, component) { this.routes[route] = component; },
             handleRouteChange() {
                 const hash = window.location.hash.slice(1) || '/';
-                if (this.currentRoute === hash && !hash.startsWith('/patient/')) return;
+                // Optimization: prevent re-rendering if the route is the same, unless it's a patient detail route
+                if (this.currentRoute === hash && !hash.startsWith('/patient/')) return; 
+                
                 const routeParts = hash.split('/');
                 let component;
                 let params = {};
                 
+                // Handle dynamic routes like /patient/:id
                 if (routeParts[1] === 'patient' && routeParts.length === 3) {
                     component = this.routes['/patient/:id'];
                     params = { id: routeParts[2] };
                 } else {
                     component = this.routes[hash];
                 }
+
                 if (component) {
                     this.currentRoute = hash;
                     document.getElementById('app').innerHTML = component.render(params);
+                    // Render modals from the component, if it has any (e.g., PatientDetailComponent)
                     document.getElementById('modal-container').innerHTML = component.renderModals ? component.renderModals() : '';
                     if (component.postRender) component.postRender(params);
                 } else {
-                    window.location.hash = '/';
+                    // Default to dashboard if route not found
+                    window.location.hash = '/dashboard'; 
                 }
             },
             navigate(path) { window.location.hash = path; }
         };
+
+        // =================================================================================
         // --- Firestore Database Layer ---
+        // FirestoreDB will use the globally defined 'db', 'appId', and 'userId'
         const FirestoreDB = {
             getPatients: (callback) => db.collection(`artifacts/${appId}/users/${userId}/patients`).onSnapshot(callback),
             addPatient: (patientData) => db.collection(`artifacts/${appId}/users/${userId}/patients`).add(patientData),
             savePatient: (patientId, patientData) => db.collection(`artifacts/${appId}/users/${userId}/patients`).doc(patientId).set(patientData, { merge: true }),
             deletePatient: (patientId) => db.collection(`artifacts/${appId}/users/${userId}/patients`).doc(patientId).delete(),
+            
             getResources: (callback) => db.collection(`artifacts/${appId}/users/${userId}/resources`).onSnapshot(callback),
             addResource: (resourceData) => db.collection(`artifacts/${appId}/users/${userId}/resources`).add(resourceData),
             deleteResource: (resourceId) => db.collection(`artifacts/${appId}/users/${userId}/resources`).doc(resourceId).delete(),
         };
-        // --- GLOBAL MODAL HELPERS ---
-        window.showConfirmModal = (title, message, onConfirm) => {
-            const modal = document.getElementById('confirm-modal');
-            if (!modal) return;
-            document.getElementById('confirm-title').innerText = title;
-            document.getElementById('confirm-message').innerText = message;
-            
-            const confirmBtn = document.getElementById('confirm-action-btn');
-            const newConfirmBtn = confirmBtn.cloneNode(true);
-            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
-            newConfirmBtn.onclick = () => { onConfirm(); modal.classList.add('hidden'); };
-            document.getElementById('cancel-confirm-btn').onclick = () => { modal.classList.add('hidden'); };
-            modal.classList.remove('hidden');
-            if (window.lucide) window.lucide.createIcons({ nodes: [modal.querySelector('[data-lucide]')] });
-        };
 
-        // --- COMPONENTS ---
+        // =================================================================================
+        // --- UI COMPONENTS ---
+
+        // --- Layout Component (Sidebar, Header, Confirmation Modal) ---
         const Layout = {
             render(content, activeLink) {
                 const navLinks = [
@@ -244,6 +278,8 @@
             },
             postRender() {
                 if (window.lucide) window.lucide.createIcons();
+                
+                // Logout event listeners
                 const logout = async (e) => { e.preventDefault(); await auth.signOut(); };
                 document.getElementById('logout-btn')?.addEventListener('click', logout);
                 document.getElementById('mobile-logout-btn')?.addEventListener('click', logout);
@@ -268,6 +304,8 @@
                 overlay?.addEventListener('click', closeMenu);
             }
         };
+
+        // --- Login Component ---
         const LoginComponent = {
             render() {
                 return `
@@ -373,9 +411,11 @@
                                 showLogin();
                             });
                 };
-                showLogin();
+                showLogin(); // Show login form by default
             }
         };
+
+        // --- Dashboard Component ---
         const DashboardComponent = {
             render() { return Layout.render(`<div id="dashboard-content"><div class="loading-overlay"><div class="loader"></div></div></div>`, 'Dashboard'); },
             async postRender() {
@@ -408,6 +448,8 @@
                 if(window.lucide) window.lucide.createIcons();
             }
         };
+
+        // --- Patients List Component ---
         const PatientsComponent = {
             render() { return Layout.render(`<div id="patients-container"><div class="loading-overlay"><div class="loader"></div></div></div>`, 'Patients'); },
             renderModals() {
@@ -508,10 +550,12 @@
             },
         };
 
+        // --- Patient Detail Component (Notes, Files, Credentials, Linked Resources) ---
         const PatientDetailComponent = {
-            activeTab: 'notes', 
+            activeTab: 'notes', // Default active tab
             render() { return Layout.render(`<div id="patient-detail-container"><div class="loading-overlay"><div class="loader"></div></div></div>`, 'Patients'); },
             renderModals() {
+                // Modals specific to PatientDetail and shared (like GoFileUploader, ResourcesComponent modals)
                 return `
                     <div id="credential-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
                         <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-lg"><h3 class="text-2xl font-bold mb-4 text-slate-800">Add Credential</h3><form id="credential-form" class="space-y-4">
@@ -530,13 +574,13 @@
                         </div>
                     </div>
                     ${GoFileUploader.renderModal()}
-                    ${ResourcesComponent.renderModals(true)} 
-                `;
+                    ${ResourcesComponent.renderModals(true)} `;
             },
             postRender(params) {
                 Layout.postRender();
                 const container = document.getElementById('patient-detail-container');
                 
+                // Real-time listener for patient data
                 db.collection(`artifacts/${appId}/users/${userId}/patients`).doc(params.id).onSnapshot((patientDoc) => {
                     if (!container || !patientDoc.exists) {
                         if (container) container.innerHTML = `<p>Patient not found.</p>`;
@@ -545,7 +589,7 @@
                     const patient = { id: patientDoc.id, ...patientDoc.data() };
                     
                     const tabContentEl = document.getElementById('tab-content');
-                    const scrollPos = tabContentEl ? tabContentEl.scrollTop : 0;
+                    const scrollPos = tabContentEl ? tabContentEl.scrollTop : 0; // Preserve scroll position
                     container.innerHTML = `
                         <div class="space-y-6">
                             <div>
@@ -562,10 +606,10 @@
                             <div id="tab-content" class="overflow-y-auto"></div>
                         </div>`;
                     
-                    this.switchTab(this.activeTab, patient);
+                    this.switchTab(this.activeTab, patient); // Re-render content for the active tab
                     
                     const newTabContentEl = document.getElementById('tab-content');
-                    if (newTabContentEl) newTabContentEl.scrollTop = scrollPos;
+                    if (newTabContentEl) newTabContentEl.scrollTop = scrollPos; // Restore scroll position
                     document.querySelectorAll('.tab-link').forEach(link => link.addEventListener('click', (e) => { 
                         e.preventDefault(); 
                         this.activeTab = e.target.dataset.tab;
@@ -574,6 +618,7 @@
                     if(window.lucide) window.lucide.createIcons();
                 });
                 
+                // Setup the resource modal for patient linking, ensuring it's ready
                 ResourcesComponent.setupModal("resource-modal-patient");
             },
             switchTab(tabName, patient) {
@@ -666,11 +711,13 @@
 
                     document.querySelectorAll('.file-actions-btn').forEach(btn => {
                         btn.addEventListener('click', (e) => {
-                            e.stopPropagation();
+                            e.stopPropagation(); // Prevent document click from closing it immediately
                             const index = e.currentTarget.dataset.index;
+                            // Close other dropdowns
                             document.querySelectorAll('[id^="file-actions-dropdown-"]').forEach(d => {
                                 if (d.id !== `file-actions-dropdown-${index}`) d.classList.add('hidden');
                             });
+                            // Toggle current dropdown
                             document.getElementById(`file-actions-dropdown-${index}`).classList.toggle('hidden');
                         });
                     });
@@ -689,6 +736,7 @@
                             updatedFiles[fileIndex].notes.push(noteText);
                             
                             await FirestoreDB.savePatient(patient.id, { files: updatedFiles });
+                            e.target.querySelector('textarea').value = ''; // Clear textarea after saving
                         });
                     });
 
@@ -699,6 +747,7 @@
                     document.getElementById('cancel-cred-btn').addEventListener('click', () => modal.classList.add('hidden'));
                     document.getElementById('credential-form').addEventListener('submit', async (e) => { e.preventDefault(); const form = e.target; const updatedCreds = [...(patient.credentials || []), { service: form.service.value, link: form.link.value, username: form.username.value, passwordRef: form.passwordRef.value }]; await FirestoreDB.savePatient(patient.id, { credentials: updatedCreds }); modal.classList.add('hidden'); form.reset(); });
                 } else if (tabName === 'links') {
+                    // This re-fetches resources to ensure the latest list is available for linking
                     FirestoreDB.getResources(snapshot => {
                         const tabContentAfterFetch = document.getElementById('tab-content');
                         if (!tabContentAfterFetch) return;
@@ -712,14 +761,14 @@
                             <div class="bg-white rounded-xl shadow-lg border border-slate-200"><div class="p-4 border-b border-slate-200 flex flex-wrap justify-between items-center gap-4"><h3 class="font-semibold text-lg text-slate-800">Linked Resources</h3><div class="flex gap-2"><button id="open-link-resource-modal" class="btn btn-primary text-sm">Link Existing</button><button id="create-link-resource-modal-btn" class="btn btn-secondary text-sm">Create & Link New</button></div></div><div class="divide-y divide-slate-200">${linkedResources.map(resource => `<div class="p-4 flex items-center justify-between"><div class="flex-1 min-w-0">${resource.type === 'article' ? `<p class="font-semibold text-secondary-700">${resource.title}</p><p class="text-sm text-slate-600">${resource.summary}</p><a href="${resource.link}" target="_blank" class="text-xs text-primary-500 font-medium">Read Article</a>` : `<p class="font-semibold text-secondary-700">${resource.name}</p><p class="text-sm text-slate-600">Specialty: ${resource.specialty}</p><p class="text-sm text-slate-600">Contact: ${resource.contact}</p>`}</div><button data-id="${resource.id}" class="unlink-resource-btn text-slate-400 hover:text-red-500 p-2 rounded-full"><svg class="w-5 h-5" data-lucide="unlink-2"></svg></button></div>`).join('') || '<p class="p-4 text-slate-500">No resources linked.</p>'}</div></div>
                         </div>`;
                         
-                        document.getElementById('save-mypage-link').addEventListener('click', async () => { await FirestoreDB.savePatient(patient.id, { mypageLink: document.getElementById('mypage-link-input').value }); alert('Link saved!'); });
+                        document.getElementById('save-mypage-link').addEventListener('click', async () => { await FirestoreDB.savePatient(patient.id, { mypageLink: document.getElementById('mypage-link-input').value }); window.showNotification('Link saved!', 'success'); });
                         document.getElementById('open-link-resource-modal').addEventListener('click', () => {
                             const modal = document.getElementById('link-resource-modal');
                             document.getElementById('resource-link-list').innerHTML = allResources.map(r => `<label class="p-4 flex items-center justify-between cursor-pointer hover:bg-slate-100"><div class="pr-4"><p class="font-semibold text-slate-700">${r.title || r.name}</p><p class="text-sm text-slate-500">${r.summary || r.specialty}</p></div><input type="checkbox" value="${r.id}" class="resource-link-checkbox h-5 w-5 rounded text-primary-600 focus:ring-primary-500" ${(patient.linkedResourceIds || []).includes(r.id) ? 'checked' : ''}></label>`).join('');
                             modal.classList.remove('hidden');
                         });
                         document.getElementById('create-link-resource-modal-btn').addEventListener('click', () => {
-                            ResourcesComponent.openModal(patient.id);
+                            ResourcesComponent.openModal(patient.id); // Pass patient ID to pre-select it
                         });
                         document.querySelectorAll('.unlink-resource-btn').forEach(btn => btn.addEventListener('click', async (e) => { const resourceId = e.currentTarget.dataset.id; await FirestoreDB.savePatient(patient.id, { linkedResourceIds: (patient.linkedResourceIds || []).filter(id => id !== resourceId) }); }));
                         document.getElementById('cancel-link-resource-btn').addEventListener('click', () => document.getElementById('link-resource-modal').classList.add('hidden'));
@@ -731,6 +780,7 @@
             }
         };
 
+        // --- Resources List Component ---
         const ResourcesComponent = {
             render() { return Layout.render(`<div id="resources-container"><div class="loading-overlay"><div class="loader"></div></div></div>`, 'Resources'); },
             renderModals(isForPatientPage = false) {
@@ -753,6 +803,7 @@
 
                 const linkPatientsSelect = document.getElementById(`${modalId}-link-patients`);
                 
+                // Fetch patients to populate the dropdown for linking
                 FirestoreDB.getPatients(snapshot => {
                     const patients = [];
                     snapshot.forEach(doc => patients.push({id: doc.id, ...doc.data()}));
@@ -777,7 +828,7 @@
                 const updateFormFields = () => { if(formFields) formFields.innerHTML = getFormFields(typeSelect.value); };
                 
                 typeSelect.addEventListener('change', updateFormFields);
-                updateFormFields();
+                updateFormFields(); // Initial call to set up fields based on default type
                 document.getElementById(`${modalId}-cancel-btn`).addEventListener('click', () => modal.classList.add('hidden'));
 
                 form.onsubmit = async (e) => {
@@ -797,6 +848,7 @@
                         
                         const selectedPatientIds = Array.from(linkPatientsSelect.selectedOptions).map(opt => opt.value);
                         
+                        // Link the new resource to selected patients
                         for (const patientId of selectedPatientIds) {
                             const patientDoc = await db.collection(`artifacts/${appId}/users/${userId}/patients`).doc(patientId).get();
                             if (patientDoc.exists) {
@@ -808,7 +860,7 @@
 
                         modal.classList.add('hidden');
                         form.reset();
-                        updateFormFields();
+                        updateFormFields(); // Reset form fields to initial state
                         window.showNotification('Resource added successfully!', 'success');
                     } catch (error) {
                         console.error("Error adding resource:", error);
@@ -836,7 +888,7 @@
                         </div>
                     </div>`;
 
-                this.setupModal("resource-modal");
+                this.setupModal("resource-modal"); // Setup the main resource modal
                 document.getElementById('add-resource-btn')?.addEventListener('click', () => this.openModal());
 
                 let resourceDocs = [];
@@ -867,12 +919,14 @@
             },
         };
 
+        // =================================================================================
         // --- GoFile Uploader Integration ---
         const GoFileUploader = {
             selectedFile: null,
             activePatient: null,
             rootFolderId: null, // This will store the actual root folder ID for the user
             userAccountId: null, // This will store the user's GoFile account ID
+            _listenersInitialized: false, // Flag to prevent re-initializing listeners
 
             async getRootFolderId() {
                 if (this.rootFolderId) return this.rootFolderId; // If already fetched, return it
@@ -905,62 +959,78 @@
 
                 } catch (e) {
                     console.error("GoFile Auth Error:", e);
-                    this.showError(`GoFile account connection error: ${e.message}. Check API Key and GoFile status.`);
+                    window.showNotification(`GoFile account connection error: ${e.message}. Check API Key and GoFile status.`, 'error');
                     return null;
                 }
             },
 
             async getOrCreateFolder(parentFolderId, folderName) {
-                // Get contents of the parent folder to check for existing subfolder
-                const contentRes = await fetch(`https://api.gofile.io/contents/${parentFolderId}?token=${GOFILE_API_KEY}`);
-                const contentData = await contentRes.json();
-                
-                if (contentData.status !== 'ok') {
-                    // GoFile API can return 'error-notFound' for getContent if parentFolderId is invalid or content is not found.
-                    // If it's a new user and 'parentFolderId' is the root, and the root is empty, this is okay.
-                    // Otherwise, it might be an issue. For now, we'll proceed to create if not found.
-                    // A more robust check might be needed for specific error codes vs empty content.
-                    console.warn(`Could not read contents of folder ${parentFolderId}. Proceeding to create. Error: ${contentData.data?.error || contentData.status}`);
-                } else {
-                    const existingFolder = Object.values(contentData.data.contents).find(c => c.type === 'folder' && c.name === folderName);
-                    if (existingFolder) return existingFolder.id;
+                // Try to get contents of the parent folder to check for existing subfolder
+                // This GET request might fail with 401/error-notPremium for free accounts.
+                // We log the warning but proceed to try creating the folder regardless.
+                try {
+                    const contentRes = await fetch(`https://api.gofile.io/contents/${parentFolderId}?token=${GOFILE_API_KEY}`);
+                    if (contentRes.ok) {
+                        const contentData = await contentRes.json();
+                        if (contentData.status === 'ok' && contentData.data && contentData.data.contents) {
+                            const existingFolder = Object.values(contentData.data.contents).find(c => c.type === 'folder' && c.name === folderName);
+                            if (existingFolder) return existingFolder.id;
+                        } else {
+                            console.warn(`GoFile: Could not retrieve contents for folder ${parentFolderId}. Status: ${contentData.status}. Error: ${contentData.data?.error || 'Unknown error.'}`);
+                        }
+                    } else {
+                        const errorText = await contentRes.text();
+                        console.warn(`GoFile: Failed to GET contents of folder ${parentFolderId}. Status: ${contentRes.status}. Text: ${errorText}. This might be due to a non-premium account for this API call (expected for /contents/{id}).`);
+                    }
+                } catch (e) {
+                    console.warn(`GoFile: Error during getContent API call for folder ${parentFolderId}:`, e.message);
                 }
 
-                // Create folder if not found
-                const createRes = await fetch(`https://api.gofile.io/contents/createFolder`, {
-                    method: 'POST', // Changed to POST as per documentation
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${GOFILE_API_KEY}` // Added Authorization header as per docs
-                    },
-                    body: JSON.stringify({ parentFolderId, folderName }) // No token in body for createFolder
-                });
-                const createData = await createRes.json();
-                if (createData.status !== 'ok') {
-                    // If the folder already exists and was missed by the getContent check (e.g., due to pagination),
-                    // GoFile might return an error indicating that. We'll need to re-check or handle it.
-                    // For simplicity now, we assume this means a real error creating.
-                    throw new Error(createData.data?.error || 'Could not create folder in GoFile.');
+                // Create folder if not found or if the check failed/unauthorized.
+                // This relies on GoFile's API to either create a new folder or return an error if it already exists
+                // and we couldn't detect it via getContent.
+                try {
+                    const createRes = await fetch(`https://api.gofile.io/contents/createFolder`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${GOFILE_API_KEY}` // API token in Authorization header
+                        },
+                        body: JSON.stringify({ parentFolderId, folderName })
+                    });
+                    const createData = await createRes.json();
+                    if (createData.status !== 'ok') {
+                        throw new Error(createData.data?.error || 'Could not create folder in GoFile.');
+                    }
+                    return createData.data.id;
+                } catch (e) {
+                    console.error(`GoFile: Error creating folder ${folderName} in parent ${parentFolderId}:`, e.message);
+                    throw e; // Re-throw to propagate the error if folder creation truly failed
                 }
-                return createData.data.id;
             },
             
             async deleteFile(file) {
-                if (!file || !file.gofile || !file.gofile.fileId) { // adminCode is not required for deleteContents
+                if (!file || !file.gofile || !file.gofile.fileId) {
                     throw new Error("File data is incomplete for deletion.");
                 }
+                // contentsId parameter expects a comma-separated list, even for a single ID
+                const contentsIdToDelete = file.gofile.fileId; 
+
                 const res = await fetch(`https://api.gofile.io/contents`, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${GOFILE_API_KEY}` // Added Authorization header as per docs
+                        'Authorization': `Bearer ${GOFILE_API_KEY}` // API token in Authorization header
                     },
-                    body: JSON.stringify({ contentsId: file.gofile.fileId }) // Changed contentsId to string for single ID
+                    body: JSON.stringify({ contentsId: contentsIdToDelete }) 
                 });
                 const data = await res.json();
                 if (data.status !== 'ok') {
-                    // It might have already been deleted, so we don't always throw an error
-                    console.warn("Could not delete file from GoFile, it may already be gone:", data);
+                    // GoFile's deleteContent might return an error if the file is already gone or permission denied.
+                    // Log a warning but don't re-throw if the goal is just to remove it from the app.
+                    console.warn("Could not delete file from GoFile, it may already be gone or permissions are insufficient:", data);
+                    // Optionally, you might still want to throw an error if this is a critical operation
+                    // throw new Error(data.data?.error || 'Failed to delete file from GoFile.');
                 }
                 return true;
             },
@@ -1005,7 +1075,7 @@
                 this.activePatient = patient;
                 const modal = document.getElementById('gofile-upload-modal');
                 modal.classList.remove('hidden');
-                this.init();
+                this.init(); // Initialize event listeners for the modal elements
             },
 
             closeModal() {
@@ -1015,6 +1085,9 @@
             },
             
             init() {
+                // Only set up event listeners once per modal instance
+                if (this._listenersInitialized) return; 
+
                 this.dropZone = document.getElementById('gofile-drop-zone');
                 this.fileInput = document.getElementById('gofile-file-input');
                 this.uploadBtn = document.getElementById('gofile-upload-action-btn');
@@ -1035,7 +1108,8 @@
                 this.uploadBtn.addEventListener('click', () => { if (this.selectedFile) this.uploadFile(this.selectedFile); });
                 this.cancelBtn.addEventListener('click', () => this.closeModal());
 
-                this.resetUI();
+                this.resetUI(); // Call resetUI initially to set correct state
+                this._listenersInitialized = true; // Mark listeners as initialized
             },
 
             resetUI() {
@@ -1080,38 +1154,38 @@
 
                 try {
                     const rootFolderId = await this.getRootFolderId();
-                    if (!rootFolderId) return; // Error was already shown
+                    if (!rootFolderId) return; // Error was already shown by getRootFolderId
 
                     const mainAppFolderId = await this.getOrCreateFolder(rootFolderId, GOFILE_ROOT_FOLDER_NAME);
-                    const userFolderId = await this.getOrCreateFolder(mainAppFolderId, userId);
+                    const userFolderId = await this.getOrCreateFolder(mainAppFolderId, userId); // userId is global from config.js
 
-                    // Changed from /servers to serverlist as per docs
-                    const serverRes = await fetch('https://api.gofile.io/serverlist'); 
-                    const serverData = await serverRes.json();
-                    if (serverData.status !== 'ok' || !serverData.data.servers.length) throw new Error('Could not find an upload server.');
-                    const server = serverData.data.servers[0].name;
+                    // *** CRITICAL FIX: Directly use the main upload endpoint as per documentation ***
+                    // Removed the /serverlist API call because it's causing a 404.
+                    const uploadEndpoint = `https://upload.gofile.io/uploadFile`; 
 
                     const formData = new FormData();
                     formData.append("file", file);
-                    formData.append("token", GOFILE_API_KEY); // Token can be passed as form data or header for uploadFile
+                    formData.append("token", GOFILE_API_KEY); 
                     formData.append("folderId", userFolderId);
 
-                    const uploadRes = await fetch(`https://${server}.gofile.io/uploadFile`, { 
+                    const uploadRes = await fetch(uploadEndpoint, { 
                         method: "POST", 
                         body: formData
                     });
 
                     const uploadData = await uploadRes.json();
-                    if (uploadData.status !== 'ok') throw new Error(uploadData.data?.error || 'File upload failed.');
+                    if (uploadData.status !== 'ok') {
+                        throw new Error(uploadData.data?.error || 'File upload failed.');
+                    }
 
-                    // Save to Firestore with GoFile details for deletion
+                    // Save to Firestore with GoFile details for deletion and retrieval
                     const newFile = { 
                         name: file.name, 
                         url: uploadData.data.downloadPage, 
                         storage: 'gofile',
                         gofile: {
                             fileId: uploadData.data.fileId,
-                            adminCode: uploadData.data.adminCode
+                            adminCode: uploadData.data.adminCode // Required for some operations, good to save
                         },
                         notes: []
                     };
@@ -1120,21 +1194,26 @@
 
                     this.uploadingSpinner.classList.add('hidden');
                     this.resultSection.classList.remove('hidden');
+                    window.showNotification('File uploaded successfully!', 'success'); // Added success notification
 
                 } catch (error) {
                     console.error("GoFile Upload Error:", error);
-                    this.showError(error.message || "An unexpected error occurred.");
-                    this.fileInfo.classList.remove('hidden');
+                    this.showError(error.message || "An unexpected error occurred during upload.");
+                    this.fileInfo.classList.remove('hidden'); 
                 }
             }
         };
 
+        // =================================================================================
         // --- App Initialization ---
         function initializeAndStartApp() {
             try {
+                // Initialize Firebase
                 app = firebase.initializeApp(firebaseConfig);
                 auth = firebase.auth();
                 db = firebase.firestore();
+
+                // Initialize Router and add routes
                 AppRouter.init();
                 AppRouter.addRoute('/', LoginComponent);
                 AppRouter.addRoute('/dashboard', DashboardComponent);
@@ -1142,23 +1221,26 @@
                 AppRouter.addRoute('/patient/:id', PatientDetailComponent);
                 AppRouter.addRoute('/resources', ResourcesComponent);
                 
+                // Listen for Firebase Auth state changes
                 auth.onAuthStateChanged((user) => {
                     if (user) {
-                        userId = user.uid; 
+                        userId = user.uid; // Set the global userId
                         const currentPath = window.location.hash.slice(1);
+                        // If logged in, navigate to dashboard or current hash if valid
                         if (!currentPath || currentPath === '/') {
                             AppRouter.navigate('/dashboard');
                         } else {
-                            AppRouter.handleRouteChange();
+                            AppRouter.handleRouteChange(); // Re-evaluate the current hash
                         }
                     } else {
+                        // If logged out, clear userId and navigate to login
                         userId = null;
                         AppRouter.navigate('/');
                         AppRouter.handleRouteChange();
                     }
                 });
 
-                // Close dropdowns if clicked outside
+                // Global event listener to close file action dropdowns when clicking outside
                 window.addEventListener('click', function(e) {    
                     document.querySelectorAll('[id^="file-actions-dropdown-"]').forEach(dropdown => {
                         if (!dropdown.contains(e.target) && !e.target.closest('.file-actions-btn')) {
@@ -1169,9 +1251,11 @@
 
             } catch (e) {
                 console.error("Firebase initialization failed:", e);
-                document.getElementById('app').innerHTML = `<div class="min-h-screen flex items-center justify-center bg-red-50"><div class="text-center p-8 bg-white rounded-lg shadow-lg"><h2 class="text-2xl font-bold text-red-700">Error: Firebase Initialization Failed</h2><p class="mt-2 text-slate-600">The application could not connect to the database. Please check your Firebase configuration values.</p><p class="mt-4 text-sm text-slate-500">Details: ${e.message}</p></div></div>`;
+                // Display a critical error message if Firebase fails to initialize
+                document.getElementById('app').innerHTML = `<div class="min-h-screen flex items-center justify-center bg-red-50"><div class="text-center p-8 bg-white rounded-lg shadow-lg"><h2 class="text-2xl font-bold text-red-700">Error: Application Initialization Failed</h2><p class="mt-2 text-slate-600">The application could not start. Please check console for details and ensure all dependencies are loaded correctly.</p><p class="mt-4 text-sm text-slate-500">Details: ${e.message}</p></div></div>`;
             }
         }
+
         // --- Start the App ---
         initializeAndStartApp();
     </script>
