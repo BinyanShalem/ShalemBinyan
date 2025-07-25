@@ -220,7 +220,7 @@
         };
 
         // =================================================================================
-        // --- UI COMPONENTS (Defined in order to avoid 'is not defined' errors) ---
+        // --- UI COMPONENTS (ALL DEFINED HERE BEFORE initializeAndStartApp) ---
 
         // --- Layout Component (Sidebar, Header, Confirmation Modal) ---
         const Layout = {
@@ -1081,7 +1081,7 @@
         };
 
         // =================================================================================
-        // --- App Initialization ---
+        // --- App Initialization Function ---
         function initializeAndStartApp() {
             try {
                 // Initialize Firebase
@@ -1089,13 +1089,13 @@
                 auth = firebase.auth();
                 db = firebase.firestore();
 
-                // Initialize Router and add routes
+                // Initialize Router and add routes (now all components should be defined)
                 AppRouter.init();
                 AppRouter.addRoute('/', LoginComponent);
                 AppRouter.addRoute('/dashboard', DashboardComponent);
                 AppRouter.addRoute('/patients', PatientsComponent);
                 AppRouter.addRoute('/patient/:id', PatientDetailComponent);
-                AppRouter.addRoute('/resources', ResourcesComponent); // Now ResourcesComponent should be defined
+                AppRouter.addRoute('/resources', ResourcesComponent); // ResourcesComponent should now be defined
 
                 // Listen for Firebase Auth state changes
                 auth.onAuthStateChanged((user) => {
@@ -1133,7 +1133,7 @@
         }
 
         // --- Start the App after the DOM is fully loaded ---
-        // This ensures all component objects are defined before initializeAndStartApp runs.
+        // This is crucial to ensure all component objects are defined before initializeAndStartApp runs.
         document.addEventListener('DOMContentLoaded', initializeAndStartApp);
     </script>
 </body>
