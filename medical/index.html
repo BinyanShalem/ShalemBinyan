@@ -780,145 +780,6 @@
             }
         };
 
-        // --- Resources List Component ---
-        const ResourcesComponent = {
-            render() { return Layout.render(`<div id="resources-container"><div class="loading-overlay"><div class="loader"></div></div></div>`, 'Resources'); },
-            renderModals(isForPatientPage = false) {
-                const modalId = isForPatientPage ? "resource-modal-patient" : "resource-modal";
-                return `
-                    <div id="${modalId}" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
-                        <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-lg"><h3 class="text-2xl font-bold mb-4 text-slate-800">Add New Resource</h3><form id="${modalId}-form" class="space-y-4">
-                            <div><label for="${modalId}-type" class="block text-sm font-medium text-slate-700">Resource Type</label><select id="${modalId}-type" class="input mt-1"><option value="article">Article</option><option value="doctor">Doctor</option></select></div>
-                            <div id="${modalId}-form-fields" class="space-y-4"></div>
-                            <div><label for="${modalId}-link-patients" class="block text-sm font-medium text-slate-700">Link to Patients (optional)</label><select id="${modalId}-link-patients" multiple class="input mt-1 h-32"></select></div>
-                            <div class="mt-6 flex justify-end space-x-3"><button type="button" id="${modalId}-cancel-btn" class="btn btn-light">Cancel</button><button type="submit" class="btn btn-secondary">Save Resource</button></div>
-                        </form></div>
-                    </div>`;
-            },
-            openModal(preselectedPatientId = null) {
-                const isPatientContext = !!preselectedPatientId;
-                const modalId = isPatientContext ? "resource-modal-patient" : "resource-modal";
-                const modal = document.getElementById(modalId);
-                if (!modal) return;
-
-                const linkPatientsSelect = document.getElementById(`${modalId}-link-patients`);
-                
-                // Fetch patients to populate the dropdown for linking
-                FirestoreDB.getPatients(snapshot => {
-                    const patients = [];
-                    snapshot.forEach(doc => patients.push({id: doc.id, ...doc.data()}));
-                    linkPatientsSelect.innerHTML = patients.map(p => `<option value="${p.id}" ${p.id === preselectedPatientId ? 'selected' : ''}>${p.name}</option>`).join('');
-                });
-                
-                modal.classList.remove('hidden');
-            },
-            setupModal(modalId) {
-                const modal = document.getElementById(modalId);
-                if (!modal) return;
-                const form = document.getElementById(`${modalId}-form`);
-                const typeSelect = document.getElementById(`${modalId}-type`);
-                const formFields = document.getElementById(`${modalId}-form-fields`);
-                const linkPatientsSelect = document.getElementById(`${modalId}-link-patients`);
-
-                const getFormFields = (type) => {
-                    if (type === 'article') return `<div><label for="${modalId}-title" class="block text-sm">Title</label><input type="text" id="${modalId}-title" required class="input"></div><div><label for="${modalId}-link" class="block text-sm">Link</label><input type="url" id="${modalId}-link" required class="input"></div><div><label for="${modalId}-summary" class="block text-sm">Summary</label><textarea id="${modalId}-summary" class="input"></textarea></div>`;
-                    if (type === 'doctor') return `<div><label for="${modalId}-name" class="block text-sm">Doctor's Name</label><input type="text" id="${modalId}-name" required class="input"></div><div><label for="${modalId}-specialty" class="block text-sm">Specialty</label><input type="text" id="${modalId}-specialty" required class="input"></div><div><label for="${modalId}-contact" class="block text-sm">Contact Info</label><input type="text" id="${modalId}-contact" required class="input"></div>`;
-                    return '';
-                };
-                const updateFormFields = () => { if(formFields) formFields.innerHTML = getFormFields(typeSelect.value); };
-                
-                typeSelect.addEventListener('change', updateFormFields);
-                updateFormFields(); // Initial call to set up fields based on default type
-                document.getElementById(`${modalId}-cancel-btn`).addEventListener('click', () => modal.classList.add('hidden'));
-
-                form.onsubmit = async (e) => {
-                    e.preventDefault();
-                    const saveButton = form.querySelector('button[type="submit"]');
-                    const originalButtonText = saveButton.innerHTML;
-                    saveButton.disabled = true;
-                    saveButton.innerHTML = `<div class="spinner-inside-button"></div>`;
-
-                    try {
-                        const type = typeSelect.value;
-                        let resourceData = { type, createdAt: new Date().toISOString() };
-                        if (type === 'article') resourceData = { ...resourceData, title: document.getElementById(`${modalId}-title`).value, link: document.getElementById(`${modalId}-link`).value, summary: document.getElementById(`${modalId}-summary`).value };
-                        if (type === 'doctor') resourceData = { ...resourceData, name: document.getElementById(`${modalId}-name`).value, specialty: document.getElementById(`${modalId}-specialty`).value, contact: document.getElementById(`${modalId}-contact`).value };
-                        
-                        const newResource = await FirestoreDB.addResource(resourceData);
-                        
-                        const selectedPatientIds = Array.from(linkPatientsSelect.selectedOptions).map(opt => opt.value);
-                        
-                        // Link the new resource to selected patients
-                        for (const patientId of selectedPatientIds) {
-                            const patientDoc = await db.collection(`artifacts/${appId}/users/${userId}/patients`).doc(patientId).get();
-                            if (patientDoc.exists) {
-                                const patientData = patientDoc.data();
-                                const linkedResourceIds = [...(patientData.linkedResourceIds || []), newResource.id];
-                                await FirestoreDB.savePatient(patientId, { linkedResourceIds });
-                            }
-                        }
-
-                        modal.classList.add('hidden');
-                        form.reset();
-                        updateFormFields(); // Reset form fields to initial state
-                        window.showNotification('Resource added successfully!', 'success');
-                    } catch (error) {
-                        console.error("Error adding resource:", error);
-                        window.showNotification(`Error: ${error.message}`, 'error');
-                    } finally {
-                        saveButton.disabled = false;
-                        saveButton.innerHTML = originalButtonText;
-                    }
-                };
-            },
-            postRender() {
-                Layout.postRender();
-                const container = document.getElementById('resources-container');
-                if (!container) return;
-
-                container.innerHTML = `
-                    <div class="space-y-6">
-                        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-                            <div><h2 class="text-3xl font-bold tracking-tight text-slate-900">Resources</h2><p class="mt-1 text-slate-500">A general database for articles, doctors, and more.</p></div>
-                            <button id="add-resource-btn" class="btn btn-secondary w-full sm:w-auto"><svg class="w-5 h-5 mr-2" data-lucide="plus-circle"></svg>Add Resource</button>
-                        </div>
-                        <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-slate-200">
-                            <div class="p-4 border-b border-slate-200"><input type="text" id="search-resource" placeholder="Search resources..." class="input w-full"></div>
-                            <div id="resource-list" class="divide-y divide-slate-200"><div class="p-6 text-center text-slate-500">Loading resources...</div></div>
-                        </div>
-                    </div>`;
-
-                this.setupModal("resource-modal"); // Setup the main resource modal
-                document.getElementById('add-resource-btn')?.addEventListener('click', () => this.openModal());
-
-                let resourceDocs = [];
-                FirestoreDB.getResources(querySnapshot => {
-                    resourceDocs = querySnapshot.docs;
-                    const searchInput = document.getElementById('search-resource');
-                    const currentFilter = searchInput ? searchInput.value : '';
-                    this.renderResourceList(resourceDocs, currentFilter);
-                });
-
-                document.getElementById('search-resource')?.addEventListener('input', (e) => this.renderResourceList(resourceDocs, e.target.value));
-                if(window.lucide) window.lucide.createIcons();
-            },
-            renderResourceList(resources, filter = '') {
-                const filteredResources = resources.filter(doc => JSON.stringify(doc.data()).toLowerCase().includes(filter.toLowerCase()));
-                const listEl = document.getElementById('resource-list');
-                if (!listEl) return;
-                listEl.innerHTML = filteredResources.length === 0 ? `<p class="p-6 text-center text-slate-500">No resources found.</p>` : filteredResources.map(doc => {
-                    const resource = doc.data();
-                    const content = resource.type === 'article' ? `<p class="font-semibold text-secondary-700">${resource.title}</p><p class="text-sm text-slate-600">${resource.summary}</p><a href="${resource.link}" target="_blank" class="text-xs text-primary-500 font-medium">Read Article</a>` : `<p class="font-semibold text-secondary-700">${resource.name}</p><p class="text-sm text-slate-600">Specialty: ${resource.specialty}</p><p class="text-sm text-slate-600">Contact: ${resource.contact}</p>`;
-                    return `<div class="p-4 flex items-center justify-between hover:bg-slate-50/50"><div class="flex-1 min-w-0">${content}</div><button data-id="${doc.id}" data-name="${resource.title || resource.name}" class="delete-resource-btn text-slate-400 hover:text-red-500 p-2 rounded-full"><svg class="w-5 h-5" data-lucide="trash-2"></svg></button></div>`;
-                }).join('');
-                document.querySelectorAll('.delete-resource-btn').forEach(btn => btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    window.showConfirmModal('Delete Resource?', `Are you sure you want to delete "${btn.dataset.name}"?`, () => FirestoreDB.deleteResource(btn.dataset.id));
-                }));
-                if(window.lucide) window.lucide.createIcons();
-            },
-        };
-
         // =================================================================================
         // --- GoFile Uploader Integration ---
         const GoFileUploader = {
@@ -1075,8 +936,10 @@
                 this.activePatient = patient;
                 const modal = document.getElementById('gofile-upload-modal');
                 modal.classList.remove('hidden');
-                this.resetUI(); // Reset UI state on open
-                this.init(); // Initialize event listeners for the modal elements
+                
+                // Fix: Initialize listeners first, then reset UI state
+                this.init(); 
+                this.resetUI(); 
             },
 
             closeModal() {
@@ -1114,7 +977,8 @@
             },
 
             resetUI() {
-                this.fileInput.value = '';
+                // Ensure elements are initialized before trying to access their properties
+                if (this.fileInput) this.fileInput.value = '';
                 this.selectedFile = null;
                 // Ensure elements exist before trying to access properties
                 if (this.fileInfo) this.fileInfo.classList.add('hidden');
@@ -1180,7 +1044,7 @@
                     });
 
                     const uploadData = await uploadRes.json();
-                    console.log('GoFile Upload Success Response:', uploadData); // FOR DEBUGGING THE UNDEFINED ERROR
+                    console.log('GoFile Upload Success Response:', uploadData); // <-- IMPORTANT: Check this log for structure!
 
                     if (uploadData.status !== 'ok') {
                         throw new Error(uploadData.data?.error || 'File upload failed.');
@@ -1190,11 +1054,11 @@
                     // Explicitly set properties to null if they are undefined or missing from response
                     const newFile = { 
                         name: file.name, 
-                        url: uploadData.data?.downloadPage || null, // Safeguard against undefined
+                        url: uploadData.data?.downloadPage || null, // Safeguard against undefined or missing property
                         storage: 'gofile',
                         gofile: {
-                            fileId: uploadData.data?.fileId || null,     // Safeguard against undefined
-                            adminCode: uploadData.data?.adminCode || null // Safeguard against undefined
+                            fileId: uploadData.data?.fileId || null,     // Safeguard against undefined or missing property
+                            adminCode: uploadData.data?.adminCode || null // Safeguard against undefined or missing property
                         },
                         notes: []
                     };
