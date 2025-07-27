@@ -1,84 +1,71 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Donate - Binyan Shalem</title>
 
-    <!-- Tailwind CSS CDN -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Google Fonts: Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-
-    <!-- Square Web Payments SDK -->
-    <script src="https://sandbox.web.squarecdn.com/v1/square.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Custom Tailwind Configuration -->
     <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              "custom-deep-purple": "#723358", // rgba(114,51,88,1)
-              "custom-slate-gray": "#4B5562", // rgba(75, 85, 98, 1)
-              "custom-beige": "#BAA68E", // rgba(186,166,142,1)
-            },
-          },
-        },
-      };
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'custom-deep-purple': '#723358', // rgba(114,51,88,1)
+                        'custom-slate-gray': '#4B5562', // rgba(75, 85, 98, 1)
+                        'custom-beige': '#BAA68E',      // rgba(186,166,142,1)
+                    }
+                }
+            }
+        }
     </script>
 
     <!-- Custom Styles -->
     <style>
-      body {
-        font-family: "Inter", sans-serif;
-        background-color: #f8fafc; /* slate-50 */
-      }
-      /* Style for selected donation amount */
-      .donation-label.selected {
-        border-color: #723358; /* custom-deep-purple */
-        background-color: rgba(114, 51, 88, 0.05);
-      }
-      .message-box {
-        position: fixed;
-        top: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        padding: 15px 25px;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        z-index: 1000;
-        display: none; /* Hidden by default */
-        font-weight: 500;
-        color: white;
-        opacity: 0;
-        transition: opacity 0.3s ease-in-out;
-      }
-      .message-box.success {
-        background-color: #4caf50; /* Green */
-      }
-      .message-box.error {
-        background-color: #f44336; /* Red */
-      }
-      #card-container {
-        margin-top: 1rem;
-      }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        /* Style for selected donation amount (no longer needed for Google Form, but keeping for consistency if other elements use it) */
+        .donation-label.selected {
+            border-color: #723358; /* custom-deep-purple */
+            background-color: rgba(114, 51, 88, 0.05);
+        }
+        /* Ensure iframe is responsive */
+        .google-form-container {
+            position: relative;
+            overflow: hidden;
+            /* Increased padding-top again to make the iframe taller and reduce scrolling */
+            padding-top: 300%; /* Adjusted from 250% to provide even more height for the form */
+            height: 0;
+        }
+
+        .google-form-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
     </style>
 </head>
 <body class="text-slate-800">
+
     <!-- Header -->
     <header id="main-header" class="bg-white shadow-sm sticky top-0 z-50">
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
             <!-- Logo -->
             <a href="index.html" class="flex items-center space-x-3">
-                <img src="https://www.binyan-shalem.com/Binyan%20Shalem_files/8594235c61f23b5d99cd2a2dbf37c8b5.jpg" alt="Binyan Shalem Logo" class="h-12 w-auto" />
+                <img src="https://www.binyan-shalem.com/Binyan%20Shalem_files/8594235c61f23b5d99cd2a2dbf37c8b5.jpg" alt="Binyan Shalem Logo" class="h-12 w-auto">
                 <div class="text-slate-800">
                     <h1 class="text-xl font-bold tracking-tight">BINYAN SHALEM</h1>
                 </div>
@@ -92,9 +79,7 @@
             </nav>
             <!-- Mobile Menu Button -->
             <button id="mobile-menu-button" class="md:hidden text-slate-700 focus:outline-none">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
             </button>
         </div>
         <!-- Mobile Menu -->
@@ -111,71 +96,24 @@
         <div class="container mx-auto px-6">
             <div class="max-w-2xl mx-auto text-center">
                 <h3 class="text-3xl md:text-4xl font-bold text-slate-900">Donate</h3>
-                <p class="text-lg text-slate-600 mt-3 mb-8">
-                    Your generous contribution allows us to continue offering our services free of charge,
-                    helping couples build stronger, healthier homes in our community.
-                </p>
+                <p class="text-lg text-slate-600 mt-3 mb-8">Your generous contribution allows us to continue offering our services free of charge, helping couples build stronger, healthier homes in our community.</p>
+            </div>
+
+            <!-- Venmo Button moved here, outside the white card -->
+            <div class="mb-8 text-center">
+                <a href="https://venmo.com/" target="_blank" rel="noopener noreferrer" class="inline-block bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors text-lg font-semibold shadow-md">
+                    Use Venmo
+                </a>
             </div>
 
             <div class="max-w-lg mx-auto bg-white p-8 rounded-xl shadow-2xl border border-slate-200">
-                <form id="donate-form" class="space-y-6">
-                    <div>
-                        <label for="donate-email" class="block text-sm font-medium text-slate-700 mb-2">
-                            Email <span class="text-red-500">*</span>
-                        </label>
-                        <input type="email" id="donate-email" name="donate-email" required
-                            class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-custom-deep-purple focus:border-custom-deep-purple transition"
-                            placeholder="you@example.com" />
-                        <p class="text-xs text-slate-500 mt-1">
-                            Make sure email is valid because the charge will not go through if not valid.
-                        </p>
-                    </div>
-                    <div>
-                        <label for="donate-name" class="block text-sm font-medium text-slate-700 mb-2">
-                            Name <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" id="donate-name" name="donate-name" required
-                            class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-custom-deep-purple focus:border-custom-deep-purple transition"
-                            placeholder="Your Name" />
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-3">
-                            Donate Amount (USD) <span class="text-red-500">*</span>
-                        </label>
-                        <div id="donation-options" class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                            <!-- Donation amounts will be generated by script -->
-                        </div>
-                    </div>
-                    <div id="custom-amount-wrapper" class="hidden">
-                        <label for="custom-amount" class="block text-sm font-medium text-slate-700 mb-2">
-                            Custom Amount (USD)
-                        </label>
-                        <input type="number" id="custom-amount" name="custom_amount" min="1" step="1"
-                            class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-custom-deep-purple focus:border-custom-deep-purple transition"
-                            placeholder="e.g., 180" />
-                    </div>
-
-                    <!-- Square Card Payment Element container -->
-                    <div id="card-container"></div>
-
-                    <div class="mt-8">
-                        <button type="submit" id="donate-button"
-                            class="w-full bg-custom-deep-purple text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity text-lg font-semibold shadow-md">
-                            Submit Donation
-                        </button>
-                    </div>
-                </form>
-                <div id="donate-success-message"
-                    class="hidden mt-6 text-center p-4 bg-green-100 text-green-800 rounded-lg">
-                    Thank you for your generous support!
+                <!-- Google Form Embedded Here -->
+                <div class="google-form-container">
+                    <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSeO4R-VYVDwYFks93J2QbgwkDo4MnsL1DqFojvveSsreRe1iA/viewform?embedded=true" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
                 </div>
             </div>
         </div>
     </main>
-
-    <!-- Message Box for user feedback -->
-    <div id="message-box" class="message-box"></div>
 
     <!-- Footer -->
     <footer class="bg-custom-slate-gray text-slate-300 relative z-20">
@@ -186,200 +124,16 @@
     </footer>
 
     <script>
-        // Replace these with your actual Square Application and Location IDs
-        const appId = "sandbox-sq0idb-x564UY1QmyQZFK211x6ZDA";
-        const locationId = "LPD36XNBAGKT8";
-
-        // Helper function to display messages
-        function showMessage(message, type = "success") {
-            const messageBox = document.getElementById("message-box");
-            messageBox.textContent = message;
-            messageBox.className = `message-box ${type}`; // Reset classes and add type
-            messageBox.style.display = "block";
-            setTimeout(() => {
-                messageBox.style.opacity = 1;
-            }, 10); // Small delay to trigger transition
-
-            setTimeout(() => {
-                messageBox.style.opacity = 0;
-                messageBox.addEventListener(
-                    "transitionend",
-                    () => {
-                        messageBox.style.display = "none";
-                    },
-                    { once: true }
-                );
-            }, 5000); // Message disappears after 5 seconds
-        }
-
-        document.addEventListener("DOMContentLoaded", async () => {
+        document.addEventListener('DOMContentLoaded', () => {
             // --- Mobile Menu ---
-            const mobileMenuButton = document.getElementById("mobile-menu-button");
-            const mobileMenu = document.getElementById("mobile-menu");
-            mobileMenuButton.addEventListener("click", () => {
-                mobileMenu.classList.toggle("hidden");
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
             });
 
-            // --- Donation Form Logic ---
-            const donationOptionsContainer = document.getElementById("donation-options");
-            const customAmountWrapper = document.getElementById("custom-amount-wrapper");
-            const customAmountInput = document.getElementById("custom-amount");
-            const amounts = ["52", "101", "252", "1000", "1800", "5000", "10000"];
-
-            // Create donation amount buttons
-            amounts.forEach((amount) => {
-                const label = document.createElement("label");
-                label.className =
-                    "donation-label flex items-center space-x-3 border border-slate-300 rounded-lg p-3 hover:bg-slate-50 cursor-pointer transition-colors";
-                label.innerHTML = `
-                    <input type="radio" name="donate_amount" value="${amount}" class="h-5 w-5 text-custom-deep-purple focus:ring-custom-deep-purple focus:ring-offset-0" />
-                    <span class="text-slate-800 font-medium">$${new Intl.NumberFormat().format(amount)}</span>
-                `;
-                donationOptionsContainer.appendChild(label);
-            });
-
-            // Create "Custom Amount" button
-            const customLabel = document.createElement("label");
-            customLabel.className =
-                "donation-label flex items-center space-x-3 border border-slate-300 rounded-lg p-3 hover:bg-slate-50 cursor-pointer transition-colors";
-            customLabel.innerHTML = `
-                <input type="radio" name="donate_amount" value="custom" class="h-5 w-5 text-custom-deep-purple focus:ring-custom-deep-purple focus:ring-offset-0" />
-                <span class="text-slate-800 font-medium">Custom</span>
-            `;
-            donationOptionsContainer.appendChild(customLabel);
-
-            // Handle selection styling and custom amount field visibility
-            const donationLabels = document.querySelectorAll(".donation-label");
-            donationOptionsContainer.addEventListener("change", (e) => {
-                if (e.target.name === "donate_amount") {
-                    donationLabels.forEach((label) =>
-                        label.classList.remove("selected")
-                    );
-                    const selectedLabel = e.target.closest("label");
-                    selectedLabel.classList.add("selected");
-
-                    if (e.target.value === "custom") {
-                        customAmountWrapper.classList.remove("hidden");
-                        customAmountInput.focus();
-                    } else {
-                        customAmountWrapper.classList.add("hidden");
-                    }
-                }
-            });
-
-            // --- Square Payments Initialization ---
-            if (!window.Square) {
-                showMessage(
-                    "Square payments SDK failed to load. Please check your internet connection.",
-                    "error"
-                );
-                return;
-            }
-
-            const payments = Square.payments(appId, locationId);
-            const card = await payments.card();
-            await card.attach("#card-container");
-
-            const donateForm = document.getElementById("donate-form");
-            const donateButton = document.getElementById("donate-button");
-            const successMessage = document.getElementById("donate-success-message");
-
-            donateForm.addEventListener("submit", async (e) => {
-                e.preventDefault();
-
-                // Disable button and show loading state
-                donateButton.disabled = true;
-                donateButton.textContent = "Processing...";
-                donateButton.classList.add("opacity-70", "cursor-not-allowed");
-
-                // Validate selected amount
-                let selectedAmount = null;
-                const selectedRadio = document.querySelector(
-                    'input[name="donate_amount"]:checked'
-                );
-                if (selectedRadio) {
-                    selectedAmount = selectedRadio.value;
-                    if (selectedAmount === "custom") {
-                        selectedAmount = customAmountInput.value;
-                    }
-                }
-
-                if (!selectedAmount || parseFloat(selectedAmount) <= 0) {
-                    showMessage("Please select or enter a valid donation amount.", "error");
-                    donateButton.disabled = false;
-                    donateButton.textContent = "Submit Donation";
-                    donateButton.classList.remove("opacity-70", "cursor-not-allowed");
-                    return;
-                }
-
-                const email = document.getElementById("donate-email").value.trim();
-                const name = document.getElementById("donate-name").value.trim();
-
-                if (!email || !name) {
-                    showMessage("Please fill in your email and name.", "error");
-                    donateButton.disabled = false;
-                    donateButton.textContent = "Submit Donation";
-                    donateButton.classList.remove("opacity-70", "cursor-not-allowed");
-                    return;
-                }
-
-                try {
-                    // Tokenize card details
-                    const result = await card.tokenize();
-                    if (result.status !== "OK") {
-                        showMessage(
-                            "Card tokenization failed: " +
-                                (result.errors
-                                    ? result.errors.map((e) => e.message).join(", ")
-                                    : "Unknown error"),
-                            "error"
-                        );
-                        donateButton.disabled = false;
-                        donateButton.textContent = "Submit Donation";
-                        donateButton.classList.remove("opacity-70", "cursor-not-allowed");
-                        return;
-                    }
-
-                    const nonce = result.token;
-
-                    // Prepare payment payload
-                    const payload = {
-                        nonce,
-                        amount: Math.round(parseFloat(selectedAmount) * 100), // convert dollars to cents
-                        buyerEmail: email,
-                        name,
-                    };
-
-                    // Send to server to process payment
-                    const response = await fetch("/process-payment", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify(payload),
-                    });
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        showMessage("Thank you for your generous support!", "success");
-                        donateForm.style.display = "none";
-                        successMessage.classList.remove("hidden");
-                    } else {
-                        showMessage(
-                            "Payment failed: " + (data.error || "Unknown error"),
-                            "error"
-                        );
-                    }
-                } catch (error) {
-                    showMessage("Payment error: " + error.message, "error");
-                } finally {
-                    donateButton.disabled = false;
-                    donateButton.textContent = "Submit Donation";
-                    donateButton.classList.remove("opacity-70", "cursor-not-allowed");
-                }
-            });
-        }); // End of DOMContentLoaded
+            // The previous donation form logic has been removed as it's replaced by the Google Form.
+        });
     </script>
 </body>
 </html>
