@@ -276,10 +276,14 @@
             // in the Square Developer Dashboard for your production application.
             
             let payments;
+            console.log('Attempting to initialize Square SDK...');
+            console.log('Type of Square before initialization:', typeof Square); // Debugging line
+
             try {
                 // Initialize the payments object without explicitly providing appId and locationId.
                 // Square will infer these from the origin URL if properly configured in the Developer Dashboard.
                 payments = Square.payments(); 
+                console.log('Square SDK initialized successfully.');
             } catch (e) {
                 console.error('Failed to initialize Square Payments SDK:', e);
                 showMessage('Failed to load payment form. Please ensure your Square application is configured correctly and try again.', 'error');
