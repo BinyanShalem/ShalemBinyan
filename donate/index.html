@@ -195,7 +195,7 @@
 
     <!-- Square Web Payments SDK -->
     <!-- Use the production URL for live applications -->
-    <script type="text/javascript" src="https://js.squareup.com/v2/paymentform"></script>
+    <script id="square-sdk-script" type="text/javascript" src="https://js.squareup.com/v2/paymentform"></script>
 
     <script>
         // Helper function to display messages
@@ -216,8 +216,8 @@
             }, 5000); // Message disappears after 5 seconds
         }
 
-        // Initialize Square Payments SDK and other elements after the entire page has loaded
-        window.onload = async () => {
+        // Main application logic, to be run AFTER Square SDK is loaded
+        async function runApplicationLogic() {
             // --- Mobile Menu ---
             const mobileMenuButton = document.getElementById('mobile-menu-button');
             const mobileMenu = document.getElementById('mobile-menu');
@@ -334,10 +334,6 @@
                     card.addEventListener('focus', () => addFocusClass(cardContainerDiv));
                     card.addEventListener('blur', () => removeFocusClass(cardContainerDiv));
 
-                    // Note: For these specific elements, you need to re-select them as they are separate instances
-                    // created by payments.card({ elementId: ... }).
-                    // Ensure these event listeners are correctly attached to the instances returned by payments.card()
-                    // for each element, not just the main 'card' instance.
                     const expirationCard = payments.card({ elementId: 'expiration-date-container' });
                     expirationCard.addEventListener('focus', () => addFocusClass(expirationContainerDiv));
                     expirationCard.addEventListener('blur', () => removeFocusClass(expirationContainerDiv));
@@ -472,7 +468,20 @@
                     donateButton.classList.remove('opacity-70', 'cursor-not-allowed');
                 }
             });
-        }; // End of window.onload
+        }
+
+        // Listen for the Square SDK script to load
+        const squareScript = document.getElementById('square-sdk-script');
+        if (squareScript) {
+            squareScript.onload = runApplicationLogic;
+            squareScript.onerror = () => {
+                console.error('Failed to load Square SDK script.');
+                showMessage('Failed to load payment form. Please check your network connection.', 'error');
+            };
+        } else {
+            console.error('Square SDK script tag not found.');
+            showMessage('Payment form initialization error. Please try again.', 'error');
+        }
     </script>
 </body>
 </html>
