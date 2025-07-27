@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Donate - Binyan Shalem</title>
     
-    <!-- Tailwind CSS -->
+    <!-- Tailwind CSS CDN - Re-added as per user request. 
+        NOTE: For production, it's generally recommended to compile Tailwind CSS
+        for better performance and smaller file size. -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Google Fonts: Inter -->
@@ -214,7 +216,8 @@
             }, 5000); // Message disappears after 5 seconds
         }
 
-        document.addEventListener('DOMContentLoaded', async () => {
+        // Initialize Square Payments SDK and other elements after the entire page has loaded
+        window.onload = async () => {
             // --- Mobile Menu ---
             const mobileMenuButton = document.getElementById('mobile-menu-button');
             const mobileMenu = document.getElementById('mobile-menu');
@@ -280,6 +283,7 @@
             } catch (e) {
                 console.error('Failed to initialize Square Payments SDK:', e);
                 showMessage('Failed to load payment form. Please ensure your Square application is configured correctly and try again.', 'error');
+                return; // Stop execution if SDK fails to initialize
             }
 
             let card;
@@ -328,14 +332,19 @@
 
                     // Note: For these specific elements, you need to re-select them as they are separate instances
                     // created by payments.card({ elementId: ... }).
-                    payments.card({ elementId: 'expiration-date-container' }).addEventListener('focus', () => addFocusClass(expirationContainerDiv));
-                    payments.card({ elementId: 'expiration-date-container' }).addEventListener('blur', () => removeFocusClass(expirationContainerDiv));
+                    // Ensure these event listeners are correctly attached to the instances returned by payments.card()
+                    // for each element, not just the main 'card' instance.
+                    const expirationCard = payments.card({ elementId: 'expiration-date-container' });
+                    expirationCard.addEventListener('focus', () => addFocusClass(expirationContainerDiv));
+                    expirationCard.addEventListener('blur', () => removeFocusClass(expirationContainerDiv));
 
-                    payments.card({ elementId: 'cvv-container' }).addEventListener('focus', () => addFocusClass(cvvContainerDiv));
-                    payments.card({ elementId: 'cvv-container' }).addEventListener('blur', () => removeFocusClass(cvvContainerDiv));
+                    const cvvCard = payments.card({ elementId: 'cvv-container' });
+                    cvvCard.addEventListener('focus', () => addFocusClass(cvvContainerDiv));
+                    cvvCard.addEventListener('blur', () => removeFocusClass(cvvContainerDiv));
 
-                    payments.card({ elementId: 'postal-code-container' }).addEventListener('focus', () => addFocusClass(postalCodeContainerDiv));
-                    payments.card({ elementId: 'postal-code-container' }).addEventListener('blur', () => removeFocusClass(postalCodeContainerDiv));
+                    const postalCodeCard = payments.card({ elementId: 'postal-code-container' });
+                    postalCodeCard.addEventListener('focus', () => addFocusClass(postalCodeContainerDiv));
+                    postalCodeCard.addEventListener('blur', () => removeFocusClass(postalCodeContainerDiv));
 
 
                 } catch (e) {
@@ -410,8 +419,8 @@
 
                         // --- IMPORTANT: Send this token and amount to your backend server ---
                         // For production, replace with your actual production backend URL
-                        // Example: const backendEndpoint = 'https://binyan-shalem.com/donate/';
-                        const backendEndpoint = 'https://binyan-shalem.com/donate'; 
+                        // Example: const backendEndpoint = 'https://api.your-domain.com/process-square-payment';
+                        const backendEndpoint = '/process-square-payment'; 
                         
                         const response = await fetch(backendEndpoint, {
                             method: 'POST',
@@ -459,7 +468,7 @@
                     donateButton.classList.remove('opacity-70', 'cursor-not-allowed');
                 }
             });
-        });
+        }; // End of window.onload
     </script>
 </body>
 </html>
