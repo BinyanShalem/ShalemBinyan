@@ -21,7 +21,7 @@
                     colors: {
                         'custom-deep-purple': '#723358', // rgba(114,51,88,1)
                         'custom-slate-gray': '#4B5562', // rgba(75, 85, 98, 1)
-                        'custom-beige': '#BAA68E',      // rgba(186,166,142,1)
+                        'custom-beige': '#BAA68E',       // rgba(186,166,142,1)
                     }
                 }
             }
@@ -38,6 +38,38 @@
         .donation-label.selected {
             border-color: #723358; /* custom-deep-purple */
             background-color: rgba(114, 51, 88, 0.05);
+        }
+        /* Style for Square payment form elements */
+        #card-container {
+            border: 1px solid #e2e8f0; /* slate-300 */
+            border-radius: 0.5rem; /* rounded-lg */
+            padding: 0.75rem 1rem; /* px-4 py-2 */
+            transition: all 0.2s ease-in-out;
+        }
+        #card-container.focused {
+            border-color: #723358; /* custom-deep-purple */
+            box-shadow: 0 0 0 2px rgba(114, 51, 88, 0.2); /* focus:ring-2 */
+        }
+        .message-box {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            font-weight: 500;
+            color: white;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .message-box.success {
+            background-color: #4CAF50; /* Green */
+        }
+        .message-box.error {
+            background-color: #F44336; /* Red */
         }
     </style>
 </head>
@@ -81,6 +113,15 @@
                 <h3 class="text-3xl md:text-4xl font-bold text-slate-900">Donate</h3>
                 <p class="text-lg text-slate-600 mt-3 mb-8">Your generous contribution allows us to continue offering our services free of charge, helping couples build stronger, healthier homes in our community.</p>
             </div>
+
+            <!-- Venmo Button - Moved outside the main form frame -->
+            <div class="max-w-lg mx-auto text-center mb-8">
+                <a href="#" class="inline-block bg-blue-600 text-white px-8 py-3 rounded-lg shadow-lg hover:bg-blue-700 transition-all text-lg font-semibold">
+                    Donate with Venmo
+                </a>
+                <p class="text-sm text-slate-500 mt-2">Click here if you prefer to donate via Venmo.</p>
+            </div>
+
             <div class="max-w-lg mx-auto bg-white p-8 rounded-xl shadow-2xl border border-slate-200">
                 <form id="donate-form">
                     <div class="space-y-6">
@@ -93,9 +134,7 @@
                             <label for="donate-name" class="block text-sm font-medium text-slate-700 mb-2">Name <span class="text-red-500">*</span></label>
                             <input type="text" id="donate-name" name="donate-name" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-custom-deep-purple focus:border-custom-deep-purple transition" placeholder="Your Name">
                         </div>
-                        <div>
-                            <a href="#" class="text-custom-deep-purple hover:underline font-semibold">Click Here To Use Venmo</a>
-                        </div>
+                        
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-3">Donate Amount (USD) <span class="text-red-500">*</span></label>
                             <div id="donation-options" class="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -106,9 +145,37 @@
                              <label for="custom-amount" class="block text-sm font-medium text-slate-700 mb-2">Custom Amount (USD)</label>
                              <input type="number" id="custom-amount" name="custom_amount" min="1" step="1" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-custom-deep-purple focus:border-custom-deep-purple transition" placeholder="e.g., 180">
                         </div>
+
+                        <!-- Square Payment Section -->
+                        <div class="space-y-4">
+                            <h4 class="text-lg font-semibold text-slate-800 pt-4 border-t border-slate-200">Payment Information</h4>
+                            <div>
+                                <label for="card-number" class="block text-sm font-medium text-slate-700 mb-2">Card Number</label>
+                                <!-- Placeholder for Square's card number input -->
+                                <div id="card-container" class="w-full"></div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label for="sq-expiration-date" class="block text-sm font-medium text-slate-700 mb-2">Expiration</label>
+                                    <!-- Placeholder for Square's expiration date input -->
+                                    <div id="expiration-date-container" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-custom-deep-purple focus:border-custom-deep-purple transition"></div>
+                                </div>
+                                <div>
+                                    <label for="sq-cvv" class="block text-sm font-medium text-slate-700 mb-2">CVV</label>
+                                    <!-- Placeholder for Square's CVV input -->
+                                    <div id="cvv-container" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-custom-deep-purple focus:border-custom-deep-purple transition"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="sq-postal-code" class="block text-sm font-medium text-slate-700 mb-2">Postal Code</label>
+                                <!-- Placeholder for Square's postal code input -->
+                                <div id="postal-code-container" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-custom-deep-purple focus:border-custom-deep-purple transition"></div>
+                            </div>
+                        </div>
+
                         <div class="mt-8">
-                            <button type="submit" class="w-full bg-custom-deep-purple text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity text-lg font-semibold shadow-md">
-                                Next
+                            <button type="submit" id="donate-button" class="w-full bg-custom-deep-purple text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity text-lg font-semibold shadow-md">
+                                Donate Now
                             </button>
                         </div>
                     </div>
@@ -120,6 +187,9 @@
         </div>
     </main>
 
+    <!-- Message Box for user feedback -->
+    <div id="message-box" class="message-box"></div>
+
     <!-- Footer -->
     <footer class="bg-custom-slate-gray text-slate-300 relative z-20">
         <div class="container mx-auto px-6 py-8 text-center">
@@ -128,8 +198,30 @@
         </div>
     </footer>
 
+    <!-- Square Web Payments SDK -->
+    <!-- Use the production URL for live applications -->
+    <script type="text/javascript" src="https://js.squareup.com/v2/paymentform"></script>
+
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        // Helper function to display messages
+        function showMessage(message, type = 'success') {
+            const messageBox = document.getElementById('message-box');
+            messageBox.textContent = message;
+            messageBox.className = `message-box ${type}`; // Reset classes and add type
+            messageBox.style.display = 'block';
+            setTimeout(() => {
+                messageBox.style.opacity = 1;
+            }, 10); // Small delay to trigger transition
+
+            setTimeout(() => {
+                messageBox.style.opacity = 0;
+                messageBox.addEventListener('transitionend', () => {
+                    messageBox.style.display = 'none';
+                }, { once: true });
+            }, 5000); // Message disappears after 5 seconds
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
             // --- Mobile Menu ---
             const mobileMenuButton = document.getElementById('mobile-menu-button');
             const mobileMenu = document.getElementById('mobile-menu');
@@ -180,14 +272,166 @@
                 }
             });
 
-            // Handle form submission
+            // --- Square Web Payments SDK Integration ---
+            // Replaced with your actual Square Application ID and Location ID
+            const SQUARE_APP_ID = 'sq0idp-veVkP9aY1FhUQyQO9LsPKQ'; 
+            const SQUARE_LOCATION_ID = 'LJFNHNPM1GVSM'; 
+
+            if (!SQUARE_APP_ID.startsWith('sq0id') || !SQUARE_LOCATION_ID.startsWith('L0')) {
+                showMessage('Please replace YOUR_SQUARE_APPLICATION_ID and YOUR_SQUARE_LOCATION_ID in the script with your actual Square credentials.', 'error');
+            }
+
+            let payments;
+            try {
+                payments = Square.payments(SQUARE_APP_ID, SQUARE_LOCATION_ID);
+            } catch (e) {
+                console.error('Failed to initialize Square Payments SDK:', e);
+                showMessage('Failed to load payment form. Please check your Square credentials and network connection.', 'error');
+            }
+
+            let card;
+            async function initializeCard(payments) {
+                try {
+                    card = await payments.card({
+                        elementId: 'card-container',
+                        inputClass: 'w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-custom-deep-purple focus:border-custom-deep-purple transition',
+                        inputStyles: [
+                            {
+                                fontSize: '1rem', // Tailwind's default text-base
+                                fontFamily: 'Inter, sans-serif',
+                                placeholderColor: '#94a3b8', // slate-400
+                                _empty: {
+                                    color: '#1e293b', // slate-800
+                                },
+                                _focus: {
+                                    color: '#1e293b',
+                                },
+                            }
+                        ]
+                    });
+                    await card.attach('#card-container');
+
+                    // Add focus styling to the container when any Square input is focused
+                    const cardContainerDiv = document.getElementById('card-container');
+                    card.addEventListener('focus', () => cardContainerDiv.classList.add('focused'));
+                    card.addEventListener('blur', () => cardContainerDiv.classList.remove('focused'));
+
+                } catch (e) {
+                    console.error('Failed to initialize card:', e);
+                    showMessage('Failed to initialize card payment form. Please try again later.', 'error');
+                }
+            }
+
+            // Initialize the card payment form once payments is ready
+            if (payments) {
+                initializeCard(payments);
+            }
+
+            // Handle form submission for Square payment
             const donateForm = document.getElementById('donate-form');
+            const donateButton = document.getElementById('donate-button');
             const successMessage = document.getElementById('donate-success-message');
-            donateForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                // In a real application, you would integrate with a payment processor here.
-                donateForm.style.display = 'none';
-                successMessage.classList.remove('hidden');
+
+            donateForm.addEventListener('submit', async function(e) {
+                e.preventDefault(); // Prevent default form submission
+
+                // Disable button and show loading state
+                donateButton.disabled = true;
+                donateButton.textContent = 'Processing...';
+                donateButton.classList.add('opacity-70', 'cursor-not-allowed');
+
+                // Get selected donation amount
+                let selectedAmount = null;
+                const selectedRadio = document.querySelector('input[name="donate_amount"]:checked');
+                if (selectedRadio) {
+                    selectedAmount = selectedRadio.value;
+                    if (selectedAmount === 'custom') {
+                        selectedAmount = customAmountInput.value;
+                    }
+                }
+
+                if (!selectedAmount || parseFloat(selectedAmount) <= 0) {
+                    showMessage('Please select or enter a valid donation amount.', 'error');
+                    donateButton.disabled = false;
+                    donateButton.textContent = 'Donate Now';
+                    donateButton.classList.remove('opacity-70', 'cursor-not-allowed');
+                    return;
+                }
+
+                const email = document.getElementById('donate-email').value;
+                const name = document.getElementById('donate-name').value;
+
+                if (!email || !name) {
+                    showMessage('Please fill in your email and name.', 'error');
+                    donateButton.disabled = false;
+                    donateButton.textContent = 'Donate Now';
+                    donateButton.classList.remove('opacity-70', 'cursor-not-allowed');
+                    return;
+                }
+
+                if (!card) {
+                    showMessage('Payment form not fully loaded. Please refresh and try again.', 'error');
+                    donateButton.disabled = false;
+                    donateButton.textContent = 'Donate Now';
+                    donateButton.classList.remove('opacity-70', 'cursor-not-allowed');
+                    return;
+                }
+
+                try {
+                    // Tokenize the card details
+                    const result = await card.tokenize();
+                    if (result.status === 'OK') {
+                        const token = result.token;
+                        console.log('Payment token:', token); // For debugging
+
+                        // --- IMPORTANT: Send this token and amount to your backend server ---
+                        // This is where you would make a fetch() request to your server.
+                        // Your server would then use the Square API (with your secret key)
+                        // to create a payment.
+                        
+                        const backendEndpoint = '/process-square-payment'; // Replace with your actual backend endpoint
+                        const response = await fetch(backendEndpoint, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                token: token,
+                                amount: parseFloat(selectedAmount) * 100, // Square API expects amount in cents
+                                currency: 'USD', // Or your desired currency
+                                email: email,
+                                name: name
+                            }),
+                        });
+
+                        const responseData = await response.json();
+
+                        if (response.ok && responseData.success) {
+                            showMessage('Donation successful! Thank you!', 'success');
+                            donateForm.style.display = 'none';
+                            successMessage.classList.remove('hidden');
+                        } else {
+                            console.error('Backend payment error:', responseData.error);
+                            showMessage(`Payment failed: ${responseData.error || 'An unknown error occurred.'}`, 'error');
+                        }
+
+                    } else {
+                        let errorMessage = 'Payment failed. Please check your card details.';
+                        if (result.errors && result.errors.length > 0) {
+                            errorMessage = result.errors[0].message || errorMessage;
+                        }
+                        showMessage(errorMessage, 'error');
+                        console.error('Square tokenization error:', result.errors);
+                    }
+                } catch (e) {
+                    console.error('Error during Square payment process:', e);
+                    showMessage('An unexpected error occurred during payment. Please try again.', 'error');
+                } finally {
+                    // Re-enable button
+                    donateButton.disabled = false;
+                    donateButton.textContent = 'Donate Now';
+                    donateButton.classList.remove('opacity-70', 'cursor-not-allowed');
+                }
             });
         });
     </script>
