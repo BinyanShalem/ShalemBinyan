@@ -1,14 +1,15 @@
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
-const { Client, Environment } = require('square');
+const { Client } = require('square'); // Removed Environment from destructuring
+const { v4: uuidv4 } = require('uuid'); // Add this line to import uuid
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Initialize Square client
 const squareClient = new Client({
-  environment: Environment.Sandbox, // switch to Environment.Production when ready
+  environment: Client.environments.Sandbox, // Corrected: Access Sandbox via Client.environments
   accessToken: process.env.SQUARE_ACCESS_TOKEN,
 });
 
@@ -26,23 +27,24 @@ app.get('/health', (req, res) => {
 });
 
 /**
- * Example API endpoint to create a payment
- * You would call this from your frontend to process the payment
- * Make sure to handle amount, sourceId (nonce), etc. on client and server
+ * API endpoint to create a payment
+ * It receives 'nonce' (Square's sourceId) and 'amount' from the frontend.
+ * The 'idempotencyKey' is generated on the server for transaction uniqueness.
  */
 app.post('/api/payment', async (req, res) => {
   try {
-    const { sourceId, amount, idempotencyKey } = req.body;
+    const { nonce, amount } = req.body; // Expect 'nonce' from client, not 'sourceId'
+    const idempotencyKey = uuidv4(); // Generate a unique idempotency key for each payment attempt
 
-    if (!sourceId || !amount || !idempotencyKey) {
-      return res.status(400).json({ error: 'Missing required payment fields' });
+    if (!nonce || !amount) {
+      return res.status(400).json({ error: 'Missing required payment fields: nonce or amount' });
     }
 
     const paymentsApi = squareClient.paymentsApi;
 
     // Amount in cents, example: 1000 = $10.00
     const paymentResponse = await paymentsApi.createPayment({
-      sourceId,
+      sourceId: nonce, // Use 'nonce' received from the client as 'sourceId'
       idempotencyKey,
       amountMoney: {
         amount: parseInt(amount), 
@@ -53,6 +55,7 @@ app.post('/api/payment', async (req, res) => {
     return res.json(paymentResponse.result);
   } catch (error) {
     console.error('Payment error:', error);
+    // Provide a more user-friendly error message if possible
     return res.status(500).json({ error: error.message || 'Payment failed' });
   }
 });
