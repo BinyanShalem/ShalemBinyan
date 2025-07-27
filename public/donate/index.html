@@ -1,16 +1,95 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Donate - Binyan Shalem</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Donate - Binyan Shalem</title>
+  <script src="https://sandbox.web.squarecdn.com/v1/square.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-50 flex items-center justify-center h-screen">
-    <div class="bg-white p-10 rounded-xl shadow-lg text-center">
-        <h1 class="text-2xl font-bold mb-4">Donate Page</h1>
-        <p class="mb-4">This is the Donate Page served from /public/donate/index.html</p>
-    </div>
+<body class="bg-gray-50 flex items-center justify-center min-h-screen">
+  <div class="bg-white p-10 rounded-xl shadow-lg max-w-md w-full">
+    <h1 class="text-2xl font-bold mb-6 text-center">Donate</h1>
+    <form id="payment-form" class="space-y-6">
+      <label class="block">
+        <span class="text-gray-700">Name</span>
+        <input id="name" type="text" required class="mt-1 block w-full border border-gray-300 rounded-md p-2" />
+      </label>
+
+      <label class="block">
+        <span class="text-gray-700">Email</span>
+        <input id="email" type="email" required class="mt-1 block w-full border border-gray-300 rounded-md p-2" />
+      </label>
+
+      <label class="block">
+        <span class="text-gray-700">Amount (USD)</span>
+        <input id="amount" type="number" min="1" step="1" required class="mt-1 block w-full border border-gray-300 rounded-md p-2" placeholder="e.g., 100" />
+      </label>
+
+      <div id="card-container"></div>
+      <button id="card-button" type="submit" class="w-full bg-purple-700 text-white py-3 rounded-md font-semibold hover:bg-purple-800 transition">Donate</button>
+    </form>
+
+    <div id="payment-status" class="mt-6 text-center"></div>
+  </div>
+
+  <script>
+    const appId = 'REPLACE_WITH_YOUR_APP_ID'; // Put your Square Application ID here
+    const locationId = 'REPLACE_WITH_YOUR_LOCATION_ID'; // Your Location ID
+
+    async function initializeCard(payments) {
+      const card = await payments.card();
+      await card.attach('#card-container');
+      return card;
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!window.Square) {
+        alert('Square payments SDK failed to load');
+        return;
+      }
+
+      const payments = Square.payments(appId, locationId);
+      const card = await initializeCard(payments);
+
+      const form = document.getElementById('payment-form');
+      const statusContainer = document.getElementById('payment-status');
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        statusContainer.textContent = 'Processing payment...';
+
+        try {
+          const result = await card.tokenize();
+          if (result.status !== 'OK') {
+            statusContainer.textContent = 'Payment failed to tokenize card: ' + result.errors.map(e => e.message).join(', ');
+            return;
+          }
+
+          const nonce = result.token;
+          const name = document.getElementById('name').value.trim();
+          const email = document.getElementById('email').value.trim();
+          const amount = Math.round(parseFloat(document.getElementById('amount').value) * 100); // in cents
+
+          const response = await fetch('/process-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nonce, amount, buyerEmail: email, name }),
+          });
+
+          const data = await response.json();
+          if (data.success) {
+            statusContainer.textContent = 'Thank you for your generous donation!';
+            form.reset();
+          } else {
+            statusContainer.textContent = 'Payment failed: ' + (data.error || 'Unknown error');
+          }
+        } catch (error) {
+          statusContainer.textContent = 'Payment error: ' + error.message;
+        }
+      });
+    });
+  </script>
 </body>
 </html>
