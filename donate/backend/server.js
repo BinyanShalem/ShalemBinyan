@@ -3,7 +3,7 @@ require('dotenv').config();
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const { Client, Environment } = require('square'); // Corrected import from '@square/square-connect' to 'square'
+const { Client, Environment } = require('square');
 const { v4: uuidv4 } = require('uuid'); // For generating unique idempotency keys
 const cors = require('cors'); // Import cors
 
@@ -13,13 +13,14 @@ const port = process.env.PORT || 3000; // Use port 3000 or specified by environm
 // Middleware to parse JSON request bodies
 app.use(bodyParser.json());
 
-// Enable CORS for all origins. In a production environment, you should restrict this
-// to your frontend's domain for security.
-// Example: cors({ origin: 'https://your-frontend-domain.com' })
+// Enable CORS for all origins during development.
+// In a production environment, you should restrict this to your frontend's domain for security.
+// Example for production: app.use(cors({ origin: 'https://your-frontend-domain.com' }));
 app.use(cors()); 
 
 // Retrieve Square credentials from environment variables
 const accessToken = process.env.SQUARE_ACCESS_TOKEN;
+// Determine Square environment based on the .env variable
 const squareEnvironment = process.env.SQUARE_ENVIRONMENT === 'production' ? Environment.Production : Environment.Sandbox;
 
 // Initialize Square client
@@ -37,7 +38,7 @@ app.post('/process-square-payment', async (req, res) => {
 
   const { token, amount, currency, email, name } = req.body;
 
-  // Basic validation
+  // Basic validation for required fields
   if (!token || !amount || parseFloat(amount) <= 0 || !currency) {
     console.error('Missing required payment data.');
     return res.status(400).json({ success: false, error: 'Missing required payment data.' });
@@ -51,7 +52,9 @@ app.post('/process-square-payment', async (req, res) => {
     const requestBody = {
       sourceId: token, // The tokenized card nonce from the frontend
       amountMoney: {
-        amount: Math.round(parseFloat(amount)), // Amount in cents (or smallest currency unit)
+        // Square API expects amount in cents (or smallest currency unit).
+        // Ensure the amount is an integer.
+        amount: Math.round(parseFloat(amount)), 
         currency: currency,
       },
       idempotencyKey: idempotencyKey,
@@ -64,14 +67,16 @@ app.post('/process-square-payment', async (req, res) => {
 
     console.log('Square API request body:', requestBody);
 
+    // Call the Square Payments API to create the payment
     const { result } = await paymentsApi.createPayment(requestBody);
 
     console.log('Square API response:', result);
 
+    // Check if the payment was successfully completed
     if (result.payment && result.payment.status === 'COMPLETED') {
       res.status(200).json({ success: true, payment: result.payment });
     } else {
-      // Handle cases where payment was not completed successfully (e.g., declined)
+      // Handle cases where payment was not completed successfully (e.g., declined, failed)
       const errorMessages = result.errors ? result.errors.map(err => err.detail).join(', ') : 'Payment failed.';
       console.error('Payment not completed:', errorMessages, result.errors);
       res.status(400).json({ success: false, error: errorMessages });

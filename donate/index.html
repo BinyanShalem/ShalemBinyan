@@ -40,13 +40,14 @@
             background-color: rgba(114, 51, 88, 0.05);
         }
         /* Style for Square payment form elements */
-        #card-container {
+        /* These styles are applied to the container div for Square's iframes */
+        #card-container, #expiration-date-container, #cvv-container, #postal-code-container {
             border: 1px solid #e2e8f0; /* slate-300 */
             border-radius: 0.5rem; /* rounded-lg */
             padding: 0.75rem 1rem; /* px-4 py-2 */
             transition: all 0.2s ease-in-out;
         }
-        #card-container.focused {
+        #card-container.focused, #expiration-date-container.focused, #cvv-container.focused, #postal-code-container.focused {
             border-color: #723358; /* custom-deep-purple */
             box-shadow: 0 0 0 2px rgba(114, 51, 88, 0.2); /* focus:ring-2 */
         }
@@ -114,14 +115,6 @@
                 <p class="text-lg text-slate-600 mt-3 mb-8">Your generous contribution allows us to continue offering our services free of charge, helping couples build stronger, healthier homes in our community.</p>
             </div>
 
-            <!-- Venmo Button - Moved outside the main form frame -->
-            <div class="max-w-lg mx-auto text-center mb-8">
-                <a href="#" class="inline-block bg-blue-600 text-white px-8 py-3 rounded-lg shadow-lg hover:bg-blue-700 transition-all text-lg font-semibold">
-                    Donate with Venmo
-                </a>
-                <p class="text-sm text-slate-500 mt-2">Click here if you prefer to donate via Venmo.</p>
-            </div>
-
             <div class="max-w-lg mx-auto bg-white p-8 rounded-xl shadow-2xl border border-slate-200">
                 <form id="donate-form">
                     <div class="space-y-6">
@@ -158,18 +151,18 @@
                                 <div>
                                     <label for="sq-expiration-date" class="block text-sm font-medium text-slate-700 mb-2">Expiration</label>
                                     <!-- Placeholder for Square's expiration date input -->
-                                    <div id="expiration-date-container" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-custom-deep-purple focus:border-custom-deep-purple transition"></div>
+                                    <div id="expiration-date-container" class="w-full"></div>
                                 </div>
                                 <div>
                                     <label for="sq-cvv" class="block text-sm font-medium text-slate-700 mb-2">CVV</label>
                                     <!-- Placeholder for Square's CVV input -->
-                                    <div id="cvv-container" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-custom-deep-purple focus:border-custom-deep-purple transition"></div>
+                                    <div id="cvv-container" class="w-full"></div>
                                 </div>
                             </div>
                             <div>
                                 <label for="sq-postal-code" class="block text-sm font-medium text-slate-700 mb-2">Postal Code</label>
                                 <!-- Placeholder for Square's postal code input -->
-                                <div id="postal-code-container" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-custom-deep-purple focus:border-custom-deep-purple transition"></div>
+                                <div id="postal-code-container" class="w-full"></div>
                             </div>
                         </div>
 
@@ -273,26 +266,27 @@
             });
 
             // --- Square Web Payments SDK Integration ---
-            const SQUARE_APP_ID = 'sq0idp-veVkP9aY1FhUQyQO9LsPKQ'; 
-            const SQUARE_LOCATION_ID = 'LJFNHNPM1GVSM'; 
-
-            if (!SQUARE_APP_ID.startsWith('sq0id') || !SQUARE_LOCATION_ID.startsWith('L0')) {
-                showMessage('Please replace YOUR_SQUARE_APPLICATION_ID and YOUR_SQUARE_LOCATION_ID in the script with your actual Square credentials.', 'error');
-            }
-
+            // IMPORTANT: The Square Web Payments SDK can infer your Application ID and Location ID
+            // from the origin URL configured in your Square Developer Dashboard.
+            // You do NOT need to hardcode them here for production.
+            // Ensure your production domain (e.g., https://www.binyan-shalem.com) is added as an allowed origin
+            // in the Square Developer Dashboard for your production application.
+            
             let payments;
             try {
-                payments = Square.payments(SQUARE_APP_ID, SQUARE_LOCATION_ID);
+                // Initialize the payments object without explicitly providing appId and locationId.
+                // Square will infer these from the origin URL if properly configured in the Developer Dashboard.
+                payments = Square.payments(); 
             } catch (e) {
                 console.error('Failed to initialize Square Payments SDK:', e);
-                showMessage('Failed to load payment form. Please check your Square credentials and network connection.', 'error');
+                showMessage('Failed to load payment form. Please ensure your Square application is configured correctly and try again.', 'error');
             }
 
             let card;
             async function initializeCard(payments) {
                 try {
                     card = await payments.card({
-                        elementId: 'card-container',
+                        elementId: 'card-container', // The div where the card number input will be rendered
                         inputClass: 'w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-custom-deep-purple focus:border-custom-deep-purple transition',
                         inputStyles: [
                             {
@@ -310,10 +304,39 @@
                     });
                     await card.attach('#card-container');
 
+                    // Attach other Square form elements (expiration, CVV, postal code)
+                    // These are also handled by the `payments.card()` method and attach to their respective containers.
+                    // The `inputClass` and `inputStyles` apply to these as well.
+                    await payments.card({ elementId: 'expiration-date-container' }).attach('#expiration-date-container');
+                    await payments.card({ elementId: 'cvv-container' }).attach('#cvv-container');
+                    await payments.card({ elementId: 'postal-code-container' }).attach('#postal-code-container');
+
+
                     // Add focus styling to the container when any Square input is focused
                     const cardContainerDiv = document.getElementById('card-container');
-                    card.addEventListener('focus', () => cardContainerDiv.classList.add('focused'));
-                    card.addEventListener('blur', () => cardContainerDiv.classList.remove('focused'));
+                    const expirationContainerDiv = document.getElementById('expiration-date-container');
+                    const cvvContainerDiv = document.getElementById('cvv-container');
+                    const postalCodeContainerDiv = document.getElementById('postal-code-container');
+
+                    // Use a common function to add/remove focus class
+                    const addFocusClass = (element) => element.classList.add('focused');
+                    const removeFocusClass = (element) => element.classList.remove('focused');
+
+                    // Attach focus listeners to each Square input container
+                    card.addEventListener('focus', () => addFocusClass(cardContainerDiv));
+                    card.addEventListener('blur', () => removeFocusClass(cardContainerDiv));
+
+                    // Note: For these specific elements, you need to re-select them as they are separate instances
+                    // created by payments.card({ elementId: ... }).
+                    payments.card({ elementId: 'expiration-date-container' }).addEventListener('focus', () => addFocusClass(expirationContainerDiv));
+                    payments.card({ elementId: 'expiration-date-container' }).addEventListener('blur', () => removeFocusClass(expirationContainerDiv));
+
+                    payments.card({ elementId: 'cvv-container' }).addEventListener('focus', () => addFocusClass(cvvContainerDiv));
+                    payments.card({ elementId: 'cvv-container' }).addEventListener('blur', () => removeFocusClass(cvvContainerDiv));
+
+                    payments.card({ elementId: 'postal-code-container' }).addEventListener('focus', () => addFocusClass(postalCodeContainerDiv));
+                    payments.card({ elementId: 'postal-code-container' }).addEventListener('blur', () => removeFocusClass(postalCodeContainerDiv));
+
 
                 } catch (e) {
                     console.error('Failed to initialize card:', e);
@@ -349,6 +372,7 @@
                     }
                 }
 
+                // Client-side validation for amount
                 if (!selectedAmount || parseFloat(selectedAmount) <= 0) {
                     showMessage('Please select or enter a valid donation amount.', 'error');
                     donateButton.disabled = false;
@@ -360,6 +384,7 @@
                 const email = document.getElementById('donate-email').value;
                 const name = document.getElementById('donate-name').value;
 
+                // Client-side validation for email and name
                 if (!email || !name) {
                     showMessage('Please fill in your email and name.', 'error');
                     donateButton.disabled = false;
@@ -384,8 +409,9 @@
                         console.log('Payment token:', token); // For debugging
 
                         // --- IMPORTANT: Send this token and amount to your backend server ---
-                        // Corrected URL to point to the backend API endpoint
-                        const backendEndpoint = 'https://legendary-potato-5gwq5v4v5jrf66r-3000.app.github.dev/process-square-payment'; 
+                        // For production, replace with your actual production backend URL
+                        // Example: const backendEndpoint = 'https://api.your-domain.com/process-square-payment';
+                        const backendEndpoint = '/process-square-payment'; 
                         
                         const response = await fetch(backendEndpoint, {
                             method: 'POST',
@@ -405,6 +431,7 @@
 
                         if (response.ok && responseData.success) {
                             showMessage('Donation successful! Thank you!', 'success');
+                            // Hide the form and show success message
                             donateForm.style.display = 'none';
                             successMessage.classList.remove('hidden');
                         } else {
@@ -413,9 +440,11 @@
                         }
 
                     } else {
+                        // Handle Square tokenization errors
                         let errorMessage = 'Payment failed. Please check your card details.';
                         if (result.errors && result.errors.length > 0) {
-                            errorMessage = result.errors[0].message || errorMessage;
+                            // Concatenate all error messages from Square for better user feedback
+                            errorMessage = result.errors.map(err => err.message || 'Unknown error').join(', ');
                         }
                         showMessage(errorMessage, 'error');
                         console.error('Square tokenization error:', result.errors);
@@ -424,7 +453,7 @@
                     console.error('Error during Square payment process:', e);
                     showMessage('An unexpected error occurred during payment. Please try again.', 'error');
                 } finally {
-                    // Re-enable button
+                    // Re-enable button regardless of success or failure
                     donateButton.disabled = false;
                     donateButton.textContent = 'Donate Now';
                     donateButton.classList.remove('opacity-70', 'cursor-not-allowed');
