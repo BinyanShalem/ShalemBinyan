@@ -273,7 +273,6 @@
             });
 
             // --- Square Web Payments SDK Integration ---
-            // Replaced with your actual Square Application ID and Location ID
             const SQUARE_APP_ID = 'sq0idp-veVkP9aY1FhUQyQO9LsPKQ'; 
             const SQUARE_LOCATION_ID = 'LJFNHNPM1GVSM'; 
 
@@ -385,11 +384,9 @@
                         console.log('Payment token:', token); // For debugging
 
                         // --- IMPORTANT: Send this token and amount to your backend server ---
-                        // This is where you would make a fetch() request to your server.
-                        // Your server would then use the Square API (with your secret key)
-                        // to create a payment.
+                        // Update this URL to your Codespace's public URL for port 3000
+                        const backendEndpoint = 'https://legendary-potato-5gwq5v4v5jrf66r-3000.app.github.dev/process-square-payment'; 
                         
-                        const backendEndpoint = '/process-square-payment'; // Replace with your actual backend endpoint
                         const response = await fetch(backendEndpoint, {
                             method: 'POST',
                             headers: {

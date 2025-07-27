@@ -3,7 +3,7 @@ require('dotenv').config();
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const { Client, Environment } = require('@square/square-connect');
+const { Client, Environment } = require('square'); // Corrected import from '@square/square-connect' to 'square'
 const { v4: uuidv4 } = require('uuid'); // For generating unique idempotency keys
 const cors = require('cors'); // Import cors
 
