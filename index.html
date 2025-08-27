@@ -1,222 +1,231 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Binyan Shalem | Empowering Homes</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binyan Shalem | Empowering Homes</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-GRW46G4BGP"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'custom-deep-purple': '#723358',
-                        'custom-slate-gray': '#4B5562',
-                        'custom-beige': '#BAA68E',
-                    }
-                }
-            }
-        }
-    </script>
+      gtag('config', 'G-GRW46G4BGP');
+    </script>
 
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc; /* slate-50 */
-            scroll-behavior: smooth;
-        }
-        .nav-link.active {
-            font-weight: 700;
-            color: white;
-            background-color: rgba(186, 166, 142, 0.3);
-        }
-        #main-header.scrolled {
-            background-color: white;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-        }
-        #main-header.scrolled .nav-link:not(.donate-btn) {
-            color: #4B5562;
-        }
-        #main-header.scrolled .nav-link.active:not(.donate-btn) {
-            color: #723358;
-            background-color: rgba(186, 166, 142, 0.2);
-        }
-        #main-header.scrolled .donate-btn {
-            color: white !important;
-        }
-        #main-header.scrolled .header-text,
-        #main-header.scrolled #mobile-menu-button { /* Change icon color on scroll */
-            color: #1f2937;
-        }
-    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'custom-deep-purple': '#723358',
+                        'custom-slate-gray': '#4B5562',
+                        'custom-beige': '#BAA68E',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            scroll-behavior: smooth;
+        }
+        .nav-link.active {
+            font-weight: 700;
+            color: white;
+            background-color: rgba(186, 166, 142, 0.3);
+        }
+        #main-header.scrolled {
+            background-color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        #main-header.scrolled .nav-link:not(.donate-btn) {
+            color: #4B5562;
+        }
+        #main-header.scrolled .nav-link.active:not(.donate-btn) {
+            color: #723358;
+            background-color: rgba(186, 166, 142, 0.2);
+        }
+        #main-header.scrolled .donate-btn {
+            color: white !important;
+        }
+        #main-header.scrolled .header-text,
+        #main-header.scrolled #mobile-menu-button { /* Change icon color on scroll */
+            color: #1f2937;
+        }
+    </style>
 </head>
 <body class="text-slate-800">
 
-    <header id="main-header" class="fixed w-full top-0 z-50 transition-all duration-300">
-        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <img src="https://www.binyan-shalem.com/Binyan%20Shalem_files/8594235c61f23b5d99cd2a2dbf37c8b5.jpg" alt="Binyan Shalem Logo" class="h-12 w-auto" onerror="this.onerror=null;this.src='https://placehold.co/100x50/723358/FFFFFF?text=Logo';">
-                <div class="header-text text-white">
-                    <h1 class="text-lg sm:text-xl font-bold tracking-tight">BINYAN SHALEM</h1>
-                    <p class="text-xs sm:text-sm md:text-base font-medium">Your Marriage, Your Path, Our Support.</p>
-                </div>
-            </div>
-            <nav class="hidden md:flex items-center space-x-2 text-white">
-                <a href="#home" class="nav-link transition-colors px-3 py-2 rounded-md">Home</a>
-                <a href="#mission" class="nav-link transition-colors px-3 py-2 rounded-md">Our Mission</a>
-                <a href="#contact" class="nav-link transition-colors px-3 py-2 rounded-md">Get Help</a>
-                <a href="/donate" class="nav-link donate-btn bg-custom-deep-purple text-white px-4 py-2 rounded-lg hover:opacity-90 transition-all shadow ml-6">Donate</a>
-            </nav>
-            <button id="mobile-menu-button" class="md:hidden text-white focus:outline-none">
-                <svg id="hamburger-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-                <svg id="close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-            </div>
-        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4 bg-white/95 backdrop-blur-sm rounded-b-lg">
-            <a href="#home" class="nav-link block py-2 text-slate-700">Home</a>
-            <a href="#mission" class="nav-link block py-2 text-slate-700">Our Mission</a>
-            <a href="#contact" class="nav-link block py-2 text-slate-700">Get Help</a>
-            <a href="/donate" class="nav-link donate-btn block mt-2 text-center bg-custom-deep-purple text-white px-4 py-2 rounded-lg shadow">Donate</a>
-        </div>
-    </header>
+    <header id="main-header" class="fixed w-full top-0 z-50 transition-all duration-300">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <img src="https://www.binyan-shalem.com/Binyan%20Shalem_files/8594235c61f23b5d99cd2a2dbf37c8b5.jpg" alt="Binyan Shalem Logo" class="h-12 w-auto" onerror="this.onerror=null;this.src='https://placehold.co/100x50/723358/FFFFFF?text=Logo';">
+                <div class="header-text text-white">
+                    <h1 class="text-lg sm:text-xl font-bold tracking-tight">BINYAN SHALEM</h1>
+                    <p class="text-xs sm:text-sm md:text-base font-medium">Your Marriage, Your Path, Our Support.</p>
+                </div>
+            </div>
+            <nav class="hidden md:flex items-center space-x-2 text-white">
+                <a href="#home" class="nav-link transition-colors px-3 py-2 rounded-md">Home</a>
+                <a href="#mission" class="nav-link transition-colors px-3 py-2 rounded-md">Our Mission</a>
+                <a href="#contact" class="nav-link transition-colors px-3 py-2 rounded-md">Get Help</a>
+                <a href="/donate" class="nav-link donate-btn bg-custom-deep-purple text-white px-4 py-2 rounded-lg hover:opacity-90 transition-all shadow ml-6">Donate</a>
+            </nav>
+            <button id="mobile-menu-button" class="md:hidden text-white focus:outline-none">
+                <svg id="hamburger-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                <svg id="close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            </div>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4 bg-white/95 backdrop-blur-sm rounded-b-lg">
+            <a href="#home" class="nav-link block py-2 text-slate-700">Home</a>
+            <a href="#mission" class="nav-link block py-2 text-slate-700">Our Mission</a>
+            <a href="#contact" class="nav-link block py-2 text-slate-700">Get Help</a>
+            <a href="/donate" class="nav-link donate-btn block mt-2 text-center bg-custom-deep-purple text-white px-4 py-2 rounded-lg shadow">Donate</a>
+        </div>
+    </header>
 
-    <main>
-        <section id="home" class="relative min-h-screen flex items-center justify-center text-center text-white bg-contain bg-no-repeat bg-center md:bg-cover lg:bg-fixed" style="background-image: url('https://www.binyan-shalem.com/Binyan%20Shalem_files/8594235c61f23b5d99cd2a2dbf37c8b5.jpg');">
-            <div class="absolute inset-0 bg-black opacity-40"></div>
-            <div class="relative z-10 container mx-auto px-6">
-                <h2 class="text-3xl md:text-4xl lg:text-6xl font-bold leading-tight mb-4">Empowering Homes within a Torah Framework.</h2>
-                <p class="text-base md:text-lg lg:text-2xl text-slate-200 max-w-3xl mx-auto mb-8">
-                    Our goal is to provide couples with personalized, practical support within the framework of rabbinical guidance to help you build a stronger, more fulfilling marriage—at no cost to you.
-                </p>
-                <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
-                    <a href="#contact" class="bg-custom-deep-purple text-white px-8 py-3 rounded-lg hover:opacity-90 transition-opacity text-lg font-semibold shadow-lg">Your journey starts here</a>
-                    <a href="/donate" class="bg-custom-beige text-custom-deep-purple px-8 py-3 rounded-lg hover:opacity-90 transition-opacity text-lg font-semibold shadow-lg border border-custom-deep-purple">Donate Now</a>
-                </div>
-            </div>
-        </section>
+    <main>
+        <section id="home" class="relative min-h-screen flex items-center justify-center text-center text-white bg-contain bg-no-repeat bg-center md:bg-cover lg:bg-fixed" style="background-image: url('https://www.binyan-shalem.com/Binyan%20Shalem_files/8594235c61f23b5d99cd2a2dbf37c8b5.jpg');">
+            <div class="absolute inset-0 bg-black opacity-40"></div>
+            <div class="relative z-10 container mx-auto px-6">
+                <h2 class="text-3xl md:text-4xl lg:text-6xl font-bold leading-tight mb-4">Empowering Homes within a Torah Framework.</h2>
+                <p class="text-base md:text-lg lg:text-2xl text-slate-200 max-w-3xl mx-auto mb-8">
+                    Our goal is to provide couples with personalized, practical support within the framework of rabbinical guidance to help you build a stronger, more fulfilling marriage—at no cost to you.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                    <a href="#contact" class="bg-custom-deep-purple text-white px-8 py-3 rounded-lg hover:opacity-90 transition-opacity text-lg font-semibold shadow-lg">Your journey starts here</a>
+                    <a href="/donate" class="bg-custom-beige text-custom-deep-purple px-8 py-3 rounded-lg hover:opacity-90 transition-opacity text-lg font-semibold shadow-lg border border-custom-deep-purple">Donate Now</a>
+                </div>
+            </div>
+        </section>
 
-        <div class="relative z-20 bg-slate-50">
-            <section id="mission" class="py-28 md:py-40 bg-custom-beige">
-                <div class="container mx-auto px-6">
-                    <div class="text-center mb-16">
-                        <h3 class="text-3xl md:text-4xl font-bold text-slate-900">Guidance You Can Trust</h3>
-                        <p class="text-lg text-slate-600 mt-2">Our approach is built on three core principles.</p>
-                    </div>
-                    <div class="grid md:grid-cols-3 gap-10">
-                        <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200 text-center">
-                            <h4 class="text-2xl font-bold text-custom-deep-purple mb-4">1. Our Mission</h4>
-                            <p class="text-slate-600">We recognize the common pitfalls of generic marriage advice. We aim to help Jewish couples strengthen their marriages by offering expert guidance, support, and tools tailored to their unique needs.</p>
-                        </div>
-                        <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200 text-center">
-                            <h4 class="text-2xl font-bold text-custom-deep-purple mb-4">2. Tailored Support</h4>
-                            <p class="text-slate-600">Rabbi Shaul Haber meets with couples, offering thoughtful, practical direction rooted in Torah values. We partner with a wide network of trusted professionals to ensure the highest level of care.</p>
-                        </div>
-                        <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200 text-center">
-                            <h4 class="text-2xl font-bold text-custom-deep-purple mb-4">3. Absolute Confidentiality</h4>
-                            <p class="text-slate-600">We prioritize your privacy above all else. Our services are built on a foundation of 100% confidentiality, ensuring a safe and secure space to work through challenges without fear of judgment.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
+        <div class="relative z-20 bg-slate-50">
+            <section id="mission" class="py-28 md:py-40 bg-custom-beige">
+                <div class="container mx-auto px-6">
+                    <div class="text-center mb-16">
+                        <h3 class="text-3xl md:text-4xl font-bold text-slate-900">Guidance You Can Trust</h3>
+                        <p class="text-lg text-slate-600 mt-2">Our approach is built on three core principles.</p>
+                    </div>
+                    <div class="grid md:grid-cols-3 gap-10">
+                        <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200 text-center">
+                            <h4 class="text-2xl font-bold text-custom-deep-purple mb-4">1. Our Mission</h4>
+                            <p class="text-slate-600">We recognize the common pitfalls of generic marriage advice. We aim to help Jewish couples strengthen their marriages by offering expert guidance, support, and tools tailored to their unique needs.</p>
+                        </div>
+                        <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200 text-center">
+                            <h4 class="text-2xl font-bold text-custom-deep-purple mb-4">2. Tailored Support</h4>
+                            <p class="text-slate-600">Rabbi Shaul Haber meets with couples, offering thoughtful, practical direction rooted in Torah values. We partner with a wide network of trusted professionals to ensure the highest level of care.</p>
+                        </div>
+                        <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200 text-center">
+                            <h4 class="text-2xl font-bold text-custom-deep-purple mb-4">3. Absolute Confidentiality</h4>
+                            <p class="text-slate-600">We prioritize your privacy above all else. Our services are built on a foundation of 100% confidentiality, ensuring a safe and secure space to work through challenges without fear of judgment.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-            <section id="contact" class="bg-white py-20 md:py-28">
-                <div class="container mx-auto px-6">
-                    <div class="max-w-4xl mx-auto text-center">
-                        <h3 class="text-3xl md:text-4xl font-bold text-slate-900">Take the First Step</h3>
-                        <p class="text-lg text-slate-600 mt-3 mb-8">Reach out through the secure form below. All submissions are seen only by Rabbi Shaul Haber and are completely confidential.</p>
-                        
-                        <div class="w-full mx-auto" style="height: 1500px;">
-                                <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSd3EUkZ2qbEdENGZRZQfp-fL2Cii8J_KoVFRyni3idgPhipWg/viewform?embedded=true" 
-                                        width="100%" 
-                                        height="100%" 
-                                        frameborder="0" 
-                                        marginheight="0" 
-                                        marginwidth="0"
-                                        class="rounded-xl shadow-2xl border border-slate-200">
-                                        Loading…
-                                </iframe>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            <section id="contact" class="bg-white py-20 md:py-28">
+                <div class="container mx-auto px-6">
+                    <div class="max-w-4xl mx-auto text-center">
+                        <h3 class="text-3xl md:text-4xl font-bold text-slate-900">Take the First Step</h3>
+                        <p class="text-lg text-slate-600 mt-3 mb-8">Reach out through the secure form below. All submissions are seen only by Rabbi Shaul Haber and are completely confidential.</p>
+                        
+                        <div class="w-full mx-auto" style="height: 1500px;">
+                                <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSd3EUkZ2qbEdENGZRZQfp-fL2Cii8J_KoVFRyni3idgPhipWg/viewform?embedded=true" 
+                                        width="100%" 
+                                        height="100%" 
+                                        frameborder="0" 
+                                        marginheight="0" 
+                                        marginwidth="0"
+                                        class="rounded-xl shadow-2xl border border-slate-200">
+                                        Loading…
+                                </iframe>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-            <section id="donate" class="py-20 md:py-28">
-                <div class="container mx-auto px-6 text-center">
-                    <h3 class="text-3xl md:text-4xl font-bold text-slate-900">Support Our Mission</h3>
-                    <p class="text-lg text-slate-600 max-w-2xl mx-auto mt-4 mb-8">
-                        Your generous contribution allows us to continue offering our services free of charge.
-                    </p>
-                    <a href="/donate" class="bg-custom-deep-purple text-white px-10 py-4 rounded-lg hover:opacity-90 transition-opacity text-xl font-bold shadow-lg">
-                        Click Here to Donate
-                    </a>
-                </div>
-            </section>
-        </div>
-    </main>
+            <section id="donate" class="py-20 md:py-28">
+                <div class="container mx-auto px-6 text-center">
+                    <h3 class="text-3xl md:text-4xl font-bold text-slate-900">Support Our Mission</h3>
+                    <p class="text-lg text-slate-600 max-w-2xl mx-auto mt-4 mb-8">
+                        Your generous contribution allows us to continue offering our services free of charge.
+                    </p>
+                    <a href="/donate" class="bg-custom-deep-purple text-white px-10 py-4 rounded-lg hover:opacity-90 transition-opacity text-xl font-bold shadow-lg">
+                        Click Here to Donate
+                    </a>
+                </div>
+            </section>
+        </div>
+    </main>
 
-    <footer class="bg-custom-slate-gray text-slate-300 relative z-20">
-        <div class="container mx-auto px-6 py-8 text-center">
-            <p>&copy; 2025 Binyan Shalem. All Rights Reserved.</p>
-            <p class="text-sm text-slate-400 mt-2">A dedicated resource for building stronger Jewish homes.</p>
-            <p class="text-sm text-slate-400 mt-2">SMS: <a href="sms:+13474439477" class="hover:underline">+1 (347) 443-9477</a></p>
-        </div>
-    </footer>
+    <footer class="bg-custom-slate-gray text-slate-300 relative z-20">
+        <div class="container mx-auto px-6 py-8 text-center">
+            <p>&copy; 2025 Binyan Shalem. All Rights Reserved.</p>
+            <p class="text-sm text-slate-400 mt-2">A dedicated resource for building stronger Jewish homes.</p>
+            <p class="text-sm text-slate-400 mt-2">SMS: <a href="sms:+13474439477" class="hover:underline">+1 (347) 443-9477</a></p>
+        </div>
+    </footer>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const header = document.getElementById('main-header');
-            const mobileMenuButton = document.getElementById('mobile-menu-button');
-            const mobileMenu = document.getElementById('mobile-menu');
-            // ▼▼▼ CHANGE 2: Get icon elements by ID ▼▼▼
-            const hamburgerIcon = document.getElementById('hamburger-icon');
-            const closeIcon = document.getElementById('close-icon');
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const header = document.getElementById('main-header');
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            // ▼▼▼ CHANGE 2: Get icon elements by ID ▼▼▼
+            const hamburgerIcon = document.getElementById('hamburger-icon');
+            const closeIcon = document.getElementById('close-icon');
 
-            window.addEventListener('scroll', () => {
-                header.classList.toggle('scrolled', window.scrollY > 50);
-            });
+            window.addEventListener('scroll', () => {
+                header.classList.toggle('scrolled', window.scrollY > 50);
+            });
 
-            // ▼▼▼ CHANGE 3: Update click listener logic ▼▼▼
-            mobileMenuButton.addEventListener('click', () => {
-                mobileMenu.classList.toggle('hidden');
-                hamburgerIcon.classList.toggle('hidden');
-                closeIcon.classList.toggle('hidden');
-            });
+            // ▼▼▼ CHANGE 3: Update click listener logic ▼▼▼
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+                hamburgerIcon.classList.toggle('hidden');
+                closeIcon.classList.toggle('hidden');
+            });
 
-            // Close menu and reset icon when a mobile link is clicked
-            document.querySelectorAll('#mobile-menu a').forEach(link => {
-                link.addEventListener('click', () => {
-                    mobileMenu.classList.add('hidden');
-                    hamburgerIcon.classList.remove('hidden');
-                    closeIcon.classList.add('hidden');
-                });
-            });
+            // Close menu and reset icon when a mobile link is clicked
+            document.querySelectorAll('#mobile-menu a').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                    hamburgerIcon.classList.remove('hidden');
+                    closeIcon.classList.add('hidden');
+                });
+            });
 
-            // --- Active Nav Link on Scroll ---
-            const sections = document.querySelectorAll('main section');
-            const navLinks = document.querySelectorAll('.nav-link');
-            document.querySelector('.nav-link[href="#home"]').classList.add('active');
+            // --- Active Nav Link on Scroll ---
+            const sections = document.querySelectorAll('main section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            document.querySelector('.nav-link[href="#home"]').classList.add('active');
 
-            const sectionObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const id = entry.target.getAttribute('id');
-                        navLinks.forEach(link => link.classList.remove('active'));
-                        const activeLink = document.querySelector(`.nav-link[href="#${id}"]`);
-                        if (activeLink) {
-                            activeLink.classList.add('active');
-                        }
-                    }
-                });
-            }, { rootMargin: "-30% 0px -60% 0px" });
+            const sectionObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.getAttribute('id');
+                        navLinks.forEach(link => link.classList.remove('active'));
+                        const activeLink = document.querySelector(`.nav-link[href="#${id}"]`);
+                        if (activeLink) {
+                            activeLink.classList.add('active');
+                        }
+                    }
+                });
+            }, { rootMargin: "-30% 0px -60% 0px" });
 
-            sections.forEach(section => sectionObserver.observe(section));
-        });
-    </script>
-    </body>
+            sections.forEach(section => sectionObserver.observe(section));
+        });
+    </script>
+    </body>
 </html>
