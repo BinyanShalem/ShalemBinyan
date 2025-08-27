@@ -465,6 +465,12 @@
         // Initialize Firebase on window load
         window.onload = async function() {
             try {
+                // Check for a valid Firebase configuration before proceeding
+                if (Object.keys(firebaseConfig).length === 0 || !firebaseConfig.apiKey) {
+                    showCustomAlert('Initialization Error', 'Firebase configuration is missing or invalid. Please check the app configuration.');
+                    return;
+                }
+
                 // Initialize Firebase app
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
@@ -548,7 +554,7 @@
 
             } else {
                 // Default case: listen to all submissions in real-time
-                onSnapshot(submissionsRef, (querySnapshot) => {
+                const unsubscribe = onSnapshot(submissionsRef, (querySnapshot) => {
                     const allSubmissions = [];
                     querySnapshot.forEach(doc => {
                         allSubmissions.push({ id: doc.id, data: doc.data() });
@@ -558,6 +564,9 @@
                     console.error("Error fetching real-time submissions:", error);
                     showCustomAlert('Submission Fetch Error', `Could not load submissions. Please check your permissions. Error: ${error.message}`);
                 });
+
+                // Attach unsubscribe to a global variable or manage its lifecycle if needed
+                // For this simple app, it's fine to just let it run
             }
         }
 
@@ -601,8 +610,10 @@
 
         // Search button handler
         document.getElementById('search-button').addEventListener('click', () => {
-            const idTerm = document.getElementById('id-input').value;
-            const lastNameTerm = document.getElementById('last-name-input').value;
+            const idInput = document.getElementById('id-input');
+            const lastNameInput = document.getElementById('last-name-input');
+            const idTerm = idInput.value;
+            const lastNameTerm = lastNameInput.value;
             
             if (!idTerm.trim() || !lastNameTerm.trim()) {
                 showCustomAlert('Missing Information', 'Please enter both a Submission ID and a last name to search.');
@@ -742,21 +753,21 @@
             if (!step2.classList.contains('hidden')) {
                 formType = 'someone-else';
                 submissionData = {
-                    h_name: data['h-name'],
-                    w_name: data['w-name'],
-                    h_cell: data['h-cell'],
-                    h_email: data['h-email'],
-                    w_cell: data['w-cell'],
-                    w_email: data['w-email'],
-                    h_age: data['h-age'],
-                    w_age: data['w-age'],
-                    address: data['address'],
-                    years_married: data['years-married'],
-                    issue_presenting: data['issue-presenting'],
-                    family_rabbi: data['family-rabbi'],
+                    h_name: data['h-name-other'],
+                    w_name: data['w-name-other'],
+                    h_cell: data['h-cell-other'],
+                    h_email: data['h-email-other'],
+                    w_cell: data['w-cell-other'],
+                    w_email: data['w-email-other'],
+                    h_age: data['h-age-other'],
+                    w_age: data['w-age-other'],
+                    address: data['address-other'],
+                    years_married: data['years-married-other'],
+                    issue_presenting: data['issue-presenting-other'],
+                    family_rabbi: data['family-rabbi-other'],
                     anyone_else_involved: data['anyone-else-involved'],
-                    parents_names: data['parents-names'],
-                    num_kids: data['num-kids'],
+                    parents_names: data['parents-names-other'],
+                    num_kids: data['num-kids-other'],
                 };
                 if (document.getElementById('donate-yes-button-2').classList.contains('bg-custom-deep-purple')) {
                     donationDecision = 'Yes';
