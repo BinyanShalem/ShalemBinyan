@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Google Analytics (Original script from user) -->
+    <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-GRW46G4BGP"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -125,7 +125,6 @@
                 <a href="#home" class="nav-link transition-colors px-3 py-2 rounded-md">Home</a>
                 <a href="#mission" class="nav-link transition-colors px-3 py-2 rounded-md">Our Mission</a>
                 <a href="#contact" class="nav-link transition-colors px-3 py-2 rounded-md">Get Help</a>
-                <!-- Removed viewer-section link -->
                 <a href="/donate" class="nav-link donate-btn bg-custom-deep-purple text-white px-4 py-2 rounded-lg hover:opacity-90 transition-all shadow ml-6">Donate</a>
             </nav>
             <button id="mobile-menu-button" class="md:hidden text-white focus:outline-none">
@@ -137,7 +136,6 @@
             <a href="#home" class="nav-link block py-2 text-slate-700 hover:bg-slate-100 rounded-md">Home</a>
             <a href="#mission" class="nav-link block py-2 text-slate-700 hover:bg-slate-100 rounded-md">Our Mission</a>
             <a href="#contact" class="nav-link block py-2 text-slate-700 hover:bg-slate-100 rounded-md">Get Help</a>
-            <!-- Removed mobile-viewer-link -->
             <a href="/donate" class="nav-link donate-btn block mt-2 text-center bg-custom-deep-purple text-white px-4 py-2 rounded-lg shadow hover:opacity-90">Donate</a>
         </div>
     </header>
@@ -414,8 +412,6 @@
                     </div>
                 </div>
             </section>
-
-            <!-- The entire Submission Viewer Section has been removed -->
         </div>
     </main>
 
@@ -472,7 +468,6 @@
                     if (user) {
                         userId = user.uid;
                         console.log("Signed in with UID:", userId);
-                        // No initial fetch of all submissions as the section is removed
                     } else {
                         console.error("Authentication failed.");
                         showCustomAlert('Authentication Error', 'Failed to authenticate. Please refresh the page to try again.');
@@ -741,7 +736,6 @@
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
-                // Removed special handling for admin.html as it's no longer linked from main page
                 document.querySelector(this.getAttribute('href')).scrollIntoView({
                     behavior: 'smooth'
                 });
