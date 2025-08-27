@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binyan Shalem Admin Panel</title>
+    
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Load Inter font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'custom-deep-purple': '#723358',
+                        'custom-slate-gray': '#4B5562',
+                        'custom-beige': '#BAA68E',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #1f2937; /* slate-800 */
+        }
+        .form-input {
+            display: block;
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid #d1d5db; /* gray-300 */
+            background-color: #f9fafb; /* gray-50 */
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #723358;
+            box-shadow: 0 0 0 2px rgba(114, 51, 88, 0.2);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div class="max-w-4xl w-full bg-white p-8 rounded-xl shadow-2xl border border-slate-200">
+        <h1 class="text-3xl font-bold text-center text-custom-deep-purple mb-8">Admin Panel</h1>
+
+        <!-- Admin Login Form -->
+        <div id="admin-login-form" class="space-y-6">
+            <h2 class="text-xl font-semibold text-center mb-4">Admin Login</h2>
+            <div>
+                <label for="admin-password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                <input type="password" id="admin-password" class="form-input" placeholder="Enter admin password">
+            </div>
+            <button id="login-button" class="w-full bg-custom-deep-purple text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity font-semibold shadow-md">Login</button>
+            <p id="login-error-message" class="text-red-500 text-center text-sm mt-2 hidden">Incorrect password.</p>
+        </div>
+
+        <!-- Admin Submissions List (hidden by default) -->
+        <div id="admin-content" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-custom-deep-purple">All Submissions</h2>
+                <button id="logout-button" class="bg-gray-400 text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity text-sm font-semibold">Logout</button>
+            </div>
+            
+            <div id="all-submissions-list" class="space-y-6">
+                <!-- All submissions will be dynamically added here -->
+            </div>
+
+            <!-- Loading spinner for all submissions -->
+            <div id="all-submissions-loading-spinner" class="flex flex-col items-center justify-center p-8 hidden">
+                <svg class="animate-spin -ml-1 mr-3 h-12 w-12 text-custom-deep-purple" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <p class="mt-4 text-slate-600">Loading all submissions...</p>
+            </div>
+
+            <div id="no-all-submissions" class="hidden text-center text-slate-500 p-8 rounded-lg bg-slate-100 mt-8">
+                <p>No submissions found.</p>
+            </div>
+        </div>
+
+        <!-- Custom Alert/Modal (from main app) -->
+        <div id="custom-alert-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div class="bg-white p-8 rounded-lg shadow-xl max-w-sm w-full text-center">
+                <h6 id="alert-title" class="text-xl font-bold mb-4"></h6>
+                <p id="alert-message" class="text-slate-600 mb-6"></p>
+                <button id="alert-ok-button" class="bg-custom-deep-purple text-white px-6 py-2 rounded-lg hover:opacity-90 transition-opacity">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDxEV7W2m4jbJiVl0Sc6cN7gBH7oWu_rl8",
+            authDomain: "binyanshalem-28b1a.firebaseapp.com",
+            projectId: "binyanshalem-28b1a",
+            storageBucket: "binyanshalem-28b1a.firebasestorage.app",
+            messagingSenderId: "923017150407",
+            appId: "1:923017150407:web:35d71ffa41943bbbf623e2",
+            measurementId: "G-YRWCMR3HVD"
+        };
+
+        // Admin password (FOR DEMO PURPOSES ONLY - USE SECURE AUTHENTICATION IN PRODUCTION)
+        const ADMIN_PASSWORD = "adminpassword123"; 
+
+        let db;
+        let auth;
+        let userId;
+        const appId = firebaseConfig.projectId; // Use Firebase project ID as app ID
+
+        // Function to show custom alert
+        function showCustomAlert(title, message) {
+            document.getElementById('alert-title').textContent = title;
+            document.getElementById('alert-message').textContent = message;
+            document.getElementById('custom-alert-modal').classList.remove('hidden');
+        }
+
+        document.getElementById('alert-ok-button').addEventListener('click', () => {
+            document.getElementById('custom-alert-modal').classList.add('hidden');
+        });
+
+        // Initialize Firebase on window load
+        window.onload = async function() {
+            try {
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                await signInAnonymously(auth);
+                
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        console.log("Admin Panel signed in with UID:", userId);
+                    } else {
+                        console.error("Admin Panel authentication failed.");
+                        showCustomAlert('Authentication Error', 'Failed to authenticate for admin panel. Please refresh.');
+                    }
+                });
+
+            } catch (e) {
+                console.error("Error initializing Firebase in Admin Panel:", e);
+                showCustomAlert('Initialization Error', `Problem initializing Firebase. Error: ${e.message}`);
+            }
+        };
+
+        // Function to fetch and render all submissions
+        function fetchAndRenderAllSubmissions() {
+            if (!db || !userId) {
+                console.error("Database or user ID not available for admin panel.");
+                return;
+            }
+
+            const allSubmissionsList = document.getElementById('all-submissions-list');
+            const allSubmissionsSpinner = document.getElementById('all-submissions-loading-spinner');
+            const noAllSubmissionsMessage = document.getElementById('no-all-submissions');
+
+            allSubmissionsSpinner.classList.remove('hidden');
+            allSubmissionsList.innerHTML = '';
+            noAllSubmissionsMessage.classList.add('hidden');
+
+            const submissionsRef = collection(db, `artifacts/${appId}/public/data/submissions`);
+
+            onSnapshot(submissionsRef, (querySnapshot) => {
+                const allSubmissions = [];
+                querySnapshot.forEach(doc => {
+                    allSubmissions.push({ id: doc.id, data: doc.data() });
+                });
+                renderAllSubmissions(allSubmissions);
+                allSubmissionsSpinner.classList.add('hidden');
+            }, (error) => {
+                console.error("Error fetching all submissions for admin panel:", error);
+                showCustomAlert('Data Fetch Error', `Could not load all submissions. Error: ${error.message}`);
+                allSubmissionsSpinner.classList.add('hidden');
+            });
+        }
+
+        // Function to render all submissions to the UI
+        function renderAllSubmissions(submissions) {
+            const allSubmissionsList = document.getElementById('all-submissions-list');
+            const noAllSubmissionsMessage = document.getElementById('no-all-submissions');
+            
+            allSubmissionsList.innerHTML = ''; // Clear previous submissions
+            
+            if (submissions.length === 0) {
+                noAllSubmissionsMessage.classList.remove('hidden');
+            } else {
+                noAllSubmissionsMessage.classList.add('hidden');
+                submissions.forEach((submissionData) => {
+                    const submission = submissionData.data;
+                    const submissionId = submissionData.id;
+                    const card = document.createElement('div');
+                    card.classList.add('bg-slate-50', 'p-6', 'rounded-xl', 'shadow-sm', 'border', 'border-slate-200');
+                    
+                    const submissionDate = submission.timestamp ? new Date(submission.timestamp).toLocaleString() : 'N/A';
+                    
+                    let contentHTML = `
+                        <h4 class="text-xl font-bold text-custom-deep-purple mb-2">Submission ID: <span class="font-mono text-base">${submissionId}</span></h4>
+                        <p class="text-sm text-slate-500 mb-4">Submitted on: ${submissionDate}</p>
+                        <ul class="space-y-2 text-slate-700">
+                    `;
+                    
+                    for (const [key, value] of Object.entries(submission)) {
+                        if (key !== 'timestamp' && key !== 'uid' && key !== 'formType' && value !== null) {
+                            const formattedKey = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                            contentHTML += `<li><strong class="font-semibold">${formattedKey}:</strong> ${value}</li>`;
+                        }
+                    }
+                    contentHTML += `</ul>`;
+                    card.innerHTML = contentHTML;
+                    allSubmissionsList.appendChild(card);
+                });
+            }
+        }
+
+        // Admin Login Logic
+        const adminLoginForm = document.getElementById('admin-login-form');
+        const adminPasswordInput = document.getElementById('admin-password');
+        const loginButton = document.getElementById('login-button');
+        const loginErrorMessage = document.getElementById('login-error-message');
+        const adminContent = document.getElementById('admin-content');
+        const logoutButton = document.getElementById('logout-button');
+
+        loginButton.addEventListener('click', () => {
+            if (adminPasswordInput.value === ADMIN_PASSWORD) {
+                adminLoginForm.classList.add('hidden');
+                adminContent.classList.remove('hidden');
+                loginErrorMessage.classList.add('hidden');
+                fetchAndRenderAllSubmissions(); // Fetch data once logged in
+            } else {
+                loginErrorMessage.classList.remove('hidden');
+                adminPasswordInput.value = ''; // Clear password field
+            }
+        });
+
+        logoutButton.addEventListener('click', () => {
+            adminContent.classList.add('hidden');
+            adminLoginForm.classList.remove('hidden');
+            adminPasswordInput.value = ''; // Clear password field on logout
+            document.getElementById('all-submissions-list').innerHTML = ''; // Clear submissions list
+        });
+    </script>
+</body>
+</html>
