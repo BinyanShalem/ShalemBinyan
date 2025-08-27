@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Google Analytics -->
+    <!-- Google Analytics (Original script from user) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-GRW46G4BGP"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -442,18 +442,29 @@
         </div>
     </footer>
 
-    <!-- Firebase SDKs -->
+    <!-- Firebase SDKs and Application Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, addDoc, onSnapshot, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, addDoc, onSnapshot, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDxEV7W2m4jbJiVl0Sc6cN7gBH7oWu_rl8",
+            authDomain: "binyanshalem-28b1a.firebaseapp.com",
+            projectId: "binyanshalem-28b1a",
+            storageBucket: "binyanshalem-28b1a.firebasestorage.app",
+            messagingSenderId: "923017150407",
+            appId: "1:923017150407:web:35d71ffa41943bbbf623e2",
+            measurementId: "G-YRWCMR3HVD"
+        };
 
         // Global variables for Firebase and app data
         let db;
         let auth;
         let userId;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        // Directly set the app ID based on your Firebase project ID
+        const appId = firebaseConfig.projectId; 
 
         // Function to show custom alert
         function showCustomAlert(title, message) {
@@ -465,31 +476,20 @@
         // Initialize Firebase on window load
         window.onload = async function() {
             try {
-                // Check for a valid Firebase configuration before proceeding
-                if (Object.keys(firebaseConfig).length === 0 || !firebaseConfig.apiKey) {
-                    showCustomAlert('Initialization Error', 'Firebase configuration is missing or invalid. Please check the app configuration.');
-                    return;
-                }
-
-                // Initialize Firebase app
+                // Initialize Firebase app with the correct configuration
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
 
-                // Sign in with custom token or anonymously
-                const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
+                // Sign in anonymously for public access
+                await signInAnonymously(auth);
                 
                 // Auth state change listener
                 onAuthStateChanged(auth, async (user) => {
                     if (user) {
                         userId = user.uid;
                         console.log("Signed in with UID:", userId);
-                        // Initial fetch of all submissions
+                        // Initial fetch of all submissions once authenticated
                         fetchSubmissions();
                     } else {
                         console.error("Authentication failed.");
@@ -521,7 +521,7 @@
             const submissionsRef = collection(db, `artifacts/${appId}/public/data/submissions`);
 
             if (idTerm.trim() !== '' && lastNameTerm.trim() !== '') {
-                // Explicit search case: fetch all and filter
+                // Explicit search case: fetch all and filter client-side
                 try {
                     const snapshot = await getDocs(submissionsRef);
                     let searchResults = [];
@@ -549,24 +549,23 @@
                     console.error("Error fetching submissions:", error);
                     showCustomAlert('Submission Fetch Error', `Could not perform search. Error: ${error.message}`);
                 } finally {
-                     submissionsSpinner.classList.add('hidden');
+                    submissionsSpinner.classList.add('hidden');
                 }
 
             } else {
                 // Default case: listen to all submissions in real-time
-                const unsubscribe = onSnapshot(submissionsRef, (querySnapshot) => {
+                onSnapshot(submissionsRef, (querySnapshot) => {
                     const allSubmissions = [];
                     querySnapshot.forEach(doc => {
                         allSubmissions.push({ id: doc.id, data: doc.data() });
                     });
                     renderSubmissions(allSubmissions);
+                    submissionsSpinner.classList.add('hidden'); // Hide spinner after initial load
                 }, (error) => {
                     console.error("Error fetching real-time submissions:", error);
                     showCustomAlert('Submission Fetch Error', `Could not load submissions. Please check your permissions. Error: ${error.message}`);
+                    submissionsSpinner.classList.add('hidden');
                 });
-
-                // Attach unsubscribe to a global variable or manage its lifecycle if needed
-                // For this simple app, it's fine to just let it run
             }
         }
 
@@ -753,21 +752,21 @@
             if (!step2.classList.contains('hidden')) {
                 formType = 'someone-else';
                 submissionData = {
-                    h_name: data['h-name-other'],
-                    w_name: data['w-name-other'],
-                    h_cell: data['h-cell-other'],
-                    h_email: data['h-email-other'],
-                    w_cell: data['w-cell-other'],
-                    w_email: data['w-email-other'],
-                    h_age: data['h-age-other'],
-                    w_age: data['w-age-other'],
-                    address: data['address-other'],
-                    years_married: data['years-married-other'],
-                    issue_presenting: data['issue-presenting-other'],
-                    family_rabbi: data['family-rabbi-other'],
+                    h_name: data['h-name'], // Use common keys for data
+                    w_name: data['w-name'],
+                    h_cell: data['h-cell'],
+                    h_email: data['h-email'],
+                    w_cell: data['w-cell'],
+                    w_email: data['w-email'],
+                    h_age: data['h-age'],
+                    w_age: data['w-age'],
+                    address: data['address'],
+                    years_married: data['years-married'],
+                    issue_presenting: data['issue-presenting'],
+                    family_rabbi: data['family-rabbi'],
                     anyone_else_involved: data['anyone-else-involved'],
-                    parents_names: data['parents-names-other'],
-                    num_kids: data['num-kids-other'],
+                    parents_names: data['parents-names'],
+                    num_kids: data['num-kids'],
                 };
                 if (document.getElementById('donate-yes-button-2').classList.contains('bg-custom-deep-purple')) {
                     donationDecision = 'Yes';
