@@ -1,231 +1,877 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Binyan Shalem | Empowering Homes</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-GRW46G4BGP"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binyan Shalem | Empowering Homes</title>
+    
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Load Inter font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-GRW46G4BGP"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-GRW46G4BGP');
+    </script>
 
-      gtag('config', 'G-GRW46G4BGP');
-    </script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'custom-deep-purple': '#723358',
+                        'custom-slate-gray': '#4B5562',
+                        'custom-beige': '#BAA68E',
+                    }
+                }
+            }
+        }
+    </script>
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'custom-deep-purple': '#723358',
-                        'custom-slate-gray': '#4B5562',
-                        'custom-beige': '#BAA68E',
-                    }
-                }
-            }
-        }
-    </script>
-
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc; /* slate-50 */
-            scroll-behavior: smooth;
-        }
-        .nav-link.active {
-            font-weight: 700;
-            color: white;
-            background-color: rgba(186, 166, 142, 0.3);
-        }
-        #main-header.scrolled {
-            background-color: white;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-        }
-        #main-header.scrolled .nav-link:not(.donate-btn) {
-            color: #4B5562;
-        }
-        #main-header.scrolled .nav-link.active:not(.donate-btn) {
-            color: #723358;
-            background-color: rgba(186, 166, 142, 0.2);
-        }
-        #main-header.scrolled .donate-btn {
-            color: white !important;
-        }
-        #main-header.scrolled .header-text,
-        #main-header.scrolled #mobile-menu-button { /* Change icon color on scroll */
-            color: #1f2937;
-        }
-    </style>
+    <style>
+        /* Base styles for a clean, modern look */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            scroll-behavior: smooth;
+        }
+        /* Active navigation link styling */
+        .nav-link.active {
+            font-weight: 700;
+            color: white;
+            background-color: rgba(186, 166, 142, 0.3);
+        }
+        /* Header styling on scroll */
+        #main-header.scrolled {
+            background-color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        #main-header.scrolled .nav-link:not(.donate-btn) {
+            color: #4B5562;
+        }
+        #main-header.scrolled .nav-link.active:not(.donate-btn) {
+            color: #723358;
+            background-color: rgba(186, 166, 142, 0.2);
+        }
+        #main-header.scrolled .donate-btn {
+            color: white !important;
+        }
+        #main-header.scrolled .header-text,
+        #main-header.scrolled #mobile-menu-button {
+            color: #1f2937;
+        }
+        /* Form element styling */
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        .form-input, .form-select {
+            display: block;
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid #d1d5db; /* gray-300 */
+            background-color: #f9fafb; /* gray-50 */
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #723358;
+            box-shadow: 0 0 0 2px rgba(114, 51, 88, 0.2);
+        }
+    </style>
 </head>
 <body class="text-slate-800">
 
-    <header id="main-header" class="fixed w-full top-0 z-50 transition-all duration-300">
-        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <img src="https://www.binyan-shalem.com/Binyan%20Shalem_files/8594235c61f23b5d99cd2a2dbf37c8b5.jpg" alt="Binyan Shalem Logo" class="h-12 w-auto" onerror="this.onerror=null;this.src='https://placehold.co/100x50/723358/FFFFFF?text=Logo';">
-                <div class="header-text text-white">
-                    <h1 class="text-lg sm:text-xl font-bold tracking-tight">BINYAN SHALEM</h1>
-                    <p class="text-xs sm:text-sm md:text-base font-medium">Your Marriage, Your Path, Our Support.</p>
-                </div>
-            </div>
-            <nav class="hidden md:flex items-center space-x-2 text-white">
-                <a href="#home" class="nav-link transition-colors px-3 py-2 rounded-md">Home</a>
-                <a href="#mission" class="nav-link transition-colors px-3 py-2 rounded-md">Our Mission</a>
-                <a href="#contact" class="nav-link transition-colors px-3 py-2 rounded-md">Get Help</a>
-                <a href="/donate" class="nav-link donate-btn bg-custom-deep-purple text-white px-4 py-2 rounded-lg hover:opacity-90 transition-all shadow ml-6">Donate</a>
-            </nav>
-            <button id="mobile-menu-button" class="md:hidden text-white focus:outline-none">
-                <svg id="hamburger-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-                <svg id="close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-            </div>
-        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4 bg-white/95 backdrop-blur-sm rounded-b-lg">
-            <a href="#home" class="nav-link block py-2 text-slate-700">Home</a>
-            <a href="#mission" class="nav-link block py-2 text-slate-700">Our Mission</a>
-            <a href="#contact" class="nav-link block py-2 text-slate-700">Get Help</a>
-            <a href="/donate" class="nav-link donate-btn block mt-2 text-center bg-custom-deep-purple text-white px-4 py-2 rounded-lg shadow">Donate</a>
-        </div>
-    </header>
+    <header id="main-header" class="fixed w-full top-0 z-50 transition-all duration-300">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <img src="https://www.binyan-shalem.com/Binyan%20Shalem_files/8594235c61f23b5d99cd2a2dbf37c8b5.jpg" alt="Binyan Shalem Logo" class="h-12 w-auto" onerror="this.onerror=null;this.src='https://placehold.co/100x50/723358/FFFFFF?text=Logo';">
+                <div class="header-text text-white">
+                    <h1 class="text-lg sm:text-xl font-bold tracking-tight">BINYAN SHALEM</h1>
+                    <p class="text-xs sm:text-sm md:text-base font-medium">Your Marriage, Your Path, Our Support.</p>
+                </div>
+            </div>
+            <nav class="hidden md:flex items-center space-x-2 text-white">
+                <a href="#home" class="nav-link transition-colors px-3 py-2 rounded-md">Home</a>
+                <a href="#mission" class="nav-link transition-colors px-3 py-2 rounded-md">Our Mission</a>
+                <a href="#contact" class="nav-link transition-colors px-3 py-2 rounded-md">Get Help</a>
+                <a href="#viewer-section" id="viewer-link" class="nav-link transition-colors px-3 py-2 rounded-md">Submissions</a>
+                <a href="/donate" class="nav-link donate-btn bg-custom-deep-purple text-white px-4 py-2 rounded-lg hover:opacity-90 transition-all shadow ml-6">Donate</a>
+            </nav>
+            <button id="mobile-menu-button" class="md:hidden text-white focus:outline-none">
+                <svg id="hamburger-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                <svg id="close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4 bg-white/95 backdrop-blur-sm rounded-b-lg">
+            <a href="#home" class="nav-link block py-2 text-slate-700">Home</a>
+            <a href="#mission" class="nav-link block py-2 text-slate-700">Our Mission</a>
+            <a href="#contact" class="nav-link block py-2 text-slate-700">Get Help</a>
+            <a href="#viewer-section" id="mobile-viewer-link" class="nav-link block py-2 text-slate-700">Submissions</a>
+            <a href="/donate" class="nav-link donate-btn block mt-2 text-center bg-custom-deep-purple text-white px-4 py-2 rounded-lg shadow">Donate</a>
+        </div>
+    </header>
 
-    <main>
-        <section id="home" class="relative min-h-screen flex items-center justify-center text-center text-white bg-contain bg-no-repeat bg-center md:bg-cover lg:bg-fixed" style="background-image: url('https://www.binyan-shalem.com/Binyan%20Shalem_files/8594235c61f23b5d99cd2a2dbf37c8b5.jpg');">
-            <div class="absolute inset-0 bg-black opacity-40"></div>
-            <div class="relative z-10 container mx-auto px-6">
-                <h2 class="text-3xl md:text-4xl lg:text-6xl font-bold leading-tight mb-4">Empowering Homes within a Torah Framework.</h2>
-                <p class="text-base md:text-lg lg:text-2xl text-slate-200 max-w-3xl mx-auto mb-8">
-                    Our goal is to provide couples with personalized, practical support within the framework of rabbinical guidance to help you build a stronger, more fulfilling marriage—at no cost to you.
-                </p>
-                <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
-                    <a href="#contact" class="bg-custom-deep-purple text-white px-8 py-3 rounded-lg hover:opacity-90 transition-opacity text-lg font-semibold shadow-lg">Your journey starts here</a>
-                    <a href="/donate" class="bg-custom-beige text-custom-deep-purple px-8 py-3 rounded-lg hover:opacity-90 transition-opacity text-lg font-semibold shadow-lg border border-custom-deep-purple">Donate Now</a>
-                </div>
-            </div>
-        </section>
+    <main>
+        <section id="home" class="relative min-h-screen flex items-center justify-center text-center text-white bg-contain bg-no-repeat bg-center md:bg-cover lg:bg-fixed" style="background-image: url('https://www.binyan-shalem.com/Binyan%20Shalem_files/8594235c61f23b5d99cd2a2dbf37c8b5.jpg');">
+            <!-- Increased opacity for better text contrast -->
+            <div class="absolute inset-0 bg-black opacity-70"></div>
+            <div class="relative z-10 container mx-auto px-6">
+                <h2 class="text-3xl md:text-4xl lg:text-6xl font-bold leading-tight mb-4">Empowering Homes within a Torah Framework.</h2>
+                <p class="text-base md:text-lg lg:text-2xl text-slate-200 max-w-3xl mx-auto mb-8">
+                    Our goal is to provide couples with personalized, practical support within the framework of rabbinical guidance to help you build a stronger, more fulfilling marriage—at no cost to you.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                    <a href="#contact" class="bg-custom-deep-purple text-white px-8 py-3 rounded-lg hover:opacity-90 transition-opacity text-lg font-semibold shadow-lg">Your journey starts here</a>
+                    <a href="/donate" class="bg-custom-beige text-custom-deep-purple px-8 py-3 rounded-lg hover:opacity-90 transition-opacity text-lg font-semibold shadow-lg border border-custom-deep-purple">Donate Now</a>
+                </div>
+            </div>
+        </section>
 
-        <div class="relative z-20 bg-slate-50">
-            <section id="mission" class="py-28 md:py-40 bg-custom-beige">
-                <div class="container mx-auto px-6">
-                    <div class="text-center mb-16">
-                        <h3 class="text-3xl md:text-4xl font-bold text-slate-900">Guidance You Can Trust</h3>
-                        <p class="text-lg text-slate-600 mt-2">Our approach is built on three core principles.</p>
-                    </div>
-                    <div class="grid md:grid-cols-3 gap-10">
-                        <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200 text-center">
-                            <h4 class="text-2xl font-bold text-custom-deep-purple mb-4">1. Our Mission</h4>
-                            <p class="text-slate-600">We recognize the common pitfalls of generic marriage advice. We aim to help Jewish couples strengthen their marriages by offering expert guidance, support, and tools tailored to their unique needs.</p>
-                        </div>
-                        <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200 text-center">
-                            <h4 class="text-2xl font-bold text-custom-deep-purple mb-4">2. Tailored Support</h4>
-                            <p class="text-slate-600">Rabbi Shaul Haber meets with couples, offering thoughtful, practical direction rooted in Torah values. We partner with a wide network of trusted professionals to ensure the highest level of care.</p>
-                        </div>
-                        <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200 text-center">
-                            <h4 class="text-2xl font-bold text-custom-deep-purple mb-4">3. Absolute Confidentiality</h4>
-                            <p class="text-slate-600">We prioritize your privacy above all else. Our services are built on a foundation of 100% confidentiality, ensuring a safe and secure space to work through challenges without fear of judgment.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
+        <div class="relative z-20 bg-slate-50">
+            <section id="mission" class="py-28 md:py-40 bg-custom-beige">
+                <div class="container mx-auto px-6">
+                    <div class="text-center mb-16">
+                        <h3 class="text-3xl md:text-4xl font-bold text-slate-900">Guidance You Can Trust</h3>
+                        <p class="text-lg text-slate-600 mt-2">Our approach is built on three core principles.</p>
+                    </div>
+                    <div class="grid md:grid-cols-3 gap-10">
+                        <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200 text-center">
+                            <h4 class="text-2xl font-bold text-custom-deep-purple mb-4">1. Our Mission</h4>
+                            <p class="text-slate-600">We recognize the common pitfalls of generic marriage advice. We aim to help Jewish couples strengthen their marriages by offering expert guidance, support, and tools tailored to their unique needs.</p>
+                        </div>
+                        <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200 text-center">
+                            <h4 class="text-2xl font-bold text-custom-deep-purple mb-4">2. Tailored Support</h4>
+                            <p class="text-slate-600">Rabbi Shaul Haber meets with couples, offering thoughtful, practical direction rooted in Torah values. We partner with a wide network of trusted professionals to ensure the highest level of care.</p>
+                        </div>
+                        <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200 text-center">
+                            <h4 class="text-2xl font-bold text-custom-deep-purple mb-4">3. Absolute Confidentiality</h4>
+                            <p class="text-slate-600">We prioritize your privacy above all else. Our services are built on a foundation of 100% confidentiality, ensuring a safe and secure space to work through challenges without fear of judgment.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-            <section id="contact" class="bg-white py-20 md:py-28">
-                <div class="container mx-auto px-6">
-                    <div class="max-w-4xl mx-auto text-center">
-                        <h3 class="text-3xl md:text-4xl font-bold text-slate-900">Take the First Step</h3>
-                        <p class="text-lg text-slate-600 mt-3 mb-8">Reach out through the secure form below. All submissions are seen only by Rabbi Shaul Haber and are completely confidential.</p>
-                        
-                        <div class="w-full mx-auto" style="height: 1500px;">
-                                <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSd3EUkZ2qbEdENGZRZQfp-fL2Cii8J_KoVFRyni3idgPhipWg/viewform?embedded=true" 
-                                        width="100%" 
-                                        height="100%" 
-                                        frameborder="0" 
-                                        marginheight="0" 
-                                        marginwidth="0"
-                                        class="rounded-xl shadow-2xl border border-slate-200">
-                                        Loading…
-                                </iframe>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            <section id="contact" class="bg-white py-20 md:py-28">
+                <div class="container mx-auto px-6">
+                    <div class="max-w-4xl mx-auto text-center">
+                        <h3 class="text-3xl md:text-4xl font-bold text-slate-900">Take the First Step</h3>
+                        <p class="text-lg text-slate-600 mt-3 mb-8">Reach out through our secure form. All submissions are seen only by Rabbi Shaul Haber and are completely confidential.</p>
+                        
+                        <div id="form-container" class="w-full mx-auto max-w-lg bg-white p-8 rounded-xl shadow-2xl border border-slate-200">
+                            <!-- Loading spinner -->
+                            <div id="loading-spinner" class="hidden flex flex-col items-center justify-center p-8">
+                                <svg class="animate-spin -ml-1 mr-3 h-12 w-12 text-custom-deep-purple" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <p class="mt-4 text-slate-600">Submitting your form...</p>
+                            </div>
 
-            <section id="donate" class="py-20 md:py-28">
-                <div class="container mx-auto px-6 text-center">
-                    <h3 class="text-3xl md:text-4xl font-bold text-slate-900">Support Our Mission</h3>
-                    <p class="text-lg text-slate-600 max-w-2xl mx-auto mt-4 mb-8">
-                        Your generous contribution allows us to continue offering our services free of charge.
-                    </p>
-                    <a href="/donate" class="bg-custom-deep-purple text-white px-10 py-4 rounded-lg hover:opacity-90 transition-opacity text-xl font-bold shadow-lg">
-                        Click Here to Donate
-                    </a>
-                </div>
-            </section>
-        </div>
-    </main>
+                            <!-- Form with all steps -->
+                            <form id="contact-form" class="space-y-6">
+                                <!-- Step 1: Who is submitting? -->
+                                <div id="step-1-content">
+                                    <div class="mb-4">
+                                        <label class="form-label text-left">Who is submitting the form?*</label>
+                                        <div class="flex space-x-2">
+                                            <button type="button" id="couple-button" data-value="couple" class="flex-1 text-center py-2 px-4 rounded-full border border-gray-300 bg-white text-gray-700 transition-all duration-200 ease-in-out hover:border-custom-deep-purple hover:bg-custom-deep-purple/10">Husband/Wife</button>
+                                            <button type="button" id="someone-else-button" data-value="someone-else" class="flex-1 text-center py-2 px-4 rounded-full border border-gray-300 bg-white text-gray-700 transition-all duration-200 ease-in-out hover:border-custom-deep-purple hover:bg-custom-deep-purple/10">Someone else</button>
+                                        </div>
+                                    </div>
+                                    <div class="text-center">
+                                        <button type="button" id="next-button" class="bg-custom-deep-purple text-white px-8 py-3 rounded-lg hover:opacity-90 transition-opacity text-lg font-semibold shadow-md">Next</button>
+                                    </div>
+                                </div>
 
-    <footer class="bg-custom-slate-gray text-slate-300 relative z-20">
-        <div class="container mx-auto px-6 py-8 text-center">
-            <p>&copy; 2025 Binyan Shalem. All Rights Reserved.</p>
-            <p class="text-sm text-slate-400 mt-2">A dedicated resource for building stronger Jewish homes.</p>
-            <p class="text-sm text-slate-400 mt-2">SMS: <a href="sms:+13474439477" class="hover:underline">+1 (347) 443-9477</a></p>
-        </div>
-    </footer>
+                                <!-- Step 2: Someone else form fields -->
+                                <div id="step-2-content" class="hidden">
+                                    <p class="text-sm text-gray-500 mt-2 mb-4 text-left font-semibold">Note: This form is not for the couple itself. For the couple to submit please choose Husband/Wife on the previous page. If you would like to have someone submit for you, please ensure all information is accurate and correct.*</p>
+                                    <h4 class="text-xl font-semibold text-custom-deep-purple mb-4">Contact Information</h4>
+                                    <p class="text-sm text-gray-500 mt-2 mb-4 text-left">Note: *=required</p>
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label for="h-name-other" class="form-label text-left">Husband (First and Last)*</label>
+                                            <input type="text" id="h-name-other" name="h-name" required class="form-input">
+                                        </div>
+                                        <div>
+                                            <label for="w-name-other" class="form-label text-left">Wife (First and Maiden)*</label>
+                                            <input type="text" id="w-name-other" name="w-name" required class="form-input">
+                                        </div>
+                                        <div>
+                                            <label for="h-cell-other" class="form-label text-left">Husband Cell</label>
+                                            <input type="tel" id="h-cell-other" name="h-cell" class="form-input">
+                                        </div>
+                                        <div>
+                                            <label for="h-email-other" class="form-label text-left">Husband email</label>
+                                            <input type="email" id="h-email-other" name="h-email" class="form-input">
+                                        </div>
+                                        <div>
+                                            <label for="w-cell-other" class="form-label text-left">Wife Cell</label>
+                                            <input type="tel" id="w-cell-other" name="w-cell" class="form-input">
+                                        </div>
+                                        <div>
+                                            <label for="w-email-other" class="form-label text-left">Wife email</label>
+                                            <input type="email" id="w-email-other" name="w-email" class="form-input">
+                                        </div>
+                                        <div>
+                                            <label for="h-age-other" class="form-label text-left">Husband Age</label>
+                                            <input type="number" id="h-age-other" name="h-age" class="form-input">
+                                        </div>
+                                        <div>
+                                            <label for="w-age-other" class="form-label text-left">Wife Age</label>
+                                            <input type="number" id="w-age-other" name="w-age" class="form-input">
+                                        </div>
+                                        <div>
+                                            <label for="address-other" class="form-label text-left">Address</label>
+                                            <input type="text" id="address-other" name="address" class="form-input">
+                                        </div>
+                                        <div>
+                                            <label for="years-married-other" class="form-label text-left">How many years married?</label>
+                                            <input type="number" id="years-married-other" name="years-married" class="form-input">
+                                        </div>
+                                        <div>
+                                            <label for="issue-presenting-other" class="form-label text-left">Issue Presenting*</label>
+                                            <textarea id="issue-presenting-other" name="issue-presenting" rows="4" required class="form-input"></textarea>
+                                        </div>
+                                        <div>
+                                            <label for="family-rabbi-other" class="form-label text-left">Family Rabbi</label>
+                                            <input type="text" id="family-rabbi-other" name="family-rabbi" class="form-input">
+                                        </div>
+                                        <div>
+                                            <label for="anyone-else-involved" class="form-label text-left">Anyone else involved</label>
+                                            <input type="text" id="anyone-else-involved" name="anyone-else-involved" class="form-input">
+                                        </div>
+                                        <div>
+                                            <label for="parents-names-other" class="form-label text-left">Husband and Wife's parents names</label>
+                                            <input type="text" id="parents-names-other" name="parents-names" class="form-input">
+                                        </div>
+                                        <div>
+                                            <label for="num-kids-other" class="form-label text-left">How many kids?</label>
+                                            <input type="number" id="num-kids-other" name="num-kids" class="form-input">
+                                        </div>
+                                    </div>
+                                    <div class="mt-6">
+                                        <p class="form-label text-left">Donate Venmo with this <a href="https://venmo.com/?txn=pay&recipients=shalembinyan@gmail.com" target="_blank" rel="noopener noreferrer" class="underline text-custom-deep-purple hover:opacity-80">Link</a> (Optional)</p>
+                                    </div>
+                                    <!-- Donation buttons for someone else -->
+                                    <div class="mt-6">
+                                        <label class="form-label text-left">Donation (Optional)</label>
+                                        <div class="flex space-x-2">
+                                            <button type="button" id="donate-yes-button-2" data-value="yes" class="flex-1 text-center py-2 px-4 rounded-full border border-gray-300 bg-white text-gray-700 transition-all duration-200 ease-in-out hover:border-custom-deep-purple hover:bg-custom-deep-purple/10">Yes</button>
+                                            <button type="button" id="donate-no-button-2" data-value="no" class="flex-1 text-center py-2 px-4 rounded-full border border-gray-300 bg-white text-gray-700 transition-all duration-200 ease-in-out hover:border-custom-deep-purple hover:bg-custom-deep-purple/10">No</button>
+                                        </div>
+                                    </div>
+                                    <div class="mt-6 text-center">
+                                        <button type="button" id="back-button-2" class="bg-gray-400 text-white px-8 py-3 rounded-lg hover:opacity-90 transition-opacity text-lg font-semibold shadow-md mr-4">Back</button>
+                                        <button type="submit" class="bg-custom-deep-purple text-white px-8 py-3 rounded-lg hover:opacity-90 transition-opacity text-lg font-semibold shadow-md">Submit</button>
+                                    </div>
+                                </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const header = document.getElementById('main-header');
-            const mobileMenuButton = document.getElementById('mobile-menu-button');
-            const mobileMenu = document.getElementById('mobile-menu');
-            // ▼▼▼ CHANGE 2: Get icon elements by ID ▼▼▼
-            const hamburgerIcon = document.getElementById('hamburger-icon');
-            const closeIcon = document.getElementById('close-icon');
+                                <!-- Step 3: Husband/Wife form fields -->
+                                <div id="step-3-content" class="hidden">
+                                    <h4 class="text-xl font-semibold text-custom-deep-purple mb-4">Couple's Information</h4>
+                                    <p class="text-sm text-gray-500 mt-2 mb-4 text-left">Note: *=required</p>
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label for="h-name" class="form-label text-left">Husband (First and Last)*</label>
+                                            <input type="text" id="h-name" name="h-name" required class="form-input">
+                                        </div>
+                                        <div>
+                                            <label for="w-name" class="form-label text-left">Wife (First and Maiden)*</label>
+                                            <input type="text" id="w-name" name="w-name" required class="form-input">
+                                        </div>
+                                        <div>
+                                            <label for="h-cell" class="form-label text-left">Husband Cell*</label>
+                                            <input type="tel" id="h-cell" name="h-cell" required class="form-input">
+                                        </div>
+                                        <div>
+                                            <label for="h-email" class="form-label text-left">Husband email</label>
+                                            <input type="email" id="h-email" name="h-email" class="form-input">
+                                        </div>
+                                        <div>
+                                            <label for="w-cell" class="form-label text-left">Wife Cell*</label>
+                                            <input type="tel" id="w-cell" name="w-cell" required class="form-input">
+                                        </div>
+                                        <div>
+                                            <label for="w-email" class="form-label text-left">Wife email</label>
+                                            <input type="email" id="w-email" name="w-email" class="form-input">
+                                        </div>
+                                        <div>
+                                            <label for="h-age" class="form-label text-left">Husband Age*</label>
+                                            <input type="number" id="h-age" name="h-age" required class="form-input">
+                                        </div>
+                                        <div>
+                                            <label for="w-age" class="form-label text-left">Wife Age*</label>
+                                            <input type="number" id="w-age" name="w-age" required class="form-input">
+                                        </div>
+                                        <div>
+                                            <label for="address" class="form-label text-left">Address*</label>
+                                            <input type="text" id="address" name="address" required class="form-input">
+                                        </div>
+                                        <div>
+                                            <label for="years-married" class="form-label text-left">How many years married?*</label>
+                                            <input type="number" id="years-married" name="years-married" required class="form-input">
+                                        </div>
+                                        <div>
+                                            <label for="issue-presenting" class="form-label text-left">Issue Presenting*</label>
+                                            <textarea id="issue-presenting" name="issue-presenting" rows="4" required class="form-input"></textarea>
+                                        </div>
+                                        <div>
+                                            <label for="family-rabbi" class="form-label text-left">Family Rabbi</label>
+                                            <input type="text" id="family-rabbi" name="family-rabbi" class="form-input">
+                                        </div>
+                                        <div>
+                                            <label for="parents-names" class="form-label text-left">Husband and Wife's parents names*</label>
+                                            <input type="text" id="parents-names" name="parents-names" required class="form-input">
+                                        </div>
+                                        <div>
+                                            <label for="num-kids" class="form-label text-left">How many kids?*</label>
+                                            <input type="number" id="num-kids" name="num-kids" required class="form-input">
+                                        </div>
+                                    </div>
+                                    <!-- Donation buttons for couple -->
+                                    <div class="mt-6">
+                                        <label class="form-label text-left">Would you like to donate?</label>
+                                        <div class="flex space-x-2">
+                                            <button type="button" id="donate-yes-button-3" data-value="yes" class="flex-1 text-center py-2 px-4 rounded-full border border-gray-300 bg-white text-gray-700 transition-all duration-200 ease-in-out hover:border-custom-deep-purple hover:bg-custom-deep-purple/10">Yes</button>
+                                            <button type="button" id="donate-no-button-3" data-value="no" class="flex-1 text-center py-2 px-4 rounded-full border border-gray-300 bg-white text-gray-700 transition-all duration-200 ease-in-out hover:border-custom-deep-purple hover:bg-custom-deep-purple/10">No</button>
+                                        </div>
+                                    </div>
+                                    <div class="mt-6 text-center">
+                                        <button type="button" id="back-button-3" class="bg-gray-400 text-white px-8 py-3 rounded-lg hover:opacity-90 transition-opacity text-lg font-semibold shadow-md mr-4">Back</button>
+                                        <button type="submit" class="bg-custom-deep-purple text-white px-8 py-3 rounded-lg hover:opacity-90 transition-opacity text-lg font-semibold shadow-md">Submit</button>
+                                    </div>
+                                </div>
+                            </form>
 
-            window.addEventListener('scroll', () => {
-                header.classList.toggle('scrolled', window.scrollY > 50);
-            });
+                            <!-- Thank you page with donation options -->
+                            <div id="thank-you-page" class="hidden flex flex-col items-center justify-center text-center p-8 space-y-6">
+                                <h4 class="text-2xl font-bold text-slate-900">Thank you!</h4>
+                                <p id="thank-you-message" class="text-lg text-slate-600">Your form has been submitted successfully.</p>
+                                <div id="submission-id-container" class="hidden text-left p-4 bg-slate-100 rounded-lg border border-slate-200 max-w-sm w-full">
+                                    <p class="text-sm font-semibold text-slate-700 mb-2">This is your unique Submission ID. Please copy it and keep it in a safe place, as this is the only time it will be shown.</p>
+                                    <div class="flex items-center space-x-2 bg-white rounded-md p-2 shadow-inner">
+                                        <span id="submission-id-display" class="flex-grow font-mono text-xs md:text-sm text-custom-deep-purple break-all"></span>
+                                        <button id="copy-id-button" class="flex-shrink-0 bg-custom-beige text-custom-deep-purple px-2 py-1 rounded-md text-xs font-semibold hover:bg-opacity-80 transition-opacity">Copy</button>
+                                    </div>
+                                </div>
+                                <div id="donation-options" class="hidden w-full space-y-8">
+                                    <h5 class="text-xl font-bold text-slate-800">Please consider supporting our mission.</h5>
+                                    <!-- Venmo Button -->
+                                    <div class="text-center">
+                                        <a href="https://venmo.com/?txn=pay&amp;recipients=shalembinyan@gmail.com" target="_blank" rel="noopener noreferrer" class="inline-block bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors text-lg font-semibold shadow-md">
+                                            Use Venmo
+                                        </a>
+                                    </div>
+                                    <!-- Donate Google Form -->
+                                    <div class="max-w-lg mx-auto bg-white p-4 rounded-xl shadow-2xl border border-slate-200" style="height: 1000px;">
+                                        <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSeO4R-VYVDwYFks93J2QbgwkDo4MnsL1DqFojvveSsreRe1iA/viewform?embedded=true" width="100%" height="100%" frameborder="0" marginheight="0" marginwidth="0" class="rounded-xl">Loading…</iframe>
+                                    </div>
+                                </div>
+                                <button type="button" id="close-form-button" class="mt-4 bg-custom-deep-purple text-white px-8 py-3 rounded-lg hover:opacity-90 transition-opacity text-lg font-semibold shadow-md">Close</button>
+                            </div>
 
-            // ▼▼▼ CHANGE 3: Update click listener logic ▼▼▼
-            mobileMenuButton.addEventListener('click', () => {
-                mobileMenu.classList.toggle('hidden');
-                hamburgerIcon.classList.toggle('hidden');
-                closeIcon.classList.toggle('hidden');
-            });
+                            <!-- Custom Alert/Modal -->
+                            <div id="custom-alert-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                                <div class="bg-white p-8 rounded-lg shadow-xl max-w-sm w-full text-center">
+                                    <h6 id="alert-title" class="text-xl font-bold mb-4"></h6>
+                                    <p id="alert-message" class="text-slate-600 mb-6"></p>
+                                    <button id="alert-ok-button" class="bg-custom-deep-purple text-white px-6 py-2 rounded-lg hover:opacity-90 transition-opacity">OK</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-            // Close menu and reset icon when a mobile link is clicked
-            document.querySelectorAll('#mobile-menu a').forEach(link => {
-                link.addEventListener('click', () => {
-                    mobileMenu.classList.add('hidden');
-                    hamburgerIcon.classList.remove('hidden');
-                    closeIcon.classList.add('hidden');
-                });
-            });
+            <!-- Submission Viewer Section -->
+            <section id="viewer-section" class="bg-slate-50 py-20 md:py-28">
+                <div class="container mx-auto px-6">
+                    <div class="max-w-4xl mx-auto">
+                        <h3 class="text-3xl md:text-4xl font-bold text-slate-900 text-center">View Submissions</h3>
+                        <p class="text-center text-lg text-slate-600 mt-2 mb-8">
+                            Search for a specific submission by providing both the ID and a last name.
+                        </p>
+                        
+                        <!-- Search Bar -->
+                        <div class="mb-8 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                            <input type="text" id="id-input" placeholder="Enter Submission ID" class="form-input flex-1">
+                            <input type="text" id="last-name-input" placeholder="Enter Couple's Last Name" class="form-input flex-1">
+                            <button id="search-button" class="bg-custom-deep-purple text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity font-semibold w-full sm:w-auto">Search</button>
+                        </div>
+                        
+                        <!-- Submission list -->
+                        <div id="submissions-list" class="space-y-6">
+                            <!-- Submissions will be dynamically added here -->
+                        </div>
+                        
+                        <!-- Loading spinner for submissions -->
+                        <div id="submissions-loading-spinner" class="flex flex-col items-center justify-center p-8 hidden">
+                            <svg class="animate-spin -ml-1 mr-3 h-12 w-12 text-custom-deep-purple" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <p class="mt-4 text-slate-600">Searching...</p>
+                        </div>
+                        
+                        <div id="no-submissions" class="hidden text-center text-slate-500 p-8 rounded-lg bg-slate-100 mt-8">
+                            <p>No submissions found. Try searching with a different name or ID.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
 
-            // --- Active Nav Link on Scroll ---
-            const sections = document.querySelectorAll('main section');
-            const navLinks = document.querySelectorAll('.nav-link');
-            document.querySelector('.nav-link[href="#home"]').classList.add('active');
+    <footer class="bg-custom-deep-purple text-white py-8">
+        <div class="container mx-auto px-6 text-center">
+            <p class="text-sm md:text-base">© 2024 Binyan Shalem. All Rights Reserved.</p>
+        </div>
+    </footer>
 
-            const sectionObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const id = entry.target.getAttribute('id');
-                        navLinks.forEach(link => link.classList.remove('active'));
-                        const activeLink = document.querySelector(`.nav-link[href="#${id}"]`);
-                        if (activeLink) {
-                            activeLink.classList.add('active');
-                        }
-                    }
-                });
-            }, { rootMargin: "-30% 0px -60% 0px" });
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, addDoc, onSnapshot, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-            sections.forEach(section => sectionObserver.observe(section));
-        });
-    </script>
-    </body>
+        // Global variables for Firebase and app data
+        let db;
+        let auth;
+        let userId;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+
+        // Function to show custom alert
+        function showCustomAlert(title, message) {
+            document.getElementById('alert-title').textContent = title;
+            document.getElementById('alert-message').textContent = message;
+            document.getElementById('custom-alert-modal').classList.remove('hidden');
+        }
+
+        // Initialize Firebase on window load
+        window.onload = async function() {
+            try {
+                // Initialize Firebase app
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                // Sign in with custom token or anonymously
+                const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                
+                // Auth state change listener
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        console.log("Signed in with UID:", userId);
+                        // Initial fetch of all submissions
+                        fetchSubmissions();
+                    } else {
+                        console.error("Authentication failed.");
+                        showCustomAlert('Authentication Error', 'Failed to authenticate. Please refresh the page to try again.');
+                    }
+                });
+
+            } catch (e) {
+                console.error("Error initializing Firebase:", e);
+                showCustomAlert('Initialization Error', `There was a problem initializing the app. Please refresh. Error: ${e.message}`);
+            }
+        };
+
+        // Function to fetch and display submissions with optional search
+        async function fetchSubmissions(idTerm = '', lastNameTerm = '') {
+            if (!db || !userId) {
+                console.error("Database or user ID not available.");
+                return;
+            }
+
+            const submissionsList = document.getElementById('submissions-list');
+            const submissionsSpinner = document.getElementById('submissions-loading-spinner');
+            const noSubmissionsMessage = document.getElementById('no-submissions');
+
+            submissionsSpinner.classList.remove('hidden');
+            submissionsList.innerHTML = '';
+            noSubmissionsMessage.classList.add('hidden');
+
+            const submissionsRef = collection(db, `artifacts/${appId}/public/data/submissions`);
+
+            if (idTerm.trim() !== '' && lastNameTerm.trim() !== '') {
+                // Explicit search case: fetch all and filter
+                try {
+                    const snapshot = await getDocs(submissionsRef);
+                    let searchResults = [];
+
+                    snapshot.forEach(doc => {
+                        const submission = doc.data();
+                        const hName = submission.h_name || '';
+                        const wName = submission.w_name || '';
+
+                        const hLastName = hName.split(' ').pop()?.toLowerCase() || '';
+                        const wLastName = wName.split(' ').pop()?.toLowerCase() || '';
+                        const searchLastNameLower = lastNameTerm.toLowerCase();
+                        
+                        const idMatch = doc.id.toLowerCase().includes(idTerm.toLowerCase());
+                        const lastNameMatch = hLastName.includes(searchLastNameLower) || wLastName.includes(searchLastNameLower);
+
+                        if (idMatch && lastNameMatch) {
+                            searchResults.push({ id: doc.id, data: submission });
+                        }
+                    });
+
+                    renderSubmissions(searchResults);
+
+                } catch (error) {
+                    console.error("Error fetching submissions:", error);
+                    showCustomAlert('Submission Fetch Error', `Could not perform search. Error: ${error.message}`);
+                } finally {
+                     submissionsSpinner.classList.add('hidden');
+                }
+
+            } else {
+                // Default case: listen to all submissions in real-time
+                onSnapshot(submissionsRef, (querySnapshot) => {
+                    const allSubmissions = [];
+                    querySnapshot.forEach(doc => {
+                        allSubmissions.push({ id: doc.id, data: doc.data() });
+                    });
+                    renderSubmissions(allSubmissions);
+                }, (error) => {
+                    console.error("Error fetching real-time submissions:", error);
+                    showCustomAlert('Submission Fetch Error', `Could not load submissions. Please check your permissions. Error: ${error.message}`);
+                });
+            }
+        }
+
+        // Function to render submissions to the UI
+        function renderSubmissions(submissions) {
+            const submissionsList = document.getElementById('submissions-list');
+            const noSubmissionsMessage = document.getElementById('no-submissions');
+            
+            submissionsList.innerHTML = ''; // Clear previous submissions
+            
+            if (submissions.length === 0) {
+                noSubmissionsMessage.classList.remove('hidden');
+            } else {
+                noSubmissionsMessage.classList.add('hidden');
+                submissions.forEach((submissionData) => {
+                    const submission = submissionData.data;
+                    const submissionId = submissionData.id;
+                    const card = document.createElement('div');
+                    card.classList.add('bg-white', 'p-6', 'rounded-xl', 'shadow-md', 'border', 'border-slate-200');
+                    
+                    const submissionDate = submission.timestamp ? new Date(submission.timestamp).toLocaleString() : 'N/A';
+                    
+                    let contentHTML = `
+                        <h4 class="text-xl font-bold text-custom-deep-purple mb-2">Submission ID: <span class="font-mono text-base">${submissionId}</span></h4>
+                        <p class="text-sm text-slate-500 mb-4">Submitted on: ${submissionDate}</p>
+                        <ul class="space-y-2 text-slate-700">
+                    `;
+                    
+                    for (const [key, value] of Object.entries(submission)) {
+                        if (key !== 'timestamp' && key !== 'uid' && key !== 'formType' && value !== null) {
+                            const formattedKey = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                            contentHTML += `<li><strong class="font-semibold">${formattedKey}:</strong> ${value}</li>`;
+                        }
+                    }
+                    contentHTML += `</ul>`;
+                    card.innerHTML = contentHTML;
+                    submissionsList.appendChild(card);
+                });
+            }
+        }
+
+        // Search button handler
+        document.getElementById('search-button').addEventListener('click', () => {
+            const idTerm = document.getElementById('id-input').value;
+            const lastNameTerm = document.getElementById('last-name-input').value;
+            
+            if (!idTerm.trim() || !lastNameTerm.trim()) {
+                showCustomAlert('Missing Information', 'Please enter both a Submission ID and a last name to search.');
+                return;
+            }
+            fetchSubmissions(idTerm, lastNameTerm);
+        });
+
+        // ----- Form Handling Logic -----
+
+        const contactForm = document.getElementById('contact-form');
+        const step1 = document.getElementById('step-1-content');
+        const step2 = document.getElementById('step-2-content');
+        const step3 = document.getElementById('step-3-content');
+        const nextButton = document.getElementById('next-button');
+        const backButtons = document.querySelectorAll('[id^="back-button-"]');
+        const coupleButton = document.getElementById('couple-button');
+        const someoneElseButton = document.getElementById('someone-else-button');
+        const donateButtons = document.querySelectorAll('[id^="donate-"]');
+        const closeFormButton = document.getElementById('close-form-button');
+        const copyIdButton = document.getElementById('copy-id-button');
+
+        let selectedFormType = '';
+
+        coupleButton.addEventListener('click', () => {
+            selectedFormType = 'couple';
+            coupleButton.classList.add('bg-custom-deep-purple', 'text-white');
+            someoneElseButton.classList.remove('bg-custom-deep-purple', 'text-white');
+        });
+
+        someoneElseButton.addEventListener('click', () => {
+            selectedFormType = 'someone-else';
+            someoneElseButton.classList.add('bg-custom-deep-purple', 'text-white');
+            coupleButton.classList.remove('bg-custom-deep-purple', 'text-white');
+        });
+
+        nextButton.addEventListener('click', () => {
+            if (selectedFormType === 'couple') {
+                step1.classList.add('hidden');
+                step3.classList.remove('hidden');
+            } else if (selectedFormType === 'someone-else') {
+                step1.classList.add('hidden');
+                step2.classList.remove('hidden');
+            } else {
+                showCustomAlert('Selection Required', 'Please select who is submitting the form to proceed.');
+            }
+        });
+
+        backButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                step2.classList.add('hidden');
+                step3.classList.add('hidden');
+                step1.classList.remove('hidden');
+            });
+        });
+
+        donateButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const parentDiv = button.parentElement;
+                parentDiv.querySelectorAll('button').forEach(btn => {
+                    btn.classList.remove('bg-custom-deep-purple', 'text-white');
+                    btn.classList.add('bg-white', 'text-gray-700');
+                });
+                button.classList.remove('bg-white', 'text-gray-700');
+                button.classList.add('bg-custom-deep-purple', 'text-white');
+            });
+        });
+        
+        closeFormButton.addEventListener('click', () => {
+            document.getElementById('thank-you-page').classList.add('hidden');
+            document.getElementById('contact-form').classList.remove('hidden');
+            document.getElementById('form-container').classList.remove('hidden');
+            document.getElementById('donation-options').classList.add('hidden');
+            document.getElementById('submission-id-container').classList.add('hidden');
+            
+            // Reset form
+            contactForm.reset();
+            step2.classList.add('hidden');
+            step3.classList.add('hidden');
+            step1.classList.remove('hidden');
+            selectedFormType = '';
+            
+            // Reset button styles
+            const allButtons = document.querySelectorAll('.rounded-full.border.border-gray-300');
+            allButtons.forEach(btn => {
+                btn.classList.remove('bg-custom-deep-purple', 'text-white');
+                btn.classList.add('bg-white', 'text-gray-700');
+            });
+        });
+        
+        copyIdButton.addEventListener('click', () => {
+            const submissionId = document.getElementById('submission-id-display').textContent;
+            try {
+                const tempInput = document.createElement('textarea');
+                tempInput.value = submissionId;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+                showCustomAlert('Copied!', 'The Submission ID has been copied to your clipboard.');
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+                showCustomAlert('Copy Error', 'Failed to copy the ID. Please copy it manually.');
+            }
+        });
+
+        document.getElementById('alert-ok-button').addEventListener('click', () => {
+            document.getElementById('custom-alert-modal').classList.add('hidden');
+        });
+
+        // Form submission handler
+        contactForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Show loading spinner and hide form
+            document.getElementById('form-container').classList.add('hidden');
+            document.getElementById('loading-spinner').classList.remove('hidden');
+
+            // Collect form data
+            const formData = new FormData(e.target);
+            const data = {};
+            for (const [key, value] of formData.entries()) {
+                const trimmedValue = value.trim();
+                // Convert empty non-required fields to null
+                if (trimmedValue === '') {
+                    data[key] = null;
+                } else {
+                    data[key] = trimmedValue;
+                }
+            }
+            
+            let submissionData = {};
+            let formType = null;
+            let donationDecision = 'No';
+
+            // Determine which form was submitted and format data
+            if (!step2.classList.contains('hidden')) {
+                formType = 'someone-else';
+                submissionData = {
+                    h_name: data['h-name'],
+                    w_name: data['w-name'],
+                    h_cell: data['h-cell'],
+                    h_email: data['h-email'],
+                    w_cell: data['w-cell'],
+                    w_email: data['w-email'],
+                    h_age: data['h-age'],
+                    w_age: data['w-age'],
+                    address: data['address'],
+                    years_married: data['years-married'],
+                    issue_presenting: data['issue-presenting'],
+                    family_rabbi: data['family-rabbi'],
+                    anyone_else_involved: data['anyone-else-involved'],
+                    parents_names: data['parents-names'],
+                    num_kids: data['num-kids'],
+                };
+                if (document.getElementById('donate-yes-button-2').classList.contains('bg-custom-deep-purple')) {
+                    donationDecision = 'Yes';
+                }
+            } else if (!step3.classList.contains('hidden')) {
+                formType = 'couple';
+                submissionData = {
+                    h_name: data['h-name'],
+                    w_name: data['w-name'],
+                    h_cell: data['h-cell'],
+                    h_email: data['h-email'],
+                    w_cell: data['w-cell'],
+                    w_email: data['w-email'],
+                    h_age: data['h-age'],
+                    w_age: data['w-age'],
+                    address: data['address'],
+                    years_married: data['years-married'],
+                    issue_presenting: data['issue-presenting'],
+                    family_rabbi: data['family-rabbi'],
+                    parents_names: data['parents-names'],
+                    num_kids: data['num-kids'],
+                };
+                if (document.getElementById('donate-yes-button-3').classList.contains('bg-custom-deep-purple')) {
+                    donationDecision = 'Yes';
+                }
+            }
+
+            // Clean up and format submission data (convert empty strings and parse numbers)
+            const finalSubmission = {
+                ...submissionData,
+                donation: donationDecision,
+                timestamp: new Date().toISOString(),
+                uid: userId,
+                formType: formType,
+            };
+            
+            // Loop through and convert empty strings to null
+            for (const key in finalSubmission) {
+                if (finalSubmission[key] === '') {
+                    finalSubmission[key] = null;
+                }
+                // Convert to number if it's a number field
+                if (['h_age', 'w_age', 'years_married', 'num_kids'].includes(key) && finalSubmission[key] !== null) {
+                    finalSubmission[key] = parseInt(finalSubmission[key]);
+                }
+            }
+
+            try {
+                if (!db || !userId) {
+                    showCustomAlert('Error', 'Authentication failed. Please refresh the page.');
+                    document.getElementById('form-container').classList.remove('hidden');
+                    document.getElementById('loading-spinner').classList.add('hidden');
+                    return;
+                }
+
+                // Add document to Firestore and get its ID
+                const submissionsRef = collection(db, `artifacts/${appId}/public/data/submissions`);
+                const docRef = await addDoc(submissionsRef, finalSubmission);
+
+                // Show thank you page
+                document.getElementById('contact-form').classList.add('hidden');
+                document.getElementById('thank-you-page').classList.remove('hidden');
+
+                // If a donation was selected, show the ID and donation options
+                if (donationDecision === 'Yes') {
+                    document.getElementById('submission-id-container').classList.remove('hidden');
+                    document.getElementById('submission-id-display').textContent = docRef.id;
+                    document.getElementById('donation-options').classList.remove('hidden');
+                } else {
+                    document.getElementById('thank-you-message').textContent = 'Your form has been submitted successfully.';
+                }
+
+            } catch (error) {
+                console.error('Error adding document: ', error);
+                showCustomAlert('Submission Error', `There was a problem submitting your form. Please try again. Error: ${error.message}`);
+                document.getElementById('form-container').classList.remove('hidden');
+                document.getElementById('loading-spinner').classList.add('hidden');
+            }
+        });
+
+        // Navigation for mobile menu
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const hamburgerIcon = document.getElementById('hamburger-icon');
+        const closeIcon = document.getElementById('close-icon');
+
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            hamburgerIcon.classList.toggle('hidden');
+            closeIcon.classList.toggle('hidden');
+        });
+
+        // Header scroll effect
+        const mainHeader = document.getElementById('main-header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                mainHeader.classList.add('scrolled');
+            } else {
+                mainHeader.classList.remove('scrolled');
+            }
+        });
+
+        // Smooth scroll for internal links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+                // Close mobile menu after clicking a link
+                mobileMenu.classList.add('hidden');
+                hamburgerIcon.classList.remove('hidden');
+                closeIcon.classList.add('hidden');
+            });
+        });
+    </script>
+</body>
 </html>
