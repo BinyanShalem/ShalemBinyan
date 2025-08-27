@@ -90,6 +90,24 @@
             border-color: #723358;
             box-shadow: 0 0 0 2px rgba(114, 51, 88, 0.2);
         }
+
+        /* Mobile specific styles for the menu itself */
+        #mobile-menu {
+            position: absolute; /* Changed to absolute for better positioning control */
+            top: 100%; /* Positions it directly below the header */
+            left: 0;
+            right: 0;
+            width: 100%;
+            transition: all 0.3s ease-out; /* Smooth transition for opening/closing */
+            transform-origin: top; /* Animation starts from the top */
+            max-height: 0; /* Hidden by default */
+            overflow: hidden; /* Hide content when collapsed */
+        }
+        #mobile-menu.open {
+            max-height: 500px; /* Adjust as needed for content, allows smooth height transition */
+            padding-top: 1rem; /* Add some padding when open */
+            padding-bottom: 1rem;
+        }
     </style>
 </head>
 <body class="text-slate-800">
@@ -107,7 +125,7 @@
                 <a href="#home" class="nav-link transition-colors px-3 py-2 rounded-md">Home</a>
                 <a href="#mission" class="nav-link transition-colors px-3 py-2 rounded-md">Our Mission</a>
                 <a href="#contact" class="nav-link transition-colors px-3 py-2 rounded-md">Get Help</a>
-                <a href="#viewer-section" id="viewer-link" class="nav-link transition-colors px-3 py-2 rounded-md">Submissions</a>
+                <!-- Removed viewer-section link -->
                 <a href="/donate" class="nav-link donate-btn bg-custom-deep-purple text-white px-4 py-2 rounded-lg hover:opacity-90 transition-all shadow ml-6">Donate</a>
             </nav>
             <button id="mobile-menu-button" class="md:hidden text-white focus:outline-none">
@@ -116,11 +134,11 @@
             </button>
         </div>
         <div id="mobile-menu" class="hidden md:hidden px-6 pb-4 bg-white/95 backdrop-blur-sm rounded-b-lg">
-            <a href="#home" class="nav-link block py-2 text-slate-700">Home</a>
-            <a href="#mission" class="nav-link block py-2 text-slate-700">Our Mission</a>
-            <a href="#contact" class="nav-link block py-2 text-slate-700">Get Help</a>
-            <a href="#viewer-section" id="mobile-viewer-link" class="nav-link block py-2 text-slate-700">Submissions</a>
-            <a href="/donate" class="nav-link donate-btn block mt-2 text-center bg-custom-deep-purple text-white px-4 py-2 rounded-lg shadow">Donate</a>
+            <a href="#home" class="nav-link block py-2 text-slate-700 hover:bg-slate-100 rounded-md">Home</a>
+            <a href="#mission" class="nav-link block py-2 text-slate-700 hover:bg-slate-100 rounded-md">Our Mission</a>
+            <a href="#contact" class="nav-link block py-2 text-slate-700 hover:bg-slate-100 rounded-md">Get Help</a>
+            <!-- Removed mobile-viewer-link -->
+            <a href="/donate" class="nav-link donate-btn block mt-2 text-center bg-custom-deep-purple text-white px-4 py-2 rounded-lg shadow hover:opacity-90">Donate</a>
         </div>
     </header>
 
@@ -204,35 +222,35 @@
                                     <div class="space-y-4">
                                         <div>
                                             <label for="h-name-other" class="form-label text-left">Husband (First and Last)*</label>
-                                            <input type="text" id="h-name-other" name="h-name" required class="form-input">
+                                            <input type="text" id="h-name-other" name="h_name" required class="form-input">
                                         </div>
                                         <div>
                                             <label for="w-name-other" class="form-label text-left">Wife (First and Maiden)*</label>
-                                            <input type="text" id="w-name-other" name="w-name" required class="form-input">
+                                            <input type="text" id="w-name-other" name="w_name" required class="form-input">
                                         </div>
                                         <div>
                                             <label for="h-cell-other" class="form-label text-left">Husband Cell</label>
-                                            <input type="tel" id="h-cell-other" name="h-cell" class="form-input">
+                                            <input type="tel" id="h-cell-other" name="h_cell" class="form-input">
                                         </div>
                                         <div>
                                             <label for="h-email-other" class="form-label text-left">Husband email</label>
-                                            <input type="email" id="h-email-other" name="h-email" class="form-input">
+                                            <input type="email" id="h-email-other" name="h_email" class="form-input">
                                         </div>
                                         <div>
                                             <label for="w-cell-other" class="form-label text-left">Wife Cell</label>
-                                            <input type="tel" id="w-cell-other" name="w-cell" class="form-input">
+                                            <input type="tel" id="w-cell-other" name="w_cell" class="form-input">
                                         </div>
                                         <div>
                                             <label for="w-email-other" class="form-label text-left">Wife email</label>
-                                            <input type="email" id="w-email-other" name="w-email" class="form-input">
+                                            <input type="email" id="w-email-other" name="w_email" class="form-input">
                                         </div>
                                         <div>
                                             <label for="h-age-other" class="form-label text-left">Husband Age</label>
-                                            <input type="number" id="h-age-other" name="h-age" class="form-input">
+                                            <input type="number" id="h-age-other" name="h_age" class="form-input">
                                         </div>
                                         <div>
                                             <label for="w-age-other" class="form-label text-left">Wife Age</label>
-                                            <input type="number" id="w-age-other" name="w-age" class="form-input">
+                                            <input type="number" id="w-age-other" name="w_age" class="form-input">
                                         </div>
                                         <div>
                                             <label for="address-other" class="form-label text-left">Address</label>
@@ -240,27 +258,27 @@
                                         </div>
                                         <div>
                                             <label for="years-married-other" class="form-label text-left">How many years married?</label>
-                                            <input type="number" id="years-married-other" name="years-married" class="form-input">
+                                            <input type="number" id="years-married-other" name="years_married" class="form-input">
                                         </div>
                                         <div>
                                             <label for="issue-presenting-other" class="form-label text-left">Issue Presenting*</label>
-                                            <textarea id="issue-presenting-other" name="issue-presenting" rows="4" required class="form-input"></textarea>
+                                            <textarea id="issue-presenting-other" name="issue_presenting" rows="4" required class="form-input"></textarea>
                                         </div>
                                         <div>
                                             <label for="family-rabbi-other" class="form-label text-left">Family Rabbi</label>
-                                            <input type="text" id="family-rabbi-other" name="family-rabbi" class="form-input">
+                                            <input type="text" id="family-rabbi-other" name="family_rabbi" class="form-input">
                                         </div>
                                         <div>
                                             <label for="anyone-else-involved" class="form-label text-left">Anyone else involved</label>
-                                            <input type="text" id="anyone-else-involved" name="anyone-else-involved" class="form-input">
+                                            <input type="text" id="anyone-else-involved" name="anyone_else_involved" class="form-input">
                                         </div>
                                         <div>
                                             <label for="parents-names-other" class="form-label text-left">Husband and Wife's parents names</label>
-                                            <input type="text" id="parents-names-other" name="parents-names" class="form-input">
+                                            <input type="text" id="parents-names-other" name="parents_names" class="form-input">
                                         </div>
                                         <div>
                                             <label for="num-kids-other" class="form-label text-left">How many kids?</label>
-                                            <input type="number" id="num-kids-other" name="num-kids" class="form-input">
+                                            <input type="number" id="num-kids-other" name="num_kids" class="form-input">
                                         </div>
                                     </div>
                                     <div class="mt-6">
@@ -287,35 +305,35 @@
                                     <div class="space-y-4">
                                         <div>
                                             <label for="h-name" class="form-label text-left">Husband (First and Last)*</label>
-                                            <input type="text" id="h-name" name="h-name" required class="form-input">
+                                            <input type="text" id="h-name" name="h_name" required class="form-input">
                                         </div>
                                         <div>
                                             <label for="w-name" class="form-label text-left">Wife (First and Maiden)*</label>
-                                            <input type="text" id="w-name" name="w-name" required class="form-input">
+                                            <input type="text" id="w-name" name="w_name" required class="form-input">
                                         </div>
                                         <div>
                                             <label for="h-cell" class="form-label text-left">Husband Cell*</label>
-                                            <input type="tel" id="h-cell" name="h-cell" required class="form-input">
+                                            <input type="tel" id="h-cell" name="h_cell" required class="form-input">
                                         </div>
                                         <div>
                                             <label for="h-email" class="form-label text-left">Husband email</label>
-                                            <input type="email" id="h-email" name="h-email" class="form-input">
+                                            <input type="email" id="h-email" name="h_email" class="form-input">
                                         </div>
                                         <div>
                                             <label for="w-cell" class="form-label text-left">Wife Cell*</label>
-                                            <input type="tel" id="w-cell" name="w-cell" required class="form-input">
+                                            <input type="tel" id="w-cell" name="w_cell" required class="form-input">
                                         </div>
                                         <div>
                                             <label for="w-email" class="form-label text-left">Wife email</label>
-                                            <input type="email" id="w-email" name="w-email" class="form-input">
+                                            <input type="email" id="w-email" name="w_email" class="form-input">
                                         </div>
                                         <div>
                                             <label for="h-age" class="form-label text-left">Husband Age*</label>
-                                            <input type="number" id="h-age" name="h-age" required class="form-input">
+                                            <input type="number" id="h-age" name="h_age" required class="form-input">
                                         </div>
                                         <div>
                                             <label for="w-age" class="form-label text-left">Wife Age*</label>
-                                            <input type="number" id="w-age" name="w-age" required class="form-input">
+                                            <input type="number" id="w-age" name="w_age" required class="form-input">
                                         </div>
                                         <div>
                                             <label for="address" class="form-label text-left">Address*</label>
@@ -323,23 +341,23 @@
                                         </div>
                                         <div>
                                             <label for="years-married" class="form-label text-left">How many years married?*</label>
-                                            <input type="number" id="years-married" name="years-married" required class="form-input">
+                                            <input type="number" id="years-married" name="years_married" required class="form-input">
                                         </div>
                                         <div>
                                             <label for="issue-presenting" class="form-label text-left">Issue Presenting*</label>
-                                            <textarea id="issue-presenting" name="issue-presenting" rows="4" required class="form-input"></textarea>
+                                            <textarea id="issue-presenting" name="issue_presenting" rows="4" required class="form-input"></textarea>
                                         </div>
                                         <div>
                                             <label for="family-rabbi" class="form-label text-left">Family Rabbi</label>
-                                            <input type="text" id="family-rabbi" name="family-rabbi" class="form-input">
+                                            <input type="text" id="family-rabbi" name="family_rabbi" class="form-input">
                                         </div>
                                         <div>
                                             <label for="parents-names" class="form-label text-left">Husband and Wife's parents names*</label>
-                                            <input type="text" id="parents-names" name="parents-names" required class="form-input">
+                                            <input type="text" id="parents-names" name="parents_names" required class="form-input">
                                         </div>
                                         <div>
                                             <label for="num-kids" class="form-label text-left">How many kids?*</label>
-                                            <input type="number" id="num-kids" name="num-kids" required class="form-input">
+                                            <input type="number" id="num-kids" name="num_kids" required class="form-input">
                                         </div>
                                     </div>
                                     <!-- Donation buttons for couple -->
@@ -397,42 +415,7 @@
                 </div>
             </section>
 
-            <!-- Submission Viewer Section -->
-            <section id="viewer-section" class="bg-slate-50 py-20 md:py-28">
-                <div class="container mx-auto px-6">
-                    <div class="max-w-4xl mx-auto">
-                        <h3 class="text-3xl md:text-4xl font-bold text-slate-900 text-center">View Submissions</h3>
-                        <p class="text-center text-lg text-slate-600 mt-2 mb-8">
-                            Search for a specific submission by providing both the ID and a last name.
-                        </p>
-                        
-                        <!-- Search Bar -->
-                        <div class="mb-8 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-                            <input type="text" id="id-input" placeholder="Enter Submission ID" class="form-input flex-1">
-                            <input type="text" id="last-name-input" placeholder="Enter Couple's Last Name" class="form-input flex-1">
-                            <button id="search-button" class="bg-custom-deep-purple text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity font-semibold w-full sm:w-auto">Search</button>
-                        </div>
-                        
-                        <!-- Submission list -->
-                        <div id="submissions-list" class="space-y-6">
-                            <!-- Submissions will be dynamically added here -->
-                        </div>
-                        
-                        <!-- Loading spinner for submissions -->
-                        <div id="submissions-loading-spinner" class="flex flex-col items-center justify-center p-8 hidden">
-                            <svg class="animate-spin -ml-1 mr-3 h-12 w-12 text-custom-deep-purple" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <p class="mt-4 text-slate-600">Searching...</p>
-                        </div>
-                        
-                        <div id="no-submissions" class="hidden text-center text-slate-500 p-8 rounded-lg bg-slate-100 mt-8">
-                            <p>No submissions found. Try searching with a different name or ID.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            <!-- The entire Submission Viewer Section has been removed -->
         </div>
     </main>
 
@@ -489,8 +472,7 @@
                     if (user) {
                         userId = user.uid;
                         console.log("Signed in with UID:", userId);
-                        // Initial fetch of all submissions once authenticated
-                        fetchSubmissions();
+                        // No initial fetch of all submissions as the section is removed
                     } else {
                         console.error("Authentication failed.");
                         showCustomAlert('Authentication Error', 'Failed to authenticate. Please refresh the page to try again.');
@@ -503,123 +485,8 @@
             }
         };
 
-        // Function to fetch and display submissions with optional search
-        async function fetchSubmissions(idTerm = '', lastNameTerm = '') {
-            if (!db || !userId) {
-                console.error("Database or user ID not available.");
-                return;
-            }
-
-            const submissionsList = document.getElementById('submissions-list');
-            const submissionsSpinner = document.getElementById('submissions-loading-spinner');
-            const noSubmissionsMessage = document.getElementById('no-submissions');
-
-            submissionsSpinner.classList.remove('hidden');
-            submissionsList.innerHTML = '';
-            noSubmissionsMessage.classList.add('hidden');
-
-            const submissionsRef = collection(db, `artifacts/${appId}/public/data/submissions`);
-
-            if (idTerm.trim() !== '' && lastNameTerm.trim() !== '') {
-                // Explicit search case: fetch all and filter client-side
-                try {
-                    const snapshot = await getDocs(submissionsRef);
-                    let searchResults = [];
-
-                    snapshot.forEach(doc => {
-                        const submission = doc.data();
-                        const hName = submission.h_name || '';
-                        const wName = submission.w_name || '';
-
-                        const hLastName = hName.split(' ').pop()?.toLowerCase() || '';
-                        const wLastName = wName.split(' ').pop()?.toLowerCase() || '';
-                        const searchLastNameLower = lastNameTerm.toLowerCase();
-                        
-                        const idMatch = doc.id.toLowerCase().includes(idTerm.toLowerCase());
-                        const lastNameMatch = hLastName.includes(searchLastNameLower) || wLastName.includes(searchLastNameLower);
-
-                        if (idMatch && lastNameMatch) {
-                            searchResults.push({ id: doc.id, data: submission });
-                        }
-                    });
-
-                    renderSubmissions(searchResults);
-
-                } catch (error) {
-                    console.error("Error fetching submissions:", error);
-                    showCustomAlert('Submission Fetch Error', `Could not perform search. Error: ${error.message}`);
-                } finally {
-                    submissionsSpinner.classList.add('hidden');
-                }
-
-            } else {
-                // Default case: listen to all submissions in real-time
-                onSnapshot(submissionsRef, (querySnapshot) => {
-                    const allSubmissions = [];
-                    querySnapshot.forEach(doc => {
-                        allSubmissions.push({ id: doc.id, data: doc.data() });
-                    });
-                    renderSubmissions(allSubmissions);
-                    submissionsSpinner.classList.add('hidden'); // Hide spinner after initial load
-                }, (error) => {
-                    console.error("Error fetching real-time submissions:", error);
-                    showCustomAlert('Submission Fetch Error', `Could not load submissions. Please check your permissions. Error: ${error.message}`);
-                    submissionsSpinner.classList.add('hidden');
-                });
-            }
-        }
-
-        // Function to render submissions to the UI
-        function renderSubmissions(submissions) {
-            const submissionsList = document.getElementById('submissions-list');
-            const noSubmissionsMessage = document.getElementById('no-submissions');
-            
-            submissionsList.innerHTML = ''; // Clear previous submissions
-            
-            if (submissions.length === 0) {
-                noSubmissionsMessage.classList.remove('hidden');
-            } else {
-                noSubmissionsMessage.classList.add('hidden');
-                submissions.forEach((submissionData) => {
-                    const submission = submissionData.data;
-                    const submissionId = submissionData.id;
-                    const card = document.createElement('div');
-                    card.classList.add('bg-white', 'p-6', 'rounded-xl', 'shadow-md', 'border', 'border-slate-200');
-                    
-                    const submissionDate = submission.timestamp ? new Date(submission.timestamp).toLocaleString() : 'N/A';
-                    
-                    let contentHTML = `
-                        <h4 class="text-xl font-bold text-custom-deep-purple mb-2">Submission ID: <span class="font-mono text-base">${submissionId}</span></h4>
-                        <p class="text-sm text-slate-500 mb-4">Submitted on: ${submissionDate}</p>
-                        <ul class="space-y-2 text-slate-700">
-                    `;
-                    
-                    for (const [key, value] of Object.entries(submission)) {
-                        if (key !== 'timestamp' && key !== 'uid' && key !== 'formType' && value !== null) {
-                            const formattedKey = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-                            contentHTML += `<li><strong class="font-semibold">${formattedKey}:</strong> ${value}</li>`;
-                        }
-                    }
-                    contentHTML += `</ul>`;
-                    card.innerHTML = contentHTML;
-                    submissionsList.appendChild(card);
-                });
-            }
-        }
-
-        // Search button handler
-        document.getElementById('search-button').addEventListener('click', () => {
-            const idInput = document.getElementById('id-input');
-            const lastNameInput = document.getElementById('last-name-input');
-            const idTerm = idInput.value;
-            const lastNameTerm = lastNameInput.value;
-            
-            if (!idTerm.trim() || !lastNameTerm.trim()) {
-                showCustomAlert('Missing Information', 'Please enter both a Submission ID and a last name to search.');
-                return;
-            }
-            fetchSubmissions(idTerm, lastNameTerm);
-        });
+        // Removed fetchSubmissions and renderSubmissions functions as the viewer-section is removed.
+        // Removed search button handler.
 
         // ----- Form Handling Logic -----
 
@@ -752,21 +619,21 @@
             if (!step2.classList.contains('hidden')) {
                 formType = 'someone-else';
                 submissionData = {
-                    h_name: data['h-name'], // Use common keys for data
-                    w_name: data['w-name'],
-                    h_cell: data['h-cell'],
-                    h_email: data['h-email'],
-                    w_cell: data['w-cell'],
-                    w_email: data['w-email'],
-                    h_age: data['h-age'],
-                    w_age: data['w-age'],
+                    h_name: data['h_name'], // Use common keys for data
+                    w_name: data['w_name'],
+                    h_cell: data['h_cell'],
+                    h_email: data['h_email'],
+                    w_cell: data['w_cell'],
+                    w_email: data['w_email'],
+                    h_age: data['h_age'],
+                    w_age: data['w_age'],
                     address: data['address'],
-                    years_married: data['years-married'],
-                    issue_presenting: data['issue-presenting'],
-                    family_rabbi: data['family-rabbi'],
-                    anyone_else_involved: data['anyone-else-involved'],
-                    parents_names: data['parents-names'],
-                    num_kids: data['num-kids'],
+                    years_married: data['years_married'],
+                    issue_presenting: data['issue_presenting'],
+                    family_rabbi: data['family_rabbi'],
+                    anyone_else_involved: data['anyone_else_involved'],
+                    parents_names: data['parents_names'],
+                    num_kids: data['num_kids'],
                 };
                 if (document.getElementById('donate-yes-button-2').classList.contains('bg-custom-deep-purple')) {
                     donationDecision = 'Yes';
@@ -774,20 +641,20 @@
             } else if (!step3.classList.contains('hidden')) {
                 formType = 'couple';
                 submissionData = {
-                    h_name: data['h-name'],
-                    w_name: data['w-name'],
-                    h_cell: data['h-cell'],
-                    h_email: data['h-email'],
-                    w_cell: data['w-cell'],
-                    w_email: data['w-email'],
-                    h_age: data['h-age'],
-                    w_age: data['w-age'],
+                    h_name: data['h_name'],
+                    w_name: data['w_name'],
+                    h_cell: data['h_cell'],
+                    h_email: data['h_email'],
+                    w_cell: data['w_cell'],
+                    w_email: data['w_email'],
+                    h_age: data['h_age'],
+                    w_age: data['w_age'],
                     address: data['address'],
-                    years_married: data['years-married'],
-                    issue_presenting: data['issue-presenting'],
-                    family_rabbi: data['family-rabbi'],
-                    parents_names: data['parents-names'],
-                    num_kids: data['num-kids'],
+                    years_married: data['years_married'],
+                    issue_presenting: data['issue_presenting'],
+                    family_rabbi: data['family_rabbi'],
+                    parents_names: data['parents_names'],
+                    num_kids: data['num_kids'],
                 };
                 if (document.getElementById('donate-yes-button-3').classList.contains('bg-custom-deep-purple')) {
                     donationDecision = 'Yes';
@@ -855,6 +722,7 @@
 
         mobileMenuButton.addEventListener('click', () => {
             mobileMenu.classList.toggle('hidden');
+            mobileMenu.classList.toggle('open'); // Toggle 'open' class for CSS animation
             hamburgerIcon.classList.toggle('hidden');
             closeIcon.classList.toggle('hidden');
         });
@@ -873,11 +741,13 @@
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
+                // Removed special handling for admin.html as it's no longer linked from main page
                 document.querySelector(this.getAttribute('href')).scrollIntoView({
                     behavior: 'smooth'
                 });
                 // Close mobile menu after clicking a link
                 mobileMenu.classList.add('hidden');
+                mobileMenu.classList.remove('open'); // Ensure mobile menu is properly closed
                 hamburgerIcon.classList.remove('hidden');
                 closeIcon.classList.add('hidden');
             });
