@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<!--
+THESIS: A calm, curated resource index that treats each item as substantial guidance, not a generic card grid.
+OWN-WORLD: Mist and morning-blue fields, deep-water type, open editorial rows, and one dense blue filter band.
+STORY: Visitors understand the library, choose a format, and immediately watch, dial, or find a book.
+FIRST VIEWPORT: A spacious title field resolves into a compact format band; the real resources begin directly below.
+FORM: Sixth grounded structure, an open sleeve with a denser resource band; surface seed edbbe3dc.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="Curated shalom bayit videos and books from Binyan Shalem.">
+    <title>Shalom Bayit Content — Binyan Shalem</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;750&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../blue-concept-pages.css">
+</head>
+<body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+
+    <header class="site-header">
+        <div class="nav-shell">
+            <a class="wordmark" href="../" aria-label="Binyan Shalem home">
+                <strong>BINYAN SHALEM</strong>
+                <span>בנין שלם</span>
+            </a>
+            <nav class="desktop-nav" aria-label="Primary navigation">
+                <a href="../">Home</a>
+                <a href="../#mission">Our Mission</a>
+                <a href="../#contact">Get Help</a>
+                <a aria-current="page" href="./">Shalom Bayit Content</a>
+                <a class="nav-donate" href="../donate/">Donate</a>
+            </nav>
+            <button class="menu-button" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"/>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <nav class="mobile-menu" id="mobile-menu" aria-label="Mobile navigation" aria-hidden="true" inert>
+        <a href="../">Home</a>
+        <a href="../#mission">Our Mission</a>
+        <a href="../#contact">Get Help</a>
+        <a aria-current="page" href="./">Shalom Bayit Content</a>
+        <a href="../donate/">Donate</a>
+    </nav>
+
+    <main id="main-content">
+        <section class="page-hero">
+            <div class="hero-shell">
+                <div>
+                    <p class="hero-kicker">Thoughtfully curated</p>
+                    <h1>Shalom bayit content.</h1>
+                </div>
+                <p class="hero-intro">Powerful, practical resources for building a stronger home—presented with clarity, sensitivity, and a Torah perspective.</p>
+            </div>
+        </section>
+
+        <section class="resource-band" aria-label="Content filters">
+            <div class="resource-band-inner">
+                <p id="resource-count">7 resources</p>
+                <div class="filters" role="group" aria-label="Filter resources by format">
+                    <button class="filter-button" type="button" data-filter="all" aria-pressed="true">All resources</button>
+                    <button class="filter-button" type="button" data-filter="video" aria-pressed="false">Videos</button>
+                    <button class="filter-button" type="button" data-filter="book" aria-pressed="false">Books</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="library-shell" aria-labelledby="library-title">
+            <div class="library-heading">
+                <h2 id="library-title">Resources for the home.</h2>
+                <p>Explore shiurim and reading selected to make thoughtful guidance easier to find and return to.</p>
+            </div>
+            <div class="resource-list" id="resource-list"></div>
+            <div class="empty-state" id="empty-state" hidden>
+                <h3>No resources in this format yet.</h3>
+                <p>Choose another format to continue browsing.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-shell">
+            <p>© 2026 Binyan Shalem. All Rights Reserved.</p>
+            <p>Text us at: <a href="sms:3474439477">(347) 443-9477</a></p>
+        </div>
+    </footer>
+
+    <script>
+        /*
+         * Future admin integration:
+         * Replace this sample array with documents from a Firebase "content" collection.
+         * The intended admin fields are represented here, including dialIn and extension.
+         */
+        const resources = [
+            {
+                id: "anshei-shalom-shiur",
+                type: "video",
+                title: "Shalom Bayit Shiur in Anshei Shalom",
+                speaker: "R' Bentzion Shafier",
+                primaryLabel: "Watch on TorahAnytime",
+                primaryUrl: "https://MyTaT.me/v287610",
+                imageUrl: "https://ta-lectures.s3.us-east-005.backblazeb2.com/thumbnails/287610/287610.jpg",
+                imageAlt: "R' Bentzion Shafier presenting the Shalom Bayit shiur",
+                dialIn: "(605) 605-2220",
+                dialInHref: "tel:+16056052220",
+                extension: "9287610"
+            },
+            {
+                id: "korach-shalom-bayit",
+                type: "video",
+                title: "Korach - Shalom Bayit",
+                speaker: "R' Yaakov Harari",
+                primaryLabel: "Watch on TorahAnytime",
+                primaryUrl: "https://MyTaT.me/v377953",
+                imageUrl: "https://ta-lectures.s3.us-east-005.backblazeb2.com/thumbnails/377953/377953-syhg71.jpg",
+                imageAlt: "R' Yaakov Harari presenting Korach - Shalom Bayit",
+                dialIn: "(605) 605-2220",
+                dialInHref: "tel:+16056052220",
+                extension: "9377953"
+            },
+            {
+                id: "naso-shalom-bayit-strategy",
+                type: "video",
+                title: "Naso: Shalom Bayit Strategy",
+                speaker: "R' Shlomo Farhi",
+                primaryLabel: "Watch on TorahAnytime",
+                primaryUrl: "https://MyTaT.me/v193820",
+                imageUrl: "https://ta-lectures.s3.us-east-005.backblazeb2.com/thumbnails/193820/193820.jpg",
+                imageAlt: "R' Shlomo Farhi presenting Naso: Shalom Bayit Strategy",
+                dialIn: "(605) 605-2220",
+                dialInHref: "tel:+16056052220",
+                extension: "9193820"
+            },
+            {
+                id: "parenting-shalom-bayit-panel",
+                type: "video",
+                title: "Parenting & Shalom Bayit Panel",
+                speaker: "Chazaq Event",
+                primaryLabel: "Watch on TorahAnytime",
+                primaryUrl: "https://MyTaT.me/v56619",
+                imageUrl: "https://ta-lectures.s3.us-east-005.backblazeb2.com/thumbnails/56619/56619.jpg",
+                imageAlt: "Speakers at the Parenting and Shalom Bayit Panel",
+                dialIn: "(605) 605-2220",
+                dialInHref: "tel:+16056052220",
+                extension: "956619"
+            },
+            {
+                id: "shalom-bayit-ultimate-pursuit",
+                type: "video",
+                title: "Shalom Bayit - The Ultimate Pursuit",
+                speaker: "R' Paysach Krohn",
+                primaryLabel: "Watch on TorahAnytime",
+                primaryUrl: "https://MyTaT.me/v21134",
+                imageUrl: "https://ta-lectures.s3.us-east-005.backblazeb2.com/thumbnails/21134/21134-sqiltn.jpg",
+                imageAlt: "R' Paysach Krohn presenting Shalom Bayit - The Ultimate Pursuit",
+                dialIn: "(605) 605-2220",
+                dialInHref: "tel:+16056052220",
+                extension: "921134"
+            },
+            {
+                id: "book-recommendation",
+                type: "book",
+                title: "Dear Daughter",
+                speaker: "Rabbi Eliyohu Goldschmidt",
+                primaryLabel: "Shop on Amazon",
+                primaryUrl: "https://a.co/d/0ja740ak",
+                imageUrl: "https://s3.us-east-2.amazonaws.com/cdn.platform.capitalc.co/media/7159/conversions/dear-daughter-1-lightbox.jpg",
+                imageAlt: "Cover of Dear Daughter by Rabbi Eliyohu Goldschmidt",
+                dialIn: "",
+                dialInHref: "",
+                extension: ""
+            },
+            {
+                id: "dear-son",
+                type: "book",
+                title: "Dear Son",
+                speaker: "Rabbi Eliyohu Goldschmidt",
+                primaryLabel: "Shop on Amazon",
+                primaryUrl: "https://a.co/d/067oAlwe",
+                imageUrl: "https://cdn.powered-by-nitrosell.com/product_images/11/2547/large-DEAR%20SON%20HC.jpg",
+                imageAlt: "Cover of Dear Son by Rabbi Eliyohu Goldschmidt",
+                dialIn: "",
+                dialInHref: "",
+                extension: ""
+            }
+        ];
+
+        const list = document.getElementById("resource-list");
+        const count = document.getElementById("resource-count");
+        const emptyState = document.getElementById("empty-state");
+        const filterButtons = [...document.querySelectorAll(".filter-button")];
+
+        function createLink(label, url, className, accessibleLabel = label) {
+            const link = document.createElement("a");
+            link.className = className;
+            link.href = url;
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            link.textContent = label;
+            link.setAttribute("aria-label", accessibleLabel);
+            return link;
+        }
+
+        function createVisual(resource) {
+            const visual = document.createElement("a");
+            visual.className = `resource-visual ${resource.type}`;
+            visual.href = resource.primaryUrl;
+            visual.target = "_blank";
+            visual.rel = "noopener noreferrer";
+            visual.setAttribute(
+                "aria-label",
+                resource.type === "video"
+                    ? `Watch ${resource.title} on TorahAnytime`
+                    : `Shop for ${resource.title} on Amazon`
+            );
+
+            const image = document.createElement("img");
+            image.className = "resource-image";
+            image.src = resource.imageUrl;
+            image.alt = resource.imageAlt;
+            image.loading = "lazy";
+            image.decoding = "async";
+            visual.appendChild(image);
+
+            if (resource.type === "video") {
+                const mark = document.createElement("div");
+                mark.className = "resource-mark video";
+                mark.setAttribute("aria-hidden", "true");
+                mark.innerHTML = '<svg viewBox="0 0 32 32"><path d="M11 8.5 24 16 11 23.5Z" fill="currentColor"/></svg>';
+                visual.appendChild(mark);
+            }
+
+            return visual;
+        }
+
+        function createResource(resource) {
+            const article = document.createElement("article");
+            article.className = "resource";
+            article.dataset.type = resource.type;
+            article.appendChild(createVisual(resource));
+
+            const body = document.createElement("div");
+            const type = document.createElement("p");
+            type.className = "resource-type";
+            type.textContent = resource.type === "video" ? "Video & dial-in" : "Book";
+
+            const title = document.createElement("h3");
+            title.textContent = resource.title;
+
+            body.append(type, title);
+
+            if (resource.speaker) {
+                const speaker = document.createElement("p");
+                speaker.className = "resource-speaker";
+                speaker.textContent = resource.speaker;
+                body.appendChild(speaker);
+            }
+
+            const actions = document.createElement("div");
+            actions.className = "resource-actions";
+            const actionLabel = resource.type === "video"
+                ? `Watch ${resource.title} on TorahAnytime`
+                : `Shop for ${resource.title} on Amazon`;
+            actions.appendChild(createLink(resource.primaryLabel, resource.primaryUrl, "action-link primary", actionLabel));
+
+            body.appendChild(actions);
+
+            if (resource.dialIn) {
+                const details = document.createElement("dl");
+                details.className = "dial-details";
+
+                const phoneGroup = document.createElement("div");
+                const phoneLabel = document.createElement("dt");
+                phoneLabel.textContent = "Dial in";
+                const phoneValue = document.createElement("dd");
+                const phoneLink = document.createElement("a");
+                phoneLink.href = resource.dialInHref;
+                phoneLink.textContent = resource.dialIn;
+                phoneValue.appendChild(phoneLink);
+                phoneGroup.append(phoneLabel, phoneValue);
+
+                const extensionGroup = document.createElement("div");
+                const extensionLabel = document.createElement("dt");
+                extensionLabel.textContent = "Then press";
+                const extensionValue = document.createElement("dd");
+                extensionValue.textContent = resource.extension;
+                extensionGroup.append(extensionLabel, extensionValue);
+
+                details.append(phoneGroup, extensionGroup);
+                body.appendChild(details);
+            }
+
+            article.appendChild(body);
+            return article;
+        }
+
+        resources.forEach((resource) => list.appendChild(createResource(resource)));
+
+        function applyFilter(filter) {
+            let visible = 0;
+            [...list.children].forEach((item) => {
+                const show = filter === "all" || item.dataset.type === filter;
+                item.hidden = !show;
+                if (show) visible += 1;
+            });
+
+            filterButtons.forEach((button) => {
+                button.setAttribute("aria-pressed", String(button.dataset.filter === filter));
+            });
+
+            count.textContent = `${visible} ${visible === 1 ? "resource" : "resources"}`;
+            emptyState.hidden = visible !== 0;
+
+            const url = new URL(window.location.href);
+            if (filter === "all") {
+                url.searchParams.delete("format");
+            } else {
+                url.searchParams.set("format", filter);
+            }
+            history.replaceState(null, "", url);
+        }
+
+        filterButtons.forEach((button) => {
+            button.addEventListener("click", () => applyFilter(button.dataset.filter));
+        });
+
+        const requestedFormat = new URLSearchParams(window.location.search).get("format");
+        applyFilter(["video", "book"].includes(requestedFormat) ? requestedFormat : "all");
+
+        const menuButton = document.querySelector(".menu-button");
+        const mobileMenu = document.getElementById("mobile-menu");
+
+        function setMenu(open, restoreFocus = true) {
+            menuButton.setAttribute("aria-expanded", String(open));
+            menuButton.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+            mobileMenu.classList.toggle("open", open);
+            mobileMenu.setAttribute("aria-hidden", String(!open));
+            mobileMenu.inert = !open;
+            document.body.classList.toggle("menu-open", open);
+
+            if (open) {
+                window.setTimeout(() => mobileMenu.querySelector("a").focus(), 0);
+            } else if (restoreFocus) {
+                menuButton.focus();
+            }
+        }
+
+        menuButton.addEventListener("click", () => setMenu(menuButton.getAttribute("aria-expanded") !== "true"));
+        mobileMenu.addEventListener("click", (event) => {
+            if (event.target.closest("a")) setMenu(false, false);
+        });
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && menuButton.getAttribute("aria-expanded") === "true") {
+                setMenu(false);
+            }
+        });
+    </script>
+</body>
+</html>

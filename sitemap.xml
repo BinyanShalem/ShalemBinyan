@@ -3,7 +3,7 @@
   <!-- Homepage -->
   <url>
     <loc>https://www.binyan-shalem.com/</loc>
-    <lastmod>2025-03-22</lastmod>
+    <lastmod>2026-07-30</lastmod>
     <changefreq>yearly</changefreq>
     <priority>1.0</priority>
   </url>
@@ -18,25 +18,17 @@
 
   <!-- Donation page -->
   <url>
-    <loc>https://www.binyan-shalem.com/donate</loc>
-    <lastmod>2025-03-22</lastmod>
+    <loc>https://www.binyan-shalem.com/donate/</loc>
+    <lastmod>2026-07-30</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.9</priority>
   </url>
 
-  <!-- Robots.txt -->
+  <!-- Shalom Bayit Content -->
   <url>
-    <loc>https://www.binyan-shalem.com/robots.txt</loc>
-    <lastmod>2025-03-22</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.1</priority>
-  </url>
-  
-  <!-- Text Us -->
-  <url>
-    <loc>https://www.binyan-shalem.com/text-us</loc>
-    <lastmod>2025-03-22</lastmod>
-    <changefreq>yearly</changefreq>
+    <loc>https://www.binyan-shalem.com/content/</loc>
+    <lastmod>2026-07-30</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 </urlset>

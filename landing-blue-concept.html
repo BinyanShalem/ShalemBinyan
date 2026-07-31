@@ -9,9 +9,9 @@
     FORM: User-pinned vertical reference composition; the supplied logo replaces the airplane. Seed: user-provided reference image.
     -->
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Binyan Shalem offers personalized, practical support within a Torah framework to help couples build stronger homes.">
-    <title>Binyan Shalem — Torah-Grounded Marriage Guidance</title>
+    <title>Binyan Shalem — Calm Landing Concept</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;750&amp;display=swap" rel="stylesheet">
@@ -998,169 +998,20 @@
             transform: translateY(-2px);
         }
 
-        .submit-button:disabled {
-            color: #e4eff5;
-            background: #66879b;
-            cursor: wait;
-            box-shadow: none;
-            transform: none;
-        }
-
-        .form-status {
+        .prototype-message {
+            display: none;
             grid-column: 1 / -1;
             margin: 0;
             padding: 0.9rem 1rem;
-            color: #702c34;
-            background: #f8e9eb;
+            color: var(--deep-water);
+            background: #e9f3f8;
             border-radius: 12px;
             font-size: 0.88rem;
             font-weight: 650;
         }
 
-        .loading-state,
-        .thank-you-state {
-            min-height: 360px;
-            text-align: center;
-        }
-
-        .loading-state {
-            display: grid;
-            place-items: center;
-            align-content: center;
-            gap: 1rem;
-            color: var(--deep-water);
-        }
-
-        .loading-state p {
-            margin: 0;
-            font-weight: 650;
-        }
-
-        .loading-spinner {
-            width: 48px;
-            height: 48px;
-            border: 4px solid var(--sky-soft);
-            border-top-color: var(--deep-water);
-            border-radius: 50%;
-            animation: loading-spin 850ms linear infinite;
-        }
-
-        .thank-you-state {
-            display: grid;
-            place-items: center;
-            align-content: center;
-            gap: 1.15rem;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .thank-you-mark {
-            display: grid;
-            place-items: center;
-            width: 64px;
-            height: 64px;
-            color: var(--white);
-            background: var(--deep-water);
-            border-radius: 50%;
-            font-size: 1.65rem;
-            font-weight: 750;
-        }
-
-        .thank-you-state h3,
-        .thank-you-state p {
-            margin: 0;
-        }
-
-        .thank-you-state > p {
-            max-width: 48ch;
-            color: var(--muted);
-        }
-
-        .submission-id-card {
-            width: min(100%, 480px);
-            padding: 1rem;
-            color: var(--deep-water);
-            background: #edf7fb;
-            border-radius: 14px;
-            text-align: left;
-        }
-
-        .submission-id-card > p {
-            margin: 0 0 0.75rem;
-            color: var(--deep-water);
-            font-size: 0.86rem;
-            font-weight: 650;
-        }
-
-        .submission-id-row {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            padding: 0.65rem;
-            background: var(--white);
-            border-radius: 10px;
-        }
-
-        .submission-id-row code {
-            flex: 1;
-            min-width: 0;
-            overflow-wrap: anywhere;
-            color: var(--midnight);
-            font-size: 0.8rem;
-        }
-
-        .copy-id-button {
-            min-height: 44px;
-            padding: 0.55rem 0.9rem;
-            color: var(--deep-water);
-            background: var(--sky-soft);
-            border: 0;
-            border-radius: 999px;
-            font-weight: 720;
-            cursor: pointer;
-        }
-
-        .copy-status {
+        .prototype-message.show {
             display: block;
-            min-height: 1.3em;
-            margin-top: 0.45rem;
-            color: var(--deep-water);
-            font-size: 0.78rem;
-        }
-
-        .thank-you-actions {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 0.7rem;
-            width: 100%;
-        }
-
-        .thank-you-action {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 52px;
-            padding: 0.75rem 1.2rem;
-            border: 1px solid var(--deep-water);
-            border-radius: 999px;
-            font-weight: 720;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        .thank-you-action-primary {
-            color: var(--white);
-            background: var(--deep-water);
-        }
-
-        .thank-you-action-secondary {
-            color: var(--deep-water);
-            background: transparent;
-        }
-
-        [hidden] {
-            display: none !important;
         }
 
         .site-footer {
@@ -1196,12 +1047,6 @@
             to {
                 opacity: 1;
                 transform: translateY(0) scale(1);
-            }
-        }
-
-        @keyframes loading-spin {
-            to {
-                transform: rotate(360deg);
             }
         }
 
@@ -1381,19 +1226,8 @@
             .field-wide,
             .donation-field,
             .submit-button,
-            .form-status {
+            .prototype-message {
                 grid-column: auto;
-            }
-
-            .thank-you-actions,
-            .submission-id-row {
-                align-items: stretch;
-                flex-direction: column;
-            }
-
-            .copy-id-button,
-            .thank-you-action {
-                width: 100%;
             }
 
             .footer-inner {
@@ -1583,8 +1417,8 @@
                 <a href="#home">Home</a>
                 <a href="#mission">Our Mission</a>
                 <a href="#contact">Get Help</a>
-                <a href="content/">Shalom Bayit Content</a>
-                <a class="nav-donate" href="donate/">Donate</a>
+                <a href="content-blue-concept.html">Shalom Bayit Content</a>
+                <a class="nav-donate" href="donate-blue-concept.html">Donate</a>
             </nav>
 
             <button class="menu-button" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
@@ -1599,8 +1433,8 @@
         <a href="#home">Home</a>
         <a href="#mission">Our Mission</a>
         <a href="#contact">Get Help</a>
-        <a href="content/">Shalom Bayit Content</a>
-        <a href="donate/">Donate</a>
+        <a href="content-blue-concept.html">Shalom Bayit Content</a>
+        <a href="donate-blue-concept.html">Donate</a>
     </nav>
 
     <main id="main-content">
@@ -1642,9 +1476,9 @@
                 <div class="action-dock" aria-label="Primary actions">
                     <div class="cta-stack">
                         <a class="cta cta-primary" href="#contact">Your journey starts here</a>
-                        <a class="cta cta-secondary" href="donate/">Donate Now</a>
+                        <a class="cta cta-secondary" href="donate-blue-concept.html">Donate Now</a>
                     </div>
-                    <a class="content-entry" href="content/">
+                    <a class="content-entry" href="content-blue-concept.html">
                         Powerful and curated content on shalom bayit
                         <span aria-hidden="true">→</span>
                     </a>
@@ -1694,7 +1528,7 @@
                     <h2>Shalom bayit, thoughtfully curated.</h2>
                     <p>Powerful, practical content for building a stronger home—presented with clarity, sensitivity, and a Torah perspective.</p>
                 </div>
-                <a class="ribbon-link" href="content/" aria-label="Explore shalom bayit content">
+                <a class="ribbon-link" href="content-blue-concept.html" aria-label="Explore shalom bayit content">
                     <span>Explore the content</span>
                     <span aria-hidden="true">↗</span>
                 </a>
@@ -1709,22 +1543,21 @@
                     <p>Reach out through our secure form. All submissions are completely confidential.</p>
                 </div>
 
-                <div class="intake-card" id="form-container">
-                    <form id="concept-form">
-                        <h3>Who is submitting the form?</h3>
-                        <p class="form-note">Fields marked with * are required.</p>
+                <form class="intake-card" id="concept-form">
+                    <h3>Who is submitting the form?</h3>
+                    <p class="form-note">Fields marked with * are required.</p>
 
-                        <div class="submitter-choice" role="group" aria-label="Who is submitting the form?">
-                            <button class="choice-button" type="button" data-form-type="couple" aria-pressed="true">Husband / Wife</button>
-                            <button class="choice-button" type="button" data-form-type="someone-else" aria-pressed="false">Someone else</button>
-                        </div>
+                    <div class="submitter-choice" role="group" aria-label="Who is submitting the form?">
+                        <button class="choice-button" type="button" data-form-type="couple" aria-pressed="true">Husband / Wife</button>
+                        <button class="choice-button" type="button" data-form-type="someone-else" aria-pressed="false">Someone else</button>
+                    </div>
 
-                        <p class="form-context" id="form-context">
-                            Please share the couple’s information below.
-                        </p>
+                    <p class="form-context" id="form-context">
+                        Please share the couple’s information below.
+                    </p>
 
-                        <div class="form-grid">
-                            <h4 class="form-section-title" id="form-section-title">Couple’s Information</h4>
+                    <div class="form-grid">
+                        <h4 class="form-section-title" id="form-section-title">Couple’s Information</h4>
 
                         <div class="field">
                             <label for="husband-name">Husband (First and Last)*</label>
@@ -1815,36 +1648,12 @@
                             </div>
                         </fieldset>
 
-                            <button class="submit-button" id="submit-button" type="submit" disabled>Connecting securely…</button>
-                            <p class="form-status" id="form-status" role="alert" hidden></p>
-                        </div>
-                    </form>
-
-                    <div class="loading-state" id="loading-state" role="status" aria-live="polite" hidden>
-                        <span class="loading-spinner" aria-hidden="true"></span>
-                        <p>Sending your information securely…</p>
+                        <button class="submit-button" type="submit">Submit securely</button>
+                        <p class="prototype-message" id="prototype-message" role="status">
+                            Concept preview only—no information was sent or stored.
+                        </p>
                     </div>
-
-                    <section class="thank-you-state" id="thank-you-state" tabindex="-1" aria-labelledby="thank-you-title" hidden>
-                        <span class="thank-you-mark" aria-hidden="true">✓</span>
-                        <h3 id="thank-you-title">Thank you.</h3>
-                        <p>Your information has been submitted successfully. A member of the Binyan Shalem team will follow up thoughtfully and confidentially.</p>
-
-                        <div class="submission-id-card" id="submission-id-card" hidden>
-                            <p>This is your unique Submission ID. Please keep it in a safe place; it is only shown here.</p>
-                            <div class="submission-id-row">
-                                <code id="submission-id-display"></code>
-                                <button class="copy-id-button" id="copy-id-button" type="button">Copy ID</button>
-                            </div>
-                            <span class="copy-status" id="copy-status" role="status" aria-live="polite"></span>
-                        </div>
-
-                        <div class="thank-you-actions">
-                            <a class="thank-you-action thank-you-action-primary" id="donation-followup" href="donate/" hidden>Continue to donation form</a>
-                            <button class="thank-you-action thank-you-action-secondary" id="reset-form-button" type="button">Submit another request</button>
-                        </div>
-                    </section>
-                </div>
+                </form>
             </div>
         </section>
     </main>
@@ -1859,25 +1668,7 @@
         </div>
     </footer>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, addDoc, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyDxEV7W2m4jbJiVl0Sc6cN7gBH7oWu_rl8",
-            authDomain: "binyanshalem-28b1a.firebaseapp.com",
-            projectId: "binyanshalem-28b1a",
-            storageBucket: "binyanshalem-28b1a.firebasestorage.app",
-            messagingSenderId: "923017150407",
-            appId: "1:923017150407:web:35d71ffa41943bbbf623e2",
-            measurementId: "G-YRWCMR3HVD"
-        };
-
-        const appId = firebaseConfig.projectId;
-        let db;
-        let userId;
-
+    <script>
         const heroSection = document.querySelector(".hero");
         let heroIsVisible = true;
 
@@ -1936,175 +1727,30 @@
         const donationLegend = document.getElementById("donation-legend");
         const coupleRequiredFields = document.querySelectorAll("[data-couple-required]");
         const modeLabels = document.querySelectorAll("[data-couple-label]");
-        const contactForm = document.getElementById("concept-form");
-        const submitButton = document.getElementById("submit-button");
-        const formStatus = document.getElementById("form-status");
-        const loadingState = document.getElementById("loading-state");
-        const thankYouState = document.getElementById("thank-you-state");
-        const submissionIdCard = document.getElementById("submission-id-card");
-        const submissionIdDisplay = document.getElementById("submission-id-display");
-        const donationFollowup = document.getElementById("donation-followup");
-        const copyStatus = document.getElementById("copy-status");
-
-        function setFormType(type) {
-            const someoneElse = type === "someone-else";
-            choiceButtons.forEach((item) => {
-                item.setAttribute("aria-pressed", String(item.dataset.formType === type));
-            });
-            formContext.textContent = someoneElse
-                ? "Note: This form is not for the couple itself. For the couple to submit please choose Husband/Wife. If you would like to have someone submit for you, please ensure all information is accurate and correct.*"
-                : "Please share the couple’s information below.";
-            formSectionTitle.textContent = someoneElse ? "Contact Information" : "Couple’s Information";
-            anyoneElseField.hidden = !someoneElse;
-            donationLegend.textContent = someoneElse ? "Donation (Optional)" : "Would you like to donate?";
-            coupleRequiredFields.forEach((field) => {
-                field.required = !someoneElse;
-            });
-            modeLabels.forEach((label) => {
-                label.textContent = someoneElse ? label.dataset.otherLabel : label.dataset.coupleLabel;
-            });
-        }
 
         choiceButtons.forEach((button) => {
             button.addEventListener("click", () => {
-                setFormType(button.dataset.formType);
+                const someoneElse = button.dataset.formType === "someone-else";
+                choiceButtons.forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
+                formContext.textContent = someoneElse
+                    ? "Note: This form is not for the couple itself. For the couple to submit please choose Husband/Wife. If you would like to have someone submit for you, please ensure all information is accurate and correct.*"
+                    : "Please share the couple’s information below.";
+                formSectionTitle.textContent = someoneElse ? "Contact Information" : "Couple’s Information";
+                anyoneElseField.hidden = !someoneElse;
+                donationLegend.textContent = someoneElse ? "Donation (Optional)" : "Would you like to donate?";
+                coupleRequiredFields.forEach((field) => {
+                    field.required = !someoneElse;
+                });
+                modeLabels.forEach((label) => {
+                    label.textContent = someoneElse ? label.dataset.otherLabel : label.dataset.coupleLabel;
+                });
             });
         });
 
-        function showFormError(message) {
-            formStatus.textContent = message;
-            formStatus.hidden = false;
-        }
-
-        function clearFormError() {
-            formStatus.textContent = "";
-            formStatus.hidden = true;
-        }
-
-        function setSubmitting(submitting) {
-            contactForm.hidden = submitting;
-            loadingState.hidden = !submitting;
-            contactForm.setAttribute("aria-busy", String(submitting));
-        }
-
-        async function initializeBackend() {
-            try {
-                const app = initializeApp(firebaseConfig);
-                const auth = getAuth(app);
-                db = getFirestore(app);
-                const credential = await signInAnonymously(auth);
-                userId = credential.user.uid;
-                submitButton.disabled = false;
-                submitButton.textContent = "Submit securely";
-            } catch (error) {
-                console.error("Firebase initialization failed:", error);
-                submitButton.textContent = "Unable to connect";
-                showFormError("The secure form could not connect. Please refresh the page and try again.");
-            }
-        }
-
-        contactForm.addEventListener("submit", async (event) => {
+        document.getElementById("concept-form").addEventListener("submit", (event) => {
             event.preventDefault();
-            clearFormError();
-
-            if (!db || !userId) {
-                showFormError("The secure form is still connecting. Please wait a moment and try again.");
-                return;
-            }
-
-            const formData = new FormData(contactForm);
-            const data = Object.fromEntries(
-                Array.from(formData.entries(), ([key, value]) => {
-                    const normalizedValue = String(value).trim();
-                    return [key, normalizedValue === "" ? null : normalizedValue];
-                })
-            );
-            const formType = document.querySelector('.choice-button[aria-pressed="true"]').dataset.formType;
-            const donationDecision = data.donation === "yes" ? "Yes" : "No";
-            const submissionData = {
-                h_name: data.h_name,
-                w_name: data.w_name,
-                h_cell: data.h_cell,
-                h_email: data.h_email,
-                w_cell: data.w_cell,
-                w_email: data.w_email,
-                h_age: data.h_age,
-                w_age: data.w_age,
-                address: data.address,
-                years_married: data.years_married,
-                issue_presenting: data.issue_presenting,
-                family_rabbi: data.family_rabbi,
-                parents_names: data.parents_names,
-                num_kids: data.num_kids,
-                ...(formType === "someone-else" ? { anyone_else_involved: data.anyone_else_involved } : {}),
-                donation: donationDecision,
-                timestamp: new Date().toISOString(),
-                uid: userId,
-                formType
-            };
-
-            ["h_age", "w_age", "years_married", "num_kids"].forEach((key) => {
-                if (submissionData[key] !== null) {
-                    submissionData[key] = Number.parseInt(submissionData[key], 10);
-                }
-            });
-
-            setSubmitting(true);
-
-            try {
-                const submissionsRef = collection(db, `artifacts/${appId}/public/data/submissions`);
-                const docRef = await addDoc(submissionsRef, submissionData);
-                loadingState.hidden = true;
-                thankYouState.hidden = false;
-                submissionIdDisplay.textContent = docRef.id;
-                submissionIdCard.hidden = donationDecision !== "Yes";
-                donationFollowup.hidden = donationDecision !== "Yes";
-                thankYouState.focus({ preventScroll: true });
-            } catch (error) {
-                console.error("Submission failed:", error);
-                setSubmitting(false);
-                showFormError("Your information could not be submitted. Please check your connection and try again.");
-                submitButton.focus({ preventScroll: true });
-            }
+            document.getElementById("prototype-message").classList.add("show");
         });
-
-        document.getElementById("copy-id-button").addEventListener("click", async () => {
-            const submissionId = submissionIdDisplay.textContent;
-            try {
-                await navigator.clipboard.writeText(submissionId);
-                copyStatus.textContent = "Submission ID copied.";
-            } catch {
-                const temporaryInput = document.createElement("textarea");
-                temporaryInput.value = submissionId;
-                temporaryInput.setAttribute("readonly", "");
-                temporaryInput.style.position = "fixed";
-                temporaryInput.style.opacity = "0";
-                document.body.appendChild(temporaryInput);
-                temporaryInput.select();
-                const copied = document.execCommand("copy");
-                temporaryInput.remove();
-                copyStatus.textContent = copied
-                    ? "Submission ID copied."
-                    : "Please select and copy the ID manually.";
-            }
-        });
-
-        document.getElementById("reset-form-button").addEventListener("click", () => {
-            contactForm.reset();
-            setFormType("couple");
-            clearFormError();
-            copyStatus.textContent = "";
-            submissionIdDisplay.textContent = "";
-            submissionIdCard.hidden = true;
-            donationFollowup.hidden = true;
-            thankYouState.hidden = true;
-            contactForm.hidden = false;
-            contactForm.setAttribute("aria-busy", "false");
-            document.querySelector("#concept-form h3").focus?.();
-            document.getElementById("husband-name").focus();
-        });
-
-        initializeBackend();
     </script>
 </body>
 </html>

@@ -1,138 +1,124 @@
 <!DOCTYPE html>
+<!--
+THESIS: Donation is a calm act of support with the secure form reached immediately, not a decorative fundraising pitch.
+OWN-WORLD: Morning-blue atmosphere, deep-water controls, open typography, and one grounded white form surface.
+STORY: Visitors understand what their contribution supports and move directly into the existing secure form.
+FIRST VIEWPORT: A concise donation statement sits in a compact blue field with the full embedded form directly below.
+FORM: A direct support threshold extending the approved blue concept; no new visual world or behavior.
+-->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Donate - Binyan Shalem</title>
-
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Google Fonts: Inter -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="Support Binyan Shalem and help couples receive guidance free of charge.">
+    <title>Donate — Binyan Shalem</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- Custom Tailwind Configuration -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'custom-deep-purple': '#723358', // rgba(114,51,88,1)
-                        'custom-slate-gray': '#4B5562', // rgba(75, 85, 98, 1)
-                        'custom-beige': '#BAA68E',      // rgba(186,166,142,1)
-                    }
-                }
-            }
-        }
-    </script>
-
-    <!-- Custom Styles -->
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc; /* slate-50 */
-        }
-        /* Style for selected donation amount (no longer needed for Google Form, but keeping for consistency if other elements use it) */
-        .donation-label.selected {
-            border-color: #723358; /* custom-deep-purple */
-            background-color: rgba(114, 51, 88, 0.05);
-        }
-        /* Ensure iframe is responsive */
-        .google-form-container {
-            position: relative;
-            overflow: hidden;
-            /* Increased padding-top again to make the iframe taller and reduce scrolling */
-            padding-top: 300%; /* Adjusted from 250% to provide even more height for the form */
-            height: 0;
-        }
-
-        .google-form-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: 0;
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;750&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../blue-concept-pages.css">
 </head>
-<body class="text-slate-800">
+<body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
 
-    <!-- Header -->
-    <header id="main-header" class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <!-- Logo -->
-            <a href="index.html" class="flex items-center space-x-3">
-                <img src="https://www.binyan-shalem.com/Binyan%20Shalem_files/8594235c61f23b5d99cd2a2dbf37c8b5.jpg" alt="Binyan Shalem Logo" class="h-12 w-auto">
-                <div class="text-slate-800">
-                    <h1 class="text-xl font-bold tracking-tight">BINYAN SHALEM</h1>
-                </div>
+    <header class="site-header">
+        <div class="nav-shell">
+            <a class="wordmark" href="../" aria-label="Binyan Shalem home">
+                <strong>BINYAN SHALEM</strong>
+                <span>בנין שלם</span>
             </a>
-            <!-- Desktop Navigation -->
-            <nav class="hidden md:flex items-center space-x-2 text-custom-slate-gray">
-                <a href="https://binyan-shalem.com/index.html#home" class="nav-link transition-colors px-3 py-2 rounded-md hover:text-custom-deep-purple">Home</a>
-                <a href="https://binyan-shalem.com/index.html#mission" class="nav-link transition-colors px-3 py-2 rounded-md hover:text-custom-deep-purple">Our Mission</a>
-                <a href="https://binyan-shalem.com/index.html#contact" class="nav-link transition-colors px-3 py-2 rounded-md hover:text-custom-deep-purple">Get Help</a>
-                <a href="https://binyan-shalem.com/donate.html" class="nav-link bg-custom-deep-purple text-white px-4 py-2 rounded-lg hover:opacity-90 transition-all shadow ml-6">Donate</a>
+            <nav class="desktop-nav" aria-label="Primary navigation">
+                <a href="../">Home</a>
+                <a href="../#mission">Our Mission</a>
+                <a href="../#contact">Get Help</a>
+                <a href="../content/">Shalom Bayit Content</a>
+                <a class="nav-donate" aria-current="page" href="./">Donate</a>
             </nav>
-            <!-- Mobile Menu Button -->
-            <button id="mobile-menu-button" class="md:hidden text-slate-700 focus:outline-none">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            <button class="menu-button" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"/>
+                </svg>
             </button>
-        </div>
-        <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4 bg-white/95 backdrop-blur-sm rounded-b-lg">
-            <a href="https://binyan-shalem.com/index.html#home" class="nav-link block py-2 text-slate-700">Home</a>
-            <a href="https://binyan-shalem.com/index.html#mission" class="nav-link block py-2 text-slate-700">Our Mission</a>
-            <a href="https://binyan-shalem.com/index.html#contact" class="nav-link block py-2 text-slate-700">Get Help</a>
-            <a href="https://binyan-shalem.com/donate.html" class="nav-link block mt-2 text-center bg-custom-deep-purple text-white px-4 py-2 rounded-lg shadow">Donate</a>
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="py-20 md:py-28">
-        <div class="container mx-auto px-6">
-            <div class="max-w-2xl mx-auto text-center">
-                <h3 class="text-3xl md:text-4xl font-bold text-slate-900">Donate</h3>
-                <p class="text-lg text-slate-600 mt-3 mb-8">Your generous contribution allows us to continue offering our services free of charge, helping couples build stronger, healthier homes in our community.</p>
-            </div>
+    <nav class="mobile-menu" id="mobile-menu" aria-label="Mobile navigation" aria-hidden="true" inert>
+        <a href="../">Home</a>
+        <a href="../#mission">Our Mission</a>
+        <a href="../#contact">Get Help</a>
+        <a href="../content/">Shalom Bayit Content</a>
+        <a aria-current="page" href="./">Donate</a>
+    </nav>
 
-            <!-- Venmo Button moved here, outside the white card -->
-            <div class="mb-8 text-center">
-                <a href="https://venmo.com/?txn=pay&recipients=shalembinyan@gmail.com" target="_blank" rel="noopener noreferrer" class="inline-block bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors text-lg font-semibold shadow-md">
-                    Use Venmo
-                </a>
-            </div>
-
-            <div class="max-w-lg mx-auto bg-white p-8 rounded-xl shadow-2xl border border-slate-200">
-                <!-- Google Form Embedded Here -->
-                <div class="google-form-container">
-                    <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSeO4R-VYVDwYFks93J2QbgwkDo4MnsL1DqFojvveSsreRe1iA/viewform?embedded=true" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+    <main id="main-content">
+        <section class="page-hero donation-hero">
+            <div class="hero-shell">
+                <div>
+                    <p class="hero-kicker">Help keep guidance accessible</p>
+                    <h1>Support stronger homes.</h1>
+                </div>
+                <div class="donation-callout">
+                    <p>Your generous contribution allows us to continue offering our services free of charge, helping couples build stronger, healthier homes in our community.</p>
                 </div>
             </div>
-        </div>
+        </section>
+
+        <section class="donation-main" aria-labelledby="donation-form-title">
+            <div class="donation-shell">
+                <div class="donation-copy">
+                    <h2 id="donation-form-title">Donate securely.</h2>
+                    <p>Use our secure donation form to complete your contribution.</p>
+                </div>
+
+                <div class="form-surface">
+                    <div class="form-toolbar">
+                        <p>Secure donation form</p>
+                        <a class="form-fallback" href="https://docs.google.com/forms/d/e/1FAIpQLSeO4R-VYVDwYFks93J2QbgwkDo4MnsL1DqFojvveSsreRe1iA/viewform" target="_blank" rel="noopener noreferrer">Open form in a new tab</a>
+                    </div>
+                    <iframe
+                        class="google-form"
+                        src="https://docs.google.com/forms/d/e/1FAIpQLSeO4R-VYVDwYFks93J2QbgwkDo4MnsL1DqFojvveSsreRe1iA/viewform?embedded=true"
+                        title="Binyan Shalem secure donation form"
+                        loading="lazy"
+                    >Loading…</iframe>
+                </div>
+            </div>
+        </section>
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-custom-slate-gray text-slate-300 relative z-20">
-        <div class="container mx-auto px-6 py-8 text-center">
-            <p>&copy; 2025 Binyan Shalem. All Rights Reserved.</p>
-            <p class="text-sm text-slate-400 mt-2">A dedicated resource for building stronger Jewish homes.</p>
+    <footer class="site-footer">
+        <div class="footer-shell">
+            <p>© 2026 Binyan Shalem. All Rights Reserved.</p>
+            <p>Text us at: <a href="sms:3474439477">(347) 443-9477</a></p>
         </div>
     </footer>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- Mobile Menu ---
-            const mobileMenuButton = document.getElementById('mobile-menu-button');
-            const mobileMenu = document.getElementById('mobile-menu');
-            mobileMenuButton.addEventListener('click', () => {
-                mobileMenu.classList.toggle('hidden');
-            });
+        const menuButton = document.querySelector(".menu-button");
+        const mobileMenu = document.getElementById("mobile-menu");
 
-            // The previous donation form logic has been removed as it's replaced by the Google Form.
+        function setMenu(open, restoreFocus = true) {
+            menuButton.setAttribute("aria-expanded", String(open));
+            menuButton.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+            mobileMenu.classList.toggle("open", open);
+            mobileMenu.setAttribute("aria-hidden", String(!open));
+            mobileMenu.inert = !open;
+            document.body.classList.toggle("menu-open", open);
+
+            if (open) {
+                window.setTimeout(() => mobileMenu.querySelector("a").focus(), 0);
+            } else if (restoreFocus) {
+                menuButton.focus();
+            }
+        }
+
+        menuButton.addEventListener("click", () => setMenu(menuButton.getAttribute("aria-expanded") !== "true"));
+        mobileMenu.addEventListener("click", (event) => {
+            if (event.target.closest("a")) setMenu(false, false);
+        });
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && menuButton.getAttribute("aria-expanded") === "true") {
+                setMenu(false);
+            }
         });
     </script>
 </body>
