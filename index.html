@@ -15,7 +15,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;750&amp;display=swap" rel="stylesheet">
-    <script defer src="/cache-refresh.js?v=2026-08-02.2"></script>
+    <script defer src="/cache-refresh.js?v=2026-08-02.3"></script>
     <style>
         :root {
             --mist: #f4fafd;
@@ -667,6 +667,26 @@
 
         .cta-secondary:hover {
             background: var(--sky);
+        }
+
+        .content-entry {
+            display: flex;
+            justify-content: center;
+            margin-top: 0.72rem;
+            color: var(--deep-water);
+            font-size: 0.82rem;
+            font-weight: 650;
+            text-align: center;
+            text-underline-offset: 0.22em;
+        }
+
+        .content-entry span {
+            margin-left: 0.35rem;
+            transition: transform 180ms ease;
+        }
+
+        .content-entry:hover span {
+            transform: translateX(4px);
         }
 
         .section-shell {
@@ -1581,6 +1601,11 @@
                 min-height: 52px;
             }
 
+            .content-entry {
+                margin-top: 0.5rem;
+                font-size: 0.76rem;
+            }
+
             .principle {
                 grid-template-columns: 3rem minmax(0, 1fr);
             }
@@ -1670,6 +1695,11 @@
                 font-size: 0.93rem;
             }
 
+            .content-entry {
+                margin-top: 0.35rem;
+                font-size: 0.76rem;
+            }
+
         }
 
         @media (max-width: 620px) and (max-height: 740px) {
@@ -1749,6 +1779,11 @@
                 font-size: 0.88rem;
             }
 
+            .content-entry {
+                margin-top: 0.25rem;
+                font-size: 0.65rem;
+            }
+
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -1807,6 +1842,7 @@
     <nav class="mobile-menu" id="mobile-menu" aria-label="Mobile navigation" aria-hidden="true" inert>
         <a href="#home">Home</a>
         <a href="#mission">Our Mission</a>
+        <a href="faq/">Frequently Asked Questions</a>
         <a href="#contact">Get Help</a>
         <a href="content/">Shalom Bayit Content</a>
         <a href="contact/">Contact Us</a>
@@ -1834,7 +1870,7 @@
                     <div class="brand-mark-crop">
                         <img
                             class="brand-mark"
-                            src="logo_nbg.png?v=2026-08-02.2"
+                            src="logo_nbg.png?v=2026-08-02.3"
                             alt="Binyan Shalem logo"
                         >
                     </div>
@@ -1855,6 +1891,10 @@
                         <a class="cta cta-primary" href="#contact">Your journey starts here</a>
                         <a class="cta cta-secondary" href="donate/">Donate Now</a>
                     </div>
+                    <a class="content-entry" href="content/">
+                        Powerful and curated content on marriage
+                        <span aria-hidden="true">→</span>
+                    </a>
                 </div>
             </div>
         </section>
