@@ -15,7 +15,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;750&amp;display=swap" rel="stylesheet">
-    <script defer src="/cache-refresh.js?v=2026-08-02.1"></script>
+    <script defer src="/cache-refresh.js?v=2026-08-02.2"></script>
     <style>
         :root {
             --mist: #f4fafd;
@@ -669,26 +669,6 @@
             background: var(--sky);
         }
 
-        .content-entry {
-            display: flex;
-            justify-content: center;
-            margin-top: 0.72rem;
-            color: var(--deep-water);
-            font-size: 0.82rem;
-            font-weight: 650;
-            text-align: center;
-            text-underline-offset: 0.22em;
-        }
-
-        .content-entry span {
-            margin-left: 0.35rem;
-            transition: transform 180ms ease;
-        }
-
-        .content-entry:hover span {
-            transform: translateX(4px);
-        }
-
         .section-shell {
             width: min(calc(100% - (2 * var(--page-gutter))), var(--content-width));
             margin: 0 auto;
@@ -876,76 +856,6 @@
             color: var(--muted);
             font-size: 1.01rem;
             line-height: 1.75;
-        }
-
-        .content-ribbon {
-            position: relative;
-            overflow: hidden;
-            padding: clamp(4rem, 8vw, 7rem) 0;
-            color: var(--white);
-            background: var(--deep-water);
-        }
-
-        .content-ribbon::after {
-            position: absolute;
-            top: -11rem;
-            right: -5rem;
-            width: 30rem;
-            height: 30rem;
-            border: 1px solid rgba(208, 234, 247, 0.24);
-            border-radius: 50%;
-            content: "";
-        }
-
-        .content-ribbon-inner {
-            position: relative;
-            z-index: 1;
-            display: grid;
-            grid-template-columns: minmax(0, 1.2fr) minmax(230px, 0.8fr);
-            align-items: end;
-            gap: 3rem;
-        }
-
-        .content-ribbon h2 {
-            max-width: 17ch;
-            margin: 0;
-            font-size: clamp(2.25rem, 5vw, 4.8rem);
-            font-weight: 610;
-            letter-spacing: -0.035em;
-            line-height: 1.02;
-            text-wrap: balance;
-        }
-
-        .content-ribbon p {
-            max-width: 48ch;
-            margin: 1.2rem 0 0;
-            color: #d6eaf5;
-        }
-
-        .ribbon-link {
-            display: inline-flex;
-            align-items: center;
-            justify-content: space-between;
-            min-height: 64px;
-            padding: 0.9rem 1.3rem;
-            color: var(--midnight);
-            background: var(--sky);
-            border-radius: 999px;
-            font-weight: 720;
-            text-decoration: none;
-            transition: transform 180ms ease, background 180ms ease;
-        }
-
-        .ribbon-link:hover {
-            background: #d5eaf5;
-            transform: translateY(-2px);
-        }
-
-        .ribbon-link .text-arrow {
-            font-family: Arial, Helvetica, sans-serif;
-            font-variant-emoji: text;
-            font-size: 1.15em;
-            line-height: 1;
         }
 
         .contact {
@@ -1343,6 +1253,85 @@
             text-underline-offset: 0.2em;
         }
 
+        @media (min-width: 821px) {
+            .principles {
+                --mission-bottom-space: clamp(5.5rem, 7vw, 7rem);
+                padding-top: clamp(5rem, 7vw, 7rem);
+                padding-bottom: 0;
+            }
+
+            .principles-layout {
+                grid-template-columns: minmax(340px, 0.95fr) minmax(0, 1.55fr);
+                align-items: stretch;
+                gap: clamp(3.5rem, 6vw, 6rem);
+            }
+
+            .principles .section-intro {
+                position: relative;
+                top: auto;
+                display: flex;
+                flex-direction: column;
+                align-self: stretch;
+                padding: 2.5rem clamp(2rem, 3vw, 3rem) 2.8rem 0;
+            }
+
+            .principles .section-intro::before {
+                top: -3rem;
+                right: clamp(-3rem, -3vw, -2rem);
+            }
+
+            .principles .section-intro h2 {
+                max-width: 14ch;
+                font-size: clamp(2.8rem, 3.6vw, 4.1rem);
+                line-height: 1;
+            }
+
+            .principles .section-intro > p:last-child {
+                max-width: 42ch;
+                margin-top: 1.15rem;
+                line-height: 1.62;
+            }
+
+            .principles .mission-faq-link {
+                align-self: flex-start;
+                margin-top: auto;
+            }
+
+            .principles .principle-list {
+                padding-bottom: var(--mission-bottom-space);
+            }
+
+            .principle {
+                padding-top: clamp(1.8rem, 2.5vw, 2.4rem);
+                padding-bottom: clamp(1.8rem, 2.5vw, 2.4rem);
+            }
+
+            .principle h3 {
+                font-size: clamp(1.5rem, 2vw, 1.95rem);
+            }
+
+            .principle p {
+                margin-top: 0.7rem;
+                line-height: 1.65;
+            }
+        }
+
+        @media (min-width: 1100px) {
+            .principles-layout {
+                grid-template-columns: minmax(430px, 1.08fr) minmax(0, 1.42fr);
+                gap: clamp(3rem, 4.5vw, 5rem);
+            }
+
+            .principles .section-intro {
+                padding-right: 2rem;
+            }
+
+            .principles .section-intro h2 {
+                max-width: 16ch;
+                font-size: clamp(3rem, 3.2vw, 3.65rem);
+            }
+        }
+
         @keyframes brand-arrival {
             from {
                 opacity: 0.6;
@@ -1395,8 +1384,7 @@
             }
 
             .principles-layout,
-            .contact-layout,
-            .content-ribbon-inner {
+            .contact-layout {
                 grid-template-columns: 1fr;
             }
 
@@ -1593,11 +1581,6 @@
                 min-height: 52px;
             }
 
-            .content-entry {
-                margin-top: 0.5rem;
-                font-size: 0.76rem;
-            }
-
             .principle {
                 grid-template-columns: 3rem minmax(0, 1fr);
             }
@@ -1687,10 +1670,6 @@
                 font-size: 0.93rem;
             }
 
-            .content-entry {
-                margin-top: 0.35rem;
-                font-size: 0.76rem;
-            }
         }
 
         @media (max-width: 620px) and (max-height: 740px) {
@@ -1770,10 +1749,6 @@
                 font-size: 0.88rem;
             }
 
-            .content-entry {
-                margin-top: 0.25rem;
-                font-size: 0.65rem;
-            }
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -1859,7 +1834,7 @@
                     <div class="brand-mark-crop">
                         <img
                             class="brand-mark"
-                            src="logo_nbg.png?v=2026-08-02.1"
+                            src="logo_nbg.png?v=2026-08-02.2"
                             alt="Binyan Shalem logo"
                         >
                     </div>
@@ -1880,10 +1855,6 @@
                         <a class="cta cta-primary" href="#contact">Your journey starts here</a>
                         <a class="cta cta-secondary" href="donate/">Donate Now</a>
                     </div>
-                    <a class="content-entry" href="content/">
-                        Powerful and curated content on marriage
-                        <span aria-hidden="true">→</span>
-                    </a>
                 </div>
             </div>
         </section>
@@ -1925,19 +1896,6 @@
                         </div>
                     </article>
                 </div>
-            </div>
-        </section>
-
-        <section class="content-ribbon" id="content">
-            <div class="section-shell content-ribbon-inner">
-                <div>
-                    <h2>Shalom bayit, thoughtfully curated.</h2>
-                    <p>Powerful, practical content for building a stronger home—presented with clarity, sensitivity, and a Torah perspective.</p>
-                </div>
-                <a class="ribbon-link" href="content/" aria-label="Explore shalom bayit content">
-                    <span>Explore the content</span>
-                    <span class="text-arrow" aria-hidden="true">&#8599;&#65038;</span>
-                </a>
             </div>
         </section>
 
