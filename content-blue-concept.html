@@ -17,7 +17,7 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;750&amp;display=swap" rel="stylesheet">
     <link rel="stylesheet" href="blue-concept-pages.css">
 </head>
-<body>
+<body class="content-page">
     <a class="skip-link" href="#main-content">Skip to main content</a>
 
     <header class="site-header">
@@ -294,6 +294,7 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
             article.appendChild(createVisual(resource));
 
             const body = document.createElement("div");
+            body.className = "resource-body";
             const type = document.createElement("p");
             type.className = "resource-type";
             type.textContent = resource.type === "video"
