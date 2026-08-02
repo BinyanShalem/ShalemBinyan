@@ -31,6 +31,7 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
                 <a href="landing-blue-concept.html#mission">Our Mission</a>
                 <a href="landing-blue-concept.html#contact">Get Help</a>
                 <a aria-current="page" href="content-blue-concept.html">Shalom Bayit Content</a>
+                <a href="contact-blue-concept.html">Contact Us</a>
                 <a class="nav-donate" href="donate-blue-concept.html">Donate</a>
             </nav>
             <button class="menu-button" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
@@ -46,6 +47,7 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
         <a href="landing-blue-concept.html#mission">Our Mission</a>
         <a href="landing-blue-concept.html#contact">Get Help</a>
         <a aria-current="page" href="content-blue-concept.html">Shalom Bayit Content</a>
+        <a href="contact-blue-concept.html">Contact Us</a>
         <a href="donate-blue-concept.html">Donate</a>
     </nav>
 
@@ -62,7 +64,7 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
 
         <section class="resource-band" aria-label="Content filters">
             <div class="resource-band-inner">
-                <p id="resource-count">7 resources</p>
+                <p id="resource-count">9 resources</p>
                 <div class="filters" role="group" aria-label="Filter resources by format">
                     <button class="filter-button" type="button" data-filter="all" aria-pressed="true">All resources</button>
                     <button class="filter-button" type="button" data-filter="video" aria-pressed="false">Videos</button>
@@ -87,7 +89,7 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
     <footer class="site-footer">
         <div class="footer-shell">
             <p>© 2026 Binyan Shalem. All Rights Reserved.</p>
-            <p>Text us at: <a href="sms:3474439477">(347) 443-9477</a></p>
+            <p><a href="contact-blue-concept.html">Contact Us</a></p>
         </div>
     </footer>
 
@@ -95,7 +97,7 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
         /*
          * Future admin integration:
          * Replace this sample array with documents from a Firebase "content" collection.
-         * The intended admin fields are represented here, including dialIn and extension.
+         * The intended admin fields are represented here, including source, embedUrl, dialIn, and extension.
          */
         const resources = [
             {
@@ -164,6 +166,34 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
                 extension: "921134"
             },
             {
+                id: "speech-about-marriage-emet",
+                type: "video",
+                source: "youtube",
+                title: "Speech about Marriage at \"Emet\"",
+                speaker: "Rabbi YY Jacobson",
+                primaryLabel: "Watch on YouTube",
+                primaryUrl: "https://www.youtube.com/watch?v=xif_pqs2DPs",
+                embedUrl: "https://www.youtube-nocookie.com/embed/xif_pqs2DPs?rel=0",
+                imageAlt: "Speech about Marriage at Emet by Rabbi YY Jacobson",
+                dialIn: "",
+                dialInHref: "",
+                extension: ""
+            },
+            {
+                id: "kabbalistic-difference-men-women",
+                type: "video",
+                source: "youtube",
+                title: "A Kabbalistic Difference Between Men and Women",
+                speaker: "R. YY Jacobson · TorahAnytime",
+                primaryLabel: "Watch on YouTube",
+                primaryUrl: "https://www.youtube.com/watch?v=oLxvUVTEAT4",
+                embedUrl: "https://www.youtube-nocookie.com/embed/oLxvUVTEAT4?rel=0",
+                imageAlt: "A Kabbalistic Difference Between Men and Women by R. YY Jacobson",
+                dialIn: "",
+                dialInHref: "",
+                extension: ""
+            },
+            {
                 id: "book-recommendation",
                 type: "book",
                 title: "Dear Daughter",
@@ -208,6 +238,23 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
         }
 
         function createVisual(resource) {
+            if (resource.embedUrl) {
+                const visual = document.createElement("div");
+                visual.className = "resource-visual video embedded-video";
+
+                const frame = document.createElement("iframe");
+                frame.className = "resource-embed";
+                frame.src = resource.embedUrl;
+                frame.title = `Play ${resource.title}`;
+                frame.loading = "lazy";
+                frame.referrerPolicy = "strict-origin-when-cross-origin";
+                frame.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+                frame.allowFullscreen = true;
+                visual.appendChild(frame);
+
+                return visual;
+            }
+
             const visual = document.createElement("a");
             visual.className = `resource-visual ${resource.type}`;
             visual.href = resource.primaryUrl;
@@ -216,7 +263,7 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
             visual.setAttribute(
                 "aria-label",
                 resource.type === "video"
-                    ? `Watch ${resource.title} on TorahAnytime`
+                    ? `Watch ${resource.title} on ${resource.source === "youtube" ? "YouTube" : "TorahAnytime"}`
                     : `Shop for ${resource.title} on Amazon`
             );
 
@@ -242,13 +289,16 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
         function createResource(resource) {
             const article = document.createElement("article");
             article.className = "resource";
+            article.id = resource.id;
             article.dataset.type = resource.type;
             article.appendChild(createVisual(resource));
 
             const body = document.createElement("div");
             const type = document.createElement("p");
             type.className = "resource-type";
-            type.textContent = resource.type === "video" ? "Video & dial-in" : "Book";
+            type.textContent = resource.type === "video"
+                ? (resource.source === "youtube" ? "YouTube video" : "Video & dial-in")
+                : "Book";
 
             const title = document.createElement("h3");
             title.textContent = resource.title;
@@ -265,7 +315,7 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
             const actions = document.createElement("div");
             actions.className = "resource-actions";
             const actionLabel = resource.type === "video"
-                ? `Watch ${resource.title} on TorahAnytime`
+                ? `Watch ${resource.title} on ${resource.source === "youtube" ? "YouTube" : "TorahAnytime"}`
                 : `Shop for ${resource.title} on Amazon`;
             actions.appendChild(createLink(resource.primaryLabel, resource.primaryUrl, "action-link primary", actionLabel));
 
@@ -306,6 +356,12 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
             let visible = 0;
             [...list.children].forEach((item) => {
                 const show = filter === "all" || item.dataset.type === filter;
+
+                if (!show && !item.hidden) {
+                    const embeddedPlayer = item.querySelector(".resource-embed");
+                    if (embeddedPlayer) embeddedPlayer.src = embeddedPlayer.src;
+                }
+
                 item.hidden = !show;
                 if (show) visible += 1;
             });

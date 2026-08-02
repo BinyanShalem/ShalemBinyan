@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <!--
-THESIS: Donation is a calm act of support with the secure form reached immediately, not a decorative fundraising pitch.
-OWN-WORLD: Morning-blue atmosphere, deep-water controls, open typography, and one grounded white form surface.
-STORY: Visitors understand what their contribution supports and move directly into the existing secure form.
-FIRST VIEWPORT: A concise donation statement sits in a compact blue field with the full embedded form directly below.
-FORM: A direct support threshold extending the approved blue concept; no new visual world or behavior.
+THESIS: Contact is one direct, private action rather than a directory of channels.
+OWN-WORLD: Morning-blue atmosphere, deep-water type, one oversized textable number, and the established restrained navigation.
+STORY: Visitors arrive, see the single contact method, and can begin a text immediately.
+FIRST VIEWPORT: The page title and phone number sit centered in a quiet blue field with no competing content.
+FORM: A precisely specified extension of the approved blue concept; no new visual world or interaction model.
 -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="description" content="Support Binyan Shalem and help couples receive guidance free of charge.">
-    <title>Donate — Binyan Shalem</title>
+    <meta name="description" content="Contact Binyan Shalem by text message.">
+    <title>Contact Us — Binyan Shalem</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;750&amp;display=swap" rel="stylesheet">
@@ -31,8 +31,8 @@ FORM: A direct support threshold extending the approved blue concept; no new vis
                 <a href="../#mission">Our Mission</a>
                 <a href="../#contact">Get Help</a>
                 <a href="../content/">Shalom Bayit Content</a>
-                <a href="../contact/">Contact Us</a>
-                <a class="nav-donate" aria-current="page" href="./">Donate</a>
+                <a aria-current="page" href="./">Contact Us</a>
+                <a class="nav-donate" href="../donate/">Donate</a>
             </nav>
             <button class="menu-button" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -47,41 +47,17 @@ FORM: A direct support threshold extending the approved blue concept; no new vis
         <a href="../#mission">Our Mission</a>
         <a href="../#contact">Get Help</a>
         <a href="../content/">Shalom Bayit Content</a>
-        <a href="../contact/">Contact Us</a>
-        <a aria-current="page" href="./">Donate</a>
+        <a aria-current="page" href="./">Contact Us</a>
+        <a href="../donate/">Donate</a>
     </nav>
 
-    <main id="main-content">
-        <section class="page-hero donation-hero">
-            <div class="hero-shell">
-                <div>
-                    <p class="hero-kicker">Help keep guidance accessible</p>
-                    <h1>Support stronger homes.</h1>
-                </div>
-                <div class="donation-callout">
-                    <p>Your generous contribution allows us to continue offering our services free of charge, helping couples build stronger, healthier homes in our community.</p>
-                </div>
-            </div>
-        </section>
-
-        <section class="donation-main" aria-labelledby="donation-form-title">
-            <div class="donation-shell">
-                <div class="donation-copy">
-                    <h2 id="donation-form-title">Donate securely.</h2>
-                    <p>Use our secure donation form to complete your contribution.</p>
-                </div>
-
-                <div class="form-surface">
-                    <div class="form-toolbar">
-                        <p>Secure donation form</p>
-                        <a class="form-fallback" href="https://docs.google.com/forms/d/e/1FAIpQLSeO4R-VYVDwYFks93J2QbgwkDo4MnsL1DqFojvveSsreRe1iA/viewform" target="_blank" rel="noopener noreferrer">Open form in a new tab</a>
-                    </div>
-                    <iframe
-                        class="google-form"
-                        src="https://docs.google.com/forms/d/e/1FAIpQLSeO4R-VYVDwYFks93J2QbgwkDo4MnsL1DqFojvveSsreRe1iA/viewform?embedded=true"
-                        title="Binyan Shalem secure donation form"
-                        loading="lazy"
-                    >Loading…</iframe>
+    <main id="main-content" class="contact-page-main">
+        <section class="contact-page" aria-labelledby="contact-page-title">
+            <div class="contact-page-shell">
+                <h1 class="visually-hidden" id="contact-page-title">Contact us.</h1>
+                <div class="contact-details">
+                    <p>You can text us at</p>
+                    <a class="contact-number" href="sms:3474439477" aria-label="Text Binyan Shalem at 347 443 9477">(347) 443-9477</a>
                 </div>
             </div>
         </section>
@@ -90,7 +66,7 @@ FORM: A direct support threshold extending the approved blue concept; no new vis
     <footer class="site-footer">
         <div class="footer-shell">
             <p>© 2026 Binyan Shalem. All Rights Reserved.</p>
-            <p><a href="../contact/">Contact Us</a></p>
+            <p><a aria-current="page" href="./">Contact Us</a></p>
         </div>
     </footer>
 
