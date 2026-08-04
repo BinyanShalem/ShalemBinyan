@@ -15,7 +15,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;750&amp;display=swap" rel="stylesheet">
-    <script defer src="/cache-refresh.js?v=2026-08-02.3"></script>
+    <script defer src="/cache-refresh.js?v=2026-08-04.1"></script>
     <style>
         :root {
             --mist: #f4fafd;
@@ -989,6 +989,13 @@
             font-weight: 700;
         }
 
+        .field-help {
+            margin: -0.12rem 0 0.08rem;
+            color: var(--muted);
+            font-size: 0.79rem;
+            line-height: 1.5;
+        }
+
         .field input,
         .field textarea {
             width: 100%;
@@ -1870,7 +1877,7 @@
                     <div class="brand-mark-crop">
                         <img
                             class="brand-mark"
-                            src="logo_nbg.png?v=2026-08-02.3"
+                            src="logo_nbg.png?v=2026-08-04.1"
                             alt="Binyan Shalem logo"
                         >
                     </div>
@@ -2028,9 +2035,10 @@
                             <input id="rabbi" name="family_rabbi" type="text">
                         </div>
 
-                        <div class="field" id="anyone-else-field" hidden>
-                            <label for="anyone-else">Anyone else involved</label>
-                            <input id="anyone-else" name="anyone_else_involved" type="text">
+                        <div class="field field-wide">
+                            <label for="anyone-else">Is anyone else involved?</label>
+                            <p class="field-help" id="anyone-else-help">This could be a rabbi, teacher, family member, friend, or anyone else supporting the couple. If so, please share their name and role—we may be able to work together.</p>
+                            <input id="anyone-else" name="anyone_else_involved" type="text" aria-describedby="anyone-else-help" placeholder="Name and relationship, if applicable">
                         </div>
 
                         <div class="field">
@@ -2169,7 +2177,6 @@
         const choiceButtons = document.querySelectorAll(".choice-button");
         const formContext = document.getElementById("form-context");
         const formSectionTitle = document.getElementById("form-section-title");
-        const anyoneElseField = document.getElementById("anyone-else-field");
         const donationLegend = document.getElementById("donation-legend");
         const coupleRequiredFields = document.querySelectorAll("[data-couple-required]");
         const modeLabels = document.querySelectorAll("[data-couple-label]");
@@ -2192,7 +2199,6 @@
                 ? "Note: This form is not for the couple itself. For the couple to submit please choose Husband/Wife. If you would like to have someone submit for you, please ensure all information is accurate and correct.*"
                 : "Please share the couple’s information below.";
             formSectionTitle.textContent = someoneElse ? "Contact Information" : "Couple’s Information";
-            anyoneElseField.hidden = !someoneElse;
             donationLegend.textContent = someoneElse ? "Donation (Optional)" : "Would you like to donate?";
             coupleRequiredFields.forEach((field) => {
                 field.required = !someoneElse;
@@ -2271,9 +2277,9 @@
                 years_married: data.years_married,
                 issue_presenting: data.issue_presenting,
                 family_rabbi: data.family_rabbi,
+                anyone_else_involved: data.anyone_else_involved,
                 parents_names: data.parents_names,
                 num_kids: data.num_kids,
-                ...(formType === "someone-else" ? { anyone_else_involved: data.anyone_else_involved } : {}),
                 donation: donationDecision,
                 timestamp: new Date().toISOString(),
                 uid: userId,

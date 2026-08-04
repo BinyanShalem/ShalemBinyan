@@ -371,6 +371,11 @@ input {
     display: none;
 }
 
+.resource--inspiration {
+    grid-template-columns: minmax(0, 420px);
+    justify-content: center;
+}
+
 .resource-visual {
     position: relative;
     display: grid;
@@ -417,6 +422,21 @@ input {
 
 .resource-visual.book .resource-image {
     object-fit: contain;
+}
+
+.resource-visual.inspiration {
+    min-height: 0;
+    aspect-ratio: 9 / 16;
+    background: var(--white);
+    cursor: default;
+}
+
+.resource-visual.inspiration .resource-image {
+    object-fit: contain;
+}
+
+.resource-visual.inspiration:hover .resource-image {
+    transform: none;
 }
 
 .resource-mark {
@@ -882,6 +902,11 @@ input {
         border-top: 1px solid var(--line);
     }
 
+    .content-page .resource.resource--inspiration {
+        grid-template-columns: minmax(0, 420px);
+        justify-content: center;
+    }
+
     .content-page .resource-visual,
     .content-page .resource-visual.book {
         width: 100%;
@@ -892,6 +917,10 @@ input {
 
     .content-page .resource-visual.book .resource-image {
         padding: 1rem;
+    }
+
+    .content-page .resource-visual.inspiration {
+        aspect-ratio: 9 / 16;
     }
 
     .content-page .resource-body {
@@ -1121,6 +1150,10 @@ input {
 
     .resource-visual.book .resource-image {
         padding: 0.8rem;
+    }
+
+    .resource-visual.inspiration {
+        aspect-ratio: 9 / 16;
     }
 
     .resource h3 {
