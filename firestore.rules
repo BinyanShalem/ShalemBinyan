@@ -1,7 +1,117 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow a user to read and write ONLY their own documents.
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOptionalString(value, maxLength) {
+      return value == null || (value is string && value.size() <= maxLength);
+    }
+
+    function isOptionalNumber(value) {
+      return value == null || value is number;
+    }
+
+    function isHttpsUrl(value) {
+      return value is string
+        && value.size() <= 2048
+        && value.matches('https://.*');
+    }
+
+    function isValidSubmission() {
+      return request.resource.data.keys().hasOnly([
+          'h_name', 'w_name', 'h_cell', 'h_email', 'w_cell', 'w_email',
+          'h_age', 'w_age', 'address', 'years_married', 'issue_presenting',
+          'family_rabbi', 'anyone_else_involved', 'parents_names', 'num_kids',
+          'donation', 'timestamp', 'uid', 'formType'
+        ])
+        && request.resource.data.keys().hasAll([
+          'h_name', 'w_name', 'h_cell', 'h_email', 'w_cell', 'w_email',
+          'h_age', 'w_age', 'address', 'years_married', 'issue_presenting',
+          'family_rabbi', 'anyone_else_involved', 'parents_names', 'num_kids',
+          'donation', 'timestamp', 'uid', 'formType'
+        ])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.timestamp is string
+        && request.resource.data.timestamp.size() <= 40
+        && request.resource.data.formType in ['couple', 'someone-else']
+        && request.resource.data.donation in ['Yes', 'No']
+        && isOptionalString(request.resource.data.h_name, 160)
+        && isOptionalString(request.resource.data.w_name, 160)
+        && isOptionalString(request.resource.data.h_cell, 80)
+        && isOptionalString(request.resource.data.h_email, 254)
+        && isOptionalString(request.resource.data.w_cell, 80)
+        && isOptionalString(request.resource.data.w_email, 254)
+        && isOptionalNumber(request.resource.data.h_age)
+        && isOptionalNumber(request.resource.data.w_age)
+        && isOptionalString(request.resource.data.address, 500)
+        && isOptionalNumber(request.resource.data.years_married)
+        && isOptionalString(request.resource.data.issue_presenting, 5000)
+        && isOptionalString(request.resource.data.family_rabbi, 240)
+        && isOptionalString(request.resource.data.anyone_else_involved, 500)
+        && isOptionalString(request.resource.data.parents_names, 500)
+        && isOptionalNumber(request.resource.data.num_kids);
+    }
+
+    function isValidContentResource() {
+      return request.resource.data.keys().hasOnly([
+          'id', 'type', 'source', 'title', 'speaker', 'primaryLabel',
+          'primaryUrl', 'imageUrl', 'imageAlt', 'embedUrl', 'dialIn',
+          'dialInHref', 'extension', 'schemaVersion', 'published',
+          'sortOrder', 'createdAt', 'createdBy'
+        ])
+        && request.resource.data.keys().hasAll([
+          'id', 'type', 'source', 'title', 'speaker', 'primaryLabel',
+          'primaryUrl', 'imageUrl', 'imageAlt', 'embedUrl', 'dialIn',
+          'dialInHref', 'extension', 'schemaVersion', 'published',
+          'sortOrder', 'createdAt', 'createdBy'
+        ])
+        && request.resource.data.id is string
+        && request.resource.data.id.size() <= 160
+        && request.resource.data.source in ['youtube', 'torahanytime', 'amazon', 'itorah']
+        && (
+          (request.resource.data.source == 'amazon' && request.resource.data.type == 'book')
+          || (request.resource.data.source != 'amazon' && request.resource.data.type == 'video')
+        )
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 240
+        && request.resource.data.speaker is string
+        && request.resource.data.speaker.size() <= 180
+        && request.resource.data.primaryLabel is string
+        && request.resource.data.primaryLabel.size() <= 80
+        && isHttpsUrl(request.resource.data.primaryUrl)
+        && isHttpsUrl(request.resource.data.imageUrl)
+        && request.resource.data.imageAlt is string
+        && request.resource.data.imageAlt.size() <= 300
+        && request.resource.data.embedUrl is string
+        && (request.resource.data.embedUrl == '' || isHttpsUrl(request.resource.data.embedUrl))
+        && request.resource.data.dialIn is string
+        && request.resource.data.dialIn.size() <= 40
+        && request.resource.data.dialInHref is string
+        && (request.resource.data.dialInHref == '' || request.resource.data.dialInHref.matches('tel:\\+[0-9]+'))
+        && request.resource.data.extension is string
+        && request.resource.data.extension.size() <= 20
+        && request.resource.data.schemaVersion == 1
+        && request.resource.data.published == true
+        && request.resource.data.sortOrder is int
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.createdBy == request.auth.uid;
+    }
+
+    match /content/{contentId} {
+      allow read: if true;
+      allow create: if isSignedIn() && contentId == request.resource.data.id && isValidContentResource();
+      allow delete: if isSignedIn();
+      allow update: if false;
+    }
+
+    match /artifacts/{appId}/public/data/submissions/{submissionId} {
+      allow create: if isSignedIn() && isValidSubmission();
+      allow read, update, delete: if isSignedIn();
+    }
+
     match /artifacts/{appId}/users/{userId}/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }

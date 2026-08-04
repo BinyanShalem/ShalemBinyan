@@ -24,10 +24,10 @@ Visitors learn about the approach, submit a private intake form, text the organi
 
 ## Capabilities and Constraints
 
-- The current public experience is a static website with Firebase-backed intake submissions.
+- The public experience is a static website with Firebase-backed intake submissions and admin-created content resources.
 - Donations are completed through the existing embedded Google Form; Venmo is not offered.
 - The calm-blue frontend is the production design. The preceding production design is preserved on the remote backup branch documented in `ROLLBACK.md`.
-- Shalom bayit resources are currently maintained in the frontend data array. Firebase-backed admin management is a planned follow-up.
+- Shalom bayit resources use a baked-in frontend baseline plus Firebase-backed admin additions. Admin resources store links and metadata only; images remain remotely hosted and there are no image uploads.
 - Existing factual copy, organization name, contact details, and intake terminology must be preserved.
 
 ## Brand Commitments

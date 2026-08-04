@@ -3,110 +3,751 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
     <title>Binyan Shalem Admin Panel</title>
-    
-    <!-- Load Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Load Inter font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'custom-deep-purple': '#723358',
-                        'custom-slate-gray': '#4B5562',
-                        'custom-beige': '#BAA68E',
-                    }
-                }
-            }
-        }
-    </script>
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <script defer src="/cache-refresh.js?v=2026-08-04.3"></script>
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc; /* slate-50 */
-            color: #1f2937; /* slate-800 */
+        :root {
+            --admin-purple: #723358;
+            --admin-purple-dark: #592542;
+            --admin-purple-soft: #f6edf2;
+            --admin-ink: #172033;
+            --admin-muted: #5d697b;
+            --admin-line: #dbe1e8;
+            --admin-surface: #ffffff;
+            --admin-canvas: #f4f6f8;
+            --admin-success: #176b45;
+            --admin-success-soft: #e9f6ef;
+            --admin-error: #a52a2a;
+            --admin-error-soft: #fff0f0;
+            --admin-focus: #8d4f74;
         }
-        .form-input {
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-width: 320px;
+            min-height: 100vh;
+            margin: 0;
+            color: var(--admin-ink);
+            background: var(--admin-canvas);
+            font-family: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        button,
+        input,
+        textarea {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        button:disabled {
+            cursor: wait;
+            opacity: 0.62;
+        }
+
+        :focus-visible {
+            outline: 3px solid var(--admin-focus);
+            outline-offset: 3px;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+
+        .admin-shell {
+            width: min(100% - 2rem, 1160px);
+            margin: 0 auto;
+            padding: clamp(1.25rem, 4vw, 3rem) 0 4rem;
+        }
+
+        .admin-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .admin-title-block p,
+        .panel-heading p,
+        .login-card p {
+            color: var(--admin-muted);
+        }
+
+        .admin-title-block p {
+            margin: 0 0 0.35rem;
+            font-size: 0.84rem;
+            font-weight: 700;
+        }
+
+        h1,
+        h2,
+        h3,
+        p {
+            text-wrap: pretty;
+        }
+
+        h1 {
+            margin: 0;
+            color: var(--admin-purple);
+            font-size: clamp(1.7rem, 4vw, 2.4rem);
+            line-height: 1.08;
+            letter-spacing: -0.03em;
+        }
+
+        h2,
+        h3 {
+            margin: 0;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+
+        .card,
+        .panel {
+            background: var(--admin-surface);
+            border: 1px solid var(--admin-line);
+            border-radius: 16px;
+            box-shadow: 0 16px 40px rgba(23, 32, 51, 0.08);
+        }
+
+        .login-card {
+            width: min(100%, 480px);
+            margin: clamp(3rem, 10vh, 7rem) auto 0;
+            padding: clamp(1.5rem, 5vw, 2.5rem);
+        }
+
+        .login-card h2 {
+            margin-bottom: 0.65rem;
+            color: var(--admin-purple);
+            font-size: 1.45rem;
+        }
+
+        .login-card > p {
+            margin: 0 0 1.5rem;
+            line-height: 1.6;
+        }
+
+        .field-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #344054;
+            font-size: 0.88rem;
+            font-weight: 700;
+        }
+
+        .form-input,
+        .paste-input {
             display: block;
             width: 100%;
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            border: 1px solid #d1d5db; /* gray-300 */
-            background-color: #f9fafb; /* gray-50 */
-            font-size: 1rem;
+            color: var(--admin-ink);
+            background: #fbfcfd;
+            border: 1px solid #cbd3dc;
+            border-radius: 12px;
+        }
+
+        .form-input {
+            min-height: 50px;
+            padding: 0.75rem 0.9rem;
+        }
+
+        .paste-input {
+            min-height: 220px;
+            padding: 1rem;
+            resize: vertical;
+            line-height: 1.55;
+        }
+
+        .form-input:focus,
+        .paste-input:focus {
+            border-color: var(--admin-purple);
+            box-shadow: 0 0 0 4px rgba(114, 51, 88, 0.12);
+            outline: none;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 46px;
+            padding: 0.72rem 1.1rem;
+            border: 1px solid transparent;
+            border-radius: 10px;
+            font-weight: 700;
+        }
+
+        .button-primary {
+            color: #ffffff;
+            background: var(--admin-purple);
+            box-shadow: 0 8px 18px rgba(114, 51, 88, 0.2);
+        }
+
+        .button-primary:hover {
+            background: var(--admin-purple-dark);
+        }
+
+        .button-secondary {
+            color: var(--admin-ink);
+            background: #ffffff;
+            border-color: #cbd3dc;
+        }
+
+        .button-secondary:hover {
+            background: #f6f7f9;
+        }
+
+        .button-danger {
+            min-height: 38px;
+            padding: 0.5rem 0.75rem;
+            color: var(--admin-error);
+            background: #ffffff;
+            border-color: #e5bcbc;
+            font-size: 0.82rem;
+        }
+
+        .button-full {
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .admin-identity {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+        }
+
+        .admin-identity-copy {
+            color: var(--admin-muted);
+            font-size: 0.8rem;
+            text-align: right;
+        }
+
+        .admin-identity-copy strong {
+            display: block;
+            color: var(--admin-ink);
+            font-size: 0.88rem;
+        }
+
+        .admin-tabs {
+            display: flex;
+            gap: 0.4rem;
+            margin: 0 0 1rem;
+            padding: 0.35rem;
+            background: #e9edf1;
+            border-radius: 12px;
+        }
+
+        .tab-button {
+            flex: 1;
+            min-height: 44px;
+            padding: 0.65rem 1rem;
+            color: #4b5869;
+            background: transparent;
+            border: 0;
+            border-radius: 9px;
+            font-weight: 700;
+        }
+
+        .tab-button[aria-selected="true"] {
+            color: var(--admin-purple);
+            background: #ffffff;
+            box-shadow: 0 4px 12px rgba(23, 32, 51, 0.08);
+        }
+
+        .panel {
+            padding: clamp(1.25rem, 4vw, 2.25rem);
+        }
+
+        .panel-heading {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1.5rem;
+            margin-bottom: 1.75rem;
+        }
+
+        .panel-heading h2 {
+            color: var(--admin-purple);
+            font-size: clamp(1.35rem, 3vw, 1.8rem);
+        }
+
+        .panel-heading p {
+            max-width: 68ch;
+            margin: 0.55rem 0 0;
+            line-height: 1.6;
+        }
+
+        .provider-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 0 0 1rem;
+            padding: 0;
+            list-style: none;
+        }
+
+        .provider-list li,
+        .resource-badge {
+            padding: 0.4rem 0.65rem;
+            color: var(--admin-purple-dark);
+            background: var(--admin-purple-soft);
+            border-radius: 999px;
+            font-size: 0.76rem;
+            font-weight: 700;
+        }
+
+        .paste-help {
+            margin: 0.65rem 0 0;
+            color: var(--admin-muted);
+            font-size: 0.82rem;
+            line-height: 1.55;
+        }
+
+        .form-actions,
+        .preview-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.7rem;
+            margin-top: 1rem;
+        }
+
+        .status {
+            margin: 1rem 0 0;
+            padding: 0.85rem 1rem;
+            border-radius: 10px;
+            font-size: 0.88rem;
             line-height: 1.5;
         }
-        .form-input:focus {
-            outline: none;
-            border-color: #723358;
-            box-shadow: 0 0 0 2px rgba(114, 51, 88, 0.2);
+
+        .status-info {
+            color: #3a5165;
+            background: #edf4f8;
+        }
+
+        .status-success {
+            color: var(--admin-success);
+            background: var(--admin-success-soft);
+        }
+
+        .status-error {
+            color: var(--admin-error);
+            background: var(--admin-error-soft);
+        }
+
+        .content-preview {
+            display: grid;
+            grid-template-columns: minmax(180px, 0.6fr) minmax(0, 1.4fr);
+            gap: clamp(1.2rem, 4vw, 2rem);
+            align-items: center;
+            margin-top: 1.5rem;
+            padding: 1.25rem;
+            background: #f8fafb;
+            border: 1px solid var(--admin-line);
+            border-radius: 14px;
+        }
+
+        .preview-image-wrap {
+            display: grid;
+            place-items: center;
+            aspect-ratio: 16 / 10;
+            overflow: hidden;
+            background: #e7edf2;
+            border-radius: 12px;
+        }
+
+        .preview-image-wrap.book {
+            background: #ffffff;
+        }
+
+        .preview-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .preview-image-wrap.book .preview-image {
+            padding: 0.65rem;
+            object-fit: contain;
+        }
+
+        .preview-copy h3 {
+            margin-top: 0.85rem;
+            font-size: clamp(1.2rem, 3vw, 1.6rem);
+        }
+
+        .preview-speaker {
+            margin: 0.5rem 0 0;
+            color: var(--admin-muted);
+            font-weight: 600;
+        }
+
+        .preview-dial {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.65rem 1.25rem;
+            margin: 1rem 0 0;
+            color: #475467;
+            font-size: 0.86rem;
+        }
+
+        .preview-link {
+            display: inline-block;
+            margin-top: 0.9rem;
+            color: var(--admin-purple);
+            font-size: 0.86rem;
+            font-weight: 700;
+            text-underline-offset: 3px;
+        }
+
+        .section-divider {
+            height: 1px;
+            margin: clamp(2rem, 6vw, 3rem) 0;
+            background: var(--admin-line);
+        }
+
+        .subsection-heading {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .subsection-heading p {
+            margin: 0;
+            color: var(--admin-muted);
+            font-size: 0.84rem;
+        }
+
+        .admin-resource-list,
+        .submission-list {
+            display: grid;
+            gap: 0.9rem;
+        }
+
+        .admin-resource-item {
+            display: grid;
+            grid-template-columns: 88px minmax(0, 1fr) auto;
+            gap: 1rem;
+            align-items: center;
+            padding: 0.9rem;
+            background: #f8fafb;
+            border: 1px solid var(--admin-line);
+            border-radius: 12px;
+        }
+
+        .admin-resource-thumb {
+            width: 88px;
+            height: 62px;
+            object-fit: cover;
+            background: #e7edf2;
+            border-radius: 8px;
+        }
+
+        .admin-resource-item[data-type="book"] .admin-resource-thumb {
+            object-fit: contain;
+            background: #ffffff;
+        }
+
+        .admin-resource-copy {
+            min-width: 0;
+        }
+
+        .admin-resource-copy h3 {
+            overflow-wrap: anywhere;
+            font-size: 1rem;
+        }
+
+        .admin-resource-copy p {
+            margin: 0.35rem 0 0;
+            color: var(--admin-muted);
+            font-size: 0.8rem;
+        }
+
+        .submission-card {
+            padding: 1.15rem;
+            background: #f8fafb;
+            border: 1px solid var(--admin-line);
+            border-radius: 12px;
+        }
+
+        .submission-card header {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.85rem;
+            border-bottom: 1px solid var(--admin-line);
+        }
+
+        .submission-card h3 {
+            color: var(--admin-purple);
+            font-size: 1rem;
+        }
+
+        .submission-card time {
+            color: var(--admin-muted);
+            font-size: 0.78rem;
+        }
+
+        .submission-fields {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.75rem 1.25rem;
+            margin: 0;
+        }
+
+        .submission-fields div {
+            min-width: 0;
+        }
+
+        .submission-fields dt {
+            color: var(--admin-muted);
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+
+        .submission-fields dd {
+            margin: 0.25rem 0 0;
+            overflow-wrap: anywhere;
+            line-height: 1.45;
+        }
+
+        .loading-state,
+        .empty-state {
+            padding: 2rem 1rem;
+            color: var(--admin-muted);
+            text-align: center;
+        }
+
+        .loading-dot {
+            display: inline-block;
+            width: 0.7rem;
+            height: 0.7rem;
+            margin-right: 0.55rem;
+            background: var(--admin-purple);
+            border-radius: 50%;
+            animation: pulse 900ms ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse {
+            to { opacity: 0.35; transform: scale(0.78); }
+        }
+
+        @media (max-width: 720px) {
+            .admin-header,
+            .panel-heading {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .admin-identity {
+                justify-content: space-between;
+            }
+
+            .admin-identity-copy {
+                text-align: left;
+            }
+
+            .content-preview {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-resource-item {
+                grid-template-columns: 72px minmax(0, 1fr);
+            }
+
+            .admin-resource-thumb {
+                width: 72px;
+                height: 54px;
+            }
+
+            .admin-resource-item .button-danger {
+                grid-column: 1 / -1;
+                width: 100%;
+            }
+
+            .submission-card header,
+            .subsection-heading {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .submission-fields {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .admin-shell {
+                width: min(100% - 1rem, 1160px);
+            }
+
+            .admin-tabs,
+            .form-actions,
+            .preview-actions {
+                display: grid;
+            }
+
+            .button {
+                width: 100%;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+            }
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4">
+<body>
+    <main class="admin-shell">
+        <section class="card login-card" id="admin-login-form" aria-labelledby="login-title">
+            <h2 id="login-title">Admin access</h2>
+            <p>Enter the admin password to manage content and review submissions.</p>
+            <form id="login-form">
+                <label class="field-label" for="admin-password">Password</label>
+                <input class="form-input" type="password" id="admin-password" autocomplete="current-password" required placeholder="Enter admin password">
+                <button class="button button-primary button-full" id="login-button" type="submit">Log in</button>
+                <p class="status" id="login-status" role="status" aria-live="polite" hidden></p>
+            </form>
+        </section>
 
-    <div class="max-w-4xl w-full bg-white p-8 rounded-xl shadow-2xl border border-slate-200">
-        <h1 class="text-3xl font-bold text-center text-custom-deep-purple mb-8">Admin Panel</h1>
+        <section id="admin-content" hidden>
+            <header class="admin-header">
+                <div class="admin-title-block">
+                    <p>Binyan Shalem</p>
+                    <h1>Admin panel</h1>
+                </div>
+                <div class="admin-identity">
+                    <div class="admin-identity-copy">
+                        Admin session
+                        <strong id="admin-identity-label">Password access</strong>
+                    </div>
+                    <button class="button button-secondary" id="logout-button" type="button">Sign out</button>
+                </div>
+            </header>
 
-        <!-- Admin Login Form -->
-        <div id="admin-login-form" class="space-y-6">
-            <h2 class="text-xl font-semibold text-center mb-4">Admin Login</h2>
-            <div>
-                <label for="admin-password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                <input type="password" id="admin-password" class="form-input" placeholder="Enter admin password">
-            </div>
-            <button id="login-button" class="w-full bg-custom-deep-purple text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity font-semibold shadow-md">Login</button>
-            <p id="login-error-message" class="text-red-500 text-center text-sm mt-2 hidden">Incorrect password.</p>
-        </div>
-
-        <!-- Admin Submissions List (hidden by default) -->
-        <div id="admin-content" class="hidden">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-custom-deep-purple">All Submissions</h2>
-                <button id="logout-button" class="bg-gray-400 text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity text-sm font-semibold">Logout</button>
-            </div>
-            
-            <div id="all-submissions-list" class="space-y-6">
-                <!-- All submissions will be dynamically added here -->
-            </div>
-
-            <!-- Loading spinner for all submissions -->
-            <div id="all-submissions-loading-spinner" class="flex flex-col items-center justify-center p-8 hidden">
-                <svg class="animate-spin -ml-1 mr-3 h-12 w-12 text-custom-deep-purple" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <p class="mt-4 text-slate-600">Loading all submissions...</p>
+            <div class="admin-tabs" role="tablist" aria-label="Admin sections">
+                <button class="tab-button" id="content-tab" type="button" role="tab" aria-selected="true" aria-controls="content-panel">Content library</button>
+                <button class="tab-button" id="submissions-tab" type="button" role="tab" aria-selected="false" aria-controls="submissions-panel">Submissions</button>
             </div>
 
-            <div id="no-all-submissions" class="hidden text-center text-slate-500 p-8 rounded-lg bg-slate-100 mt-8">
-                <p>No submissions found.</p>
-            </div>
-        </div>
+            <section class="panel" id="content-panel" role="tabpanel" aria-labelledby="content-tab">
+                <div class="panel-heading">
+                    <div>
+                        <h2>Add a resource</h2>
+                        <p>Paste one supported link or the full TorahAnytime text block. We’ll identify the source, retrieve its public artwork, and preview exactly what will be published.</p>
+                    </div>
+                </div>
 
-        <!-- Custom Alert/Modal (from main app) -->
-        <div id="custom-alert-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div class="bg-white p-8 rounded-lg shadow-xl max-w-sm w-full text-center">
-                <h6 id="alert-title" class="text-xl font-bold mb-4"></h6>
-                <p id="alert-message" class="text-slate-600 mb-6"></p>
-                <button id="alert-ok-button" class="bg-custom-deep-purple text-white px-6 py-2 rounded-lg hover:opacity-90 transition-opacity">OK</button>
-            </div>
-        </div>
-    </div>
+                <ul class="provider-list" aria-label="Supported content providers">
+                    <li>YouTube + Shorts</li>
+                    <li>TorahAnytime</li>
+                    <li>Amazon</li>
+                    <li>iTorah</li>
+                </ul>
+
+                <form id="content-paste-form">
+                    <label class="field-label" for="content-paste">Paste content</label>
+                    <textarea class="paste-input" id="content-paste" required spellcheck="false" placeholder="Paste a YouTube, TorahAnytime, Amazon, or iTorah link here."></textarea>
+                    <p class="paste-help">For TorahAnytime, include the speaker, title, MyTaT link, dial-in number, and “Press” extension. Amazon’s extra Alexa link is ignored automatically.</p>
+                    <div class="form-actions">
+                        <button class="button button-primary" id="review-content-button" type="submit">Review content</button>
+                        <button class="button button-secondary" id="clear-content-button" type="button">Clear</button>
+                    </div>
+                    <p class="status" id="content-form-status" role="status" aria-live="polite" hidden></p>
+                </form>
+
+                <section class="content-preview" id="content-preview" aria-labelledby="preview-title" hidden>
+                    <div class="preview-image-wrap" id="preview-image-wrap">
+                        <img class="preview-image" id="preview-image" src="../logo_nbg.png" alt="" hidden>
+                    </div>
+                    <div class="preview-copy">
+                        <span class="resource-badge" id="preview-type"></span>
+                        <h3 id="preview-title"></h3>
+                        <p class="preview-speaker" id="preview-speaker"></p>
+                        <div class="preview-dial" id="preview-dial" hidden>
+                            <span id="preview-phone"></span>
+                            <span id="preview-extension"></span>
+                        </div>
+                        <a class="preview-link" id="preview-link" target="_blank" rel="noopener noreferrer">Open original link</a>
+                        <div class="preview-actions">
+                            <button class="button button-primary" id="publish-content-button" type="button">Publish resource</button>
+                            <button class="button button-secondary" id="cancel-preview-button" type="button">Edit pasted text</button>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="section-divider"></div>
+
+                <section aria-labelledby="created-content-title">
+                    <div class="subsection-heading">
+                        <h2 id="created-content-title">Admin-created resources</h2>
+                        <p id="created-content-count">0 resources</p>
+                    </div>
+                    <div class="loading-state" id="content-list-loading"><span class="loading-dot" aria-hidden="true"></span>Loading resources…</div>
+                    <div class="admin-resource-list" id="admin-resource-list"></div>
+                    <p class="empty-state" id="no-admin-resources" hidden>No admin-created resources yet.</p>
+                </section>
+            </section>
+
+            <section class="panel" id="submissions-panel" role="tabpanel" aria-labelledby="submissions-tab" hidden>
+                <div class="panel-heading">
+                    <div>
+                        <h2>Intake submissions</h2>
+                        <p>Confidential requests submitted through the public intake form.</p>
+                    </div>
+                </div>
+                <div class="loading-state" id="all-submissions-loading"><span class="loading-dot" aria-hidden="true"></span>Loading submissions…</div>
+                <div class="submission-list" id="all-submissions-list"></div>
+                <p class="empty-state" id="no-all-submissions" hidden>No submissions found.</p>
+            </section>
+        </section>
+    </main>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import {
+            getAuth,
+            signInAnonymously,
+            signOut
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import {
+            collection,
+            deleteDoc,
+            doc,
+            getDoc,
+            getFirestore,
+            onSnapshot,
+            orderBy,
+            query,
+            serverTimestamp,
+            setDoc
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import {
+            buildResourceFromPaste,
+            CONTENT_COLLECTION,
+            ContentParseError,
+            getProviderName,
+            getResourceTypeLabel,
+            normalizeStoredResource
+        } from "../content-resource-tools.mjs?v=2026-08-04.3";
 
-        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDxEV7W2m4jbJiVl0Sc6cN7gBH7oWu_rl8",
             authDomain: "binyanshalem-28b1a.firebaseapp.com",
@@ -117,145 +758,346 @@
             measurementId: "G-YRWCMR3HVD"
         };
 
-        // Admin password (FOR DEMO PURPOSES ONLY - USE SECURE AUTHENTICATION IN PRODUCTION)
-        const ADMIN_PASSWORD = "Hello123?!"; 
+        const ADMIN_PASSWORD = "Hello123?!";
+        const LOCAL_PREVIEW = ["127.0.0.1", "localhost"].includes(window.location.hostname)
+            && new URLSearchParams(window.location.search).get("preview") === "1";
+        const appId = firebaseConfig.projectId;
 
-        let db;
-        let auth;
-        let userId;
-        const appId = firebaseConfig.projectId; // Use Firebase project ID as app ID
+        const firebaseApp = initializeApp(firebaseConfig);
+        const auth = getAuth(firebaseApp);
+        const db = getFirestore(firebaseApp);
 
-        // Function to show custom alert
-        function showCustomAlert(title, message) {
-            document.getElementById('alert-title').textContent = title;
-            document.getElementById('alert-message').textContent = message;
-            document.getElementById('custom-alert-modal').classList.remove('hidden');
+        const loginSection = document.getElementById("admin-login-form");
+        const loginForm = document.getElementById("login-form");
+        const passwordInput = document.getElementById("admin-password");
+        const loginButton = document.getElementById("login-button");
+        const loginStatus = document.getElementById("login-status");
+        const adminContent = document.getElementById("admin-content");
+        const identityLabel = document.getElementById("admin-identity-label");
+        const contentPasteForm = document.getElementById("content-paste-form");
+        const contentPaste = document.getElementById("content-paste");
+        const reviewButton = document.getElementById("review-content-button");
+        const contentStatus = document.getElementById("content-form-status");
+        const contentPreview = document.getElementById("content-preview");
+        const publishButton = document.getElementById("publish-content-button");
+        const adminResourceList = document.getElementById("admin-resource-list");
+        const contentListLoading = document.getElementById("content-list-loading");
+        const noAdminResources = document.getElementById("no-admin-resources");
+        const createdContentCount = document.getElementById("created-content-count");
+
+        let pendingResource = null;
+        let contentUnsubscribe = null;
+        let submissionsUnsubscribe = null;
+        let adminUnlocked = false;
+
+        function setStatus(element, message, tone = "info") {
+            element.textContent = message;
+            element.className = `status status-${tone}`;
+            element.hidden = !message;
         }
 
-        document.getElementById('alert-ok-button').addEventListener('click', () => {
-            document.getElementById('custom-alert-modal').classList.add('hidden');
-        });
+        function setButtonLoading(button, loading, loadingLabel, idleLabel) {
+            button.disabled = loading;
+            button.textContent = loading ? loadingLabel : idleLabel;
+        }
 
-        // Initialize Firebase on window load
-        window.onload = async function() {
-            try {
-                const app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                db = getFirestore(app);
+        function clearPreview({ clearPaste = false } = {}) {
+            pendingResource = null;
+            contentPreview.hidden = true;
+            const image = document.getElementById("preview-image");
+            image.hidden = true;
+            image.src = "../logo_nbg.png";
+            image.alt = "";
+            if (clearPaste) contentPaste.value = "";
+        }
 
-                await signInAnonymously(auth);
-                
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        userId = user.uid;
-                        console.log("Admin Panel signed in with UID:", userId);
-                    } else {
-                        console.error("Admin Panel authentication failed.");
-                        showCustomAlert('Authentication Error', 'Failed to authenticate for admin panel. Please refresh.');
-                    }
-                });
+        function showPreview(resource) {
+            pendingResource = resource;
+            const imageWrap = document.getElementById("preview-image-wrap");
+            const image = document.getElementById("preview-image");
+            imageWrap.classList.toggle("book", resource.type === "book");
+            image.src = resource.imageUrl;
+            image.alt = resource.imageAlt;
+            image.hidden = false;
+            document.getElementById("preview-type").textContent = getResourceTypeLabel(resource);
+            document.getElementById("preview-title").textContent = resource.title;
+            const speaker = document.getElementById("preview-speaker");
+            speaker.textContent = resource.speaker;
+            speaker.hidden = !resource.speaker;
+            const dial = document.getElementById("preview-dial");
+            dial.hidden = !resource.dialIn;
+            document.getElementById("preview-phone").textContent = resource.dialIn ? `Dial in: ${resource.dialIn}` : "";
+            document.getElementById("preview-extension").textContent = resource.extension ? `Then press: ${resource.extension}` : "";
+            const link = document.getElementById("preview-link");
+            link.href = resource.primaryUrl;
+            link.textContent = resource.primaryLabel;
+            contentPreview.hidden = false;
+            const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            contentPreview.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth", block: "nearest" });
+        }
 
-            } catch (e) {
-                console.error("Error initializing Firebase in Admin Panel:", e);
-                showCustomAlert('Initialization Error', `Problem initializing Firebase. Error: ${e.message}`);
-            }
-        };
-
-        // Function to fetch and render all submissions
-        function fetchAndRenderAllSubmissions() {
-            if (!db || !userId) {
-                console.error("Database or user ID not available for admin panel.");
+        loginForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            setStatus(loginStatus, "");
+            if (passwordInput.value !== ADMIN_PASSWORD) {
+                setStatus(loginStatus, "Incorrect password. Please try again.", "error");
+                passwordInput.value = "";
+                passwordInput.focus();
                 return;
             }
 
-            const allSubmissionsList = document.getElementById('all-submissions-list');
-            const allSubmissionsSpinner = document.getElementById('all-submissions-loading-spinner');
-            const noAllSubmissionsMessage = document.getElementById('no-all-submissions');
+            setButtonLoading(loginButton, true, "Logging in…", "Log in");
+            try {
+                if (!auth.currentUser) await signInAnonymously(auth);
+                adminUnlocked = true;
+                loginSection.hidden = true;
+                adminContent.hidden = false;
+                identityLabel.textContent = "Password access";
+                subscribeToAdminContent();
+            } catch (error) {
+                console.error("Could not start the admin session:", error);
+                setStatus(loginStatus, "The admin session could not start. Please try again.", "error");
+            } finally {
+                setButtonLoading(loginButton, false, "Logging in…", "Log in");
+            }
+        });
 
-            allSubmissionsSpinner.classList.remove('hidden');
-            allSubmissionsList.innerHTML = '';
-            noAllSubmissionsMessage.classList.add('hidden');
+        function renderAdminResources(documents) {
+            adminResourceList.replaceChildren();
+            const resources = documents
+                .map((document) => normalizeStoredResource(document.data(), document.id))
+                .filter(Boolean);
 
-            const submissionsRef = collection(db, `artifacts/${appId}/public/data/submissions`);
+            createdContentCount.textContent = `${resources.length} ${resources.length === 1 ? "resource" : "resources"}`;
+            noAdminResources.hidden = resources.length !== 0;
 
-            onSnapshot(submissionsRef, (querySnapshot) => {
-                const allSubmissions = [];
-                querySnapshot.forEach(doc => {
-                    allSubmissions.push({ id: doc.id, data: doc.data() });
+            const fragment = document.createDocumentFragment();
+            resources.forEach((resource) => {
+                const item = document.createElement("article");
+                item.className = "admin-resource-item";
+                item.dataset.type = resource.type;
+
+                const image = document.createElement("img");
+                image.className = "admin-resource-thumb";
+                image.src = resource.imageUrl;
+                image.alt = "";
+                image.loading = "lazy";
+
+                const copy = document.createElement("div");
+                copy.className = "admin-resource-copy";
+                const title = document.createElement("h3");
+                title.textContent = resource.title;
+                const detail = document.createElement("p");
+                detail.textContent = `${getProviderName(resource)}${resource.speaker ? ` · ${resource.speaker}` : ""}`;
+                copy.append(title, detail);
+
+                const removeButton = document.createElement("button");
+                removeButton.className = "button button-danger";
+                removeButton.type = "button";
+                removeButton.textContent = "Remove";
+                removeButton.setAttribute("aria-label", `Remove ${resource.title}`);
+                removeButton.addEventListener("click", async () => {
+                    if (!window.confirm(`Remove “${resource.title}” from the public content library?`)) return;
+                    removeButton.disabled = true;
+                    removeButton.textContent = "Removing…";
+                    try {
+                        await deleteDoc(doc(db, CONTENT_COLLECTION, resource.id));
+                        setStatus(contentStatus, `Removed “${resource.title}”.`, "success");
+                    } catch (error) {
+                        console.error("Could not remove resource:", error);
+                        setStatus(contentStatus, "The resource could not be removed. Please try again.", "error");
+                        removeButton.disabled = false;
+                        removeButton.textContent = "Remove";
+                    }
                 });
-                renderAllSubmissions(allSubmissions);
-                allSubmissionsSpinner.classList.add('hidden');
+
+                item.append(image, copy, removeButton);
+                fragment.appendChild(item);
+            });
+            adminResourceList.appendChild(fragment);
+        }
+
+        function subscribeToAdminContent() {
+            if (contentUnsubscribe) return;
+            contentListLoading.hidden = false;
+            const contentQuery = query(collection(db, CONTENT_COLLECTION), orderBy("sortOrder", "desc"));
+            contentUnsubscribe = onSnapshot(contentQuery, (snapshot) => {
+                renderAdminResources(snapshot.docs);
+                contentListLoading.hidden = true;
             }, (error) => {
-                console.error("Error fetching all submissions for admin panel:", error);
-                showCustomAlert('Data Fetch Error', `Could not load all submissions. Error: ${error.message}`);
-                allSubmissionsSpinner.classList.add('hidden');
+                console.error("Could not load admin-created resources:", error);
+                contentListLoading.textContent = "Resources could not be loaded.";
             });
         }
 
-        // Function to render all submissions to the UI
-        function renderAllSubmissions(submissions) {
-            const allSubmissionsList = document.getElementById('all-submissions-list');
-            const noAllSubmissionsMessage = document.getElementById('no-all-submissions');
-            
-            allSubmissionsList.innerHTML = ''; // Clear previous submissions
-            
-            if (submissions.length === 0) {
-                noAllSubmissionsMessage.classList.remove('hidden');
-            } else {
-                noAllSubmissionsMessage.classList.add('hidden');
-                submissions.forEach((submissionData) => {
-                    const submission = submissionData.data;
-                    const submissionId = submissionData.id;
-                    const card = document.createElement('div');
-                    card.classList.add('bg-slate-50', 'p-6', 'rounded-xl', 'shadow-sm', 'border', 'border-slate-200');
-                    
-                    const submissionDate = submission.timestamp ? new Date(submission.timestamp).toLocaleString() : 'N/A';
-                    
-                    let contentHTML = `
-                        <h4 class="text-xl font-bold text-custom-deep-purple mb-2">Submission ID: <span class="font-mono text-base">${submissionId}</span></h4>
-                        <p class="text-sm text-slate-500 mb-4">Submitted on: ${submissionDate}</p>
-                        <ul class="space-y-2 text-slate-700">
-                    `;
-                    
-                    for (const [key, value] of Object.entries(submission)) {
-                        if (key !== 'timestamp' && key !== 'uid' && key !== 'formType' && value !== null) {
-                            const formattedKey = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-                            contentHTML += `<li><strong class="font-semibold">${formattedKey}:</strong> ${value}</li>`;
-                        }
-                    }
-                    contentHTML += `</ul>`;
-                    card.innerHTML = contentHTML;
-                    allSubmissionsList.appendChild(card);
-                });
+        contentPasteForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            clearPreview();
+            setStatus(contentStatus, "");
+            setButtonLoading(reviewButton, true, "Reading link…", "Review content");
+            try {
+                const resource = await buildResourceFromPaste(contentPaste.value);
+                showPreview(resource);
+                setStatus(contentStatus, `${getProviderName(resource)} content recognized. Review it below before publishing.`, "success");
+            } catch (error) {
+                const message = error instanceof ContentParseError
+                    ? error.message
+                    : "The link details could not be loaded. Check your connection and try again.";
+                if (!(error instanceof ContentParseError)) {
+                    console.error("Content metadata could not be loaded:", error);
+                }
+                setStatus(contentStatus, message, "error");
+            } finally {
+                setButtonLoading(reviewButton, false, "Reading link…", "Review content");
             }
+        });
+
+        publishButton.addEventListener("click", async () => {
+            if (!pendingResource || !adminUnlocked || !auth.currentUser) {
+                setStatus(contentStatus, "Your admin session is not ready. Sign in again and retry.", "error");
+                return;
+            }
+
+            setButtonLoading(publishButton, true, "Publishing…", "Publish resource");
+            try {
+                const resourceRef = doc(db, CONTENT_COLLECTION, pendingResource.id);
+                const existing = await getDoc(resourceRef);
+                if (existing.exists()) {
+                    setStatus(contentStatus, "That resource has already been added.", "error");
+                    return;
+                }
+
+                await setDoc(resourceRef, {
+                    ...pendingResource,
+                    schemaVersion: 1,
+                    published: true,
+                    sortOrder: Date.now(),
+                    createdAt: serverTimestamp(),
+                    createdBy: auth.currentUser.uid
+                });
+                const publishedTitle = pendingResource.title;
+                clearPreview({ clearPaste: true });
+                setStatus(contentStatus, `Published “${publishedTitle}”. It is now part of the public library.`, "success");
+            } catch (error) {
+                console.error("Could not publish resource:", error);
+                setStatus(contentStatus, "The resource could not be published. Please try again.", "error");
+            } finally {
+                setButtonLoading(publishButton, false, "Publishing…", "Publish resource");
+            }
+        });
+
+        document.getElementById("clear-content-button").addEventListener("click", () => {
+            clearPreview({ clearPaste: true });
+            setStatus(contentStatus, "");
+            contentPaste.focus();
+        });
+
+        document.getElementById("cancel-preview-button").addEventListener("click", () => {
+            clearPreview();
+            setStatus(contentStatus, "Edit the pasted text, then review it again.", "info");
+            contentPaste.focus();
+        });
+
+        function formatSubmissionValue(value) {
+            if (value === null || value === undefined || value === "") return "—";
+            if (Array.isArray(value)) return value.join(", ");
+            if (typeof value === "object") return JSON.stringify(value);
+            return String(value);
         }
 
-        // Admin Login Logic
-        const adminLoginForm = document.getElementById('admin-login-form');
-        const adminPasswordInput = document.getElementById('admin-password');
-        const loginButton = document.getElementById('login-button');
-        const loginErrorMessage = document.getElementById('login-error-message');
-        const adminContent = document.getElementById('admin-content');
-        const logoutButton = document.getElementById('logout-button');
+        function renderSubmissions(submissions) {
+            const list = document.getElementById("all-submissions-list");
+            const empty = document.getElementById("no-all-submissions");
+            list.replaceChildren();
+            empty.hidden = submissions.length !== 0;
 
-        loginButton.addEventListener('click', () => {
-            if (adminPasswordInput.value === ADMIN_PASSWORD) {
-                adminLoginForm.classList.add('hidden');
-                adminContent.classList.remove('hidden');
-                loginErrorMessage.classList.add('hidden');
-                fetchAndRenderAllSubmissions(); // Fetch data once logged in
-            } else {
-                loginErrorMessage.classList.remove('hidden');
-                adminPasswordInput.value = ''; // Clear password field
-            }
+            const sorted = [...submissions].sort((a, b) => {
+                const aTime = Date.parse(a.data.timestamp || "") || 0;
+                const bTime = Date.parse(b.data.timestamp || "") || 0;
+                return bTime - aTime;
+            });
+
+            const fragment = document.createDocumentFragment();
+            sorted.forEach(({ id, data }) => {
+                const card = document.createElement("article");
+                card.className = "submission-card";
+                const header = document.createElement("header");
+                const title = document.createElement("h3");
+                title.textContent = `Submission ${id}`;
+                const time = document.createElement("time");
+                const parsedDate = Date.parse(data.timestamp || "");
+                time.textContent = Number.isNaN(parsedDate) ? "Date unavailable" : new Date(parsedDate).toLocaleString();
+                if (!Number.isNaN(parsedDate)) time.dateTime = new Date(parsedDate).toISOString();
+                header.append(title, time);
+
+                const fields = document.createElement("dl");
+                fields.className = "submission-fields";
+                Object.entries(data).forEach(([key, value]) => {
+                    if (["timestamp", "uid", "formType"].includes(key) || value === null) return;
+                    const group = document.createElement("div");
+                    const label = document.createElement("dt");
+                    label.textContent = key.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+                    const detail = document.createElement("dd");
+                    detail.textContent = formatSubmissionValue(value);
+                    group.append(label, detail);
+                    fields.appendChild(group);
+                });
+
+                card.append(header, fields);
+                fragment.appendChild(card);
+            });
+            list.appendChild(fragment);
+        }
+
+        function subscribeToSubmissions() {
+            if (submissionsUnsubscribe) return;
+            const loading = document.getElementById("all-submissions-loading");
+            loading.hidden = false;
+            const submissionsRef = collection(db, `artifacts/${appId}/public/data/submissions`);
+            submissionsUnsubscribe = onSnapshot(submissionsRef, (snapshot) => {
+                const submissions = snapshot.docs.map((document) => ({ id: document.id, data: document.data() }));
+                renderSubmissions(submissions);
+                loading.hidden = true;
+            }, (error) => {
+                console.error("Could not load submissions:", error);
+                loading.textContent = "Submissions could not be loaded.";
+            });
+        }
+
+        const tabs = [...document.querySelectorAll('[role="tab"]')];
+        tabs.forEach((tab) => {
+            tab.addEventListener("click", () => {
+                tabs.forEach((item) => {
+                    const selected = item === tab;
+                    item.setAttribute("aria-selected", String(selected));
+                    document.getElementById(item.getAttribute("aria-controls")).hidden = !selected;
+                });
+                if (tab.id === "submissions-tab" && !LOCAL_PREVIEW) subscribeToSubmissions();
+            });
         });
 
-        logoutButton.addEventListener('click', () => {
-            adminContent.classList.add('hidden');
-            adminLoginForm.classList.remove('hidden');
-            adminPasswordInput.value = ''; // Clear password field on logout
-            document.getElementById('all-submissions-list').innerHTML = ''; // Clear submissions list
+        document.getElementById("logout-button").addEventListener("click", async () => {
+            adminUnlocked = false;
+            contentUnsubscribe?.();
+            submissionsUnsubscribe?.();
+            contentUnsubscribe = null;
+            submissionsUnsubscribe = null;
+            await signOut(auth);
+            adminContent.hidden = true;
+            loginSection.hidden = false;
+            passwordInput.value = "";
+            setStatus(loginStatus, "");
+            passwordInput.focus();
         });
+
+        if (LOCAL_PREVIEW) {
+            loginSection.hidden = true;
+            adminContent.hidden = false;
+            identityLabel.textContent = "Local preview";
+            document.getElementById("logout-button").hidden = true;
+            document.getElementById("submissions-tab").hidden = true;
+            subscribeToAdminContent();
+        }
     </script>
 </body>
 </html>

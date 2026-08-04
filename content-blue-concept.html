@@ -96,13 +96,27 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
         </div>
     </footer>
 
-    <script>
-        /*
-         * Future admin integration:
-         * Replace this sample array with documents from a Firebase "content" collection.
-         * The intended admin fields are represented here, including source, embedUrl, dialIn, and extension.
-         */
-        const resources = [
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { collection, getFirestore, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import {
+            CONTENT_COLLECTION,
+            getProviderName,
+            getResourceTypeLabel,
+            mergeResourceCollections
+        } from "./content-resource-tools.mjs?v=2026-08-04.3";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDxEV7W2m4jbJiVl0Sc6cN7gBH7oWu_rl8",
+            authDomain: "binyanshalem-28b1a.firebaseapp.com",
+            projectId: "binyanshalem-28b1a",
+            storageBucket: "binyanshalem-28b1a.firebasestorage.app",
+            messagingSenderId: "923017150407",
+            appId: "1:923017150407:web:35d71ffa41943bbbf623e2",
+            measurementId: "G-YRWCMR3HVD"
+        };
+
+        const bakedInResources = [
             {
                 id: "anshei-shalom-shiur",
                 type: "video",
@@ -310,6 +324,7 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
             }
         ];
 
+        let resources = [...bakedInResources];
         const list = document.getElementById("resource-list");
         const count = document.getElementById("resource-count");
         const emptyState = document.getElementById("empty-state");
@@ -367,7 +382,7 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
             visual.setAttribute(
                 "aria-label",
                 resource.type === "video"
-                    ? `Watch ${resource.title} on ${resource.source === "youtube" ? "YouTube" : "TorahAnytime"}`
+                    ? `Watch ${resource.title} on ${getProviderName(resource)}`
                     : `Shop for ${resource.title} on Amazon`
             );
 
@@ -403,9 +418,7 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
             body.className = "resource-body";
             const type = document.createElement("p");
             type.className = "resource-type";
-            type.textContent = resource.type === "video"
-                ? (resource.source === "youtube" ? "YouTube video" : "Video & dial-in")
-                : resource.type === "book" ? "Book" : "Inspiration";
+            type.textContent = getResourceTypeLabel(resource);
 
             const title = document.createElement("h3");
             title.textContent = resource.title;
@@ -423,7 +436,7 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
                 const actions = document.createElement("div");
                 actions.className = "resource-actions";
                 const actionLabel = resource.type === "video"
-                    ? `Watch ${resource.title} on ${resource.source === "youtube" ? "YouTube" : "TorahAnytime"}`
+                    ? `Watch ${resource.title} on ${getProviderName(resource)}`
                     : `Shop for ${resource.title} on Amazon`;
                 actions.appendChild(createLink(resource.primaryLabel, resource.primaryUrl, "action-link primary", actionLabel));
                 body.appendChild(actions);
@@ -458,9 +471,8 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
             return article;
         }
 
-        resources.forEach((resource) => list.appendChild(createResource(resource)));
-
         function applyFilter(filter) {
+            activeFilter = filter;
             let visible = 0;
             [...list.children].forEach((item) => {
                 const show = filter === "all"
@@ -497,7 +509,30 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
         });
 
         const requestedFormat = new URLSearchParams(window.location.search).get("format");
-        applyFilter(["video", "book", "inspiration"].includes(requestedFormat) ? requestedFormat : "all");
+        let activeFilter = ["video", "book", "inspiration"].includes(requestedFormat) ? requestedFormat : "all";
+
+        function renderResources(nextResources) {
+            resources = nextResources;
+            const fragment = document.createDocumentFragment();
+            resources.forEach((resource) => fragment.appendChild(createResource(resource)));
+            list.replaceChildren(fragment);
+            applyFilter(activeFilter);
+        }
+
+        renderResources(bakedInResources);
+
+        try {
+            const firebaseApp = initializeApp(firebaseConfig);
+            const db = getFirestore(firebaseApp);
+            onSnapshot(collection(db, CONTENT_COLLECTION), (snapshot) => {
+                const storedResources = snapshot.docs.map((document) => ({ id: document.id, data: document.data() }));
+                renderResources(mergeResourceCollections(bakedInResources, storedResources));
+            }, (error) => {
+                console.warn("Admin-created resources could not be loaded; showing the baked-in library.", error);
+            });
+        } catch (error) {
+            console.warn("Firebase content initialization failed; showing the baked-in library.", error);
+        }
 
         const menuButton = document.querySelector(".menu-button");
         const mobileMenu = document.getElementById("mobile-menu");
