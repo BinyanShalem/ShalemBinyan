@@ -15,7 +15,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;750&amp;display=swap" rel="stylesheet">
-    <script defer src="/cache-refresh.js?v=2026-08-04.1"></script>
+    <script defer src="/cache-refresh.js?v=2026-08-04.3"></script>
     <style>
         :root {
             --mist: #f4fafd;
@@ -915,6 +915,35 @@
             letter-spacing: -0.02em;
         }
 
+        .form-heading-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.35rem 1.25rem;
+        }
+
+        .form-faq-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            min-height: 44px;
+            color: var(--deep-water);
+            font-size: 0.82rem;
+            font-weight: 750;
+            text-underline-offset: 0.25em;
+        }
+
+        .form-faq-link:hover {
+            color: var(--midnight);
+        }
+
+        .form-faq-link:focus-visible {
+            outline: 3px solid var(--harbor);
+            outline-offset: 3px;
+            border-radius: 4px;
+        }
+
         .form-note {
             margin: 0.4rem 0 1.6rem;
             color: var(--muted);
@@ -1708,7 +1737,7 @@
                     <div class="brand-mark-crop">
                         <img
                             class="brand-mark"
-                            src="logo_nbg.png?v=2026-08-04.1"
+                            src="logo_nbg.png?v=2026-08-04.3"
                             alt="Binyan Shalem logo"
                         >
                     </div>
@@ -1785,7 +1814,10 @@
                 </div>
 
                 <form class="intake-card" id="concept-form">
-                    <h3>Who is submitting the form?</h3>
+                    <div class="form-heading-row">
+                        <h3>Who is submitting the form?</h3>
+                        <a class="form-faq-link" href="faq-blue-concept.html">Have questions? Read the FAQ <span aria-hidden="true">→</span></a>
+                    </div>
                     <p class="form-note">Fields marked with * are required.</p>
 
                     <div class="submitter-choice" role="group" aria-label="Who is submitting the form?">

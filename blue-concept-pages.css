@@ -834,6 +834,16 @@ input {
     line-height: 1.75;
 }
 
+.faq-item p a {
+    color: var(--deep-water);
+    font-weight: 750;
+    text-underline-offset: 0.25em;
+}
+
+.faq-item p a:hover {
+    color: var(--midnight);
+}
+
 .site-footer {
     color: #dcecf4;
     background: var(--deep-water);
