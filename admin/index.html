@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-    <script defer src="/cache-refresh.js?v=2026-08-04.4"></script>
+    <script defer src="/cache-refresh.js?v=2026-08-05.1"></script>
     <style>
         :root {
             --admin-purple: #723358;
@@ -347,12 +347,18 @@
             display: grid;
             grid-template-columns: minmax(180px, 0.6fr) minmax(0, 1.4fr);
             gap: clamp(1.2rem, 4vw, 2rem);
-            align-items: center;
+            align-items: start;
             margin-top: 1.5rem;
             padding: 1.25rem;
             background: #f8fafb;
             border: 1px solid var(--admin-line);
             border-radius: 14px;
+        }
+
+        .preview-media {
+            position: sticky;
+            top: 1rem;
+            min-width: 0;
         }
 
         .preview-image-wrap {
@@ -379,33 +385,88 @@
             object-fit: contain;
         }
 
-        .preview-copy h3 {
-            margin-top: 0.85rem;
+        .preview-media .resource-badge {
+            display: inline-block;
+            margin-top: 0.9rem;
+        }
+
+        .preview-lock-note {
+            margin: 0.65rem 0 0;
+            color: var(--admin-muted);
+            font-size: 0.78rem;
+            line-height: 1.5;
+        }
+
+        .preview-editor {
+            min-width: 0;
+        }
+
+        .preview-editor-heading h3 {
             font-size: clamp(1.2rem, 3vw, 1.6rem);
         }
 
-        .preview-speaker {
+        .preview-editor-heading p {
             margin: 0.5rem 0 0;
             color: var(--admin-muted);
-            font-weight: 600;
+            font-size: 0.84rem;
+            line-height: 1.55;
         }
 
-        .preview-dial {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.65rem 1.25rem;
-            margin: 1rem 0 0;
-            color: #475467;
-            font-size: 0.86rem;
+        .preview-fields {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.9rem 1rem;
+            margin-top: 1.2rem;
+        }
+
+        .preview-field {
+            display: grid;
+            min-width: 0;
+            gap: 0.42rem;
+        }
+
+        .preview-field-wide {
+            grid-column: 1 / -1;
+        }
+
+        .preview-source-fields {
+            display: grid;
+            grid-column: 1 / -1;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.9rem 1rem;
+            margin-top: 0.25rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--admin-line);
+        }
+
+        .preview-source-title {
+            grid-column: 1 / -1;
+            margin: 0;
+            color: var(--admin-purple-dark);
+            font-size: 0.82rem;
+            font-weight: 700;
+        }
+
+        .preview-field-help {
+            margin: 0;
+            color: var(--admin-muted);
+            font-size: 0.74rem;
+            line-height: 1.45;
         }
 
         .preview-link {
             display: inline-block;
-            margin-top: 0.9rem;
+            margin-top: 0.75rem;
             color: var(--admin-purple);
             font-size: 0.86rem;
             font-weight: 700;
             text-underline-offset: 3px;
+        }
+
+        .preview-link[aria-disabled="true"] {
+            color: var(--admin-muted);
+            pointer-events: none;
+            text-decoration: none;
         }
 
         .section-divider {
@@ -562,6 +623,10 @@
                 grid-template-columns: 1fr;
             }
 
+            .preview-media {
+                position: static;
+            }
+
             .admin-resource-item {
                 grid-template-columns: 72px minmax(0, 1fr);
             }
@@ -596,6 +661,16 @@
             .form-actions,
             .preview-actions {
                 display: grid;
+            }
+
+            .preview-fields,
+            .preview-source-fields {
+                grid-template-columns: 1fr;
+            }
+
+            .preview-field-wide,
+            .preview-source-title {
+                grid-column: auto;
             }
 
             .button {
@@ -673,24 +748,72 @@
                     <p class="status" id="content-form-status" role="status" aria-live="polite" hidden></p>
                 </form>
 
-                <section class="content-preview" id="content-preview" aria-labelledby="preview-title" hidden>
-                    <div class="preview-image-wrap" id="preview-image-wrap">
-                        <img class="preview-image" id="preview-image" src="../logo_nbg.png" alt="" hidden>
-                    </div>
-                    <div class="preview-copy">
-                        <span class="resource-badge" id="preview-type"></span>
-                        <h3 id="preview-title"></h3>
-                        <p class="preview-speaker" id="preview-speaker"></p>
-                        <div class="preview-dial" id="preview-dial" hidden>
-                            <span id="preview-phone"></span>
-                            <span id="preview-extension"></span>
+                <section class="content-preview" id="content-preview" aria-labelledby="preview-editor-title" hidden>
+                    <div class="preview-media">
+                        <div class="preview-image-wrap" id="preview-image-wrap">
+                            <img class="preview-image" id="preview-image" src="../logo_nbg.png" alt="" hidden>
                         </div>
-                        <a class="preview-link" id="preview-link" target="_blank" rel="noopener noreferrer">Open original link</a>
+                        <span class="resource-badge" id="preview-type"></span>
+                        <p class="preview-lock-note">Provider, content type, and internal ID stay locked so playback and duplicate detection continue to work.</p>
+                        <a class="preview-link" id="preview-link" target="_blank" rel="noopener noreferrer">Test destination link ↗</a>
+                    </div>
+                    <form class="preview-editor" id="content-preview-form" novalidate>
+                        <div class="preview-editor-heading">
+                            <h3 id="preview-editor-title">Review and edit</h3>
+                            <p>Change any public detail below. Your edits are what visitors will see after publishing.</p>
+                        </div>
+                        <div class="preview-fields">
+                            <label class="preview-field preview-field-wide">
+                                <span class="field-label">Title</span>
+                                <input class="form-input" id="preview-title" type="text" maxlength="240" required>
+                            </label>
+                            <label class="preview-field">
+                                <span class="field-label">Speaker or author</span>
+                                <input class="form-input" id="preview-speaker" type="text" maxlength="180">
+                            </label>
+                            <label class="preview-field">
+                                <span class="field-label">Button label</span>
+                                <input class="form-input" id="preview-primary-label" type="text" maxlength="80" required>
+                            </label>
+                            <label class="preview-field preview-field-wide">
+                                <span class="field-label">Destination URL</span>
+                                <input class="form-input" id="preview-primary-url" type="url" inputmode="url" maxlength="2048" required>
+                            </label>
+                            <label class="preview-field preview-field-wide">
+                                <span class="field-label">Image URL</span>
+                                <input class="form-input" id="preview-image-url" type="url" inputmode="url" maxlength="2048" required>
+                            </label>
+                            <label class="preview-field preview-field-wide">
+                                <span class="field-label">Image description</span>
+                                <input class="form-input" id="preview-image-alt" type="text" maxlength="300">
+                                <span class="preview-field-help">Used by screen readers. If left blank, the title and speaker are used.</span>
+                            </label>
+                            <div class="preview-source-fields" id="preview-youtube-fields" hidden>
+                                <p class="preview-source-title">YouTube playback</p>
+                                <label class="preview-field preview-field-wide">
+                                    <span class="field-label">Playback URL</span>
+                                    <input class="form-input" id="preview-embed-url" type="url" inputmode="url" maxlength="2048">
+                                    <span class="preview-field-help">A YouTube watch, Shorts, or embed link is accepted and converted to the privacy-enhanced player.</span>
+                                </label>
+                            </div>
+                            <div class="preview-source-fields" id="preview-torahanytime-fields" hidden>
+                                <p class="preview-source-title">TorahAnytime dial-in</p>
+                                <label class="preview-field">
+                                    <span class="field-label">Dial-in number</span>
+                                    <input class="form-input" id="preview-dial-in" type="tel" inputmode="tel" maxlength="40">
+                                </label>
+                                <label class="preview-field">
+                                    <span class="field-label">Press extension</span>
+                                    <input class="form-input" id="preview-extension" type="text" inputmode="numeric" maxlength="20">
+                                </label>
+                            </div>
+                        </div>
+                        <p class="status" id="preview-edit-status" role="status" aria-live="polite" hidden></p>
                         <div class="preview-actions">
-                            <button class="button button-primary" id="publish-content-button" type="button">Publish resource</button>
+                            <button class="button button-primary" id="publish-content-button" type="submit">Publish resource</button>
                             <button class="button button-secondary" id="cancel-preview-button" type="button">Edit pasted text</button>
                         </div>
-                    </div>
+                    </form>
                 </section>
 
                 <div class="section-divider"></div>
@@ -740,13 +863,14 @@
             setDoc
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import {
+            applyResourceEdits,
             buildResourceFromPaste,
             CONTENT_COLLECTION,
             ContentParseError,
             getProviderName,
             getResourceTypeLabel,
             normalizeStoredResource
-        } from "../content-resource-tools.mjs?v=2026-08-04.4";
+        } from "../content-resource-tools.mjs?v=2026-08-05.1";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDxEV7W2m4jbJiVl0Sc6cN7gBH7oWu_rl8",
@@ -779,11 +903,24 @@
         const reviewButton = document.getElementById("review-content-button");
         const contentStatus = document.getElementById("content-form-status");
         const contentPreview = document.getElementById("content-preview");
+        const previewEditor = document.getElementById("content-preview-form");
+        const previewEditStatus = document.getElementById("preview-edit-status");
         const publishButton = document.getElementById("publish-content-button");
         const adminResourceList = document.getElementById("admin-resource-list");
         const contentListLoading = document.getElementById("content-list-loading");
         const noAdminResources = document.getElementById("no-admin-resources");
         const createdContentCount = document.getElementById("created-content-count");
+        const previewFields = {
+            title: document.getElementById("preview-title"),
+            speaker: document.getElementById("preview-speaker"),
+            primaryLabel: document.getElementById("preview-primary-label"),
+            primaryUrl: document.getElementById("preview-primary-url"),
+            imageUrl: document.getElementById("preview-image-url"),
+            imageAlt: document.getElementById("preview-image-alt"),
+            embedUrl: document.getElementById("preview-embed-url"),
+            dialIn: document.getElementById("preview-dial-in"),
+            extension: document.getElementById("preview-extension")
+        };
 
         let pendingResource = null;
         let contentUnsubscribe = null;
@@ -804,6 +941,10 @@
         function clearPreview({ clearPaste = false } = {}) {
             pendingResource = null;
             contentPreview.hidden = true;
+            previewEditor.reset();
+            setStatus(previewEditStatus, "");
+            document.getElementById("preview-youtube-fields").hidden = true;
+            document.getElementById("preview-torahanytime-fields").hidden = true;
             const image = document.getElementById("preview-image");
             image.hidden = true;
             image.src = "../logo_nbg.png";
@@ -811,26 +952,52 @@
             if (clearPaste) contentPaste.value = "";
         }
 
+        function safeHttpsUrl(value) {
+            try {
+                const url = new URL(String(value || "").trim());
+                return url.protocol === "https:" ? url.href : "";
+            } catch {
+                return "";
+            }
+        }
+
+        function updatePreviewMedia() {
+            const image = document.getElementById("preview-image");
+            const imageUrl = safeHttpsUrl(previewFields.imageUrl.value);
+            image.hidden = !imageUrl;
+            if (imageUrl && image.src !== imageUrl) image.src = imageUrl;
+            image.alt = previewFields.imageAlt.value.trim()
+                || [previewFields.title.value.trim(), previewFields.speaker.value.trim()].filter(Boolean).join(" by ");
+
+            const link = document.getElementById("preview-link");
+            const primaryUrl = safeHttpsUrl(previewFields.primaryUrl.value);
+            if (primaryUrl) {
+                link.href = primaryUrl;
+                link.removeAttribute("aria-disabled");
+            } else {
+                link.removeAttribute("href");
+                link.setAttribute("aria-disabled", "true");
+            }
+        }
+
         function showPreview(resource) {
             pendingResource = resource;
             const imageWrap = document.getElementById("preview-image-wrap");
-            const image = document.getElementById("preview-image");
             imageWrap.classList.toggle("book", resource.type === "book");
-            image.src = resource.imageUrl;
-            image.alt = resource.imageAlt;
-            image.hidden = false;
             document.getElementById("preview-type").textContent = getResourceTypeLabel(resource);
-            document.getElementById("preview-title").textContent = resource.title;
-            const speaker = document.getElementById("preview-speaker");
-            speaker.textContent = resource.speaker;
-            speaker.hidden = !resource.speaker;
-            const dial = document.getElementById("preview-dial");
-            dial.hidden = !resource.dialIn;
-            document.getElementById("preview-phone").textContent = resource.dialIn ? `Dial in: ${resource.dialIn}` : "";
-            document.getElementById("preview-extension").textContent = resource.extension ? `Then press: ${resource.extension}` : "";
-            const link = document.getElementById("preview-link");
-            link.href = resource.primaryUrl;
-            link.textContent = resource.primaryLabel;
+            previewFields.title.value = resource.title;
+            previewFields.speaker.value = resource.speaker;
+            previewFields.primaryLabel.value = resource.primaryLabel;
+            previewFields.primaryUrl.value = resource.primaryUrl;
+            previewFields.imageUrl.value = resource.imageUrl;
+            previewFields.imageAlt.value = resource.imageAlt;
+            previewFields.embedUrl.value = resource.embedUrl;
+            previewFields.dialIn.value = resource.dialIn;
+            previewFields.extension.value = resource.extension;
+            document.getElementById("preview-youtube-fields").hidden = resource.source !== "youtube";
+            document.getElementById("preview-torahanytime-fields").hidden = resource.source !== "torahanytime";
+            setStatus(previewEditStatus, "");
+            updatePreviewMedia();
             contentPreview.hidden = false;
             const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
             contentPreview.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth", block: "nearest" });
@@ -860,6 +1027,10 @@
             } finally {
                 setButtonLoading(loginButton, false, "Logging in…", "Log in");
             }
+        });
+
+        Object.values(previewFields).forEach((field) => {
+            field.addEventListener("input", updatePreviewMedia);
         });
 
         function renderAdminResources(documents) {
@@ -952,35 +1123,58 @@
             }
         });
 
-        publishButton.addEventListener("click", async () => {
-            if (!pendingResource || !adminUnlocked || !auth.currentUser) {
-                setStatus(contentStatus, "Your admin session is not ready. Sign in again and retry.", "error");
+        previewEditor.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            if (!pendingResource) {
+                setStatus(previewEditStatus, "Review a supported resource before publishing.", "error");
+                return;
+            }
+
+            let editedResource;
+            try {
+                editedResource = applyResourceEdits(pendingResource, Object.fromEntries(
+                    Object.entries(previewFields).map(([key, field]) => [key, field.value])
+                ));
+            } catch (error) {
+                const message = error instanceof ContentParseError
+                    ? error.message
+                    : "One or more edited fields are invalid. Check the links and try again.";
+                setStatus(previewEditStatus, message, "error");
+                if (error instanceof ContentParseError && error.field && previewFields[error.field]) {
+                    previewFields[error.field].focus();
+                }
+                return;
+            }
+
+            if (!adminUnlocked || !auth.currentUser) {
+                setStatus(previewEditStatus, "Your admin session is not ready. Sign in again and retry.", "error");
                 return;
             }
 
             setButtonLoading(publishButton, true, "Publishing…", "Publish resource");
+            setStatus(previewEditStatus, "");
             try {
-                const resourceRef = doc(db, CONTENT_COLLECTION, pendingResource.id);
+                const resourceRef = doc(db, CONTENT_COLLECTION, editedResource.id);
                 const existing = await getDoc(resourceRef);
                 if (existing.exists()) {
-                    setStatus(contentStatus, "That resource has already been added.", "error");
+                    setStatus(previewEditStatus, "That resource has already been added.", "error");
                     return;
                 }
 
                 await setDoc(resourceRef, {
-                    ...pendingResource,
+                    ...editedResource,
                     schemaVersion: 1,
                     published: true,
                     sortOrder: Date.now(),
                     createdAt: serverTimestamp(),
                     createdBy: auth.currentUser.uid
                 });
-                const publishedTitle = pendingResource.title;
+                const publishedTitle = editedResource.title;
                 clearPreview({ clearPaste: true });
                 setStatus(contentStatus, `Published “${publishedTitle}”. It is now part of the public library.`, "success");
             } catch (error) {
                 console.error("Could not publish resource:", error);
-                setStatus(contentStatus, "The resource could not be published. Please try again.", "error");
+                setStatus(previewEditStatus, "The resource could not be published. Please try again.", "error");
             } finally {
                 setButtonLoading(publishButton, false, "Publishing…", "Publish resource");
             }

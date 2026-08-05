@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import {
+    applyResourceEdits,
     buildResourceFromPaste,
     ContentParseError,
     detectContentSource,
@@ -113,6 +114,51 @@ test("builds iTorah lectures as linked video resources without dial-in fields", 
     assert.equal(resource.dialIn, "");
     assert.equal(resource.primaryLabel, "Watch on iTorah");
     assert.equal(getResourceTypeLabel(resource), "iTorah video");
+});
+
+test("applies manual review edits while preserving internal resource identity", () => {
+    const resource = applyResourceEdits({
+        id: "torahanytime_421705",
+        type: "video",
+        source: "torahanytime"
+    }, {
+        title: "  A Better Marriage  ",
+        speaker: "R' Eli Mansour",
+        primaryLabel: "Open lecture",
+        primaryUrl: "https://MyTaT.me/v421705",
+        imageUrl: "https://www.torahanytime.com/images/audio-thumb-male.svg",
+        imageAlt: "Rabbi Eli Mansour teaching",
+        dialIn: "605-605-2220",
+        extension: "9421705"
+    });
+
+    assert.equal(resource.id, "torahanytime_421705");
+    assert.equal(resource.source, "torahanytime");
+    assert.equal(resource.type, "video");
+    assert.equal(resource.title, "A Better Marriage");
+    assert.equal(resource.primaryLabel, "Open lecture");
+    assert.equal(resource.dialIn, "605-605-2220");
+    assert.equal(resource.dialInHref, "tel:+16056052220");
+    assert.equal(resource.extension, "9421705");
+});
+
+test("normalizes a manually edited YouTube playback URL", () => {
+    const resource = applyResourceEdits({
+        id: "youtube_xYJON0S7WWo",
+        type: "video",
+        source: "youtube"
+    }, {
+        title: "Edited title",
+        speaker: "Edited speaker",
+        primaryLabel: "Watch now",
+        primaryUrl: "https://youtu.be/xYJON0S7WWo",
+        imageUrl: "https://i.ytimg.com/vi/xYJON0S7WWo/hqdefault.jpg",
+        imageAlt: "Edited thumbnail description",
+        embedUrl: "https://www.youtube.com/watch?v=xYJON0S7WWo"
+    });
+
+    assert.equal(resource.embedUrl, "https://www.youtube-nocookie.com/embed/xYJON0S7WWo?rel=0");
+    assert.equal(resource.primaryUrl, "https://youtu.be/xYJON0S7WWo");
 });
 
 test("rejects unsupported links with a useful validation error", async () => {

@@ -124,6 +124,90 @@ function resourceBase(resource) {
     };
 }
 
+function editValidationError(message, field) {
+    const error = new ContentParseError(message, "invalid-edit");
+    error.field = field;
+    return error;
+}
+
+function editedString(value, field, label, maxLength, { required = false } = {}) {
+    const normalized = String(value ?? "").trim();
+    if (required && !normalized) throw editValidationError(`${label} is required.`, field);
+    if (normalized.length > maxLength) {
+        throw editValidationError(`${label} must be ${maxLength} characters or fewer.`, field);
+    }
+    return normalized;
+}
+
+function editedHttpsUrl(value, field, label, { required = false } = {}) {
+    const normalized = editedString(value, field, label, 2048, { required });
+    if (!normalized) return "";
+    const url = parseHttpUrl(normalized);
+    if (!url || url.protocol !== "https:") {
+        throw editValidationError(`${label} must be a complete https:// link.`, field);
+    }
+    return url.href;
+}
+
+export function applyResourceEdits(resource, edits = {}) {
+    if (!resource || typeof resource !== "object") {
+        throw editValidationError("Review a supported resource before publishing.", "title");
+    }
+
+    const title = editedString(edits.title, "title", "Title", 240, { required: true });
+    const speaker = editedString(edits.speaker, "speaker", "Speaker or author", 180);
+    const primaryLabel = editedString(edits.primaryLabel, "primaryLabel", "Button label", 80, { required: true });
+    const primaryUrl = editedHttpsUrl(edits.primaryUrl, "primaryUrl", "Destination URL", { required: true });
+    const imageUrl = editedHttpsUrl(edits.imageUrl, "imageUrl", "Image URL", { required: true });
+    const imageAlt = editedString(edits.imageAlt, "imageAlt", "Image description", 300)
+        || (speaker ? `${title} by ${speaker}` : title);
+
+    let embedUrl = "";
+    if (resource.source === "youtube") {
+        const editedEmbedUrl = editedHttpsUrl(edits.embedUrl, "embedUrl", "YouTube playback URL", { required: true });
+        const videoId = extractYouTubeVideoId(editedEmbedUrl);
+        if (!videoId) {
+            throw editValidationError("YouTube playback URL must contain a valid YouTube video ID.", "embedUrl");
+        }
+        embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?rel=0`;
+    }
+
+    let dialIn = "";
+    let dialInHref = "";
+    let extension = "";
+    if (resource.source === "torahanytime") {
+        dialIn = editedString(edits.dialIn, "dialIn", "Dial-in number", 40);
+        extension = editedString(edits.extension, "extension", "Press extension", 20);
+        if (dialIn || extension) {
+            if (!dialIn) throw editValidationError("Add a dial-in number or clear the extension.", "dialIn");
+            if (!extension) throw editValidationError("Add the Press extension or clear the dial-in number.", "extension");
+            if (!/^\d+$/.test(extension)) {
+                throw editValidationError("Press extension can contain numbers only.", "extension");
+            }
+            const digits = dialIn.replace(/\D/g, "");
+            const localDigits = digits.length === 11 && digits.startsWith("1") ? digits.slice(1) : digits;
+            if (localDigits.length !== 10) {
+                throw editValidationError("Dial-in number must contain a complete 10-digit US phone number.", "dialIn");
+            }
+            dialInHref = `tel:+1${localDigits}`;
+        }
+    }
+
+    return resourceBase({
+        ...resource,
+        title,
+        speaker,
+        primaryLabel,
+        primaryUrl,
+        imageUrl,
+        imageAlt,
+        embedUrl,
+        dialIn,
+        dialInHref,
+        extension
+    });
+}
+
 async function fetchJson(url, fetchImpl) {
     const response = await fetchImpl(url, {
         headers: { Accept: "application/json" },
