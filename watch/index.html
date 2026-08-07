@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<!--
+THESIS: A quiet viewing room that gives one trusted resource the full page instead of trapping it inside a crowded feed.
+OWN-WORLD: Mist-blue fields, a deep-water player, open editorial metadata, and calm pill actions inherited from the content library.
+STORY: A visitor opens a shared link, immediately sees the intended video, and can watch, share, or return to the full library.
+FIRST VIEWPORT: Navigation and a compact back link lead directly into one wide player; title, speaker, provider, and sharing sit immediately below.
+FORM: Focused player room, chosen directly from the precise single-video brief; no concept seed required.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="Watch a curated marriage resource from Binyan Shalem.">
+    <meta property="og:title" content="Marriage Resource — Binyan Shalem">
+    <meta property="og:description" content="A thoughtfully curated marriage resource from Binyan Shalem.">
+    <meta property="og:type" content="video.other">
+    <meta property="og:site_name" content="Binyan Shalem">
+    <link rel="canonical" href="https://www.binyan-shalem.com/watch/">
+    <title>Marriage Resource — Binyan Shalem</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;750&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../blue-concept-pages.css?v=2026-08-07.2">
+    <script defer src="/cache-refresh.js?v=2026-08-07.2"></script>
+</head>
+<body class="watch-page">
+    <a class="skip-link" href="#main-content">Skip to video</a>
+
+    <header class="site-header">
+        <div class="nav-shell">
+            <a class="wordmark" href="../" aria-label="Binyan Shalem home">
+                <strong>BINYAN SHALEM</strong>
+                <span>בנין שלם</span>
+            </a>
+            <nav class="desktop-nav" aria-label="Primary navigation">
+                <a href="../">Home</a>
+                <a href="../#mission">Our Mission</a>
+                <a href="../#contact">Get Help</a>
+                <a aria-current="page" href="../content/">Shalom Bayit Content</a>
+                <a href="../contact/">Contact Us</a>
+                <a class="nav-donate" href="../donate/">Donate</a>
+            </nav>
+            <button class="menu-button" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"/>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <nav class="mobile-menu" id="mobile-menu" aria-label="Mobile navigation" aria-hidden="true" inert>
+        <a href="../">Home</a>
+        <a href="../#mission">Our Mission</a>
+        <a href="../faq/">Frequently Asked Questions</a>
+        <a href="../#contact">Get Help</a>
+        <a aria-current="page" href="../content/">Shalom Bayit Content</a>
+        <a href="../contact/">Contact Us</a>
+        <a href="../donate/">Donate</a>
+    </nav>
+
+    <main class="watch-main" id="main-content">
+        <section class="watch-shell" aria-label="Video resource">
+            <a class="watch-back" href="../content/">
+                <svg viewBox="0 0 20 20" aria-hidden="true">
+                    <path d="m11.8 4.5-5.5 5.5 5.5 5.5M6.8 10h7" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/>
+                </svg>
+                Back to all content
+            </a>
+
+            <div class="watch-loading" id="watch-loading" role="status">Preparing this resource…</div>
+
+            <article class="watch-detail" id="watch-detail" hidden>
+                <div class="watch-media" id="watch-media"></div>
+
+                <div class="watch-information">
+                    <div class="watch-heading">
+                        <p class="resource-type" id="watch-type"></p>
+                        <h1 id="watch-title"></h1>
+                        <p class="watch-speaker" id="watch-speaker"></p>
+                    </div>
+
+                    <div class="watch-actions" aria-label="Video actions">
+                        <a class="action-link primary" id="watch-provider-link" target="_blank" rel="noopener noreferrer"></a>
+                        <button class="action-link secondary watch-share" id="watch-share" type="button">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M12 15V3m0 0L7.5 7.5M12 3l4.5 4.5M5 12v8h14v-8" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/>
+                            </svg>
+                            Share this video
+                        </button>
+                        <p class="watch-share-status" id="watch-share-status" aria-live="polite"></p>
+                    </div>
+                </div>
+
+                <dl class="dial-details watch-dial" id="watch-dial" hidden>
+                    <div>
+                        <dt>Dial in</dt>
+                        <dd><a id="watch-phone"></a></dd>
+                    </div>
+                    <div>
+                        <dt>Then press</dt>
+                        <dd id="watch-extension"></dd>
+                    </div>
+                </dl>
+            </article>
+
+            <div class="watch-error" id="watch-error" hidden>
+                <p class="hero-kicker">Resource unavailable</p>
+                <h1>We couldn’t find that video.</h1>
+                <p>The link may be incomplete, or the resource may have been removed.</p>
+                <a class="action-link primary" href="../content/">Browse all content</a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-shell">
+            <p>© 2026 Binyan Shalem. All Rights Reserved.</p>
+            <p><a href="../contact/">Contact Us</a></p>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { doc, getDoc, getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { BAKED_IN_RESOURCES, FIREBASE_CONFIG } from "../content-library.mjs?v=2026-08-07.2";
+        import {
+            CONTENT_COLLECTION,
+            getProviderName,
+            getResourceTypeLabel,
+            normalizeStoredResource
+        } from "../content-resource-tools.mjs?v=2026-08-07.2";
+
+        const loading = document.getElementById("watch-loading");
+        const detail = document.getElementById("watch-detail");
+        const errorState = document.getElementById("watch-error");
+        const media = document.getElementById("watch-media");
+        const title = document.getElementById("watch-title");
+        const type = document.getElementById("watch-type");
+        const speaker = document.getElementById("watch-speaker");
+        const providerLink = document.getElementById("watch-provider-link");
+        const shareButton = document.getElementById("watch-share");
+        const shareStatus = document.getElementById("watch-share-status");
+        const dialDetails = document.getElementById("watch-dial");
+        const phone = document.getElementById("watch-phone");
+        const extension = document.getElementById("watch-extension");
+        const canonical = document.querySelector('link[rel="canonical"]');
+        const description = document.querySelector('meta[name="description"]');
+        const requestedId = new URLSearchParams(window.location.search).get("id") || "";
+        let activeResource = null;
+
+        function resetPagePosition() {
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
+            window.scrollTo(0, 0);
+        }
+
+        if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+        resetPagePosition();
+        window.addEventListener("load", resetPagePosition, { once: true });
+        requestAnimationFrame(() => requestAnimationFrame(resetPagePosition));
+
+        function shareableUrl(resourceId) {
+            const url = new URL("/watch/", "https://www.binyan-shalem.com");
+            url.searchParams.set("id", resourceId);
+            return url.href;
+        }
+
+        function createEmbeddedPlayer(resource) {
+            const frame = document.createElement("iframe");
+            frame.className = "watch-frame";
+            frame.src = resource.embedUrl;
+            frame.title = `Play ${resource.title}`;
+            frame.referrerPolicy = "strict-origin-when-cross-origin";
+            frame.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+            frame.allowFullscreen = true;
+            return frame;
+        }
+
+        function createExternalPlayer(resource) {
+            const link = document.createElement("a");
+            link.className = "watch-external-player";
+            link.href = resource.primaryUrl;
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            link.setAttribute("aria-label", `Watch ${resource.title} on ${getProviderName(resource)}`);
+
+            const image = document.createElement("img");
+            image.src = resource.imageUrl;
+            image.alt = resource.imageAlt || `${resource.title} by ${resource.speaker}`;
+
+            const mark = document.createElement("span");
+            mark.className = "watch-play-mark";
+            mark.setAttribute("aria-hidden", "true");
+            mark.innerHTML = '<svg viewBox="0 0 32 32"><path d="M11 8.5 24 16 11 23.5Z" fill="currentColor"/></svg>';
+
+            const note = document.createElement("span");
+            note.className = "watch-provider-note";
+            note.textContent = `Open on ${getProviderName(resource)}`;
+            link.append(image, mark, note);
+            return link;
+        }
+
+        function renderResource(resource) {
+            activeResource = resource;
+            const provider = getProviderName(resource);
+            const pageUrl = shareableUrl(resource.id);
+            const pageDescription = resource.speaker
+                ? `Watch ${resource.title} by ${resource.speaker}, curated by Binyan Shalem.`
+                : `Watch ${resource.title}, curated by Binyan Shalem.`;
+
+            document.title = `${resource.title} — Binyan Shalem`;
+            description.content = pageDescription;
+            canonical.href = pageUrl;
+            title.textContent = resource.title;
+            type.textContent = getResourceTypeLabel(resource);
+            speaker.textContent = resource.speaker || "Binyan Shalem";
+            providerLink.href = resource.primaryUrl;
+            providerLink.textContent = `Watch on ${provider}`;
+            providerLink.setAttribute("aria-label", `Watch ${resource.title} on ${provider}`);
+            media.replaceChildren(resource.embedUrl ? createEmbeddedPlayer(resource) : createExternalPlayer(resource));
+
+            if (resource.dialIn) {
+                phone.href = resource.dialInHref;
+                phone.textContent = resource.dialIn;
+                extension.textContent = resource.extension;
+                dialDetails.hidden = false;
+            }
+
+            loading.hidden = true;
+            detail.hidden = false;
+        }
+
+        function renderError() {
+            loading.hidden = true;
+            errorState.hidden = false;
+            document.title = "Resource unavailable — Binyan Shalem";
+        }
+
+        async function findResource(resourceId) {
+            const bakedResource = BAKED_IN_RESOURCES.find((resource) => resource.id === resourceId);
+            if (bakedResource) return bakedResource;
+
+            const firebaseApp = initializeApp(FIREBASE_CONFIG);
+            const snapshot = await getDoc(doc(getFirestore(firebaseApp), CONTENT_COLLECTION, resourceId));
+            if (!snapshot.exists()) return null;
+            return normalizeStoredResource(snapshot.data(), snapshot.id);
+        }
+
+        async function copyShareLink(url) {
+            if (navigator.clipboard?.writeText) {
+                await navigator.clipboard.writeText(url);
+                return;
+            }
+
+            const field = document.createElement("textarea");
+            field.value = url;
+            field.setAttribute("readonly", "");
+            field.style.position = "fixed";
+            field.style.opacity = "0";
+            document.body.appendChild(field);
+            field.select();
+            document.execCommand("copy");
+            field.remove();
+        }
+
+        shareButton.addEventListener("click", async () => {
+            if (!activeResource) return;
+            const url = shareableUrl(activeResource.id);
+            const shareData = {
+                title: activeResource.title,
+                text: activeResource.speaker
+                    ? `${activeResource.title} — ${activeResource.speaker}`
+                    : activeResource.title,
+                url
+            };
+
+            try {
+                if (navigator.share) {
+                    await navigator.share(shareData);
+                    shareStatus.textContent = "Shared.";
+                } else {
+                    await copyShareLink(url);
+                    shareStatus.textContent = "Link copied.";
+                }
+            } catch (error) {
+                if (error.name === "AbortError") return;
+                try {
+                    await copyShareLink(url);
+                    shareStatus.textContent = "Link copied.";
+                } catch {
+                    shareStatus.textContent = "Couldn’t copy the link. Please copy it from your browser.";
+                }
+            }
+        });
+
+        if (!/^[A-Za-z0-9_-]{1,180}$/.test(requestedId)) {
+            renderError();
+        } else {
+            try {
+                const resource = await findResource(requestedId);
+                if (!resource || resource.type !== "video") renderError();
+                else renderResource(resource);
+            } catch (error) {
+                console.warn("The requested resource could not be loaded.", error);
+                renderError();
+            }
+        }
+
+        const menuButton = document.querySelector(".menu-button");
+        const mobileMenu = document.getElementById("mobile-menu");
+
+        function setMenu(open, restoreFocus = true) {
+            menuButton.setAttribute("aria-expanded", String(open));
+            menuButton.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+            mobileMenu.classList.toggle("open", open);
+            mobileMenu.setAttribute("aria-hidden", String(!open));
+            mobileMenu.inert = !open;
+            document.body.classList.toggle("menu-open", open);
+
+            if (open) window.setTimeout(() => mobileMenu.querySelector("a").focus(), 0);
+            else if (restoreFocus) menuButton.focus();
+        }
+
+        menuButton.addEventListener("click", () => setMenu(menuButton.getAttribute("aria-expanded") !== "true"));
+        mobileMenu.addEventListener("click", (event) => {
+            if (event.target.closest("a")) setMenu(false, false);
+        });
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && menuButton.getAttribute("aria-expanded") === "true") setMenu(false);
+        });
+    </script>
+</body>
+</html>

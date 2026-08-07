@@ -485,8 +485,39 @@ input {
 .resource-actions {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: 0.75rem;
     margin-top: 2rem;
+}
+
+.resource-share-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    min-height: 44px;
+    padding: 0.55rem 0.85rem;
+    color: var(--deep-water);
+    appearance: none;
+    background: transparent;
+    font-size: 0.82rem;
+    font-weight: 750;
+    font-family: inherit;
+    text-decoration: none;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    cursor: pointer;
+}
+
+.resource-share-button svg {
+    width: 17px;
+    height: 17px;
+}
+
+.resource-share-button:hover {
+    color: var(--midnight);
+    background: var(--morning);
+    border-color: var(--harbor);
 }
 
 .action-link,
@@ -570,6 +601,206 @@ input {
 .empty-state p {
     margin: 0;
     color: var(--ink-soft);
+}
+
+.watch-main {
+    min-height: calc(100svh - 157px);
+    background: linear-gradient(180deg, #e4f2f9 0%, var(--mist) 42%, var(--mist) 100%);
+}
+
+.watch-shell {
+    width: min(100%, calc(var(--shell) + (2 * var(--page-gutter))));
+    min-height: calc(100svh - 157px);
+    margin: 0 auto;
+    padding: clamp(1.4rem, 3.5vw, 2.75rem) var(--page-gutter) clamp(4rem, 8vw, 7rem);
+}
+
+.watch-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    margin-bottom: clamp(1rem, 2.5vw, 1.75rem);
+    color: var(--deep-water);
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.watch-back:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+}
+
+.watch-back svg {
+    width: 20px;
+}
+
+.watch-loading {
+    display: grid;
+    min-height: min(64svh, 640px);
+    place-items: center;
+    color: var(--ink-soft);
+    font-weight: 650;
+}
+
+.watch-loading[hidden],
+.watch-detail[hidden],
+.watch-error[hidden] {
+    display: none;
+}
+
+.watch-detail {
+    width: min(100%, calc((100svh - 180px) * 1.7778));
+    max-width: var(--shell);
+    margin: 0 auto;
+}
+
+.watch-media {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    color: var(--white);
+    background: var(--midnight);
+    border-radius: 16px;
+    box-shadow: 0 24px 52px rgba(20, 47, 66, 0.2);
+}
+
+.watch-frame,
+.watch-external-player,
+.watch-external-player img {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.watch-frame {
+    border: 0;
+}
+
+.watch-external-player {
+    position: relative;
+    color: var(--white);
+    text-decoration: none;
+}
+
+.watch-external-player img {
+    object-fit: cover;
+    transition: transform 360ms ease;
+}
+
+.watch-external-player:hover img {
+    transform: scale(1.018);
+}
+
+.watch-play-mark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    width: clamp(72px, 9vw, 104px);
+    aspect-ratio: 1;
+    place-items: center;
+    color: var(--white);
+    background: var(--deep-water);
+    border-radius: 50%;
+    box-shadow: 0 18px 36px rgba(20, 47, 66, 0.28);
+    transform: translate(-50%, -50%);
+}
+
+.watch-play-mark svg {
+    width: 32%;
+    margin-left: 5%;
+}
+
+.watch-provider-note {
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+    padding: 0.65rem 0.9rem;
+    background: rgba(20, 47, 66, 0.92);
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 750;
+}
+
+.watch-information {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: clamp(2rem, 7vw, 7rem);
+    align-items: start;
+    padding: clamp(2rem, 4vw, 3.25rem) 0;
+    border-bottom: 1px solid var(--line);
+}
+
+.watch-heading h1,
+.watch-error h1 {
+    max-width: 20ch;
+    margin: 0;
+    font-size: clamp(2rem, 4.3vw, 4.25rem);
+    line-height: 1.03;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+}
+
+.watch-speaker {
+    margin: 0.9rem 0 0;
+    color: var(--ink-soft);
+    font-size: clamp(1rem, 1.6vw, 1.18rem);
+    font-weight: 650;
+}
+
+.watch-actions {
+    display: grid;
+    grid-template-columns: minmax(180px, 1fr);
+    gap: 0.75rem;
+    width: min(100%, 260px);
+}
+
+.watch-actions .action-link {
+    width: 100%;
+}
+
+.watch-share {
+    appearance: none;
+}
+
+.watch-share svg {
+    width: 20px;
+}
+
+.watch-share-status {
+    min-height: 1.3rem;
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+.watch-dial {
+    margin: 0;
+    padding-top: 1.5rem;
+    border-top: 0;
+}
+
+.watch-dial[hidden] {
+    display: none;
+}
+
+.watch-error {
+    display: grid;
+    justify-items: start;
+    max-width: 720px;
+    min-height: min(62svh, 620px);
+    align-content: center;
+}
+
+.watch-error > p:not(.hero-kicker) {
+    max-width: 52ch;
+    margin: 1.25rem 0 2rem;
+    color: var(--ink-soft);
+    line-height: 1.7;
 }
 
 .donation-hero .hero-shell {
@@ -1183,9 +1414,20 @@ input {
         margin-top: 1.3rem;
     }
 
+    .resource-actions--video {
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+    }
+
     .action-link {
         width: 100%;
         min-height: 54px;
+    }
+
+    .resource-share-button {
+        width: auto;
+        min-height: 54px;
+        padding-inline: 0.9rem;
     }
 
     .dial-details {
@@ -1305,6 +1547,74 @@ input {
         align-items: flex-start;
         flex-direction: column;
         gap: 0.65rem;
+    }
+}
+
+@media (max-width: 700px) {
+    .watch-shell {
+        padding-top: 0.8rem;
+        padding-bottom: 4rem;
+    }
+
+    .watch-back {
+        margin-bottom: 0.7rem;
+        font-size: 0.84rem;
+    }
+
+    .watch-detail {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .watch-media {
+        order: 2;
+        border-radius: 12px;
+        box-shadow: 0 16px 34px rgba(20, 47, 66, 0.16);
+    }
+
+    .watch-information {
+        display: contents;
+    }
+
+    .watch-heading {
+        order: 1;
+        padding-bottom: 1.25rem;
+    }
+
+    .watch-heading h1,
+    .watch-error h1 {
+        font-size: clamp(1.75rem, 8vw, 2.35rem);
+    }
+
+    .watch-actions {
+        order: 3;
+        grid-template-columns: 1fr 1fr;
+        width: 100%;
+        margin-top: 1.35rem;
+        padding-bottom: 1.8rem;
+        border-bottom: 1px solid var(--line);
+    }
+
+    .watch-actions .action-link {
+        min-width: 0;
+        min-height: 52px;
+        padding-inline: 0.8rem;
+        font-size: 0.86rem;
+    }
+
+    .watch-share-status {
+        grid-column: 1 / -1;
+    }
+
+    .watch-provider-note {
+        right: 0.7rem;
+        bottom: 0.7rem;
+    }
+
+    .watch-dial {
+        order: 4;
+        grid-template-columns: 1fr 1fr;
     }
 }
 
