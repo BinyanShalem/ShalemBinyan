@@ -32,7 +32,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;750&amp;display=swap" rel="stylesheet">
-    <script defer src="/cache-refresh.js?v=2026-08-05.1"></script>
+    <script defer src="/cache-refresh.js?v=2026-08-08.1"></script>
     <style>
         :root {
             --mist: #f4fafd;
@@ -1066,6 +1066,20 @@
             box-shadow: 0 0 0 4px rgba(111, 159, 189, 0.18);
         }
 
+        .field input[aria-invalid="true"],
+        .field textarea[aria-invalid="true"] {
+            border-color: var(--danger);
+            box-shadow: 0 0 0 3px rgba(156, 63, 72, 0.12);
+        }
+
+        .field-error {
+            margin: 0;
+            color: var(--danger);
+            font-size: 0.79rem;
+            font-weight: 650;
+            line-height: 1.45;
+        }
+
         .donation-field {
             grid-column: 1 / -1;
             margin: 0;
@@ -1150,9 +1164,31 @@
             padding: 0.9rem 1rem;
             color: #702c34;
             background: #f8e9eb;
+            border: 1px solid #e6bcc1;
             border-radius: 12px;
             font-size: 0.88rem;
-            font-weight: 650;
+            line-height: 1.5;
+        }
+
+        .form-status strong {
+            display: block;
+            color: #63252c;
+            font-size: 0.94rem;
+        }
+
+        .form-status p {
+            margin: 0.25rem 0 0;
+        }
+
+        .form-status ul {
+            margin: 0.65rem 0 0;
+            padding-inline-start: 1.2rem;
+        }
+
+        .form-status a {
+            color: inherit;
+            font-weight: 700;
+            text-underline-offset: 0.2em;
         }
 
         .loading-state,
@@ -2000,7 +2036,7 @@
                 </div>
 
                 <div class="intake-card" id="form-container">
-                    <form id="concept-form">
+                    <form id="concept-form" novalidate>
                         <div class="form-heading-row">
                             <h3>Who is submitting the form?</h3>
                             <a class="form-faq-link" href="faq/">Have questions? Read the FAQ <span aria-hidden="true">→</span></a>
@@ -2021,32 +2057,32 @@
 
                         <div class="field">
                             <label for="husband-name">Husband (First and Last)*</label>
-                            <input id="husband-name" name="h_name" type="text" autocomplete="name" required>
+                            <input id="husband-name" name="h_name" type="text" autocomplete="name" maxlength="160" required>
                         </div>
 
                         <div class="field">
                             <label for="wife-name">Wife (First and Maiden)*</label>
-                            <input id="wife-name" name="w_name" type="text" required>
+                            <input id="wife-name" name="w_name" type="text" maxlength="160" required>
                         </div>
 
                         <div class="field">
                             <label for="husband-cell" data-couple-label="Husband Cell*" data-other-label="Husband Cell">Husband Cell*</label>
-                            <input id="husband-cell" name="h_cell" type="tel" autocomplete="tel" required data-couple-required>
+                            <input id="husband-cell" name="h_cell" type="tel" autocomplete="tel" maxlength="80" required data-couple-required>
                         </div>
 
                         <div class="field">
                             <label for="wife-cell" data-couple-label="Wife Cell*" data-other-label="Wife Cell">Wife Cell*</label>
-                            <input id="wife-cell" name="w_cell" type="tel" autocomplete="tel" required data-couple-required>
+                            <input id="wife-cell" name="w_cell" type="tel" autocomplete="tel" maxlength="80" required data-couple-required>
                         </div>
 
                         <div class="field">
                             <label for="husband-email">Husband email</label>
-                            <input id="husband-email" name="h_email" type="email" autocomplete="email">
+                            <input id="husband-email" name="h_email" type="email" autocomplete="email" maxlength="254">
                         </div>
 
                         <div class="field">
                             <label for="wife-email">Wife email</label>
-                            <input id="wife-email" name="w_email" type="email">
+                            <input id="wife-email" name="w_email" type="email" maxlength="254">
                         </div>
 
                         <div class="field">
@@ -2061,7 +2097,7 @@
 
                         <div class="field field-wide">
                             <label for="address" data-couple-label="Address*" data-other-label="Address">Address*</label>
-                            <input id="address" name="address" type="text" autocomplete="street-address" required data-couple-required>
+                            <input id="address" name="address" type="text" autocomplete="street-address" maxlength="500" required data-couple-required>
                         </div>
 
                         <div class="field">
@@ -2076,23 +2112,29 @@
 
                         <div class="field field-wide">
                             <label for="issue">Issue Presenting*</label>
-                            <textarea id="issue" name="issue_presenting" required></textarea>
+                            <textarea id="issue" name="issue_presenting" maxlength="5000" required></textarea>
                         </div>
 
                         <div class="field">
                             <label for="rabbi">Family Rabbi</label>
-                            <input id="rabbi" name="family_rabbi" type="text">
+                            <input id="rabbi" name="family_rabbi" type="text" maxlength="240">
                         </div>
 
                         <div class="field field-wide">
                             <label for="anyone-else">Is anyone else involved?</label>
                             <p class="field-help" id="anyone-else-help">This could be a rabbi, teacher, family member, friend, or anyone else supporting the couple. If so, please share their name and role—we may be able to work together.</p>
-                            <input id="anyone-else" name="anyone_else_involved" type="text" aria-describedby="anyone-else-help" placeholder="Name and relationship, if applicable">
+                            <input id="anyone-else" name="anyone_else_involved" type="text" maxlength="500" aria-describedby="anyone-else-help" placeholder="Name and relationship, if applicable">
                         </div>
 
                         <div class="field">
                             <label for="parents" data-couple-label="Husband and Wife’s parents names*" data-other-label="Husband and Wife’s parents names">Husband and Wife’s parents names*</label>
-                            <input id="parents" name="parents_names" type="text" required data-couple-required>
+                            <input id="parents" name="parents_names" type="text" maxlength="500" required data-couple-required>
+                        </div>
+
+                        <div class="field field-wide">
+                            <label for="other-notes">Anything else you would like us to know?</label>
+                            <p class="field-help" id="other-notes-help">Optional. Share any other context, concerns, or details that would help us understand how to support you.</p>
+                            <textarea id="other-notes" name="other_notes" maxlength="3000" aria-describedby="other-notes-help"></textarea>
                         </div>
 
                         <fieldset class="donation-field">
@@ -2110,7 +2152,7 @@
                         </fieldset>
 
                             <button class="submit-button" id="submit-button" type="submit" disabled>Connecting securely…</button>
-                            <p class="form-status" id="form-status" role="alert" hidden></p>
+                            <div class="form-status" id="form-status" role="alert" tabindex="-1" hidden></div>
                         </div>
                     </form>
 
@@ -2239,6 +2281,118 @@
         const donationFollowup = document.getElementById("donation-followup");
         const copyStatus = document.getElementById("copy-status");
 
+        function getFieldLabel(field) {
+            const label = field.id ? contactForm.querySelector(`label[for="${field.id}"]`) : null;
+            return (label?.textContent || field.name || "This field").replace(/\*/g, "").trim();
+        }
+
+        function getFieldValidationMessage(field) {
+            const label = getFieldLabel(field);
+            if (field.validity.valueMissing) return `${label} is required.`;
+            if (field.validity.typeMismatch && field.type === "email") {
+                return `Enter a valid email address for ${label.toLowerCase()}.`;
+            }
+            if (field.validity.rangeUnderflow) return `${label} must be at least ${field.min}.`;
+            if (field.validity.rangeOverflow) return `${label} must be ${field.max} or less.`;
+            if (field.validity.tooLong) return `${label} must be ${field.maxLength} characters or fewer.`;
+            if (field.validity.badInput) return `Enter a valid number for ${label.toLowerCase()}.`;
+            return `Check ${label.toLowerCase()} and try again.`;
+        }
+
+        function showFieldError(field, message) {
+            const errorId = `${field.id}-error`;
+            let error = document.getElementById(errorId);
+            if (!error) {
+                error = document.createElement("p");
+                error.className = "field-error";
+                error.id = errorId;
+                field.insertAdjacentElement("afterend", error);
+            }
+            error.textContent = message;
+            field.setAttribute("aria-invalid", "true");
+            if (field.dataset.baseDescribedBy === undefined) {
+                field.dataset.baseDescribedBy = field.getAttribute("aria-describedby") || "";
+            }
+            field.setAttribute(
+                "aria-describedby",
+                [field.dataset.baseDescribedBy, errorId].filter(Boolean).join(" ")
+            );
+        }
+
+        function clearFieldError(field) {
+            document.getElementById(`${field.id}-error`)?.remove();
+            field.removeAttribute("aria-invalid");
+            if (field.dataset.baseDescribedBy !== undefined) {
+                if (field.dataset.baseDescribedBy) {
+                    field.setAttribute("aria-describedby", field.dataset.baseDescribedBy);
+                } else {
+                    field.removeAttribute("aria-describedby");
+                }
+            }
+        }
+
+        function showFormError(message, errors = [], title = "Your form was not submitted.") {
+            const heading = document.createElement("strong");
+            heading.textContent = title;
+            const detail = document.createElement("p");
+            detail.textContent = message;
+            formStatus.replaceChildren(heading, detail);
+
+            if (errors.length) {
+                const list = document.createElement("ul");
+                errors.forEach(({ field, message: fieldMessage }) => {
+                    const item = document.createElement("li");
+                    const link = document.createElement("a");
+                    link.href = `#${field.id}`;
+                    link.textContent = fieldMessage;
+                    item.appendChild(link);
+                    list.appendChild(item);
+                });
+                formStatus.appendChild(list);
+            }
+
+            formStatus.hidden = false;
+        }
+
+        function clearFormError() {
+            formStatus.replaceChildren();
+            formStatus.hidden = true;
+        }
+
+        function currentFieldErrors() {
+            return [...contactForm.querySelectorAll("input, textarea")]
+                .filter((field) => !field.disabled && !field.checkValidity())
+                .map((field) => ({ field, message: getFieldValidationMessage(field) }));
+        }
+
+        function validateContactForm() {
+            contactForm.querySelectorAll('[aria-invalid="true"]').forEach(clearFieldError);
+            const errors = currentFieldErrors();
+            if (!errors.length) return true;
+
+            errors.forEach(({ field, message }) => showFieldError(field, message));
+            showFormError("Please correct the items below, then submit the form again.", errors);
+            formStatus.focus({ preventScroll: true });
+            formStatus.scrollIntoView({ behavior: "smooth", block: "center" });
+            return false;
+        }
+
+        function getSubmissionErrorMessage(error) {
+            if (["unavailable", "deadline-exceeded"].includes(error?.code)) {
+                return "The secure service could not be reached. Check your internet connection and try again; your answers are still here.";
+            }
+            if (error?.code === "unauthenticated") {
+                return "Your secure session expired. Refresh the page, review your answers, and submit again.";
+            }
+            if (error?.code === "permission-denied") {
+                return "The secure service did not accept the form. Check that each answer is within its stated limit, then try again.";
+            }
+            if (error?.code === "resource-exhausted") {
+                return "The secure service is receiving too many requests. Wait a moment and try again; your answers are still here.";
+            }
+            return "An unexpected service error occurred. Please try again; your answers are still here.";
+        }
+
         function setFormType(type) {
             const someoneElse = type === "someone-else";
             choiceButtons.forEach((item) => {
@@ -2251,6 +2405,7 @@
             donationLegend.textContent = someoneElse ? "Donation (Optional)" : "Would you like to donate?";
             coupleRequiredFields.forEach((field) => {
                 field.required = !someoneElse;
+                if (field.checkValidity()) clearFieldError(field);
             });
             modeLabels.forEach((label) => {
                 label.textContent = someoneElse ? label.dataset.otherLabel : label.dataset.coupleLabel;
@@ -2262,16 +2417,6 @@
                 setFormType(button.dataset.formType);
             });
         });
-
-        function showFormError(message) {
-            formStatus.textContent = message;
-            formStatus.hidden = false;
-        }
-
-        function clearFormError() {
-            formStatus.textContent = "";
-            formStatus.hidden = true;
-        }
 
         function setSubmitting(submitting) {
             contactForm.hidden = submitting;
@@ -2291,16 +2436,55 @@
             } catch (error) {
                 console.error("Firebase initialization failed:", error);
                 submitButton.textContent = "Unable to connect";
-                showFormError("The secure form could not connect. Please refresh the page and try again.");
+                showFormError(
+                    "The secure form could not connect. Please refresh the page and try again.",
+                    [],
+                    "The secure form is unavailable."
+                );
             }
         }
+
+        contactForm.addEventListener("input", (event) => {
+            const field = event.target;
+            if (!(field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement)) return;
+            if (field.getAttribute("aria-invalid") !== "true") return;
+
+            if (field.checkValidity()) {
+                clearFieldError(field);
+            } else {
+                showFieldError(field, getFieldValidationMessage(field));
+            }
+
+            const remainingErrors = [...contactForm.querySelectorAll('[aria-invalid="true"]')]
+                .map((invalidField) => ({
+                    field: invalidField,
+                    message: getFieldValidationMessage(invalidField)
+                }));
+            if (remainingErrors.length) {
+                showFormError("Please correct the items below, then submit the form again.", remainingErrors);
+            } else {
+                clearFormError();
+            }
+        });
+
+        formStatus.addEventListener("click", (event) => {
+            const link = event.target.closest('a[href^="#"]');
+            if (!link) return;
+            const field = contactForm.querySelector(link.getAttribute("href"));
+            if (!field) return;
+            event.preventDefault();
+            field.focus();
+        });
 
         contactForm.addEventListener("submit", async (event) => {
             event.preventDefault();
             clearFormError();
 
+            if (!validateContactForm()) return;
+
             if (!db || !userId) {
-                showFormError("The secure form is still connecting. Please wait a moment and try again.");
+                showFormError("The secure service is still connecting. Wait a moment and try again.");
+                formStatus.focus({ preventScroll: true });
                 return;
             }
 
@@ -2327,6 +2511,7 @@
                 issue_presenting: data.issue_presenting,
                 family_rabbi: data.family_rabbi,
                 anyone_else_involved: data.anyone_else_involved,
+                other_notes: data.other_notes,
                 parents_names: data.parents_names,
                 num_kids: data.num_kids,
                 donation: donationDecision,
@@ -2355,8 +2540,8 @@
             } catch (error) {
                 console.error("Submission failed:", error);
                 setSubmitting(false);
-                showFormError("Your information could not be submitted. Please check your connection and try again.");
-                submitButton.focus({ preventScroll: true });
+                showFormError(getSubmissionErrorMessage(error));
+                formStatus.focus({ preventScroll: true });
             }
         });
 
@@ -2384,6 +2569,7 @@
         document.getElementById("reset-form-button").addEventListener("click", () => {
             contactForm.reset();
             setFormType("couple");
+            contactForm.querySelectorAll('[aria-invalid="true"]').forEach(clearFieldError);
             clearFormError();
             copyStatus.textContent = "";
             submissionIdDisplay.textContent = "";

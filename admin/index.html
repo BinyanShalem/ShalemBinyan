@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-    <script defer src="/cache-refresh.js?v=2026-08-05.1"></script>
+    <script defer src="/cache-refresh.js?v=2026-08-08.1"></script>
     <style>
         :root {
             --admin-purple: #723358;
@@ -543,6 +543,7 @@
 
         .submission-card header {
             display: flex;
+            align-items: flex-start;
             justify-content: space-between;
             gap: 1rem;
             margin-bottom: 1rem;
@@ -553,6 +554,13 @@
         .submission-card h3 {
             color: var(--admin-purple);
             font-size: 1rem;
+            overflow-wrap: anywhere;
+        }
+
+        .submission-header-copy {
+            display: grid;
+            min-width: 0;
+            gap: 0.35rem;
         }
 
         .submission-card time {
@@ -836,6 +844,7 @@
                         <p>Confidential requests submitted through the public intake form.</p>
                     </div>
                 </div>
+                <p class="status" id="submission-action-status" role="status" aria-live="polite" hidden></p>
                 <div class="loading-state" id="all-submissions-loading"><span class="loading-dot" aria-hidden="true"></span>Loading submissions…</div>
                 <div class="submission-list" id="all-submissions-list"></div>
                 <p class="empty-state" id="no-all-submissions" hidden>No submissions found.</p>
@@ -910,6 +919,7 @@
         const contentListLoading = document.getElementById("content-list-loading");
         const noAdminResources = document.getElementById("no-admin-resources");
         const createdContentCount = document.getElementById("created-content-count");
+        const submissionActionStatus = document.getElementById("submission-action-status");
         const previewFields = {
             title: document.getElementById("preview-title"),
             speaker: document.getElementById("preview-speaker"),
@@ -1199,6 +1209,25 @@
             return String(value);
         }
 
+        const submissionFieldLabels = {
+            h_name: "Husband name",
+            w_name: "Wife name",
+            h_cell: "Husband cell",
+            w_cell: "Wife cell",
+            h_email: "Husband email",
+            w_email: "Wife email",
+            h_age: "Husband age",
+            w_age: "Wife age",
+            years_married: "Years married",
+            issue_presenting: "Issue presenting",
+            family_rabbi: "Family rabbi",
+            anyone_else_involved: "Anyone else involved",
+            other_notes: "Other notes",
+            parents_names: "Parents’ names",
+            num_kids: "Number of children",
+            donation: "Donation interest"
+        };
+
         function renderSubmissions(submissions) {
             const list = document.getElementById("all-submissions-list");
             const empty = document.getElementById("no-all-submissions");
@@ -1216,13 +1245,45 @@
                 const card = document.createElement("article");
                 card.className = "submission-card";
                 const header = document.createElement("header");
+                const headerCopy = document.createElement("div");
+                headerCopy.className = "submission-header-copy";
                 const title = document.createElement("h3");
                 title.textContent = `Submission ${id}`;
                 const time = document.createElement("time");
                 const parsedDate = Date.parse(data.timestamp || "");
                 time.textContent = Number.isNaN(parsedDate) ? "Date unavailable" : new Date(parsedDate).toLocaleString();
                 if (!Number.isNaN(parsedDate)) time.dateTime = new Date(parsedDate).toISOString();
-                header.append(title, time);
+                headerCopy.append(title, time);
+
+                const deleteButton = document.createElement("button");
+                deleteButton.className = "button button-danger";
+                deleteButton.type = "button";
+                deleteButton.textContent = "Delete submission";
+                deleteButton.setAttribute("aria-label", `Permanently delete submission ${id}`);
+                deleteButton.addEventListener("click", async () => {
+                    const confirmed = window.confirm(
+                        `Permanently delete submission ${id}? This cannot be undone.`
+                    );
+                    if (!confirmed) return;
+
+                    deleteButton.disabled = true;
+                    deleteButton.textContent = "Deleting…";
+                    setStatus(submissionActionStatus, "");
+                    try {
+                        await deleteDoc(doc(db, `artifacts/${appId}/public/data/submissions/${id}`));
+                        setStatus(submissionActionStatus, `Submission ${id} was permanently deleted.`, "success");
+                    } catch (error) {
+                        console.error("Could not delete submission:", error);
+                        setStatus(
+                            submissionActionStatus,
+                            `Submission ${id} was not deleted. Check the admin session and try again.`,
+                            "error"
+                        );
+                        deleteButton.disabled = false;
+                        deleteButton.textContent = "Delete submission";
+                    }
+                });
+                header.append(headerCopy, deleteButton);
 
                 const fields = document.createElement("dl");
                 fields.className = "submission-fields";
@@ -1230,7 +1291,8 @@
                     if (["timestamp", "uid", "formType"].includes(key) || value === null) return;
                     const group = document.createElement("div");
                     const label = document.createElement("dt");
-                    label.textContent = key.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+                    label.textContent = submissionFieldLabels[key]
+                        || key.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
                     const detail = document.createElement("dd");
                     detail.textContent = formatSubmissionValue(value);
                     group.append(label, detail);

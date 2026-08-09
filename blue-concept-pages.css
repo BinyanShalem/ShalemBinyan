@@ -966,6 +966,55 @@ input {
     color: var(--midnight);
 }
 
+.contact-form-option {
+    display: grid;
+    justify-items: center;
+    gap: 0.75rem;
+    width: min(100%, 560px);
+    padding-top: clamp(1.5rem, 4vw, 2.25rem);
+    border-top: 1px solid rgba(111, 159, 189, 0.42);
+}
+
+.contact-form-option p,
+.contact-form-option small {
+    margin: 0;
+}
+
+.contact-form-option p {
+    color: var(--midnight);
+    font-size: clamp(1rem, 1.7vw, 1.15rem);
+    font-weight: 650;
+}
+
+.contact-form-option small {
+    max-width: 46ch;
+    color: var(--ink-soft);
+    font-size: 0.8rem;
+    line-height: 1.55;
+}
+
+.contact-form-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    min-height: 50px;
+    padding: 0.75rem 1.2rem;
+    color: var(--white);
+    background: var(--deep-water);
+    border-radius: 999px;
+    font-weight: 750;
+    text-decoration: none;
+    box-shadow: 0 10px 22px rgba(20, 47, 66, 0.14);
+    transition: background 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+}
+
+.contact-form-link:hover {
+    background: var(--midnight);
+    box-shadow: 0 14px 26px rgba(20, 47, 66, 0.2);
+    transform: translateY(-2px);
+}
+
 .faq-hero .hero-shell {
     min-height: 430px;
 }
