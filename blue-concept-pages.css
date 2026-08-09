@@ -1067,6 +1067,16 @@ input {
     line-height: 1.55;
 }
 
+.contact-form-option small a {
+    color: var(--deep-water);
+    font-weight: 650;
+    text-underline-offset: 0.16em;
+}
+
+.contact-form-option small a:hover {
+    color: var(--midnight);
+}
+
 .contact-form-link {
     display: inline-flex;
     align-items: center;
