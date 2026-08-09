@@ -8,7 +8,9 @@ import {
     detectContentSource,
     extractYouTubeVideoId,
     getResourceTypeLabel,
-    mergeResourceCollections
+    isNewAdminResource,
+    mergeResourceCollections,
+    normalizeStoredResource
 } from "../content-resource-tools.mjs";
 
 function jsonResponse(data, ok = true) {
@@ -206,4 +208,25 @@ test("merges backend resources after baked resources and removes duplicates", ()
     assert.equal(merged.length, 2);
     assert.equal(merged[0].id, "existing-youtube");
     assert.equal(merged[1].id, "itorah_6436");
+});
+
+test("marks only admin resources created within the last seven days as new", () => {
+    const now = Date.UTC(2026, 7, 8, 12);
+    const resource = normalizeStoredResource({
+        source: "youtube",
+        type: "video",
+        title: "A new marriage resource",
+        primaryUrl: "https://www.youtube.com/watch?v=xYJON0S7WWo",
+        primaryLabel: "Watch on YouTube",
+        imageUrl: "https://i.ytimg.com/vi/xYJON0S7WWo/hqdefault.jpg",
+        imageAlt: "A new marriage resource",
+        createdAt: { toMillis: () => now - (6 * 24 * 60 * 60 * 1000) }
+    }, "new-resource");
+
+    assert.equal(resource.createdAtMs, now - (6 * 24 * 60 * 60 * 1000));
+    assert.equal(isNewAdminResource(resource, now), true);
+    assert.equal(isNewAdminResource({ ...resource, createdAtMs: now - (7 * 24 * 60 * 60 * 1000) }, now), true);
+    assert.equal(isNewAdminResource({ ...resource, createdAtMs: now - (7 * 24 * 60 * 60 * 1000) - 1 }, now), false);
+    assert.equal(isNewAdminResource({ ...resource, createdAtMs: now + 1 }, now), false);
+    assert.equal(isNewAdminResource({ ...resource, origin: "baked" }, now), false);
 });

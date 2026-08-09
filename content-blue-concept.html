@@ -15,8 +15,8 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;750&amp;display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="blue-concept-pages.css?v=2026-08-07.2">
-    <script defer src="/cache-refresh.js?v=2026-08-07.2"></script>
+    <link rel="stylesheet" href="blue-concept-pages.css?v=2026-08-08.5">
+    <script defer src="/cache-refresh.js?v=2026-08-08.5"></script>
 </head>
 <body class="content-page">
     <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -66,25 +66,43 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
 
         <section class="resource-band" aria-label="Content filters">
             <div class="resource-band-inner">
-                <p id="resource-count">29 resources</p>
-                <div class="filters" role="group" aria-label="Filter resources by format">
-                    <button class="filter-button" type="button" data-filter="all" aria-pressed="true">All resources</button>
-                    <button class="filter-button" type="button" data-filter="video" aria-pressed="false">Videos</button>
-                    <button class="filter-button" type="button" data-filter="book" aria-pressed="false">Books</button>
-                    <button class="filter-button" type="button" data-filter="inspiration" aria-pressed="false">Inspiration</button>
+                <div class="resource-band-summary">
+                    <span>Explore</span>
+                    <p id="resource-count" aria-live="polite">30 resources</p>
+                </div>
+                <div class="filters">
+                    <div class="filter-featured" role="group" aria-label="Featured content">
+                        <button class="filter-button filter-button--featured filter-button--podcast" type="button" data-filter="podcast" aria-pressed="false">
+                            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3.5 8v4M7 5.5v9M10 3v14M13 6v8M16.5 8v4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.6"/></svg>
+                            <span>Podcasts</span>
+                        </button>
+                        <button class="filter-button filter-button--featured filter-button--new" type="button" data-filter="new" aria-pressed="false">
+                            <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 6v4.25l2.75 1.65" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/></svg>
+                            <span>New this week</span>
+                            <span class="filter-count" id="new-content-count" hidden></span>
+                        </button>
+                    </div>
+                    <div class="filter-formats" role="group" aria-label="Browse by format">
+                        <button class="filter-button" type="button" data-filter="all" aria-label="All resources" aria-pressed="true">All</button>
+                        <button class="filter-button" type="button" data-filter="video" aria-pressed="false">Videos</button>
+                        <button class="filter-button" type="button" data-filter="book" aria-pressed="false">Books</button>
+                        <button class="filter-button filter-button--quiet" type="button" data-filter="inspiration" aria-pressed="false">Inspiration</button>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <section class="library-shell" aria-labelledby="library-title">
-            <div class="library-heading">
-                <h2 id="library-title">Resources for the home.</h2>
-                <p>Explore shiurim, reading, and visual inspiration selected to make thoughtful guidance easier to find and return to. New content is added often.</p>
-            </div>
-            <div class="resource-list" id="resource-list"></div>
-            <div class="empty-state" id="empty-state" hidden>
-                <h3>No resources in this format yet.</h3>
-                <p>Choose another format to continue browsing.</p>
+        <section class="library-section" id="library-section" aria-labelledby="library-title">
+            <div class="library-shell">
+                <div class="library-heading">
+                    <h2 id="library-title">Resources for the home.</h2>
+                    <p id="library-intro">Explore shiurim, podcasts, reading, and visual inspiration selected to make thoughtful guidance easier to find and return to. New content is added often.</p>
+                </div>
+                <div class="resource-list" id="resource-list"></div>
+                <div class="empty-state" id="empty-state" hidden>
+                    <h3 id="empty-state-title">No resources in this format yet.</h3>
+                    <p id="empty-state-description">Choose another format to continue browsing.</p>
+                </div>
             </div>
         </section>
     </main>
@@ -103,17 +121,27 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
             CONTENT_COLLECTION,
             getProviderName,
             getResourceTypeLabel,
+            isNewAdminResource,
             mergeResourceCollections
-        } from "./content-resource-tools.mjs?v=2026-08-07.2";
-        import { BAKED_IN_RESOURCES, FIREBASE_CONFIG } from "./content-library.mjs?v=2026-08-07.2";
+        } from "./content-resource-tools.mjs?v=2026-08-08.5";
+        import { BAKED_IN_RESOURCES, FIREBASE_CONFIG } from "./content-library.mjs?v=2026-08-08.5";
 
         const bakedInResources = BAKED_IN_RESOURCES;
 
         let resources = [...bakedInResources];
         const list = document.getElementById("resource-list");
         const count = document.getElementById("resource-count");
+        const librarySection = document.getElementById("library-section");
+        const libraryTitle = document.getElementById("library-title");
+        const libraryIntro = document.getElementById("library-intro");
         const emptyState = document.getElementById("empty-state");
+        const emptyStateTitle = document.getElementById("empty-state-title");
+        const emptyStateDescription = document.getElementById("empty-state-description");
+        const newContentCount = document.getElementById("new-content-count");
+        const newFilterButton = document.querySelector('[data-filter="new"]');
         const filterButtons = [...document.querySelectorAll(".filter-button")];
+        const defaultLibraryIntro = libraryIntro.textContent;
+        const defaultEmptyDescription = emptyStateDescription.textContent;
 
         function createLink(label, url, className, accessibleLabel = label) {
             const link = document.createElement("a");
@@ -274,6 +302,8 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
             article.className = `resource resource--${resource.type}`;
             article.id = resource.id;
             article.dataset.type = resource.type;
+            article.dataset.origin = resource.origin || "baked";
+            article.dataset.createdAtMs = String(resource.createdAtMs || 0);
             article.appendChild(createVisual(resource));
 
             if (resource.type === "inspiration") return article;
@@ -340,11 +370,19 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
 
         function applyFilter(filter) {
             activeFilter = filter;
+            const podcastMode = filter === "podcast";
+            const newMode = filter === "new";
+            const now = Date.now();
             let visible = 0;
             [...list.children].forEach((item) => {
                 const show = filter === "all"
                     ? item.dataset.type !== "inspiration"
-                    : item.dataset.type === filter;
+                    : newMode
+                        ? isNewAdminResource({
+                            origin: item.dataset.origin,
+                            createdAtMs: Number(item.dataset.createdAtMs)
+                        }, now)
+                        : item.dataset.type === filter;
 
                 if (!show && !item.hidden) {
                     const embeddedPlayer = item.querySelector(".resource-embed");
@@ -359,7 +397,31 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
                 button.setAttribute("aria-pressed", String(button.dataset.filter === filter));
             });
 
-            count.textContent = `${visible} ${visible === 1 ? "resource" : "resources"}`;
+            librarySection.classList.toggle("podcast-mode", podcastMode);
+            librarySection.classList.toggle("new-mode", newMode);
+            libraryTitle.textContent = podcastMode
+                ? "Podcasts."
+                : newMode
+                    ? "New this week."
+                    : "Resources for the home.";
+            libraryIntro.textContent = newMode
+                ? "Resources added by our team during the past seven days."
+                : defaultLibraryIntro;
+            libraryIntro.hidden = podcastMode;
+            emptyStateTitle.textContent = podcastMode
+                ? "New podcasts coming soon."
+                : newMode
+                    ? "Nothing new this week yet."
+                    : "No resources in this format yet.";
+            emptyStateDescription.textContent = newMode
+                ? "Anything added during the last seven days will appear here."
+                : defaultEmptyDescription;
+            emptyStateDescription.hidden = podcastMode;
+            count.textContent = podcastMode
+                ? "Podcasts"
+                : newMode
+                    ? `${visible} added this week`
+                    : `${visible} ${visible === 1 ? "resource" : "resources"}`;
             emptyState.hidden = visible !== 0;
 
             const url = new URL(window.location.href);
@@ -376,10 +438,19 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
         });
 
         const requestedFormat = new URLSearchParams(window.location.search).get("format");
-        let activeFilter = ["video", "book", "inspiration"].includes(requestedFormat) ? requestedFormat : "all";
+        let activeFilter = ["video", "book", "inspiration", "podcast", "new"].includes(requestedFormat) ? requestedFormat : "all";
 
         function renderResources(nextResources) {
             resources = nextResources;
+            const recentCount = resources.filter((resource) => isNewAdminResource(resource)).length;
+            newContentCount.textContent = String(recentCount);
+            newContentCount.hidden = recentCount === 0;
+            newFilterButton.setAttribute(
+                "aria-label",
+                recentCount === 0
+                    ? "New this week"
+                    : `New this week, ${recentCount} ${recentCount === 1 ? "resource" : "resources"}`
+            );
             const fragment = document.createDocumentFragment();
             resources.forEach((resource) => fragment.appendChild(createResource(resource)));
             list.replaceChildren(fragment);

@@ -443,6 +443,30 @@ function normalizedStoredString(value, maxLength = 500) {
     return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
 }
 
+export const NEW_CONTENT_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+
+function storedTimestampToMillis(value) {
+    if (!value) return 0;
+    if (typeof value.toMillis === "function") {
+        const milliseconds = value.toMillis();
+        return Number.isFinite(milliseconds) ? milliseconds : 0;
+    }
+    if (Number.isFinite(value.seconds)) {
+        const nanoseconds = Number.isFinite(value.nanoseconds) ? value.nanoseconds : 0;
+        return (value.seconds * 1000) + Math.floor(nanoseconds / 1e6);
+    }
+    if (value instanceof Date) return value.getTime();
+    return 0;
+}
+
+export function isNewAdminResource(resource, now = Date.now()) {
+    if (resource?.origin !== "admin") return false;
+    const createdAtMs = Number(resource.createdAtMs);
+    return Number.isFinite(createdAtMs)
+        && createdAtMs <= now
+        && createdAtMs >= now - NEW_CONTENT_WINDOW_MS;
+}
+
 export function normalizeStoredResource(data, documentId = "") {
     if (!data || typeof data !== "object") return null;
     const source = normalizedStoredString(data.source, 32).toLowerCase();
@@ -470,6 +494,7 @@ export function normalizeStoredResource(data, documentId = "") {
         dialInHref: source === "torahanytime" && String(data.dialInHref || "").startsWith("tel:") ? String(data.dialInHref) : "",
         extension: source === "torahanytime" ? normalizedStoredString(data.extension, 20) : "",
         sortOrder: Number.isFinite(data.sortOrder) ? data.sortOrder : 0,
+        createdAtMs: storedTimestampToMillis(data.createdAt),
         origin: "admin"
     };
 }
