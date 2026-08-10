@@ -15,8 +15,8 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;750&amp;display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../blue-concept-pages.css?v=2026-08-08.5">
-    <script defer src="/cache-refresh.js?v=2026-08-08.5"></script>
+    <link rel="stylesheet" href="../blue-concept-pages.css?v=2026-08-10.1">
+    <script defer src="/cache-refresh.js?v=2026-08-10.1"></script>
 </head>
 <body class="content-page">
     <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -100,8 +100,20 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
                 </div>
                 <div class="resource-list" id="resource-list"></div>
                 <div class="empty-state" id="empty-state" hidden>
-                    <h3 id="empty-state-title">No resources in this format yet.</h3>
-                    <p id="empty-state-description">Choose another format to continue browsing.</p>
+                    <div class="empty-state-copy" id="empty-state-copy">
+                        <h3 id="empty-state-title">No resources in this format yet.</h3>
+                        <p id="empty-state-description">Choose another format to continue browsing.</p>
+                    </div>
+                    <div class="podcast-preview" id="podcast-preview" hidden>
+                        <div class="podcast-artwork" aria-hidden="true">
+                            <img src="../logo_podcast.png?v=2026-08-10.1" alt="">
+                        </div>
+                        <div class="podcast-preview-copy">
+                            <p class="podcast-label">A new podcast from Binyan Shalem</p>
+                            <h3>Binyan Shalem Conversations</h3>
+                            <p>Episodes coming soon.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -123,8 +135,8 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
             getResourceTypeLabel,
             isNewAdminResource,
             mergeResourceCollections
-        } from "../content-resource-tools.mjs?v=2026-08-08.5";
-        import { BAKED_IN_RESOURCES, FIREBASE_CONFIG } from "../content-library.mjs?v=2026-08-08.5";
+        } from "../content-resource-tools.mjs?v=2026-08-10.1";
+        import { BAKED_IN_RESOURCES, FIREBASE_CONFIG } from "../content-library.mjs?v=2026-08-10.1";
 
         const bakedInResources = BAKED_IN_RESOURCES;
 
@@ -135,8 +147,10 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
         const libraryTitle = document.getElementById("library-title");
         const libraryIntro = document.getElementById("library-intro");
         const emptyState = document.getElementById("empty-state");
+        const emptyStateCopy = document.getElementById("empty-state-copy");
         const emptyStateTitle = document.getElementById("empty-state-title");
         const emptyStateDescription = document.getElementById("empty-state-description");
+        const podcastPreview = document.getElementById("podcast-preview");
         const newContentCount = document.getElementById("new-content-count");
         const newFilterButton = document.querySelector('[data-filter="new"]');
         const filterButtons = [...document.querySelectorAll(".filter-button")];
@@ -408,15 +422,14 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
                 ? "Resources added by our team during the past seven days."
                 : defaultLibraryIntro;
             libraryIntro.hidden = podcastMode;
-            emptyStateTitle.textContent = podcastMode
-                ? "New podcasts coming soon."
-                : newMode
+            emptyStateTitle.textContent = newMode
                     ? "Nothing new this week yet."
                     : "No resources in this format yet.";
             emptyStateDescription.textContent = newMode
                 ? "Anything added during the last seven days will appear here."
                 : defaultEmptyDescription;
-            emptyStateDescription.hidden = podcastMode;
+            emptyStateCopy.hidden = podcastMode;
+            podcastPreview.hidden = !podcastMode;
             count.textContent = podcastMode
                 ? "Podcasts"
                 : newMode

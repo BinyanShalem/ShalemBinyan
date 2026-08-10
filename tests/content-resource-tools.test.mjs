@@ -170,14 +170,23 @@ test("rejects unsupported links with a useful validation error", async () => {
     );
 });
 
-test("merges backend resources after baked resources and removes duplicates", () => {
-    const baked = [{
-        id: "existing-youtube",
-        type: "video",
-        source: "youtube",
-        title: "Existing",
-        primaryUrl: "https://www.youtube.com/watch?v=xYJON0S7WWo"
-    }];
+test("places newest admin resources first within each baked resource type and removes duplicates", () => {
+    const baked = [
+        {
+            id: "existing-youtube",
+            type: "video",
+            source: "youtube",
+            title: "Existing video",
+            primaryUrl: "https://www.youtube.com/watch?v=xYJON0S7WWo"
+        },
+        {
+            id: "existing-book",
+            type: "book",
+            source: "amazon",
+            title: "Existing book",
+            primaryUrl: "https://www.amazon.com/dp/168025684X"
+        }
+    ];
     const stored = [
         {
             id: "duplicate",
@@ -189,25 +198,48 @@ test("merges backend resources after baked resources and removes duplicates", ()
             imageUrl: "https://i.ytimg.com/vi/xYJON0S7WWo/hqdefault.jpg",
             imageAlt: "Duplicate",
             embedUrl: "https://www.youtube-nocookie.com/embed/xYJON0S7WWo?rel=0",
-            sortOrder: 2
+            sortOrder: 4
         },
         {
-            id: "itorah_6436",
+            id: "older-video",
             source: "itorah",
             type: "video",
-            title: "Marriage And Money",
-            primaryUrl: "https://itorah.com/lecture/video/rabbi-eli-mansour/marriage-and-money/6436/1",
+            title: "Older admin video",
+            primaryUrl: "https://itorah.com/lecture/video/rabbi-example/older-video/1001/1",
             primaryLabel: "Watch on iTorah",
             imageUrl: "https://itorah.com/assets/img/social/EliMansour.png",
-            imageAlt: "Marriage And Money",
+            imageAlt: "Older admin video",
             sortOrder: 1
+        },
+        {
+            id: "newer-video",
+            source: "itorah",
+            type: "video",
+            title: "Newer admin video",
+            primaryUrl: "https://itorah.com/lecture/video/rabbi-example/newer-video/1002/1",
+            primaryLabel: "Watch on iTorah",
+            imageUrl: "https://itorah.com/assets/img/social/EliMansour.png",
+            imageAlt: "Newer admin video",
+            sortOrder: 3
+        },
+        {
+            id: "new-admin-book",
+            source: "amazon",
+            type: "book",
+            title: "New admin book",
+            primaryUrl: "https://www.amazon.com/dp/1680251767",
+            primaryLabel: "Shop on Amazon",
+            imageUrl: "https://images-na.ssl-images-amazon.com/images/P/1680251767.01.L.jpg",
+            imageAlt: "New admin book",
+            sortOrder: 2
         }
     ];
 
     const merged = mergeResourceCollections(baked, stored);
-    assert.equal(merged.length, 2);
-    assert.equal(merged[0].id, "existing-youtube");
-    assert.equal(merged[1].id, "itorah_6436");
+    assert.deepEqual(
+        merged.map((resource) => resource.id),
+        ["newer-video", "older-video", "existing-youtube", "new-admin-book", "existing-book"]
+    );
 });
 
 test("marks only admin resources created within the last seven days as new", () => {

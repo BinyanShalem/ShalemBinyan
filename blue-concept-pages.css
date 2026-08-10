@@ -168,16 +168,20 @@ input {
 .mobile-menu {
     position: fixed;
     z-index: 45;
-    inset: 76px 0 auto;
+    inset: 0;
     display: grid;
-    gap: 0;
-    padding: 0.8rem var(--page-gutter) 1.2rem;
+    align-content: center;
+    gap: 0.5rem;
+    padding: max(6rem, calc(4.5rem + env(safe-area-inset-top))) var(--page-gutter) max(2rem, env(safe-area-inset-bottom));
+    overflow-y: auto;
     background: var(--mist);
-    border-bottom: 1px solid var(--line);
-    box-shadow: 0 18px 28px rgba(20, 47, 66, 0.12);
-    transform: translateY(-130%);
+    transform: translateY(-105%);
     visibility: hidden;
-    transition: transform 240ms ease, visibility 240ms;
+    transition: transform 320ms cubic-bezier(0.2, 0.85, 0.25, 1), visibility 320ms;
+}
+
+.mobile-menu[inert] {
+    visibility: hidden;
 }
 
 .mobile-menu.open {
@@ -186,9 +190,10 @@ input {
 }
 
 .mobile-menu a {
-    padding: 0.9rem 0;
+    padding: 0.7rem 0;
     color: var(--midnight);
     border-bottom: 1px solid var(--line);
+    font-size: clamp(1.5rem, 7vw, 2.3rem);
     font-weight: 650;
     text-decoration: none;
 }
@@ -474,18 +479,69 @@ input {
 
 .library-section.podcast-mode .empty-state {
     display: grid;
-    min-height: 300px;
+    min-height: 340px;
     align-content: center;
+    padding: clamp(2rem, 4vw, 3.5rem) 0;
     border-top-color: rgba(255, 255, 255, 0.22);
     text-align: left;
 }
 
-.library-section.podcast-mode .empty-state h3 {
-    max-width: 11ch;
-    font-size: clamp(2.6rem, 5vw, 4.8rem);
-    line-height: 1;
+.podcast-preview {
+    display: grid;
+    grid-template-columns: minmax(210px, 0.78fr) minmax(280px, 1.22fr);
+    align-items: center;
+    gap: clamp(2rem, 5vw, 4.5rem);
+}
+
+.podcast-preview[hidden],
+.empty-state-copy[hidden] {
+    display: none;
+}
+
+.podcast-artwork {
+    display: grid;
+    width: min(100%, 290px);
+    aspect-ratio: 1;
+    place-items: center;
+    padding: clamp(0.7rem, 2vw, 1.1rem);
+    overflow: hidden;
+    background: #edf7fb;
+    border-radius: 50%;
+    box-shadow: 0 24px 54px rgba(5, 22, 33, 0.28);
+}
+
+.podcast-artwork img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.podcast-preview-copy {
+    min-width: 0;
+}
+
+.podcast-preview-copy .podcast-label {
+    margin: 0 0 0.85rem;
+    color: var(--sky);
+    font-size: 0.82rem;
+    font-weight: 750;
+}
+
+.library-section.podcast-mode .podcast-preview-copy h3 {
+    max-width: 12ch;
+    margin: 0;
+    color: var(--white);
+    font-size: clamp(2.4rem, 4.7vw, 4.4rem);
+    line-height: 0.98;
     letter-spacing: -0.04em;
     text-wrap: balance;
+}
+
+.podcast-preview-copy > p:last-child {
+    margin: 1.1rem 0 0;
+    color: #bfd6e3;
+    font-size: clamp(1rem, 1.5vw, 1.15rem);
+    font-weight: 650;
 }
 
 .library-shell {
@@ -1462,16 +1518,17 @@ input {
     }
 }
 
-@media (max-width: 960px) {
-    .desktop-nav {
+@media (min-width: 821px) {
+    body.menu-open {
+        overflow: auto;
+    }
+
+    .mobile-menu {
         display: none;
     }
+}
 
-    .menu-button {
-        display: grid;
-        place-items: center;
-    }
-
+@media (max-width: 960px) {
     .resource-band-inner {
         align-items: flex-start;
         flex-direction: column;
@@ -1531,10 +1588,6 @@ input {
 
     .wordmark span {
         display: none;
-    }
-
-    .mobile-menu {
-        top: 70px;
     }
 
     .page-hero h1 {
@@ -1632,6 +1685,45 @@ input {
 
     .library-heading p {
         display: none;
+    }
+
+    .library-section.podcast-mode .library-shell {
+        min-height: 0;
+        padding-top: 1.65rem;
+    }
+
+    .library-section.podcast-mode .empty-state {
+        min-height: 0;
+        padding: 1.8rem 0 3.5rem;
+        text-align: center;
+    }
+
+    .podcast-preview {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        gap: 1.65rem;
+    }
+
+    .podcast-artwork {
+        width: min(82vw, 280px);
+    }
+
+    .podcast-preview-copy {
+        display: grid;
+        justify-items: center;
+    }
+
+    .podcast-preview-copy .podcast-label {
+        margin-bottom: 0.65rem;
+    }
+
+    .library-section.podcast-mode .podcast-preview-copy h3 {
+        max-width: 11ch;
+        font-size: clamp(2.15rem, 11vw, 3.1rem);
+    }
+
+    .podcast-preview-copy > p:last-child {
+        margin-top: 0.8rem;
     }
 
     .resource {

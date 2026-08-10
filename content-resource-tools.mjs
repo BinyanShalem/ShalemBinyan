@@ -508,18 +508,42 @@ function canonicalResourceKey(resource) {
 }
 
 export function mergeResourceCollections(bakedResources, storedResources) {
-    const merged = [...bakedResources];
     const seen = new Set(bakedResources.flatMap((resource) => [resource.id, canonicalResourceKey(resource)]).filter(Boolean));
     const normalized = storedResources
         .map((item) => normalizeStoredResource(item.data || item, item.id || ""))
         .filter(Boolean)
-        .sort((a, b) => a.sortOrder - b.sortOrder || a.title.localeCompare(b.title));
+        .sort((a, b) => b.sortOrder - a.sortOrder
+            || b.createdAtMs - a.createdAtMs
+            || a.title.localeCompare(b.title));
 
+    const uniqueAdminResources = [];
     normalized.forEach((resource) => {
         const key = canonicalResourceKey(resource);
         if (seen.has(resource.id) || seen.has(key)) return;
         seen.add(resource.id);
         seen.add(key);
+        uniqueAdminResources.push(resource);
+    });
+
+    const adminResourcesByType = new Map();
+    uniqueAdminResources.forEach((resource) => {
+        const typeResources = adminResourcesByType.get(resource.type) || [];
+        typeResources.push(resource);
+        adminResourcesByType.set(resource.type, typeResources);
+    });
+
+    const merged = [];
+    const insertedTypes = new Set();
+    bakedResources.forEach((resource) => {
+        if (!insertedTypes.has(resource.type)) {
+            merged.push(...(adminResourcesByType.get(resource.type) || []));
+            insertedTypes.add(resource.type);
+        }
+        merged.push(resource);
+    });
+
+    uniqueAdminResources.forEach((resource) => {
+        if (insertedTypes.has(resource.type)) return;
         merged.push(resource);
     });
 
