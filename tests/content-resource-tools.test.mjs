@@ -55,10 +55,13 @@ TorahAnytime Links
 📹 https://MyTaT.me/v421705
 
 ☎️ Dial In (605)-605-2220
-Press 9421705`;
+    Press 9421705`;
     const resource = await buildResourceFromPaste(pasted, {
-        fetchImpl: async () => {
-            throw new Error("TorahAnytime parsing should not need metadata fetches");
+        fetchImpl: async (requestUrl) => {
+            assert.equal(requestUrl, "https://api.torahanytime.com/lectures/421705");
+            return jsonResponse({
+                thumbnail_url: "https://ta-lectures.s3.us-east-005.backblazeb2.com/thumbnails/421705/421705-cover.jpg"
+            });
         }
     });
 
@@ -68,7 +71,26 @@ Press 9421705`;
     assert.equal(resource.dialIn, "(605) 605-2220");
     assert.equal(resource.dialInHref, "tel:+16056052220");
     assert.equal(resource.extension, "9421705");
+    assert.equal(resource.imageUrl, "https://ta-lectures.s3.us-east-005.backblazeb2.com/thumbnails/421705/421705-cover.jpg");
     assert.equal(getResourceTypeLabel(resource), "Video & dial-in");
+});
+
+test("keeps TorahAnytime fallback artwork when lecture metadata is unavailable", async () => {
+    const pasted = `R' Eli Mansour
+Tips for Marriage
+
+TorahAnytime Links
+📹 https://MyTaT.me/v421705
+
+☎️ Dial In (605)-605-2220
+Press 9421705`;
+    const resource = await buildResourceFromPaste(pasted, {
+        fetchImpl: async () => {
+            throw new Error("TorahAnytime API unavailable");
+        }
+    });
+
+    assert.equal(resource.imageUrl, "https://www.torahanytime.com/images/audio-thumb-male.svg");
 });
 
 test("uses only the first Amazon product link and ignores the Alexa link", async () => {

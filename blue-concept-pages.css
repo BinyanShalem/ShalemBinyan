@@ -168,16 +168,18 @@ input {
 .mobile-menu {
     position: fixed;
     z-index: 45;
-    inset: 0;
+    inset: 76px 0 auto;
     display: grid;
-    align-content: center;
-    gap: 0.5rem;
-    padding: max(6rem, calc(4.5rem + env(safe-area-inset-top))) var(--page-gutter) max(2rem, env(safe-area-inset-bottom));
+    gap: 0;
+    max-height: calc(100svh - 76px);
+    padding: 0.8rem var(--page-gutter) 1.2rem;
     overflow-y: auto;
     background: var(--mist);
-    transform: translateY(-105%);
+    border-bottom: 1px solid var(--line);
+    box-shadow: 0 18px 28px rgba(20, 47, 66, 0.12);
+    transform: translateY(-130%);
     visibility: hidden;
-    transition: transform 320ms cubic-bezier(0.2, 0.85, 0.25, 1), visibility 320ms;
+    transition: transform 240ms ease, visibility 240ms;
 }
 
 .mobile-menu[inert] {
@@ -190,10 +192,11 @@ input {
 }
 
 .mobile-menu a {
-    padding: 0.7rem 0;
+    min-height: 48px;
+    padding: 0.8rem 0;
     color: var(--midnight);
     border-bottom: 1px solid var(--line);
-    font-size: clamp(1.5rem, 7vw, 2.3rem);
+    font-size: 0.95rem;
     font-weight: 650;
     text-decoration: none;
 }
@@ -1588,6 +1591,11 @@ input {
 
     .wordmark span {
         display: none;
+    }
+
+    .mobile-menu {
+        top: 70px;
+        max-height: calc(100svh - 70px);
     }
 
     .page-hero h1 {

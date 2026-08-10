@@ -11,6 +11,7 @@ const YOUTUBE_HOSTS = new Set([
 const AMAZON_HOST_PATTERN = /(^|\.)(amazon\.[a-z.]+|a\.co|amzn\.to)$/i;
 const ITORAH_HOST_PATTERN = /(^|\.)itorah\.com$/i;
 const TORAH_ANYTIME_HOST_PATTERN = /(^|\.)(mytat\.me|torahanytime\.com)$/i;
+const TORAH_ANYTIME_API_BASE = "https://api.torahanytime.com/lectures";
 const DEFAULT_TORAH_ANYTIME_IMAGE = "https://www.torahanytime.com/images/audio-thumb-male.svg";
 
 export const CONTENT_COLLECTION = "content";
@@ -251,7 +252,7 @@ async function buildYouTubeResource(url, fetchImpl) {
     });
 }
 
-function buildTorahAnytimeResource(rawText, url) {
+async function buildTorahAnytimeResource(rawText, url, fetchImpl) {
     const urlMatch = url.pathname.match(/\/v?(\d+)/i) || url.pathname.match(/\/lectures\/(\d+)/i);
     const lectureId = urlMatch?.[1] || "";
     if (!lectureId) {
@@ -283,6 +284,12 @@ function buildTorahAnytimeResource(rawText, url) {
     }
 
     const phone = formatPhone(phoneMatch[0]);
+    let metadata = {};
+    try {
+        metadata = await fetchJson(`${TORAH_ANYTIME_API_BASE}/${lectureId}`, fetchImpl);
+    } catch {
+        metadata = {};
+    }
 
     return resourceBase({
         id: `torahanytime_${lectureId}`,
@@ -292,7 +299,7 @@ function buildTorahAnytimeResource(rawText, url) {
         speaker,
         primaryLabel: "Watch on TorahAnytime",
         primaryUrl: `https://MyTaT.me/v${lectureId}`,
-        imageUrl: DEFAULT_TORAH_ANYTIME_IMAGE,
+        imageUrl: safeMetadataImage(metadata.thumbnail_url) || DEFAULT_TORAH_ANYTIME_IMAGE,
         imageAlt: `${speaker} presenting ${title}`,
         dialIn: phone.display,
         dialInHref: phone.href,
@@ -432,7 +439,7 @@ export async function buildResourceFromPaste(rawText, { fetchImpl = globalThis.f
     }
 
     if (detected.source === "youtube") return buildYouTubeResource(detected.url, fetchImpl);
-    if (detected.source === "torahanytime") return buildTorahAnytimeResource(text, detected.url);
+    if (detected.source === "torahanytime") return buildTorahAnytimeResource(text, detected.url, fetchImpl);
     if (detected.source === "amazon") return buildAmazonResource(detected.url, fetchImpl);
     if (detected.source === "itorah") return buildITorahResource(detected.url, fetchImpl);
 
