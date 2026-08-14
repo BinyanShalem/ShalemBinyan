@@ -32,7 +32,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;750&amp;display=swap" rel="stylesheet">
-    <script defer src="/cache-refresh.js?v=2026-08-13.1"></script>
+    <script defer src="/cache-refresh.js?v=2026-08-13.3"></script>
     <style>
         :root {
             --mist: #f4fafd;
@@ -976,9 +976,9 @@
 
         .submitter-choice {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 0.7rem;
-            margin-bottom: 1.6rem;
+            margin-bottom: 1rem;
         }
 
         .choice-button {
@@ -988,7 +988,9 @@
             background: var(--mist);
             border: 1px solid var(--line);
             border-radius: 999px;
+            font-size: 0.9rem;
             font-weight: 700;
+            white-space: nowrap;
             cursor: pointer;
             transition: color 180ms ease, background 180ms ease, border-color 180ms ease;
         }
@@ -997,6 +999,39 @@
             color: var(--white);
             background: var(--deep-water);
             border-color: var(--deep-water);
+        }
+
+        .choice-button:focus-visible {
+            outline: 3px solid var(--harbor);
+            outline-offset: 3px;
+        }
+
+        .submitter-disclosure {
+            display: grid;
+            gap: 0.8rem;
+            margin: 0 0 1rem;
+            padding: 1rem;
+            background: #edf7fb;
+            border-radius: 12px;
+        }
+
+        .submitter-disclosure[hidden] {
+            display: none;
+        }
+
+        .submitter-disclosure .field input {
+            background: var(--white);
+        }
+
+        .submitter-disclaimer {
+            margin: 0;
+            color: var(--deep-water);
+            font-size: 0.82rem;
+            line-height: 1.55;
+        }
+
+        .submitter-disclaimer strong {
+            color: var(--midnight);
         }
 
         .form-context {
@@ -1725,6 +1760,11 @@
                 grid-template-columns: 1fr;
             }
 
+            .submitter-choice {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 0.55rem;
+            }
+
             .field-wide,
             .donation-field,
             .submit-button,
@@ -2066,12 +2106,22 @@
                         <p class="form-note">Fields marked with * are required.</p>
 
                         <div class="submitter-choice" role="group" aria-label="Who is submitting the form?">
-                            <button class="choice-button" type="button" data-form-type="couple" aria-pressed="true">Husband / Wife</button>
-                            <button class="choice-button" type="button" data-form-type="someone-else" aria-pressed="false">Someone else</button>
+                            <button class="choice-button" type="button" data-form-type="husband" aria-pressed="false">Husband</button>
+                            <button class="choice-button" type="button" data-form-type="wife" aria-pressed="false">Wife</button>
+                            <button class="choice-button" type="button" data-form-type="both" aria-pressed="true">Both</button>
+                            <button class="choice-button" type="button" data-form-type="someone-else" aria-pressed="false" aria-controls="submitter-disclosure" aria-expanded="false">Someone else</button>
+                        </div>
+
+                        <div class="submitter-disclosure" id="submitter-disclosure" hidden>
+                            <div class="field">
+                                <label for="submitter-relationship">Your relationship to the couple*</label>
+                                <input id="submitter-relationship" name="submitter_relationship" type="text" maxlength="160" placeholder="Parent, rabbi, teacher, or friend" disabled>
+                            </div>
+                            <p class="submitter-disclaimer"><strong>Please note:</strong> We only get involved when the couple is on board.</p>
                         </div>
 
                         <p class="form-context" id="form-context">
-                            Please share the couple’s information below.
+                            Please share your information below.
                         </p>
 
                         <div class="form-grid">
@@ -2291,6 +2341,8 @@
         const formContext = document.getElementById("form-context");
         const formSectionTitle = document.getElementById("form-section-title");
         const donationLegend = document.getElementById("donation-legend");
+        const submitterDisclosure = document.getElementById("submitter-disclosure");
+        const submitterRelationship = document.getElementById("submitter-relationship");
         const coupleRequiredFields = document.querySelectorAll("[data-couple-required]");
         const modeLabels = document.querySelectorAll("[data-couple-label]");
         const contactForm = document.getElementById("concept-form");
@@ -2419,12 +2471,23 @@
             const someoneElse = type === "someone-else";
             choiceButtons.forEach((item) => {
                 item.setAttribute("aria-pressed", String(item.dataset.formType === type));
+                if (item.dataset.formType === "someone-else") {
+                    item.setAttribute("aria-expanded", String(someoneElse));
+                }
             });
-            formContext.textContent = someoneElse
-                ? "Note: This form is not for the couple itself. For the couple to submit please choose Husband/Wife. If you would like to have someone submit for you, please ensure all information is accurate and correct.*"
-                : "Please share the couple’s information below.";
-            formSectionTitle.textContent = someoneElse ? "Contact Information" : "Couple’s Information";
-            donationLegend.textContent = someoneElse ? "Donation (Optional)" : "Would you like to donate?";
+            submitterDisclosure.hidden = !someoneElse;
+            submitterRelationship.disabled = !someoneElse;
+            submitterRelationship.required = someoneElse;
+            if (!someoneElse) clearFieldError(submitterRelationship);
+            const contextByType = {
+                husband: "Please share information about you and your wife below.",
+                wife: "Please share information about you and your husband below.",
+                both: "Please share your information below.",
+                "someone-else": "Please share the couple’s information below."
+            };
+            formContext.textContent = contextByType[type];
+            formSectionTitle.textContent = "Couple’s Information";
+            donationLegend.textContent = "Would you like to donate?";
             coupleRequiredFields.forEach((field) => {
                 field.required = !someoneElse;
                 if (field.checkValidity()) clearFieldError(field);
@@ -2533,6 +2596,7 @@
                 issue_presenting: data.issue_presenting,
                 family_rabbi: data.family_rabbi,
                 anyone_else_involved: data.anyone_else_involved,
+                submitter_relationship: formType === "someone-else" ? data.submitter_relationship : null,
                 other_notes: data.other_notes,
                 parents_names: data.parents_names,
                 num_kids: data.num_kids,
@@ -2590,7 +2654,7 @@
 
         document.getElementById("reset-form-button").addEventListener("click", () => {
             contactForm.reset();
-            setFormType("couple");
+            setFormType("both");
             contactForm.querySelectorAll('[aria-invalid="true"]').forEach(clearFieldError);
             clearFormError();
             copyStatus.textContent = "";

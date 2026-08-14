@@ -23,19 +23,19 @@ service cloud.firestore {
       return request.resource.data.keys().hasOnly([
           'h_name', 'w_name', 'h_cell', 'h_email', 'w_cell', 'w_email',
           'h_age', 'w_age', 'address', 'years_married', 'issue_presenting',
-          'family_rabbi', 'anyone_else_involved', 'other_notes', 'parents_names', 'num_kids',
+          'family_rabbi', 'anyone_else_involved', 'submitter_relationship', 'other_notes', 'parents_names', 'num_kids',
           'donation', 'timestamp', 'uid', 'formType'
         ])
         && request.resource.data.keys().hasAll([
           'h_name', 'w_name', 'h_cell', 'h_email', 'w_cell', 'w_email',
           'h_age', 'w_age', 'address', 'years_married', 'issue_presenting',
-          'family_rabbi', 'anyone_else_involved', 'parents_names', 'num_kids',
+          'family_rabbi', 'anyone_else_involved', 'submitter_relationship', 'parents_names', 'num_kids',
           'donation', 'timestamp', 'uid', 'formType'
         ])
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.timestamp is string
         && request.resource.data.timestamp.size() <= 40
-        && request.resource.data.formType in ['couple', 'someone-else']
+        && request.resource.data.formType in ['husband', 'wife', 'both', 'someone-else', 'couple']
         && request.resource.data.donation in ['Yes', 'No']
         && isOptionalString(request.resource.data.h_name, 160)
         && isOptionalString(request.resource.data.w_name, 160)
@@ -50,6 +50,14 @@ service cloud.firestore {
         && isOptionalString(request.resource.data.issue_presenting, 5000)
         && isOptionalString(request.resource.data.family_rabbi, 240)
         && isOptionalString(request.resource.data.anyone_else_involved, 500)
+        && isOptionalString(request.resource.data.submitter_relationship, 160)
+        && (
+          (request.resource.data.formType == 'someone-else'
+            && request.resource.data.submitter_relationship is string
+            && request.resource.data.submitter_relationship.size() > 0)
+          || (request.resource.data.formType != 'someone-else'
+            && request.resource.data.submitter_relationship == null)
+        )
         && isOptionalString(request.resource.data.get('other_notes', null), 3000)
         && isOptionalString(request.resource.data.parents_names, 500)
         && isOptionalNumber(request.resource.data.num_kids);
