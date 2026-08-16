@@ -2,13 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="robots" content="noindex, nofollow">
-    <title>Binyan Shalem Admin Panel</title>
+    <meta name="theme-color" content="#3f1f33">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Binyan Admin">
+    <meta name="description" content="The Binyan Shalem admin workspace for content and intake submissions.">
+    <title>Binyan Shalem Admin</title>
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="icon" href="./icons/icon-192.png" sizes="192x192" type="image/png">
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-    <script defer src="/cache-refresh.js?v=2026-08-13.3"></script>
+    <script defer src="/cache-refresh.js?v=2026-08-15.1"></script>
     <style>
         :root {
             --admin-purple: #723358;
@@ -695,167 +703,1352 @@
                 animation-iteration-count: 1 !important;
             }
         }
+        /* Admin app visual system */
+        :root {
+            color-scheme: light;
+            --admin-purple: #6f3157;
+            --admin-purple-dark: #3f1f33;
+            --admin-purple-soft: #f1e6ed;
+            --admin-ink: #17232c;
+            --admin-muted: #64717a;
+            --admin-line: #d8dfdd;
+            --admin-canvas: #f1f4f2;
+            --admin-success-soft: #e3f2ea;
+            --admin-error: #9a2d33;
+            --admin-error-soft: #f9e6e7;
+            --admin-focus: #9a527b;
+            --admin-sage: #dcebe4;
+            --admin-sage-deep: #235c46;
+            --admin-blue-soft: #e6f0f5;
+            --admin-blue: #2e627d;
+            --admin-line-strong: #c5cfcc;
+            --sidebar-width: 272px;
+            --shadow-low: 0 1px 2px rgba(28, 39, 43, 0.06), 0 10px 28px rgba(28, 39, 43, 0.07);
+        }
+
+        html {
+            background: var(--admin-canvas);
+            scroll-behavior: smooth;
+        }
+
+        body {
+            min-height: 100dvh;
+            font-size: 15px;
+            line-height: 1.5;
+            text-rendering: optimizeLegibility;
+        }
+
+        ::selection {
+            color: #ffffff;
+            background: var(--admin-purple);
+        }
+
+        * {
+            scrollbar-color: #9facaa transparent;
+            scrollbar-width: thin;
+        }
+
+        button,
+        a {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .skip-link {
+            position: fixed;
+            z-index: 100;
+            top: 0.75rem;
+            left: 0.75rem;
+            padding: 0.7rem 1rem;
+            color: #ffffff;
+            background: var(--admin-purple-dark);
+            border-radius: 10px;
+            transform: translateY(-180%);
+            transition: transform 160ms ease-out;
+        }
+
+        .skip-link:focus {
+            transform: translateY(0);
+        }
+
+        .app-boot {
+            position: fixed;
+            z-index: 90;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            color: #ffffff;
+            background: var(--admin-purple-dark);
+        }
+
+        .app-boot-inner {
+            display: grid;
+            justify-items: center;
+            gap: 1rem;
+        }
+
+        .app-boot-mark,
+        .login-logo,
+        .sidebar-logo {
+            display: grid;
+            place-items: center;
+            overflow: hidden;
+            background: #ffffff;
+            border-radius: 50%;
+        }
+
+        .app-boot-mark {
+            width: 76px;
+            height: 76px;
+            box-shadow: 0 18px 44px rgba(0, 0, 0, 0.25);
+            animation: boot-breathe 1100ms ease-in-out infinite alternate;
+        }
+
+        .app-boot-mark img,
+        .login-logo img,
+        .sidebar-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .app-boot p {
+            margin: 0;
+            color: #e9dce4;
+            font-size: 0.84rem;
+            font-weight: 600;
+        }
+
+        @keyframes boot-breathe {
+            to {
+                transform: translateY(-4px);
+                box-shadow: 0 24px 54px rgba(0, 0, 0, 0.32);
+            }
+        }
+
+        .login-screen {
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: grid;
+            grid-template-columns: minmax(320px, 0.92fr) minmax(420px, 1.08fr);
+            background: #ffffff;
+        }
+
+        .login-brand-panel {
+            position: relative;
+            display: flex;
+            min-height: 100%;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+            padding: clamp(2rem, 6vw, 5.5rem);
+            color: #ffffff;
+            background: var(--admin-purple-dark);
+        }
+
+        .login-brand-panel::before,
+        .login-brand-panel::after {
+            position: absolute;
+            content: "";
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .login-brand-panel::before {
+            width: min(52vw, 700px);
+            aspect-ratio: 1;
+            right: -48%;
+            bottom: -18%;
+        }
+
+        .login-brand-panel::after {
+            width: min(34vw, 480px);
+            aspect-ratio: 1;
+            right: -15%;
+            bottom: -33%;
+            background: rgba(255, 255, 255, 0.035);
+        }
+
+        .login-brand-lockup,
+        .sidebar-brand {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+        }
+
+        .login-logo {
+            width: 58px;
+            height: 58px;
+            flex: 0 0 auto;
+        }
+
+        .login-brand-lockup strong,
+        .sidebar-brand strong {
+            display: block;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+        }
+
+        .login-brand-lockup span,
+        .sidebar-brand span {
+            display: block;
+            margin-top: 0.2rem;
+            color: #d5c4ce;
+            font-size: 0.78rem;
+        }
+
+        .login-message {
+            position: relative;
+            z-index: 1;
+            max-width: 510px;
+            padding: clamp(3rem, 8vw, 7rem) 0;
+        }
+
+        .login-message h1 {
+            max-width: 11ch;
+            color: #ffffff;
+            font-size: clamp(2.7rem, 5.2vw, 5.25rem);
+            line-height: 0.98;
+            letter-spacing: -0.04em;
+        }
+
+        .login-message p {
+            max-width: 48ch;
+            margin: 1.4rem 0 0;
+            color: #d8cbd3;
+            font-size: clamp(1rem, 1.5vw, 1.12rem);
+            line-height: 1.7;
+        }
+
+        .login-brand-footer {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            color: #d8cbd3;
+            font-size: 0.8rem;
+        }
+
+        .login-brand-footer svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .login-form-panel {
+            display: grid;
+            place-items: center;
+            padding: clamp(1.5rem, 6vw, 5rem);
+            background: #fafbf9;
+        }
+
+        .login-card {
+            width: min(100%, 430px);
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            border: 0;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        .login-mark,
+        .composer-guide-icon {
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+        }
+
+        .login-mark {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 1.75rem;
+            color: var(--admin-purple);
+            background: var(--admin-purple-soft);
+        }
+
+        .login-mark svg {
+            width: 23px;
+            height: 23px;
+        }
+
+        .login-card h2 {
+            margin: 0;
+            color: var(--admin-purple-dark);
+            font-size: clamp(1.85rem, 4vw, 2.35rem);
+        }
+
+        .login-card > p {
+            max-width: 40ch;
+            margin: 0.75rem 0 2rem;
+            color: var(--admin-muted);
+            line-height: 1.65;
+        }
+
+        .device-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.65rem;
+            margin: 1.2rem 0 0;
+            color: var(--admin-muted);
+            font-size: 0.78rem;
+            line-height: 1.55;
+        }
+
+        .device-note svg {
+            width: 17px;
+            height: 17px;
+            flex: 0 0 auto;
+            margin-top: 0.1rem;
+            color: var(--admin-sage-deep);
+        }
+
+        .app-shell {
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: grid;
+            grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+        }
+
+        .app-sidebar {
+            position: sticky;
+            z-index: 20;
+            top: 0;
+            display: flex;
+            width: var(--sidebar-width);
+            height: 100vh;
+            height: 100dvh;
+            flex-direction: column;
+            padding: 1.5rem 1rem calc(1rem + env(safe-area-inset-bottom));
+            color: #ffffff;
+            background: var(--admin-purple-dark);
+        }
+
+        .sidebar-brand {
+            padding: 0.2rem 0.5rem 1.65rem;
+        }
+
+        .sidebar-logo {
+            width: 44px;
+            height: 44px;
+            flex: 0 0 auto;
+        }
+
+        .sidebar-brand strong {
+            font-size: 0.94rem;
+        }
+
+        .sidebar-brand span {
+            font-size: 0.69rem;
+        }
+
+        .admin-tabs {
+            display: grid;
+            gap: 0.35rem;
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            border-radius: 0;
+        }
+
+        .tab-button {
+            display: grid;
+            width: 100%;
+            min-height: 54px;
+            grid-template-columns: 22px minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.75rem 0.85rem;
+            color: #d8cbd3;
+            background: transparent;
+            border: 0;
+            border-radius: 12px;
+            font-weight: 650;
+            text-align: left;
+            transition: color 160ms ease-out, background 160ms ease-out, transform 160ms ease-out;
+        }
+
+        .tab-button:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.075);
+        }
+
+        .tab-button[aria-selected="true"] {
+            color: var(--admin-purple-dark);
+            background: #ffffff;
+            box-shadow: 0 9px 24px rgba(20, 8, 16, 0.18);
+        }
+
+        .tab-button svg {
+            width: 21px;
+            height: 21px;
+        }
+
+        .tab-count {
+            min-width: 24px;
+            padding: 0.12rem 0.4rem;
+            color: inherit;
+            background: rgba(255, 255, 255, 0.11);
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-variant-numeric: tabular-nums;
+            text-align: center;
+        }
+
+        .tab-button[aria-selected="true"] .tab-count {
+            color: var(--admin-purple);
+            background: var(--admin-purple-soft);
+        }
+
+        .sidebar-footer {
+            display: grid;
+            gap: 0.45rem;
+            margin-top: auto;
+            padding-top: 1.25rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .sidebar-action {
+            display: flex;
+            min-height: 44px;
+            align-items: center;
+            gap: 0.7rem;
+            padding: 0.65rem 0.75rem;
+            color: #d8cbd3;
+            background: transparent;
+            border: 0;
+            border-radius: 10px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .sidebar-action:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.075);
+        }
+
+        .sidebar-action svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .app-stage {
+            min-width: 0;
+            background: var(--admin-canvas);
+        }
+
+        .admin-header {
+            position: sticky;
+            z-index: 15;
+            top: 0;
+            display: flex;
+            min-height: 82px;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+            margin: 0;
+            padding: 1rem clamp(1rem, 4vw, 3.25rem);
+            background: rgba(255, 255, 255, 0.96);
+            border-bottom: 1px solid var(--admin-line);
+        }
+
+        .admin-title-block h1 {
+            color: var(--admin-ink);
+            font-size: clamp(1.45rem, 2.5vw, 2rem);
+        }
+
+        .admin-title-block p {
+            margin: 0.3rem 0 0;
+            color: var(--admin-muted);
+            font-size: 0.78rem;
+            font-weight: 400;
+        }
+
+        .admin-identity {
+            gap: 0.8rem;
+        }
+
+        .connection-state {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            color: var(--admin-muted);
+            font-size: 0.76rem;
+            font-weight: 600;
+        }
+
+        .connection-dot {
+            width: 8px;
+            height: 8px;
+            background: #2d8964;
+            border-radius: 50%;
+            box-shadow: 0 0 0 4px var(--admin-success-soft);
+        }
+
+        .connection-state.is-offline .connection-dot {
+            background: #a66b21;
+            box-shadow: 0 0 0 4px #f5ead9;
+        }
+
+        .admin-identity-copy {
+            font-size: 0.71rem;
+            line-height: 1.25;
+        }
+
+        .admin-identity-copy strong {
+            margin-top: 0.2rem;
+            font-size: 0.78rem;
+        }
+
+        .workspace {
+            width: min(100%, 1320px);
+            margin: 0 auto;
+            padding: clamp(1.25rem, 4vw, 3.25rem);
+        }
+
+        .workspace-panel {
+            min-width: 0;
+        }
+
+        .panel-heading {
+            align-items: flex-end;
+            gap: 2rem;
+            margin-bottom: 1.4rem;
+        }
+
+        .panel-heading h2 {
+            max-width: 18ch;
+            color: var(--admin-purple-dark);
+            font-size: clamp(1.45rem, 3vw, 2.15rem);
+        }
+
+        .panel-heading p {
+            max-width: 64ch;
+            margin-top: 0.55rem;
+            line-height: 1.65;
+        }
+
+        .panel-note {
+            display: inline-flex;
+            flex: 0 0 auto;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.55rem 0.75rem;
+            color: var(--admin-sage-deep);
+            background: var(--admin-sage);
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .panel-note svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .resource-composer {
+            display: grid;
+            grid-template-columns: minmax(220px, 0.72fr) minmax(0, 1.28fr);
+            overflow: hidden;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: var(--shadow-low);
+        }
+
+        .composer-guide {
+            padding: clamp(1.4rem, 3vw, 2rem);
+            color: var(--admin-purple-dark);
+            background: var(--admin-purple-soft);
+        }
+
+        .composer-guide-icon {
+            width: 44px;
+            height: 44px;
+            margin-bottom: 1.25rem;
+            color: #ffffff;
+            background: var(--admin-purple);
+        }
+
+        .composer-guide-icon svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .composer-guide h3 {
+            max-width: 14ch;
+            font-size: 1.15rem;
+        }
+
+        .composer-guide > p {
+            margin: 0.7rem 0 1.25rem;
+            color: #684e5f;
+            font-size: 0.82rem;
+            line-height: 1.6;
+        }
+
+        .provider-list {
+            gap: 0.45rem;
+            margin: 0;
+        }
+
+        .provider-list li,
+        .resource-badge {
+            padding: 0.35rem 0.55rem;
+            color: var(--admin-purple-dark);
+            background: rgba(255, 255, 255, 0.76);
+            font-size: 0.7rem;
+        }
+
+        .composer-form {
+            padding: clamp(1.4rem, 3vw, 2rem);
+        }
+
+        .field-label {
+            margin-bottom: 0.48rem;
+            color: #334149;
+            font-size: 0.79rem;
+            font-weight: 700;
+        }
+
+        .form-input,
+        .paste-input {
+            caret-color: var(--admin-purple);
+            background: #fbfcfb;
+            border-color: var(--admin-line-strong);
+            border-radius: 11px;
+            transition: border-color 160ms ease-out, box-shadow 160ms ease-out, background 160ms ease-out;
+        }
+
+        .form-input::placeholder,
+        .paste-input::placeholder {
+            color: #5d686e;
+            opacity: 1;
+        }
+
+        .form-input {
+            min-height: 48px;
+            padding: 0.72rem 0.85rem;
+        }
+
+        .paste-input {
+            min-height: 190px;
+            padding: 0.9rem;
+        }
+
+        .form-input:hover,
+        .paste-input:hover {
+            border-color: #aab6b2;
+        }
+
+        .form-input:focus,
+        .paste-input:focus {
+            background: #ffffff;
+            border-color: var(--admin-purple);
+            box-shadow: 0 0 0 4px rgba(111, 49, 87, 0.12);
+        }
+
+        .paste-help {
+            font-size: 0.76rem;
+        }
+
+        .button {
+            min-height: 44px;
+            gap: 0.48rem;
+            padding: 0.68rem 1rem;
+            border-radius: 10px;
+            transition: transform 160ms ease-out, background 160ms ease-out, border-color 160ms ease-out, box-shadow 160ms ease-out;
+        }
+
+        .button:not(:disabled):active {
+            transform: translateY(1px);
+        }
+
+        .button svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .button-primary {
+            box-shadow: 0 8px 20px rgba(79, 31, 60, 0.18);
+        }
+
+        .button-primary:hover {
+            background: #5f294a;
+            box-shadow: 0 11px 25px rgba(79, 31, 60, 0.23);
+        }
+
+        .button-secondary {
+            border-color: var(--admin-line-strong);
+        }
+
+        .button-secondary:hover {
+            background: #f7f9f8;
+            border-color: #aab6b2;
+        }
+
+        .button-quiet {
+            min-height: 38px;
+            padding: 0.5rem 0.65rem;
+            color: var(--admin-muted);
+            background: transparent;
+            border-color: transparent;
+            font-size: 0.78rem;
+        }
+
+        .button-quiet:hover {
+            color: var(--admin-purple);
+            background: var(--admin-purple-soft);
+        }
+
+        .button-danger {
+            background: transparent;
+            border-color: #e6c4c7;
+            font-size: 0.76rem;
+        }
+
+        .button-danger:hover {
+            background: var(--admin-error-soft);
+            border-color: #d6a6aa;
+        }
+
+        .status {
+            font-size: 0.82rem;
+        }
+
+        .status-info {
+            color: var(--admin-blue);
+            background: var(--admin-blue-soft);
+        }
+
+        .content-preview {
+            grid-template-columns: minmax(200px, 0.62fr) minmax(0, 1.38fr);
+            gap: clamp(1.25rem, 4vw, 2.25rem);
+            margin-top: 1.25rem;
+            padding: clamp(1.2rem, 3vw, 1.75rem);
+            background: var(--admin-blue-soft);
+            border: 0;
+            border-radius: 16px;
+            box-shadow: var(--shadow-low);
+        }
+
+        .preview-media {
+            top: 104px;
+        }
+
+        .preview-image-wrap {
+            background: #cad9df;
+            box-shadow: 0 10px 25px rgba(33, 61, 73, 0.12);
+        }
+
+        .preview-media .resource-badge {
+            color: var(--admin-blue);
+            background: #ffffff;
+        }
+
+        .preview-lock-note {
+            color: #496675;
+            font-size: 0.74rem;
+        }
+
+        .preview-link {
+            color: var(--admin-blue);
+            font-size: 0.8rem;
+        }
+
+        .preview-editor {
+            padding: clamp(1rem, 2vw, 1.4rem);
+            background: #ffffff;
+            border-radius: 13px;
+        }
+
+        .preview-editor-heading p {
+            font-size: 0.8rem;
+        }
+
+        .preview-source-title {
+            color: var(--admin-blue);
+        }
+
+        .section-divider {
+            margin: clamp(2.25rem, 6vw, 4rem) 0 clamp(1.5rem, 4vw, 2.5rem);
+        }
+
+        .subsection-heading h2 {
+            color: var(--admin-ink);
+            font-size: clamp(1.2rem, 2.5vw, 1.55rem);
+        }
+
+        .subsection-heading p {
+            font-size: 0.78rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .admin-resource-list,
+        .submission-list {
+            overflow: hidden;
+            background: #ffffff;
+            border-radius: 14px;
+            box-shadow: var(--shadow-low);
+        }
+
+        .admin-resource-list {
+            display: block;
+        }
+
+        .admin-resource-item {
+            grid-template-columns: 92px minmax(0, 1fr) auto;
+            padding: 0.9rem 1rem;
+            background: #ffffff;
+            border: 0;
+            border-bottom: 1px solid var(--admin-line);
+            border-radius: 0;
+        }
+
+        .admin-resource-item:last-child {
+            border-bottom: 0;
+        }
+
+        .admin-resource-thumb {
+            width: 92px;
+            border-radius: 9px;
+        }
+
+        .admin-resource-copy h3 {
+            font-size: 0.94rem;
+            letter-spacing: -0.015em;
+        }
+
+        .admin-resource-copy p {
+            font-size: 0.74rem;
+        }
+
+        .submission-list {
+            gap: 1px;
+            background: var(--admin-line);
+        }
+
+        .submission-card {
+            padding: clamp(1rem, 3vw, 1.35rem);
+            background: #ffffff;
+            border: 0;
+            border-radius: 0;
+        }
+
+        .submission-card header {
+            padding-bottom: 0.9rem;
+        }
+
+        .submission-card h3 {
+            color: var(--admin-purple-dark);
+        }
+
+        .submission-fields {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.9rem 1.35rem;
+        }
+
+        .submission-id {
+            color: #5e6a72;
+            font-size: 0.66rem;
+            overflow-wrap: anywhere;
+        }
+
+        .install-status {
+            position: fixed;
+            z-index: 40;
+            top: 92px;
+            right: clamp(1rem, 4vw, 3.25rem);
+            width: min(calc(100% - 2rem), 390px);
+            margin: 0;
+            padding: 0.8rem 0.9rem;
+            color: var(--admin-blue);
+            background: #ffffff;
+            border-radius: 11px;
+            box-shadow: 0 16px 38px rgba(29, 42, 48, 0.16);
+            font-size: 0.78rem;
+            line-height: 1.5;
+        }
+
+        .install-status[data-tone="error"] {
+            color: var(--admin-error);
+            background: #fff9f9;
+        }
+
+        .submission-fields dt {
+            font-size: 0.68rem;
+        }
+
+        .submission-fields dd {
+            margin-top: 0.22rem;
+            color: #26343d;
+            font-size: 0.86rem;
+        }
+
+        .loading-state,
+        .empty-state {
+            margin: 0;
+            padding: 2.5rem 1rem;
+            background: #ffffff;
+            border-radius: 14px;
+        }
+
+        @media (max-width: 1050px) {
+            :root {
+                --sidebar-width: 232px;
+            }
+
+            .submission-fields {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 820px) {
+            .app-shell {
+                display: block;
+                padding-bottom: calc(74px + env(safe-area-inset-bottom));
+            }
+
+            .app-sidebar {
+                position: fixed;
+                top: auto;
+                right: 0;
+                bottom: 0;
+                left: 0;
+                width: auto;
+                height: calc(70px + env(safe-area-inset-bottom));
+                padding: 0.45rem max(0.65rem, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(0.65rem, env(safe-area-inset-left));
+                background: rgba(63, 31, 51, 0.98);
+                box-shadow: 0 -12px 35px rgba(32, 16, 26, 0.16);
+            }
+
+            .sidebar-brand,
+            .sidebar-footer {
+                display: none;
+            }
+
+            .admin-tabs {
+                height: 100%;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 0.4rem;
+            }
+
+            .tab-button {
+                min-height: 58px;
+                grid-template-columns: 22px auto;
+                justify-content: center;
+                gap: 0.55rem;
+                padding: 0.55rem 0.7rem;
+                text-align: center;
+            }
+
+            .tab-count {
+                display: none;
+            }
+
+            .admin-header {
+                min-height: 72px;
+                padding: 0.8rem max(1rem, env(safe-area-inset-right)) 0.8rem max(1rem, env(safe-area-inset-left));
+            }
+
+            .connection-state,
+            .admin-identity-copy {
+                display: none;
+            }
+
+            .workspace {
+                padding: 1.4rem max(1rem, env(safe-area-inset-right)) 2rem max(1rem, env(safe-area-inset-left));
+            }
+
+            .preview-media {
+                top: 90px;
+            }
+
+            body:has(input:focus, textarea:focus) .app-sidebar {
+                transform: translateY(110%);
+                transition: transform 180ms ease-out;
+            }
+        }
+
+        @media (max-width: 720px) {
+            .login-screen {
+                display: block;
+                background: #fafbf9;
+            }
+
+            .login-brand-panel {
+                min-height: auto;
+                padding: calc(1.25rem + env(safe-area-inset-top)) 1.25rem 2rem;
+            }
+
+            .login-message {
+                padding: 3rem 0 1rem;
+            }
+
+            .login-message h1 {
+                max-width: 9ch;
+                font-size: clamp(2.5rem, 12vw, 4rem);
+            }
+
+            .login-message p {
+                margin-top: 1rem;
+                font-size: 0.94rem;
+            }
+
+            .login-brand-footer {
+                display: none;
+            }
+
+            .login-form-panel {
+                min-height: 52vh;
+                place-items: start center;
+                padding: 2rem 1.25rem calc(2rem + env(safe-area-inset-bottom));
+            }
+
+            .panel-heading,
+            .subsection-heading {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .resource-composer,
+            .content-preview {
+                grid-template-columns: 1fr;
+            }
+
+            .composer-guide {
+                padding-bottom: 1.3rem;
+            }
+
+            .composer-guide-icon {
+                width: 38px;
+                height: 38px;
+                margin-bottom: 0.9rem;
+            }
+
+            .preview-media {
+                position: static;
+            }
+
+            .submission-fields {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .admin-title-block p {
+                display: none;
+            }
+
+            .admin-identity {
+                gap: 0.35rem;
+            }
+
+            .admin-header .button-quiet span {
+                display: none;
+            }
+
+            .admin-header .button-quiet {
+                width: 44px;
+                min-height: 44px;
+                padding: 0;
+            }
+
+            .preview-fields,
+            .preview-source-fields {
+                grid-template-columns: 1fr;
+            }
+
+            .preview-field-wide,
+            .preview-source-title {
+                grid-column: auto;
+            }
+
+            .form-actions,
+            .preview-actions {
+                display: grid;
+            }
+
+            .form-actions .button,
+            .preview-actions .button {
+                width: 100%;
+            }
+
+            .admin-resource-item {
+                grid-template-columns: 76px minmax(0, 1fr);
+            }
+
+            .admin-resource-thumb {
+                width: 76px;
+                height: 54px;
+            }
+
+            .admin-resource-item .button-danger {
+                grid-column: 1 / -1;
+                width: 100%;
+            }
+
+            .submission-card header {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .submission-card header .button-danger {
+                width: 100%;
+            }
+        }
+
+        @media (display-mode: standalone) {
+            .admin-header {
+                padding-top: max(0.8rem, env(safe-area-inset-top));
+            }
+        }
     </style>
 </head>
 <body>
-    <main class="admin-shell">
-        <section class="card login-card" id="admin-login-form" aria-labelledby="login-title">
-            <h2 id="login-title">Admin access</h2>
-            <p>Enter the admin password to manage content and review submissions.</p>
-            <form id="login-form">
-                <label class="field-label" for="admin-password">Password</label>
-                <input class="form-input" type="password" id="admin-password" autocomplete="current-password" required placeholder="Enter admin password">
-                <button class="button button-primary button-full" id="login-button" type="submit">Log in</button>
-                <p class="status" id="login-status" role="status" aria-live="polite" hidden></p>
-            </form>
-        </section>
+    <!--
+        IMPECCABLE_DIRECTION_CONTRACT
+        FORM [surface seed b24dcaf2]: Operate-mode calm operations console; established plum identity; code-led build with no approved comp.
+        FIRST VIEWPORT: A persistent navigation rail frames one focused publishing task, its supported sources, and its review-before-publish state.
+        TASK PATH: Unlock once → choose Content or Submissions → complete the selected workflow → receive explicit success, error, loading, or empty feedback.
+        SIGNATURE INTERACTION: Desktop rail becomes thumb-reachable bottom tabs on phones; focused form entry temporarily clears that navigation from the keyboard area.
+        RESPONSIVE & STATES: Preserve every workflow from 320px upward with visible focus, reduced motion, install guidance, remembered access, offline state, and explicit Lock app reset.
+    -->
+    <a class="skip-link" href="#workspace">Skip to workspace</a>
 
-        <section id="admin-content" hidden>
-            <header class="admin-header">
-                <div class="admin-title-block">
-                    <p>Binyan Shalem</p>
-                    <h1>Admin panel</h1>
-                </div>
-                <div class="admin-identity">
-                    <div class="admin-identity-copy">
-                        Admin session
-                        <strong id="admin-identity-label">Password access</strong>
+    <div class="app-boot" id="app-boot" role="status" aria-live="polite">
+        <div class="app-boot-inner">
+            <span class="app-boot-mark"><img src="./icons/icon-192.png" alt=""></span>
+            <p>Opening your workspace…</p>
+        </div>
+    </div>
+
+    <main>
+        <section class="login-screen" id="admin-login-form" aria-labelledby="login-title" hidden>
+            <div class="login-brand-panel">
+                <div class="login-brand-lockup">
+                    <span class="login-logo"><img src="./icons/icon-192.png" alt=""></span>
+                    <div>
+                        <strong>Binyan Shalem</strong>
+                        <span>Admin workspace</span>
                     </div>
-                    <button class="button button-secondary" id="logout-button" type="button">Sign out</button>
                 </div>
-            </header>
 
-            <div class="admin-tabs" role="tablist" aria-label="Admin sections">
-                <button class="tab-button" id="content-tab" type="button" role="tab" aria-selected="true" aria-controls="content-panel">Content library</button>
-                <button class="tab-button" id="submissions-tab" type="button" role="tab" aria-selected="false" aria-controls="submissions-panel">Submissions</button>
+                <div class="login-message">
+                    <h1>Everything you need, in one calm place.</h1>
+                    <p>Review private intake requests and keep the public resource library current from one focused workspace.</p>
+                </div>
+
+                <div class="login-brand-footer">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s8-3.8 8-10V5l-8-3-8 3v6c0 6.2 8 10 8 10Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>
+                    <span>Private administrative workspace</span>
+                </div>
             </div>
 
-            <section class="panel" id="content-panel" role="tabpanel" aria-labelledby="content-tab">
-                <div class="panel-heading">
-                    <div>
-                        <h2>Add a resource</h2>
-                        <p>Paste one supported link or the full TorahAnytime text block. We’ll identify the source, retrieve its public artwork, and preview exactly what will be published.</p>
-                    </div>
-                </div>
-
-                <ul class="provider-list" aria-label="Supported content providers">
-                    <li>YouTube + Shorts</li>
-                    <li>TorahAnytime</li>
-                    <li>Amazon</li>
-                    <li>iTorah</li>
-                </ul>
-
-                <form id="content-paste-form">
-                    <label class="field-label" for="content-paste">Paste content</label>
-                    <textarea class="paste-input" id="content-paste" required spellcheck="false" placeholder="Paste a YouTube, TorahAnytime, Amazon, or iTorah link here."></textarea>
-                    <p class="paste-help">For TorahAnytime, include the speaker, title, MyTaT link, dial-in number, and “Press” extension. Amazon’s extra Alexa link is ignored automatically.</p>
-                    <div class="form-actions">
-                        <button class="button button-primary" id="review-content-button" type="submit">Review content</button>
-                        <button class="button button-secondary" id="clear-content-button" type="button">Clear</button>
-                    </div>
-                    <p class="status" id="content-form-status" role="status" aria-live="polite" hidden></p>
-                </form>
-
-                <section class="content-preview" id="content-preview" aria-labelledby="preview-editor-title" hidden>
-                    <div class="preview-media">
-                        <div class="preview-image-wrap" id="preview-image-wrap">
-                            <img class="preview-image" id="preview-image" src="../logo_nbg.png" alt="" hidden>
-                        </div>
-                        <span class="resource-badge" id="preview-type"></span>
-                        <p class="preview-lock-note">Provider, content type, and internal ID stay locked so playback and duplicate detection continue to work.</p>
-                        <a class="preview-link" id="preview-link" target="_blank" rel="noopener noreferrer">Test destination link ↗</a>
-                    </div>
-                    <form class="preview-editor" id="content-preview-form" novalidate>
-                        <div class="preview-editor-heading">
-                            <h3 id="preview-editor-title">Review and edit</h3>
-                            <p>Change any public detail below. Your edits are what visitors will see after publishing.</p>
-                        </div>
-                        <div class="preview-fields">
-                            <label class="preview-field preview-field-wide">
-                                <span class="field-label">Title</span>
-                                <input class="form-input" id="preview-title" type="text" maxlength="240" required>
-                            </label>
-                            <label class="preview-field">
-                                <span class="field-label">Speaker or author</span>
-                                <input class="form-input" id="preview-speaker" type="text" maxlength="180">
-                            </label>
-                            <label class="preview-field">
-                                <span class="field-label">Button label</span>
-                                <input class="form-input" id="preview-primary-label" type="text" maxlength="80" required>
-                            </label>
-                            <label class="preview-field preview-field-wide">
-                                <span class="field-label">Destination URL</span>
-                                <input class="form-input" id="preview-primary-url" type="url" inputmode="url" maxlength="2048" required>
-                            </label>
-                            <label class="preview-field preview-field-wide">
-                                <span class="field-label">Image URL</span>
-                                <input class="form-input" id="preview-image-url" type="url" inputmode="url" maxlength="2048" required>
-                            </label>
-                            <label class="preview-field preview-field-wide">
-                                <span class="field-label">Image description</span>
-                                <input class="form-input" id="preview-image-alt" type="text" maxlength="300">
-                                <span class="preview-field-help">Used by screen readers. If left blank, the title and speaker are used.</span>
-                            </label>
-                            <div class="preview-source-fields" id="preview-youtube-fields" hidden>
-                                <p class="preview-source-title">YouTube playback</p>
-                                <label class="preview-field preview-field-wide">
-                                    <span class="field-label">Playback URL</span>
-                                    <input class="form-input" id="preview-embed-url" type="url" inputmode="url" maxlength="2048">
-                                    <span class="preview-field-help">A YouTube watch, Shorts, or embed link is accepted and converted to the privacy-enhanced player.</span>
-                                </label>
-                            </div>
-                            <div class="preview-source-fields" id="preview-torahanytime-fields" hidden>
-                                <p class="preview-source-title">TorahAnytime dial-in</p>
-                                <label class="preview-field">
-                                    <span class="field-label">Dial-in number</span>
-                                    <input class="form-input" id="preview-dial-in" type="tel" inputmode="tel" maxlength="40">
-                                </label>
-                                <label class="preview-field">
-                                    <span class="field-label">Press extension</span>
-                                    <input class="form-input" id="preview-extension" type="text" inputmode="numeric" maxlength="20">
-                                </label>
-                            </div>
-                        </div>
-                        <p class="status" id="preview-edit-status" role="status" aria-live="polite" hidden></p>
-                        <div class="preview-actions">
-                            <button class="button button-primary" id="publish-content-button" type="submit">Publish resource</button>
-                            <button class="button button-secondary" id="cancel-preview-button" type="button">Edit pasted text</button>
-                        </div>
+            <div class="login-form-panel">
+                <div class="login-card">
+                    <span class="login-mark" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"/></svg>
+                    </span>
+                    <h2 id="login-title">Welcome back.</h2>
+                    <p>Enter the admin password once. This device will remain unlocked for future visits.</p>
+                    <form id="login-form">
+                        <label class="field-label" for="admin-password">Admin password</label>
+                        <input class="form-input" type="password" id="admin-password" autocomplete="current-password" required placeholder="Enter your password">
+                        <button class="button button-primary button-full" id="login-button" type="submit">
+                            <span>Unlock workspace</span>
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6M4 12h11" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/></svg>
+                        </button>
+                        <p class="status" id="login-status" role="status" aria-live="polite" hidden></p>
                     </form>
-                </section>
+                    <p class="device-note">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s8-3.8 8-10V5l-8-3-8 3v6c0 6.2 8 10 8 10Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/><path d="m9 12 2 2 4-5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>
+                        <span>Your unlock is stored only on this browser. Use “Lock app” if you want this device to ask for the password again.</span>
+                    </p>
+                </div>
+            </div>
+        </section>
 
-                <div class="section-divider"></div>
-
-                <section aria-labelledby="created-content-title">
-                    <div class="subsection-heading">
-                        <h2 id="created-content-title">Admin-created resources</h2>
-                        <p id="created-content-count">0 resources</p>
-                    </div>
-                    <div class="loading-state" id="content-list-loading"><span class="loading-dot" aria-hidden="true"></span>Loading resources…</div>
-                    <div class="admin-resource-list" id="admin-resource-list"></div>
-                    <p class="empty-state" id="no-admin-resources" hidden>No admin-created resources yet.</p>
-                </section>
-            </section>
-
-            <section class="panel" id="submissions-panel" role="tabpanel" aria-labelledby="submissions-tab" hidden>
-                <div class="panel-heading">
+        <section class="app-shell" id="admin-content" hidden>
+            <aside class="app-sidebar" aria-label="Admin navigation">
+                <div class="sidebar-brand">
+                    <span class="sidebar-logo"><img src="./icons/icon-192.png" alt=""></span>
                     <div>
-                        <h2>Intake submissions</h2>
-                        <p>Confidential requests submitted through the public intake form.</p>
+                        <strong>Binyan Shalem</strong>
+                        <span>Admin workspace</span>
                     </div>
                 </div>
-                <p class="status" id="submission-action-status" role="status" aria-live="polite" hidden></p>
-                <div class="loading-state" id="all-submissions-loading"><span class="loading-dot" aria-hidden="true"></span>Loading submissions…</div>
-                <div class="submission-list" id="all-submissions-list"></div>
-                <p class="empty-state" id="no-all-submissions" hidden>No submissions found.</p>
-            </section>
+
+                <div class="admin-tabs" role="tablist" aria-label="Admin sections">
+                    <button class="tab-button" id="content-tab" type="button" role="tab" aria-selected="true" aria-controls="content-panel">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>
+                        <span>Content library</span>
+                        <span class="tab-count" id="content-nav-count" aria-label="0 resources">0</span>
+                    </button>
+                    <button class="tab-button" id="submissions-tab" type="button" role="tab" aria-selected="false" aria-controls="submissions-panel">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10v4H7zM5 5v16h14V5M8 11h8M8 15h6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>
+                        <span>Submissions</span>
+                        <span class="tab-count" id="submissions-nav-count" aria-label="Submissions not loaded">—</span>
+                    </button>
+                </div>
+
+                <div class="sidebar-footer">
+                    <a class="sidebar-action" href="../" target="_blank" rel="noopener noreferrer">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5M19 5l-8 8M19 14v5H5V5h5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>
+                        <span>Open public site</span>
+                    </a>
+                </div>
+            </aside>
+
+            <div class="app-stage">
+                <header class="admin-header">
+                    <div class="admin-title-block">
+                        <h1 id="workspace-title">Content library</h1>
+                        <p id="workspace-description">Publish and manage trusted marriage resources.</p>
+                    </div>
+                    <div class="admin-identity">
+                        <span class="connection-state" id="connection-state"><span class="connection-dot" aria-hidden="true"></span><span id="connection-label">Connected</span></span>
+                        <div class="admin-identity-copy">
+                            This device
+                            <strong id="admin-identity-label">Remembered access</strong>
+                        </div>
+                        <button class="button button-quiet" id="install-app-button" type="button" aria-label="Install the Binyan Shalem admin app" hidden>
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>
+                            <span>Install app</span>
+                        </button>
+                        <button class="button button-quiet" id="logout-button" type="button" aria-label="Lock this admin app">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8 10V7a4 4 0 0 1 8 0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.7"/></svg>
+                            <span>Lock app</span>
+                        </button>
+                    </div>
+                    <p class="install-status" id="install-status" role="status" aria-live="polite" hidden></p>
+                </header>
+
+                <div class="workspace" id="workspace">
+                    <section class="workspace-panel" id="content-panel" role="tabpanel" aria-labelledby="content-tab">
+                        <div class="panel-heading">
+                            <div>
+                                <h2>Publish something useful.</h2>
+                                <p>Paste one supported link or a complete TorahAnytime text block. The app will identify it, retrieve the public artwork, and prepare a final review.</p>
+                            </div>
+                            <span class="panel-note">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 12 4 4 8-9" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/></svg>
+                                Review before publishing
+                            </span>
+                        </div>
+
+                        <section class="resource-composer" aria-labelledby="composer-title">
+                            <div class="composer-guide">
+                                <span class="composer-guide-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"/></svg>
+                                </span>
+                                <h3 id="composer-title">Add a resource link</h3>
+                                <p>The app understands these four sources and keeps every public detail editable before publishing.</p>
+                                <ul class="provider-list" aria-label="Supported content providers">
+                                    <li>YouTube + Shorts</li>
+                                    <li>TorahAnytime</li>
+                                    <li>Amazon</li>
+                                    <li>iTorah</li>
+                                </ul>
+                            </div>
+
+                            <form class="composer-form" id="content-paste-form">
+                                <label class="field-label" for="content-paste">Paste content</label>
+                                <textarea class="paste-input" id="content-paste" required spellcheck="false" placeholder="Paste a YouTube, TorahAnytime, Amazon, or iTorah link here."></textarea>
+                                <p class="paste-help">For TorahAnytime, include the speaker, title, MyTaT link, dial-in number, and “Press” extension. Amazon’s extra Alexa link is ignored automatically.</p>
+                                <div class="form-actions">
+                                    <button class="button button-primary" id="review-content-button" type="submit">Review content</button>
+                                    <button class="button button-secondary" id="clear-content-button" type="button">Clear</button>
+                                </div>
+                                <p class="status" id="content-form-status" role="status" aria-live="polite" hidden></p>
+                            </form>
+                        </section>
+
+                        <section class="content-preview" id="content-preview" aria-labelledby="preview-editor-title" hidden>
+                            <div class="preview-media">
+                                <div class="preview-image-wrap" id="preview-image-wrap">
+                                    <img class="preview-image" id="preview-image" src="../logo_nbg.png" alt="" hidden>
+                                </div>
+                                <span class="resource-badge" id="preview-type"></span>
+                                <p class="preview-lock-note">Provider, content type, and internal ID stay locked so playback and duplicate detection continue to work.</p>
+                                <a class="preview-link" id="preview-link" target="_blank" rel="noopener noreferrer">Test destination link ↗</a>
+                            </div>
+                            <form class="preview-editor" id="content-preview-form" novalidate>
+                                <div class="preview-editor-heading">
+                                    <h3 id="preview-editor-title">Review and edit</h3>
+                                    <p>Change any public detail below. Your edits are what visitors will see after publishing.</p>
+                                </div>
+                                <div class="preview-fields">
+                                    <label class="preview-field preview-field-wide"><span class="field-label">Title</span><input class="form-input" id="preview-title" type="text" maxlength="240" required></label>
+                                    <label class="preview-field"><span class="field-label">Speaker or author</span><input class="form-input" id="preview-speaker" type="text" maxlength="180"></label>
+                                    <label class="preview-field"><span class="field-label">Button label</span><input class="form-input" id="preview-primary-label" type="text" maxlength="80" required></label>
+                                    <label class="preview-field preview-field-wide"><span class="field-label">Destination URL</span><input class="form-input" id="preview-primary-url" type="url" inputmode="url" maxlength="2048" required></label>
+                                    <label class="preview-field preview-field-wide"><span class="field-label">Image URL</span><input class="form-input" id="preview-image-url" type="url" inputmode="url" maxlength="2048" required></label>
+                                    <label class="preview-field preview-field-wide"><span class="field-label">Image description</span><input class="form-input" id="preview-image-alt" type="text" maxlength="300"><span class="preview-field-help">Used by screen readers. If left blank, the title and speaker are used.</span></label>
+                                    <div class="preview-source-fields" id="preview-youtube-fields" hidden>
+                                        <p class="preview-source-title">YouTube playback</p>
+                                        <label class="preview-field preview-field-wide"><span class="field-label">Playback URL</span><input class="form-input" id="preview-embed-url" type="url" inputmode="url" maxlength="2048"><span class="preview-field-help">A YouTube watch, Shorts, or embed link is accepted and converted to the privacy-enhanced player.</span></label>
+                                    </div>
+                                    <div class="preview-source-fields" id="preview-torahanytime-fields" hidden>
+                                        <p class="preview-source-title">TorahAnytime dial-in</p>
+                                        <label class="preview-field"><span class="field-label">Dial-in number</span><input class="form-input" id="preview-dial-in" type="tel" inputmode="tel" maxlength="40"></label>
+                                        <label class="preview-field"><span class="field-label">Press extension</span><input class="form-input" id="preview-extension" type="text" inputmode="numeric" maxlength="20"></label>
+                                    </div>
+                                </div>
+                                <p class="status" id="preview-edit-status" role="status" aria-live="polite" hidden></p>
+                                <div class="preview-actions">
+                                    <button class="button button-primary" id="publish-content-button" type="submit">Publish resource</button>
+                                    <button class="button button-secondary" id="cancel-preview-button" type="button">Edit pasted text</button>
+                                </div>
+                            </form>
+                        </section>
+
+                        <div class="section-divider"></div>
+
+                        <section aria-labelledby="created-content-title">
+                            <div class="subsection-heading">
+                                <h2 id="created-content-title">Published from this app</h2>
+                                <p id="created-content-count">0 resources</p>
+                            </div>
+                            <div class="loading-state" id="content-list-loading"><span class="loading-dot" aria-hidden="true"></span>Loading resources…</div>
+                            <div class="admin-resource-list" id="admin-resource-list"></div>
+                            <p class="empty-state" id="no-admin-resources" hidden>No admin-created resources yet.</p>
+                        </section>
+                    </section>
+
+                    <section class="workspace-panel" id="submissions-panel" role="tabpanel" aria-labelledby="submissions-tab" hidden>
+                        <div class="panel-heading">
+                            <div>
+                                <h2>People who reached out.</h2>
+                                <p>Confidential requests submitted through the public intake form, ordered with the newest first.</p>
+                            </div>
+                            <span class="panel-note">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s8-3.8 8-10V5l-8-3-8 3v6c0 6.2 8 10 8 10Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>
+                                Confidential
+                            </span>
+                        </div>
+                        <p class="status" id="submission-action-status" role="status" aria-live="polite" hidden></p>
+                        <div class="loading-state" id="all-submissions-loading"><span class="loading-dot" aria-hidden="true"></span>Loading submissions…</div>
+                        <div class="submission-list" id="all-submissions-list"></div>
+                        <p class="empty-state" id="no-all-submissions" hidden>No submissions found.</p>
+                    </section>
+                </div>
+            </div>
         </section>
     </main>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import {
+            browserLocalPersistence,
             getAuth,
+            setPersistence,
             signInAnonymously,
             signOut
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -879,7 +2072,7 @@
             getProviderName,
             getResourceTypeLabel,
             normalizeStoredResource
-        } from "../content-resource-tools.mjs?v=2026-08-10.2";
+        } from "../content-resource-tools.mjs?v=2026-08-15.1";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDxEV7W2m4jbJiVl0Sc6cN7gBH7oWu_rl8",
@@ -892,6 +2085,8 @@
         };
 
         const ADMIN_PASSWORD = "Hello123?!";
+        const ADMIN_UNLOCK_KEY = "binyanShalem.adminUnlocked.v1";
+        const ADMIN_TAB_KEY = "binyanShalem.adminTab.v1";
         const LOCAL_PREVIEW = ["127.0.0.1", "localhost"].includes(window.location.hostname)
             && new URLSearchParams(window.location.search).get("preview") === "1";
         const appId = firebaseConfig.projectId;
@@ -901,6 +2096,7 @@
         const db = getFirestore(firebaseApp);
 
         const loginSection = document.getElementById("admin-login-form");
+        const bootScreen = document.getElementById("app-boot");
         const loginForm = document.getElementById("login-form");
         const passwordInput = document.getElementById("admin-password");
         const loginButton = document.getElementById("login-button");
@@ -919,6 +2115,14 @@
         const contentListLoading = document.getElementById("content-list-loading");
         const noAdminResources = document.getElementById("no-admin-resources");
         const createdContentCount = document.getElementById("created-content-count");
+        const contentNavCount = document.getElementById("content-nav-count");
+        const submissionsNavCount = document.getElementById("submissions-nav-count");
+        const workspaceTitle = document.getElementById("workspace-title");
+        const workspaceDescription = document.getElementById("workspace-description");
+        const installButton = document.getElementById("install-app-button");
+        const installStatus = document.getElementById("install-status");
+        const connectionState = document.getElementById("connection-state");
+        const connectionLabel = document.getElementById("connection-label");
         const submissionActionStatus = document.getElementById("submission-action-status");
         const previewFields = {
             title: document.getElementById("preview-title"),
@@ -936,6 +2140,8 @@
         let contentUnsubscribe = null;
         let submissionsUnsubscribe = null;
         let adminUnlocked = false;
+        let installPrompt = null;
+        let installStatusTimer = null;
 
         function setStatus(element, message, tone = "info") {
             element.textContent = message;
@@ -945,7 +2151,10 @@
 
         function setButtonLoading(button, loading, loadingLabel, idleLabel) {
             button.disabled = loading;
-            button.textContent = loading ? loadingLabel : idleLabel;
+            button.setAttribute("aria-busy", String(loading));
+            const label = button.querySelector("span");
+            if (label) label.textContent = loading ? loadingLabel : idleLabel;
+            else button.textContent = loading ? loadingLabel : idleLabel;
         }
 
         function clearPreview({ clearPaste = false } = {}) {
@@ -1013,29 +2222,76 @@
             contentPreview.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth", block: "nearest" });
         }
 
+        function hasRememberedUnlock() {
+            try {
+                return window.localStorage.getItem(ADMIN_UNLOCK_KEY) === "unlocked";
+            } catch {
+                return false;
+            }
+        }
+
+        function rememberUnlock() {
+            try {
+                window.localStorage.setItem(ADMIN_UNLOCK_KEY, "unlocked");
+            } catch {
+                // The session still works when storage is unavailable; it simply cannot be remembered.
+            }
+        }
+
+        function forgetUnlock() {
+            try {
+                window.localStorage.removeItem(ADMIN_UNLOCK_KEY);
+                window.localStorage.removeItem(ADMIN_TAB_KEY);
+            } catch {
+                // Storage may be unavailable in a private browsing mode.
+            }
+        }
+
+        function showLogin(message = "") {
+            adminUnlocked = false;
+            adminContent.hidden = true;
+            loginSection.hidden = false;
+            bootScreen.hidden = true;
+            setStatus(loginStatus, message, message ? "error" : "info");
+            window.requestAnimationFrame(() => passwordInput.focus());
+        }
+
+        function showWorkspace(identity = "Remembered access") {
+            adminUnlocked = true;
+            loginSection.hidden = true;
+            adminContent.hidden = false;
+            bootScreen.hidden = true;
+            identityLabel.textContent = identity;
+            subscribeToAdminContent();
+            activateInitialTab();
+        }
+
+        async function startAdminSession(identity = "Remembered access") {
+            await setPersistence(auth, browserLocalPersistence);
+            if (!auth.currentUser) await signInAnonymously(auth);
+            showWorkspace(identity);
+        }
+
         loginForm.addEventListener("submit", async (event) => {
             event.preventDefault();
             setStatus(loginStatus, "");
             if (passwordInput.value !== ADMIN_PASSWORD) {
-                setStatus(loginStatus, "Incorrect password. Please try again.", "error");
+                setStatus(loginStatus, "That password didn’t match. Please try again.", "error");
                 passwordInput.value = "";
                 passwordInput.focus();
                 return;
             }
 
-            setButtonLoading(loginButton, true, "Logging in…", "Log in");
+            setButtonLoading(loginButton, true, "Unlocking…", "Unlock workspace");
             try {
-                if (!auth.currentUser) await signInAnonymously(auth);
-                adminUnlocked = true;
-                loginSection.hidden = true;
-                adminContent.hidden = false;
-                identityLabel.textContent = "Password access";
-                subscribeToAdminContent();
+                await startAdminSession();
+                rememberUnlock();
+                passwordInput.value = "";
             } catch (error) {
                 console.error("Could not start the admin session:", error);
-                setStatus(loginStatus, "The admin session could not start. Please try again.", "error");
+                setStatus(loginStatus, "The workspace could not connect. Check your internet connection and try again.", "error");
             } finally {
-                setButtonLoading(loginButton, false, "Logging in…", "Log in");
+                setButtonLoading(loginButton, false, "Unlocking…", "Unlock workspace");
             }
         });
 
@@ -1050,6 +2306,8 @@
                 .filter(Boolean);
 
             createdContentCount.textContent = `${resources.length} ${resources.length === 1 ? "resource" : "resources"}`;
+            contentNavCount.textContent = String(resources.length);
+            contentNavCount.setAttribute("aria-label", `${resources.length} ${resources.length === 1 ? "resource" : "resources"}`);
             noAdminResources.hidden = resources.length !== 0;
 
             const fragment = document.createDocumentFragment();
@@ -1244,6 +2502,8 @@
             const empty = document.getElementById("no-all-submissions");
             list.replaceChildren();
             empty.hidden = submissions.length !== 0;
+            submissionsNavCount.textContent = String(submissions.length);
+            submissionsNavCount.setAttribute("aria-label", `${submissions.length} ${submissions.length === 1 ? "submission" : "submissions"}`);
 
             const sorted = [...submissions].sort((a, b) => {
                 const aTime = Date.parse(a.data.timestamp || "") || 0;
@@ -1259,12 +2519,16 @@
                 const headerCopy = document.createElement("div");
                 headerCopy.className = "submission-header-copy";
                 const title = document.createElement("h3");
-                title.textContent = `Submission ${id}`;
+                const coupleNames = [data.h_name, data.w_name].filter(Boolean);
+                title.textContent = coupleNames.join(" & ") || "Intake submission";
                 const time = document.createElement("time");
                 const parsedDate = Date.parse(data.timestamp || "");
                 time.textContent = Number.isNaN(parsedDate) ? "Date unavailable" : new Date(parsedDate).toLocaleString();
                 if (!Number.isNaN(parsedDate)) time.dateTime = new Date(parsedDate).toISOString();
-                headerCopy.append(title, time);
+                const submissionId = document.createElement("span");
+                submissionId.className = "submission-id";
+                submissionId.textContent = `Submission ID: ${id}`;
+                headerCopy.append(title, time, submissionId);
 
                 const deleteButton = document.createElement("button");
                 deleteButton.className = "button button-danger";
@@ -1332,39 +2596,192 @@
         }
 
         const tabs = [...document.querySelectorAll('[role="tab"]')];
-        tabs.forEach((tab) => {
-            tab.addEventListener("click", () => {
-                tabs.forEach((item) => {
-                    const selected = item === tab;
-                    item.setAttribute("aria-selected", String(selected));
-                    document.getElementById(item.getAttribute("aria-controls")).hidden = !selected;
-                });
-                if (tab.id === "submissions-tab" && !LOCAL_PREVIEW) subscribeToSubmissions();
+        const tabCopy = {
+            "content-tab": {
+                title: "Content library",
+                description: "Publish and manage trusted marriage resources."
+            },
+            "submissions-tab": {
+                title: "Intake submissions",
+                description: "Review confidential requests from couples and supporters."
+            }
+        };
+
+        function activateTab(tab, { persist = true, updateUrl = true } = {}) {
+            if (!tab || tab.hidden) tab = document.getElementById("content-tab");
+
+            tabs.forEach((item) => {
+                const selected = item === tab;
+                item.setAttribute("aria-selected", String(selected));
+                item.tabIndex = selected ? 0 : -1;
+                document.getElementById(item.getAttribute("aria-controls")).hidden = !selected;
+            });
+
+            const copy = tabCopy[tab.id];
+            workspaceTitle.textContent = copy.title;
+            workspaceDescription.textContent = copy.description;
+
+            if (tab.id === "submissions-tab" && !LOCAL_PREVIEW) subscribeToSubmissions();
+
+            if (persist) {
+                try {
+                    window.localStorage.setItem(ADMIN_TAB_KEY, tab.id);
+                } catch {
+                    // Tab persistence is optional.
+                }
+            }
+
+            if (updateUrl) {
+                const url = new URL(window.location.href);
+                if (tab.id === "content-tab") url.searchParams.delete("tab");
+                else url.searchParams.set("tab", "submissions");
+                history.replaceState(null, "", url);
+            }
+        }
+
+        function activateInitialTab() {
+            const requestedTab = new URLSearchParams(window.location.search).get("tab") === "submissions"
+                ? "submissions-tab"
+                : "";
+            let rememberedTab = "";
+            try {
+                rememberedTab = window.localStorage.getItem(ADMIN_TAB_KEY) || "";
+            } catch {
+                rememberedTab = "";
+            }
+            const target = document.getElementById(requestedTab || rememberedTab || "content-tab");
+            activateTab(target, { persist: false, updateUrl: Boolean(requestedTab) });
+        }
+
+        tabs.forEach((tab, index) => {
+            tab.addEventListener("click", () => activateTab(tab));
+            tab.addEventListener("keydown", (event) => {
+                if (!['ArrowDown', 'ArrowRight', 'ArrowUp', 'ArrowLeft'].includes(event.key)) return;
+                event.preventDefault();
+                const direction = ['ArrowDown', 'ArrowRight'].includes(event.key) ? 1 : -1;
+                const nextTab = tabs[(index + direction + tabs.length) % tabs.length];
+                nextTab.focus();
+                activateTab(nextTab);
             });
         });
 
         document.getElementById("logout-button").addEventListener("click", async () => {
+            forgetUnlock();
             adminUnlocked = false;
             contentUnsubscribe?.();
             submissionsUnsubscribe?.();
             contentUnsubscribe = null;
             submissionsUnsubscribe = null;
-            await signOut(auth);
-            adminContent.hidden = true;
-            loginSection.hidden = false;
-            passwordInput.value = "";
-            setStatus(loginStatus, "");
-            passwordInput.focus();
+            try {
+                await signOut(auth);
+            } finally {
+                showLogin();
+            }
         });
 
-        if (LOCAL_PREVIEW) {
-            loginSection.hidden = true;
-            adminContent.hidden = false;
-            identityLabel.textContent = "Local preview";
-            document.getElementById("logout-button").hidden = true;
-            document.getElementById("submissions-tab").hidden = true;
-            subscribeToAdminContent();
+        function updateConnectionState() {
+            const online = navigator.onLine;
+            connectionState.classList.toggle("is-offline", !online);
+            connectionLabel.textContent = online ? "Connected" : "Offline";
         }
+
+        window.addEventListener("online", updateConnectionState);
+        window.addEventListener("offline", updateConnectionState);
+        updateConnectionState();
+
+        const isStandaloneApp = window.matchMedia("(display-mode: standalone)").matches
+            || window.navigator.standalone === true;
+        const isIOSDevice = /iPad|iPhone|iPod/.test(window.navigator.userAgent)
+            || (window.navigator.platform === "MacIntel" && window.navigator.maxTouchPoints > 1);
+
+        function showInstallStatus(message, tone = "info") {
+            window.clearTimeout(installStatusTimer);
+            installStatus.textContent = message;
+            installStatus.dataset.tone = tone;
+            installStatus.hidden = !message;
+            if (message) {
+                installStatusTimer = window.setTimeout(() => {
+                    installStatus.hidden = true;
+                }, 7000);
+            }
+        }
+
+        if (isIOSDevice && !isStandaloneApp) {
+            installButton.hidden = false;
+            installButton.setAttribute("aria-label", "How to add the Binyan Shalem admin app to the Home Screen");
+        }
+
+        window.addEventListener("beforeinstallprompt", (event) => {
+            event.preventDefault();
+            installPrompt = event;
+            installButton.hidden = false;
+        });
+
+        installButton.addEventListener("click", async () => {
+            if (!installPrompt) {
+                if (isIOSDevice) {
+                    showInstallStatus("On iPhone or iPad, tap the Share button, then choose “Add to Home Screen.”");
+                } else {
+                    showInstallStatus("Use your browser menu and choose “Install app” or “Add to Home screen.”");
+                }
+                return;
+            }
+
+            installButton.disabled = true;
+            try {
+                await installPrompt.prompt();
+                const choice = await installPrompt.userChoice;
+                if (choice.outcome === "accepted") {
+                    showInstallStatus("The admin app is being added to this device.");
+                    installButton.hidden = true;
+                } else {
+                    showInstallStatus("Installation was canceled. You can try again from your browser menu.");
+                }
+                installPrompt = null;
+            } catch (error) {
+                console.warn("The install prompt could not open:", error);
+                showInstallStatus("The install prompt could not open. Try “Install app” from your browser menu.", "error");
+                installButton.hidden = false;
+            } finally {
+                installButton.disabled = false;
+            }
+        });
+
+        window.addEventListener("appinstalled", () => {
+            installPrompt = null;
+            installButton.hidden = true;
+        });
+
+        if ("serviceWorker" in navigator && (window.isSecureContext || ["localhost", "127.0.0.1"].includes(window.location.hostname))) {
+            window.addEventListener("load", () => {
+                navigator.serviceWorker.register("./service-worker.js", { scope: "./" }).catch((error) => {
+                    console.warn("The admin app service worker could not register:", error);
+                });
+            }, { once: true });
+        }
+
+        async function bootstrapAdmin() {
+            if (LOCAL_PREVIEW) {
+                document.getElementById("logout-button").hidden = true;
+                document.getElementById("submissions-tab").hidden = true;
+                showWorkspace("Local preview");
+                return;
+            }
+
+            if (!hasRememberedUnlock()) {
+                showLogin();
+                return;
+            }
+
+            try {
+                await startAdminSession();
+            } catch (error) {
+                console.error("Could not restore the remembered admin session:", error);
+                showLogin("The saved workspace could not connect. Enter the password to try again.");
+            }
+        }
+
+        void bootstrapAdmin();
     </script>
 </body>
 </html>
