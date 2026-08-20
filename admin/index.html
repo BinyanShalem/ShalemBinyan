@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Binyan Admin">
-    <meta name="description" content="The Binyan Shalem admin workspace for content and intake submissions.">
+    <meta name="description" content="The Binyan Shalem admin workspace for resources, encounters, and reminders.">
     <title>Binyan Shalem Admin</title>
     <link rel="manifest" href="./manifest.webmanifest">
     <link rel="icon" href="./icons/icon-192.png" sizes="192x192" type="image/png">
@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-    <script defer src="/cache-refresh.js?v=2026-08-15.1"></script>
+    <script defer src="/cache-refresh.js?v=2026-08-20.1"></script>
     <style>
         :root {
             --admin-purple: #723358;
@@ -1804,6 +1804,414 @@
             }
         }
 
+        .organizer-heading {
+            align-items: center;
+        }
+
+        .organizer-heading h2 {
+            max-width: 22ch;
+        }
+
+        .organizer-heading .button {
+            flex: 0 0 auto;
+        }
+
+        .organizer-switcher {
+            display: inline-grid;
+            grid-auto-flow: column;
+            gap: 0.25rem;
+            margin: 0 0 1.25rem;
+            padding: 0.3rem;
+            background: #e5eae7;
+            border-radius: 11px;
+        }
+
+        .organizer-switcher button {
+            min-height: 44px;
+            padding: 0.55rem 0.85rem;
+            color: var(--admin-muted);
+            background: transparent;
+            border: 0;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+
+        .organizer-switcher button[aria-pressed="true"] {
+            color: var(--admin-purple-dark);
+            background: #ffffff;
+            box-shadow: 0 4px 12px rgba(36, 47, 43, 0.08);
+        }
+
+        .encounter-editor {
+            margin-bottom: 1.25rem;
+            padding: clamp(1rem, 3vw, 1.5rem);
+            background: #ffffff;
+            border-radius: 15px;
+            box-shadow: var(--shadow-low);
+        }
+
+        .encounter-editor-heading {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .encounter-editor-heading h3 {
+            color: var(--admin-purple-dark);
+            font-size: 1.08rem;
+        }
+
+        .encounter-editor-heading p {
+            margin: 0.35rem 0 0;
+            color: var(--admin-muted);
+            font-size: 0.78rem;
+        }
+
+        .encounter-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        .encounter-field-wide {
+            grid-column: 1 / -1;
+        }
+
+        .encounter-field textarea {
+            min-height: 112px;
+        }
+
+        .encounter-field-hint {
+            color: var(--admin-muted);
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        .encounter-followup {
+            display: flex;
+            grid-column: 1 / -1;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0.85rem 0.95rem;
+            background: var(--admin-purple-soft);
+            border-radius: 11px;
+        }
+
+        .encounter-followup strong,
+        .encounter-followup span {
+            display: block;
+        }
+
+        .encounter-followup strong {
+            color: var(--admin-purple-dark);
+            font-size: 0.82rem;
+        }
+
+        .encounter-followup span span {
+            margin-top: 0.18rem;
+            color: #684e5f;
+            font-size: 0.7rem;
+        }
+
+        .toggle-input {
+            width: 46px;
+            height: 26px;
+            flex: 0 0 auto;
+            margin: 0;
+            accent-color: var(--admin-purple);
+        }
+
+        .encounter-list,
+        .reminder-list {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .encounter-thread,
+        .reminder-card {
+            padding: clamp(1rem, 3vw, 1.25rem);
+            background: #ffffff;
+            border-radius: 14px;
+            box-shadow: var(--shadow-low);
+        }
+
+        .encounter-summary {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 1rem;
+            align-items: start;
+        }
+
+        .encounter-summary h3,
+        .reminder-card h3 {
+            color: var(--admin-purple-dark);
+            font-size: 1rem;
+        }
+
+        .encounter-context,
+        .reminder-card p {
+            margin: 0.35rem 0 0;
+            color: var(--admin-muted);
+            font-size: 0.8rem;
+            line-height: 1.5;
+        }
+
+        .encounter-meta,
+        .encounter-actions,
+        .reminder-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .encounter-meta {
+            margin-top: 0.72rem;
+        }
+
+        .meta-chip,
+        .followup-badge {
+            display: inline-flex;
+            align-items: center;
+            min-height: 26px;
+            padding: 0.25rem 0.5rem;
+            color: #536158;
+            background: #eef2ef;
+            border-radius: 999px;
+            font-size: 0.68rem;
+            font-weight: 650;
+        }
+
+        .followup-badge {
+            color: #6e4b13;
+            background: #fbefd8;
+        }
+
+        .encounter-actions {
+            justify-content: flex-end;
+        }
+
+        .encounter-actions .button,
+        .reminder-actions .button,
+        .submission-card .button {
+            min-height: 44px;
+            padding: 0.5rem 0.72rem;
+            font-size: 0.74rem;
+        }
+
+        .meeting-entry .button {
+            min-height: 44px;
+        }
+
+        .encounter-timeline {
+            margin-top: 1rem;
+            border-top: 1px solid var(--admin-line);
+        }
+
+        .encounter-timeline summary {
+            min-height: 44px;
+            padding: 0.82rem 0;
+            color: var(--admin-purple);
+            font-size: 0.76rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .meeting-entry {
+            display: grid;
+            grid-template-columns: 12px minmax(0, 1fr) auto;
+            gap: 0.75rem;
+            padding: 0.75rem 0;
+            border-top: 1px solid #edf0ee;
+        }
+
+        .meeting-dot {
+            width: 9px;
+            height: 9px;
+            margin-top: 0.35rem;
+            background: var(--admin-sage-deep);
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            box-shadow: 0 0 0 3px var(--admin-sage);
+        }
+
+        .meeting-entry strong {
+            display: block;
+            font-size: 0.78rem;
+        }
+
+        .meeting-entry p {
+            margin: 0.3rem 0 0;
+            color: var(--admin-muted);
+            font-size: 0.76rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        .reminders-overview {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 1rem 1.1rem;
+            color: #304d41;
+            background: var(--admin-sage);
+            border-radius: 13px;
+        }
+
+        .reminders-overview strong {
+            display: block;
+            font-size: 0.86rem;
+        }
+
+        .reminders-overview p {
+            margin: 0.25rem 0 0;
+            color: #456558;
+            font-size: 0.74rem;
+            line-height: 1.5;
+        }
+
+        .reminder-card {
+            display: grid;
+            grid-template-columns: 42px minmax(0, 1fr);
+            gap: 0.85rem;
+        }
+
+        .reminder-icon {
+            display: grid;
+            width: 42px;
+            height: 42px;
+            place-items: center;
+            color: var(--admin-purple);
+            background: var(--admin-purple-soft);
+            border-radius: 11px;
+        }
+
+        .reminder-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .reminder-actions {
+            margin-top: 0.85rem;
+        }
+
+        .submission-card header {
+            gap: 0.8rem;
+        }
+
+        .submission-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 0.45rem;
+        }
+
+        .preview-mode-indicator {
+            display: inline-flex;
+            min-height: 28px;
+            align-items: center;
+            padding: 0.25rem 0.55rem;
+            color: #6e4b13;
+            background: #fbefd8;
+            border-radius: 999px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 820px) {
+            .admin-tabs {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .tab-button {
+                grid-template-columns: 19px auto;
+                gap: 0.35rem;
+                padding-inline: 0.4rem;
+                font-size: 0.7rem;
+            }
+
+            .tab-button svg {
+                width: 19px;
+                height: 19px;
+            }
+        }
+
+        @media (max-width: 620px) {
+            .admin-header {
+                min-height: 68px;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            .admin-title-block h1 {
+                font-size: 1.35rem;
+            }
+
+            .admin-identity {
+                margin-left: auto;
+            }
+
+            .organizer-heading {
+                align-items: stretch;
+            }
+
+            .organizer-heading .button {
+                width: 100%;
+            }
+
+            .organizer-switcher {
+                display: grid;
+                grid-auto-flow: row;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                width: 100%;
+            }
+
+            .organizer-switcher button {
+                min-height: 44px;
+                padding-inline: 0.45rem;
+                font-size: 0.7rem;
+            }
+
+            .encounter-grid,
+            .encounter-summary,
+            .reminders-overview {
+                grid-template-columns: 1fr;
+            }
+
+            .encounter-field-wide {
+                grid-column: auto;
+            }
+
+            .encounter-actions {
+                justify-content: flex-start;
+            }
+
+            .meeting-entry {
+                grid-template-columns: 12px minmax(0, 1fr);
+            }
+
+            .meeting-entry .button {
+                grid-column: 2;
+                justify-self: start;
+            }
+
+            .reminders-overview .button {
+                width: 100%;
+            }
+
+            .submission-actions {
+                justify-content: flex-start;
+            }
+        }
+
         @media (display-mode: standalone) {
             .admin-header {
                 padding-top: max(0.8rem, env(safe-area-inset-top));
@@ -1814,11 +2222,12 @@
 <body>
     <!--
         IMPECCABLE_DIRECTION_CONTRACT
-        FORM [surface seed b24dcaf2]: Operate-mode calm operations console; established plum identity; code-led build with no approved comp.
-        FIRST VIEWPORT: A persistent navigation rail frames one focused publishing task, its supported sources, and its review-before-publish state.
-        TASK PATH: Unlock once → choose Content or Submissions → complete the selected workflow → receive explicit success, error, loading, or empty feedback.
-        SIGNATURE INTERACTION: Desktop rail becomes thumb-reachable bottom tabs on phones; focused form entry temporarily clears that navigation from the keyboard area.
-        RESPONSIVE & STATES: Preserve every workflow from 320px upward with visible focus, reduced motion, install guidance, remembered access, offline state, and explicit Lock app reset.
+        THESIS: A calm secretary, not a database; the admin sees the next natural action and records only what is worth remembering.
+        OWN-WORLD: Deep-plum navigation, quiet gray-green canvas, white working surfaces, compact Inter type, sage reassurance, and practical low-shadow controls.
+        STORY: Unlock once → choose Resources, Encounters, or Reminders → log or continue a conversation → act on only the latest relevant follow-up.
+        FIRST VIEWPORT: A plum rail frames one clear New encounter action, a compact Active/Intake forms/Archived switch, and connected meeting threads; phones use three bottom tabs.
+        FORM [surface seed b24dcaf2]: Operate-mode established-world extension; focused entry clears bottom navigation from the keyboard area and every state remains explicit.
+        FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance.
     -->
     <a class="skip-link" href="#workspace">Skip to workspace</a>
 
@@ -1888,13 +2297,18 @@
                 <div class="admin-tabs" role="tablist" aria-label="Admin sections">
                     <button class="tab-button" id="content-tab" type="button" role="tab" aria-selected="true" aria-controls="content-panel">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>
-                        <span>Content library</span>
+                        <span>Resources</span>
                         <span class="tab-count" id="content-nav-count" aria-label="0 resources">0</span>
                     </button>
-                    <button class="tab-button" id="submissions-tab" type="button" role="tab" aria-selected="false" aria-controls="submissions-panel">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10v4H7zM5 5v16h14V5M8 11h8M8 15h6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>
-                        <span>Submissions</span>
-                        <span class="tab-count" id="submissions-nav-count" aria-label="Submissions not loaded">—</span>
+                    <button class="tab-button" id="encounters-tab" type="button" role="tab" aria-selected="false" aria-controls="encounters-panel">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm8-1a2.5 2.5 0 1 0 0-5M3 20v-2a4 4 0 0 1 4-4h2a4 4 0 0 1 4 4v2m1-6h1a4 4 0 0 1 4 4v2" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>
+                        <span>Encounters</span>
+                        <span class="tab-count" id="encounters-nav-count" aria-label="0 active encounters">0</span>
+                    </button>
+                    <button class="tab-button" id="reminders-tab" type="button" role="tab" aria-selected="false" aria-controls="reminders-panel">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>
+                        <span>Reminders</span>
+                        <span class="tab-count" id="reminders-nav-count" aria-label="0 reminders">0</span>
                     </button>
                 </div>
 
@@ -1909,7 +2323,7 @@
             <div class="app-stage">
                 <header class="admin-header">
                     <div class="admin-title-block">
-                        <h1 id="workspace-title">Content library</h1>
+                        <h1 id="workspace-title">Resources</h1>
                         <p id="workspace-description">Publish and manage trusted marriage resources.</p>
                     </div>
                     <div class="admin-identity">
@@ -1918,6 +2332,7 @@
                             This device
                             <strong id="admin-identity-label">Remembered access</strong>
                         </div>
+                        <span class="preview-mode-indicator" id="preview-mode-indicator" hidden>Preview data</span>
                         <button class="button button-quiet" id="install-app-button" type="button" aria-label="Install the Binyan Shalem admin app" hidden>
                             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>
                             <span>Install app</span>
@@ -2022,21 +2437,110 @@
                         </section>
                     </section>
 
-                    <section class="workspace-panel" id="submissions-panel" role="tabpanel" aria-labelledby="submissions-tab" hidden>
-                        <div class="panel-heading">
+                    <section class="workspace-panel" id="encounters-panel" role="tabpanel" aria-labelledby="encounters-tab" hidden>
+                        <div class="panel-heading organizer-heading">
                             <div>
-                                <h2>People who reached out.</h2>
-                                <p>Confidential requests submitted through the public intake form, ordered with the newest first.</p>
+                                <h2>Keep every conversation connected.</h2>
+                                <p>Log the essentials, then let the app carry the details forward when you meet again.</p>
                             </div>
-                            <span class="panel-note">
-                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s8-3.8 8-10V5l-8-3-8 3v6c0 6.2 8 10 8 10Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>
-                                Confidential
-                            </span>
+                            <button class="button button-primary" id="new-encounter-button" type="button">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"/></svg>
+                                New encounter
+                            </button>
                         </div>
-                        <p class="status" id="submission-action-status" role="status" aria-live="polite" hidden></p>
-                        <div class="loading-state" id="all-submissions-loading"><span class="loading-dot" aria-hidden="true"></span>Loading submissions…</div>
-                        <div class="submission-list" id="all-submissions-list"></div>
-                        <p class="empty-state" id="no-all-submissions" hidden>No submissions found.</p>
+
+                        <div class="organizer-switcher" role="group" aria-label="Encounter views">
+                            <button type="button" data-encounter-view="active" aria-pressed="true">Active</button>
+                            <button type="button" data-encounter-view="intake" aria-pressed="false">Intake forms</button>
+                            <button type="button" data-encounter-view="archived" aria-pressed="false">Archived</button>
+                        </div>
+
+                        <form class="encounter-editor" id="encounter-form" hidden>
+                            <div class="encounter-editor-heading">
+                                <div>
+                                    <h3 id="encounter-form-title">New encounter</h3>
+                                    <p id="encounter-form-description">A name is all you need to save. Everything else is optional.</p>
+                                </div>
+                                <button class="button button-quiet" id="cancel-encounter-button" type="button" aria-label="Close encounter form">Close</button>
+                            </div>
+                            <input id="encounter-root-id" type="hidden">
+                            <input id="encounter-previous-id" type="hidden">
+                            <input id="encounter-submission-id" type="hidden">
+                            <div class="encounter-grid">
+                                <label class="encounter-field encounter-field-wide">
+                                    <span class="field-label">Who did you meet? <span aria-hidden="true">*</span></span>
+                                    <input class="form-input" id="encounter-names" type="text" maxlength="240" autocomplete="name" placeholder="Name or couple" required>
+                                </label>
+                                <label class="encounter-field encounter-field-wide">
+                                    <span class="field-label">Contact info <span class="encounter-field-hint">Optional</span></span>
+                                    <input class="form-input" id="encounter-contact" type="text" maxlength="500" autocomplete="tel" placeholder="Phone or email">
+                                </label>
+                                <label class="encounter-field">
+                                    <span class="field-label">Date <span class="encounter-field-hint">Optional</span></span>
+                                    <input class="form-input" id="encounter-date" type="date">
+                                </label>
+                                <label class="encounter-field">
+                                    <span class="field-label">Time <span class="encounter-field-hint">Optional</span></span>
+                                    <input class="form-input" id="encounter-time" type="time">
+                                </label>
+                                <label class="encounter-field encounter-field-wide">
+                                    <span class="field-label">How did you connect?</span>
+                                    <select class="form-input" id="encounter-method"></select>
+                                </label>
+                                <label class="encounter-field encounter-field-wide">
+                                    <span class="field-label">Notes <span class="encounter-field-hint">Optional — short is fine</span></span>
+                                    <textarea class="paste-input" id="encounter-notes" maxlength="5000" placeholder="Anything worth remembering"></textarea>
+                                </label>
+                                <label class="encounter-followup" for="encounter-followup">
+                                    <span><strong>Needs a follow-up</strong><span>Keep this in Reminders until it is handled.</span></span>
+                                    <input class="toggle-input" id="encounter-followup" type="checkbox" role="switch">
+                                </label>
+                            </div>
+                            <div class="form-actions">
+                                <button class="button button-primary" id="save-encounter-button" type="submit">Save encounter</button>
+                                <button class="button button-secondary" id="cancel-encounter-button-bottom" type="button">Cancel</button>
+                            </div>
+                            <p class="status" id="encounter-form-status" role="status" aria-live="polite" hidden></p>
+                        </form>
+
+                        <p class="status" id="encounter-action-status" role="status" aria-live="polite" hidden></p>
+
+                        <div id="active-encounters-view">
+                            <div class="loading-state" id="encounters-loading"><span class="loading-dot" aria-hidden="true"></span>Loading encounters…</div>
+                            <div class="encounter-list" id="active-encounter-list"></div>
+                            <p class="empty-state" id="no-active-encounters" hidden>No active encounters yet. Add one after your next conversation.</p>
+                        </div>
+
+                        <div id="archived-encounters-view" hidden>
+                            <div class="encounter-list" id="archived-encounter-list"></div>
+                            <p class="empty-state" id="no-archived-encounters">Nothing is archived.</p>
+                        </div>
+
+                        <div id="intake-submissions-view" hidden>
+                            <p class="status" id="submission-action-status" role="status" aria-live="polite" hidden></p>
+                            <div class="loading-state" id="all-submissions-loading"><span class="loading-dot" aria-hidden="true"></span>Loading intake forms…</div>
+                            <div class="submission-list" id="all-submissions-list"></div>
+                            <p class="empty-state" id="no-all-submissions" hidden>No intake forms found.</p>
+                        </div>
+                    </section>
+
+                    <section class="workspace-panel" id="reminders-panel" role="tabpanel" aria-labelledby="reminders-tab" hidden>
+                        <div class="panel-heading organizer-heading">
+                            <div>
+                                <h2>What needs your attention.</h2>
+                                <p>Each intake starts here. Once you log an encounter, only its latest follow-up decision counts.</p>
+                            </div>
+                        </div>
+                        <div class="reminders-overview">
+                            <div>
+                                <strong id="reminder-summary">You’re all caught up.</strong>
+                                <p id="notification-explanation">Allow notifications to receive one daily nudge when this app is active.</p>
+                            </div>
+                            <button class="button button-secondary" id="enable-notifications-button" type="button">Enable notifications</button>
+                        </div>
+                        <p class="status" id="reminder-action-status" role="status" aria-live="polite" hidden></p>
+                        <div class="reminder-list" id="reminder-list"></div>
+                        <p class="empty-state" id="no-reminders">Nothing needs follow-up right now.</p>
                     </section>
                 </div>
             </div>
@@ -2062,7 +2566,9 @@
             orderBy,
             query,
             serverTimestamp,
-            setDoc
+            setDoc,
+            updateDoc,
+            writeBatch
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import {
             applyResourceEdits,
@@ -2072,7 +2578,17 @@
             getProviderName,
             getResourceTypeLabel,
             normalizeStoredResource
-        } from "../content-resource-tools.mjs?v=2026-08-15.1";
+        } from "../content-resource-tools.mjs?v=2026-08-20.1";
+        import {
+            buildEncounterPrefill,
+            CONTACT_METHODS,
+            deriveReminders,
+            ENCOUNTERS_COLLECTION,
+            groupEncounterThreads,
+            localDayKey,
+            normalizeEncounter,
+            REMINDER_RESOLUTIONS_COLLECTION
+        } from "./organizer-tools.mjs?v=2026-08-20.1";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDxEV7W2m4jbJiVl0Sc6cN7gBH7oWu_rl8",
@@ -2087,6 +2603,8 @@
         const ADMIN_PASSWORD = "Hello123?!";
         const ADMIN_UNLOCK_KEY = "binyanShalem.adminUnlocked.v1";
         const ADMIN_TAB_KEY = "binyanShalem.adminTab.v1";
+        const REMINDER_SNOOZE_KEY = "binyanShalem.reminderSnoozes.v1";
+        const REMINDER_NOTICE_KEY = "binyanShalem.lastReminderNotice.v1";
         const LOCAL_PREVIEW = ["127.0.0.1", "localhost"].includes(window.location.hostname)
             && new URLSearchParams(window.location.search).get("preview") === "1";
         const appId = firebaseConfig.projectId;
@@ -2116,7 +2634,8 @@
         const noAdminResources = document.getElementById("no-admin-resources");
         const createdContentCount = document.getElementById("created-content-count");
         const contentNavCount = document.getElementById("content-nav-count");
-        const submissionsNavCount = document.getElementById("submissions-nav-count");
+        const encountersNavCount = document.getElementById("encounters-nav-count");
+        const remindersNavCount = document.getElementById("reminders-nav-count");
         const workspaceTitle = document.getElementById("workspace-title");
         const workspaceDescription = document.getElementById("workspace-description");
         const installButton = document.getElementById("install-app-button");
@@ -2124,6 +2643,22 @@
         const connectionState = document.getElementById("connection-state");
         const connectionLabel = document.getElementById("connection-label");
         const submissionActionStatus = document.getElementById("submission-action-status");
+        const encounterForm = document.getElementById("encounter-form");
+        const encounterFormStatus = document.getElementById("encounter-form-status");
+        const encounterActionStatus = document.getElementById("encounter-action-status");
+        const reminderActionStatus = document.getElementById("reminder-action-status");
+        const encounterFields = {
+            rootId: document.getElementById("encounter-root-id"),
+            previousId: document.getElementById("encounter-previous-id"),
+            submissionId: document.getElementById("encounter-submission-id"),
+            names: document.getElementById("encounter-names"),
+            contact: document.getElementById("encounter-contact"),
+            occurredDate: document.getElementById("encounter-date"),
+            occurredTime: document.getElementById("encounter-time"),
+            method: document.getElementById("encounter-method"),
+            notes: document.getElementById("encounter-notes"),
+            needsFollowUp: document.getElementById("encounter-followup")
+        };
         const previewFields = {
             title: document.getElementById("preview-title"),
             speaker: document.getElementById("preview-speaker"),
@@ -2139,9 +2674,24 @@
         let pendingResource = null;
         let contentUnsubscribe = null;
         let submissionsUnsubscribe = null;
+        let encountersUnsubscribe = null;
+        let resolutionsUnsubscribe = null;
+        let allSubmissions = [];
+        let allEncounters = [];
+        let allResolutions = [];
+        let submissionsLoaded = false;
+        let encountersLoaded = false;
+        let resolutionsLoaded = false;
         let adminUnlocked = false;
         let installPrompt = null;
         let installStatusTimer = null;
+
+        CONTACT_METHODS.forEach((method) => {
+            const option = document.createElement("option");
+            option.value = method;
+            option.textContent = method;
+            encounterFields.method.appendChild(option);
+        });
 
         function setStatus(element, message, tone = "info") {
             element.textContent = message;
@@ -2263,6 +2813,8 @@
             bootScreen.hidden = true;
             identityLabel.textContent = identity;
             subscribeToAdminContent();
+            if (LOCAL_PREVIEW) loadPreviewOrganizer();
+            else subscribeToOrganizer();
             activateInitialTab();
         }
 
@@ -2497,13 +3049,351 @@
             donation: "Donation interest"
         };
 
+        function formatEncounterMoment(encounter) {
+            if (!encounter.occurredDate) return "Date not recorded";
+            const value = `${encounter.occurredDate}T${encounter.occurredTime || "12:00"}`;
+            const parsed = new Date(value);
+            if (Number.isNaN(parsed.getTime())) return encounter.occurredDate;
+            const date = parsed.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+            if (!encounter.occurredTime) return date;
+            return `${date} · ${parsed.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}`;
+        }
+
+        function setEncounterView(view) {
+            document.querySelectorAll("[data-encounter-view]").forEach((button) => {
+                button.setAttribute("aria-pressed", String(button.dataset.encounterView === view));
+            });
+            document.getElementById("active-encounters-view").hidden = view !== "active";
+            document.getElementById("intake-submissions-view").hidden = view !== "intake";
+            document.getElementById("archived-encounters-view").hidden = view !== "archived";
+        }
+
+        function fillEncounterForm(prefill) {
+            encounterFields.rootId.value = prefill.rootEncounterId || "";
+            encounterFields.previousId.value = prefill.previousEncounterId || "";
+            encounterFields.submissionId.value = prefill.submissionId || "";
+            encounterFields.names.value = prefill.names || "";
+            encounterFields.contact.value = prefill.contact || "";
+            encounterFields.occurredDate.value = prefill.occurredDate || "";
+            encounterFields.occurredTime.value = prefill.occurredTime || "";
+            encounterFields.method.value = prefill.method || "In person";
+            encounterFields.notes.value = prefill.notes || "";
+            encounterFields.needsFollowUp.checked = prefill.needsFollowUp === true;
+        }
+
+        function openEncounterForm({ encounter, submission } = {}) {
+            const prefill = buildEncounterPrefill({ encounter, submission });
+            fillEncounterForm(prefill);
+            const title = document.getElementById("encounter-form-title");
+            const description = document.getElementById("encounter-form-description");
+            if (encounter) {
+                title.textContent = `Another meeting with ${prefill.names}`;
+                description.textContent = "The shared details are filled in. Add only what changed this time.";
+            } else if (submission) {
+                title.textContent = `First encounter with ${prefill.names}`;
+                description.textContent = "The intake form filled in what it could. Review, add a note, and save.";
+            } else {
+                title.textContent = "New encounter";
+                description.textContent = "A name is all you need to save. Everything else is optional.";
+            }
+            setStatus(encounterFormStatus, "");
+            encounterForm.hidden = false;
+            encounterForm.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+            window.setTimeout(() => encounterFields.names.focus(), 120);
+        }
+
+        function closeEncounterForm() {
+            encounterForm.reset();
+            encounterForm.hidden = true;
+            setStatus(encounterFormStatus, "");
+        }
+
+        function createActionButton(label, className, handler) {
+            const button = document.createElement("button");
+            button.className = className;
+            button.type = "button";
+            button.textContent = label;
+            button.addEventListener("click", handler);
+            return button;
+        }
+
+        async function deleteEncounter(encounter) {
+            if (!window.confirm(`Delete this meeting with ${encounter.names || "this contact"}? This cannot be undone.`)) return;
+            setStatus(encounterActionStatus, "");
+            try {
+                if (LOCAL_PREVIEW) {
+                    allEncounters = allEncounters.filter(({ id }) => id !== encounter.id);
+                    renderOrganizer();
+                } else {
+                    await deleteDoc(doc(db, ENCOUNTERS_COLLECTION, encounter.id));
+                }
+                setStatus(encounterActionStatus, "The meeting was deleted.", "success");
+            } catch (error) {
+                console.error("Could not delete encounter:", error);
+                setStatus(encounterActionStatus, "The meeting was not deleted. Try again.", "error");
+            }
+        }
+
+        async function setThreadArchived(thread, archived) {
+            setStatus(encounterActionStatus, "");
+            try {
+                if (LOCAL_PREVIEW) {
+                    const ids = new Set(thread.meetings.map(({ id }) => id));
+                    allEncounters = allEncounters.map((item) => ids.has(item.id) ? { ...item, archived } : item);
+                    renderOrganizer();
+                } else {
+                    const batch = writeBatch(db);
+                    thread.meetings.forEach(({ id }) => {
+                        batch.update(doc(db, ENCOUNTERS_COLLECTION, id), { archived, updatedAt: serverTimestamp() });
+                    });
+                    await batch.commit();
+                }
+                setStatus(encounterActionStatus, archived ? "The encounter thread was archived." : "The encounter thread is active again.", "success");
+            } catch (error) {
+                console.error("Could not update encounter archive:", error);
+                setStatus(encounterActionStatus, "The encounter could not be updated. Try again.", "error");
+            }
+        }
+
+        function renderEncounterThread(thread, archived) {
+            const latest = thread.latest;
+            const article = document.createElement("article");
+            article.className = "encounter-thread";
+
+            const summary = document.createElement("div");
+            summary.className = "encounter-summary";
+            const copy = document.createElement("div");
+            const title = document.createElement("h3");
+            title.textContent = latest.names || "Unnamed encounter";
+            const context = document.createElement("p");
+            context.className = "encounter-context";
+            context.textContent = latest.notes
+                || thread.meetings.find(({ notes }) => notes)?.notes
+                || "No notes added";
+            const meta = document.createElement("div");
+            meta.className = "encounter-meta";
+            [formatEncounterMoment(latest), latest.method, `${thread.meetings.length} ${thread.meetings.length === 1 ? "meeting" : "meetings"}`]
+                .filter(Boolean)
+                .forEach((value) => {
+                    const chip = document.createElement("span");
+                    chip.className = "meta-chip";
+                    chip.textContent = value;
+                    meta.appendChild(chip);
+                });
+            if (latest.needsFollowUp) {
+                const followup = document.createElement("span");
+                followup.className = "followup-badge";
+                followup.textContent = "Follow-up needed";
+                meta.appendChild(followup);
+            }
+            copy.append(title, context, meta);
+
+            const actions = document.createElement("div");
+            actions.className = "encounter-actions";
+            if (!archived) {
+                actions.append(
+                    createActionButton("Add meeting", "button button-primary", () => openEncounterForm({ encounter: latest })),
+                    createActionButton("Archive", "button button-secondary", () => setThreadArchived(thread, true))
+                );
+            } else {
+                actions.append(createActionButton("Restore", "button button-secondary", () => setThreadArchived(thread, false)));
+            }
+            summary.append(copy, actions);
+
+            const timeline = document.createElement("details");
+            timeline.className = "encounter-timeline";
+            const timelineSummary = document.createElement("summary");
+            timelineSummary.textContent = `View ${thread.meetings.length === 1 ? "meeting details" : `all ${thread.meetings.length} meetings`}`;
+            timeline.appendChild(timelineSummary);
+            [...thread.meetings].reverse().forEach((meeting) => {
+                const entry = document.createElement("div");
+                entry.className = "meeting-entry";
+                const dot = document.createElement("span");
+                dot.className = "meeting-dot";
+                dot.setAttribute("aria-hidden", "true");
+                const entryCopy = document.createElement("div");
+                const heading = document.createElement("strong");
+                heading.textContent = `${formatEncounterMoment(meeting)} · ${meeting.method}`;
+                const notes = document.createElement("p");
+                const lines = [meeting.contact, meeting.notes].filter(Boolean);
+                notes.textContent = lines.join("\n") || "No extra details were added.";
+                entryCopy.append(heading, notes);
+                const remove = createActionButton("Delete", "button button-danger", () => deleteEncounter(meeting));
+                entry.append(dot, entryCopy, remove);
+                timeline.appendChild(entry);
+            });
+            article.append(summary, timeline);
+            return article;
+        }
+
+        function renderEncounters() {
+            const threads = groupEncounterThreads(allEncounters);
+            const active = threads.filter(({ archived }) => !archived);
+            const archived = threads.filter((thread) => thread.archived);
+            const activeList = document.getElementById("active-encounter-list");
+            const archivedList = document.getElementById("archived-encounter-list");
+            activeList.replaceChildren(...active.map((thread) => renderEncounterThread(thread, false)));
+            archivedList.replaceChildren(...archived.map((thread) => renderEncounterThread(thread, true)));
+            document.getElementById("no-active-encounters").hidden = active.length !== 0;
+            document.getElementById("no-archived-encounters").hidden = archived.length !== 0;
+            document.getElementById("encounters-loading").hidden = encountersLoaded;
+            encountersNavCount.textContent = String(active.length);
+            encountersNavCount.setAttribute("aria-label", `${active.length} active ${active.length === 1 ? "encounter" : "encounters"}`);
+        }
+
+        function readSnoozes() {
+            try {
+                return JSON.parse(window.localStorage.getItem(REMINDER_SNOOZE_KEY) || "{}");
+            } catch {
+                return {};
+            }
+        }
+
+        function activeReminders() {
+            const today = localDayKey();
+            const snoozes = readSnoozes();
+            return deriveReminders({
+                submissions: allSubmissions,
+                encounters: allEncounters,
+                resolutions: allResolutions
+            }).filter(({ key }) => snoozes[key] !== today);
+        }
+
+        async function remindTomorrow(reminder) {
+            const snoozes = readSnoozes();
+            snoozes[reminder.key] = localDayKey();
+            try {
+                window.localStorage.setItem(REMINDER_SNOOZE_KEY, JSON.stringify(snoozes));
+            } catch {
+                // A snooze is device-local and optional when browser storage is unavailable.
+            }
+            renderReminders();
+            setStatus(reminderActionStatus, "Cleared for today. It will return tomorrow.", "success");
+        }
+
+        function resolutionDocId(key) {
+            return key.replace(/[^a-zA-Z0-9_-]/g, "_");
+        }
+
+        async function completeReminder(reminder) {
+            if (!window.confirm(`Mark “${reminder.title}” as taken care of?`)) return;
+            setStatus(reminderActionStatus, "");
+            try {
+                if (reminder.type === "encounter") {
+                    if (LOCAL_PREVIEW) {
+                        allEncounters = allEncounters.map((item) => item.id === reminder.targetId
+                            ? { ...item, needsFollowUp: false }
+                            : item);
+                        renderOrganizer();
+                    } else {
+                        await updateDoc(doc(db, ENCOUNTERS_COLLECTION, reminder.targetId), {
+                            needsFollowUp: false,
+                            updatedAt: serverTimestamp()
+                        });
+                    }
+                } else if (LOCAL_PREVIEW) {
+                    allResolutions = [...allResolutions, { targetKey: reminder.key }];
+                    renderOrganizer();
+                } else {
+                    await setDoc(doc(db, REMINDER_RESOLUTIONS_COLLECTION, resolutionDocId(reminder.key)), {
+                        targetKey: reminder.key,
+                        resolvedAt: serverTimestamp(),
+                        resolvedBy: auth.currentUser.uid
+                    });
+                }
+                setStatus(reminderActionStatus, "Marked as taken care of.", "success");
+            } catch (error) {
+                console.error("Could not complete reminder:", error);
+                setStatus(reminderActionStatus, "The reminder could not be updated. Try again.", "error");
+            }
+        }
+
+        async function maybeSendDailyNotification(reminders) {
+            if (!submissionsLoaded || !encountersLoaded || !resolutionsLoaded) return;
+            if (!("Notification" in window) || Notification.permission !== "granted" || reminders.length === 0) return;
+            const today = localDayKey();
+            try {
+                if (window.localStorage.getItem(REMINDER_NOTICE_KEY) === today) return;
+                const registration = await navigator.serviceWorker?.ready;
+                if (!registration) return;
+                await registration.showNotification("Binyan Shalem reminders", {
+                    body: reminders.length === 1 ? reminders[0].title : `${reminders.length} items need your attention today.`,
+                    icon: "./icons/icon-192.png",
+                    badge: "./icons/icon-192.png",
+                    tag: `binyan-reminders-${today}`,
+                    data: { url: "./?tab=reminders" }
+                });
+                window.localStorage.setItem(REMINDER_NOTICE_KEY, today);
+            } catch (error) {
+                console.warn("Could not show reminder notification:", error);
+            }
+        }
+
+        function renderReminders() {
+            const reminders = activeReminders();
+            const list = document.getElementById("reminder-list");
+            const empty = document.getElementById("no-reminders");
+            const summary = document.getElementById("reminder-summary");
+            list.replaceChildren();
+            empty.hidden = reminders.length !== 0;
+            summary.textContent = reminders.length === 0
+                ? "You’re all caught up."
+                : `${reminders.length} ${reminders.length === 1 ? "item needs" : "items need"} your attention.`;
+            remindersNavCount.textContent = String(reminders.length);
+            remindersNavCount.setAttribute("aria-label", `${reminders.length} ${reminders.length === 1 ? "reminder" : "reminders"}`);
+
+            reminders.forEach((reminder) => {
+                const card = document.createElement("article");
+                card.className = "reminder-card";
+                const icon = document.createElement("span");
+                icon.className = "reminder-icon";
+                icon.innerHTML = reminder.type === "submission"
+                    ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10v4H7zM5 5v16h14V5M8 11h8M8 15h6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>'
+                    : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm8-1a2.5 2.5 0 1 0 0-5M3 20v-2a4 4 0 0 1 4-4h2a4 4 0 0 1 4 4v2m1-6h1a4 4 0 0 1 4 4v2" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>';
+                const body = document.createElement("div");
+                const title = document.createElement("h3");
+                title.textContent = reminder.title;
+                const detail = document.createElement("p");
+                detail.textContent = reminder.detail;
+                const actions = document.createElement("div");
+                actions.className = "reminder-actions";
+                if (reminder.type === "submission") {
+                    actions.append(createActionButton("Log encounter", "button button-primary", () => {
+                        activateTab(document.getElementById("encounters-tab"));
+                        setEncounterView("intake");
+                        openEncounterForm({ submission: reminder.submission });
+                    }));
+                } else {
+                    actions.append(createActionButton("Add meeting", "button button-primary", () => {
+                        activateTab(document.getElementById("encounters-tab"));
+                        setEncounterView("active");
+                        openEncounterForm({ encounter: reminder.encounter });
+                    }));
+                }
+                actions.append(
+                    createActionButton("Remind tomorrow", "button button-secondary", () => remindTomorrow(reminder)),
+                    createActionButton("Taken care of", "button button-secondary", () => completeReminder(reminder))
+                );
+                body.append(title, detail, actions);
+                card.append(icon, body);
+                list.appendChild(card);
+            });
+
+            void maybeSendDailyNotification(reminders);
+        }
+
+        function renderOrganizer() {
+            renderSubmissions(allSubmissions);
+            renderEncounters();
+            renderReminders();
+        }
+
         function renderSubmissions(submissions) {
             const list = document.getElementById("all-submissions-list");
             const empty = document.getElementById("no-all-submissions");
             list.replaceChildren();
             empty.hidden = submissions.length !== 0;
-            submissionsNavCount.textContent = String(submissions.length);
-            submissionsNavCount.setAttribute("aria-label", `${submissions.length} ${submissions.length === 1 ? "submission" : "submissions"}`);
+            document.getElementById("all-submissions-loading").hidden = submissionsLoaded;
 
             const sorted = [...submissions].sort((a, b) => {
                 const aTime = Date.parse(a.data.timestamp || "") || 0;
@@ -2512,7 +3402,8 @@
             });
 
             const fragment = document.createDocumentFragment();
-            sorted.forEach(({ id, data }) => {
+            sorted.forEach((submission) => {
+                const { id, data } = submission;
                 const card = document.createElement("article");
                 card.className = "submission-card";
                 const header = document.createElement("header");
@@ -2530,40 +3421,47 @@
                 submissionId.textContent = `Submission ID: ${id}`;
                 headerCopy.append(title, time, submissionId);
 
+                const actions = document.createElement("div");
+                actions.className = "submission-actions";
+                const logButton = document.createElement("button");
+                logButton.className = "button button-primary";
+                logButton.type = "button";
+                logButton.textContent = "Log encounter";
+                logButton.addEventListener("click", () => openEncounterForm({ submission }));
+
                 const deleteButton = document.createElement("button");
                 deleteButton.className = "button button-danger";
                 deleteButton.type = "button";
-                deleteButton.textContent = "Delete submission";
+                deleteButton.textContent = "Delete";
                 deleteButton.setAttribute("aria-label", `Permanently delete submission ${id}`);
                 deleteButton.addEventListener("click", async () => {
-                    const confirmed = window.confirm(
-                        `Permanently delete submission ${id}? This cannot be undone.`
-                    );
+                    const confirmed = window.confirm(`Permanently delete submission ${id}? This cannot be undone.`);
                     if (!confirmed) return;
-
                     deleteButton.disabled = true;
                     deleteButton.textContent = "Deleting…";
                     setStatus(submissionActionStatus, "");
                     try {
-                        await deleteDoc(doc(db, `artifacts/${appId}/public/data/submissions/${id}`));
-                        setStatus(submissionActionStatus, `Submission ${id} was permanently deleted.`, "success");
+                        if (LOCAL_PREVIEW) {
+                            allSubmissions = allSubmissions.filter((item) => item.id !== id);
+                            renderOrganizer();
+                        } else {
+                            await deleteDoc(doc(db, `artifacts/${appId}/public/data/submissions/${id}`));
+                        }
+                        setStatus(submissionActionStatus, "The intake form was permanently deleted.", "success");
                     } catch (error) {
                         console.error("Could not delete submission:", error);
-                        setStatus(
-                            submissionActionStatus,
-                            `Submission ${id} was not deleted. Check the admin session and try again.`,
-                            "error"
-                        );
+                        setStatus(submissionActionStatus, "The intake form was not deleted. Try again.", "error");
                         deleteButton.disabled = false;
-                        deleteButton.textContent = "Delete submission";
+                        deleteButton.textContent = "Delete";
                     }
                 });
-                header.append(headerCopy, deleteButton);
+                actions.append(logButton, deleteButton);
+                header.append(headerCopy, actions);
 
                 const fields = document.createElement("dl");
                 fields.className = "submission-fields";
                 Object.entries(data).forEach(([key, value]) => {
-                    if (["timestamp", "uid"].includes(key) || value === null) return;
+                    if (["timestamp", "uid"].includes(key) || value === null || value === "") return;
                     const group = document.createElement("div");
                     const label = document.createElement("dt");
                     label.textContent = submissionFieldLabels[key]
@@ -2586,8 +3484,9 @@
             loading.hidden = false;
             const submissionsRef = collection(db, `artifacts/${appId}/public/data/submissions`);
             submissionsUnsubscribe = onSnapshot(submissionsRef, (snapshot) => {
-                const submissions = snapshot.docs.map((document) => ({ id: document.id, data: document.data() }));
-                renderSubmissions(submissions);
+                allSubmissions = snapshot.docs.map((document) => ({ id: document.id, data: document.data() }));
+                submissionsLoaded = true;
+                renderOrganizer();
                 loading.hidden = true;
             }, (error) => {
                 console.error("Could not load submissions:", error);
@@ -2595,15 +3494,181 @@
             });
         }
 
+        function subscribeToOrganizer() {
+            subscribeToSubmissions();
+            if (!encountersUnsubscribe) {
+                encountersUnsubscribe = onSnapshot(collection(db, ENCOUNTERS_COLLECTION), (snapshot) => {
+                    allEncounters = snapshot.docs.map((document) => normalizeEncounter(document.data(), document.id));
+                    encountersLoaded = true;
+                    renderOrganizer();
+                }, (error) => {
+                    console.error("Could not load encounters:", error);
+                    document.getElementById("encounters-loading").textContent = "Encounters could not be loaded.";
+                });
+            }
+            if (!resolutionsUnsubscribe) {
+                resolutionsUnsubscribe = onSnapshot(collection(db, REMINDER_RESOLUTIONS_COLLECTION), (snapshot) => {
+                    allResolutions = snapshot.docs.map((document) => ({ id: document.id, ...document.data() }));
+                    resolutionsLoaded = true;
+                    renderOrganizer();
+                }, (error) => {
+                    console.error("Could not load reminder resolutions:", error);
+                    setStatus(reminderActionStatus, "Reminder history could not be loaded.", "error");
+                });
+            }
+        }
+
+        function loadPreviewOrganizer() {
+            allSubmissions = [{
+                id: "preview-intake",
+                data: {
+                    h_name: "David",
+                    w_name: "Rachel",
+                    h_cell: "(555) 014-1182",
+                    issue_presenting: "Getting on the same page about family routines",
+                    timestamp: new Date(Date.now() - 86400000).toISOString(),
+                    formType: "both"
+                }
+            }];
+            allEncounters = [
+                normalizeEncounter({
+                    names: "Ari & Leah Cohen",
+                    contact: "ari@example.com · (555) 019-2040",
+                    occurredDate: localDayKey(new Date(Date.now() - 7 * 86400000)),
+                    occurredTime: "19:30",
+                    method: "Video",
+                    notes: "Agreed to try a shorter weekly check-in.",
+                    needsFollowUp: true,
+                    rootEncounterId: "preview-thread",
+                    archived: false,
+                    createdAt: new Date(Date.now() - 7 * 86400000)
+                }, "preview-thread"),
+                normalizeEncounter({
+                    names: "Ari & Leah Cohen",
+                    contact: "ari@example.com · (555) 019-2040",
+                    occurredDate: localDayKey(new Date(Date.now() - 2 * 86400000)),
+                    occurredTime: "20:00",
+                    method: "Phone",
+                    notes: "The new routine is helping. Check back after Shabbos.",
+                    needsFollowUp: true,
+                    rootEncounterId: "preview-thread",
+                    previousEncounterId: "preview-thread",
+                    archived: false,
+                    createdAt: new Date(Date.now() - 2 * 86400000)
+                }, "preview-followup")
+            ];
+            submissionsLoaded = true;
+            encountersLoaded = true;
+            resolutionsLoaded = true;
+            renderOrganizer();
+        }
+
+        document.querySelectorAll("[data-encounter-view]").forEach((button) => {
+            button.addEventListener("click", () => setEncounterView(button.dataset.encounterView));
+        });
+        document.getElementById("new-encounter-button").addEventListener("click", () => {
+            setEncounterView("active");
+            openEncounterForm();
+        });
+        document.getElementById("cancel-encounter-button").addEventListener("click", closeEncounterForm);
+        document.getElementById("cancel-encounter-button-bottom").addEventListener("click", closeEncounterForm);
+
+        encounterForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            if (!encounterFields.names.value.trim()) {
+                setStatus(encounterFormStatus, "Add at least one name before saving.", "error");
+                encounterFields.names.focus();
+                return;
+            }
+
+            const saveButton = document.getElementById("save-encounter-button");
+            setButtonLoading(saveButton, true, "Saving…", "Save encounter");
+            setStatus(encounterFormStatus, "");
+            try {
+                const encounterRef = LOCAL_PREVIEW
+                    ? { id: `preview-${Date.now()}` }
+                    : doc(collection(db, ENCOUNTERS_COLLECTION));
+                const payload = {
+                    names: encounterFields.names.value.trim(),
+                    contact: encounterFields.contact.value.trim(),
+                    occurredDate: encounterFields.occurredDate.value,
+                    occurredTime: encounterFields.occurredTime.value,
+                    method: encounterFields.method.value,
+                    notes: encounterFields.notes.value.trim(),
+                    needsFollowUp: encounterFields.needsFollowUp.checked,
+                    submissionId: encounterFields.submissionId.value || null,
+                    rootEncounterId: encounterFields.rootId.value || encounterRef.id,
+                    previousEncounterId: encounterFields.previousId.value || null,
+                    archived: false,
+                    createdAt: LOCAL_PREVIEW ? new Date() : serverTimestamp(),
+                    updatedAt: LOCAL_PREVIEW ? new Date() : serverTimestamp(),
+                    createdBy: LOCAL_PREVIEW ? "preview" : auth.currentUser.uid
+                };
+                if (LOCAL_PREVIEW) {
+                    allEncounters = [...allEncounters, normalizeEncounter(payload, encounterRef.id)];
+                    renderOrganizer();
+                } else {
+                    await setDoc(encounterRef, payload);
+                }
+                closeEncounterForm();
+                setEncounterView("active");
+                setStatus(encounterActionStatus, "Encounter saved. The reminder list is already up to date.", "success");
+            } catch (error) {
+                console.error("Could not save encounter:", error);
+                setStatus(encounterFormStatus, "The encounter could not be saved. Check your connection and try again.", "error");
+            } finally {
+                setButtonLoading(saveButton, false, "Saving…", "Save encounter");
+            }
+        });
+
+        const notificationButton = document.getElementById("enable-notifications-button");
+
+        function updateNotificationControls() {
+            const explanation = document.getElementById("notification-explanation");
+            if (!("Notification" in window)) {
+                notificationButton.hidden = true;
+                explanation.textContent = "This browser does not support notifications. Reminders still appear here every day.";
+                return;
+            }
+            if (Notification.permission === "granted") {
+                notificationButton.textContent = "Notifications on";
+                notificationButton.disabled = true;
+                explanation.textContent = "You’ll receive one daily nudge when the app is opened or active.";
+            } else if (Notification.permission === "denied") {
+                notificationButton.textContent = "Notifications blocked";
+                notificationButton.disabled = true;
+                explanation.textContent = "Notifications are blocked in browser settings. Reminders still stay visible here.";
+            }
+        }
+
+        notificationButton.addEventListener("click", async () => {
+            try {
+                const permission = await Notification.requestPermission();
+                updateNotificationControls();
+                if (permission === "granted") {
+                    setStatus(reminderActionStatus, "Notifications are on for this device.", "success");
+                    void maybeSendDailyNotification(activeReminders());
+                }
+            } catch (error) {
+                console.warn("Notification permission could not be requested:", error);
+                setStatus(reminderActionStatus, "Notifications could not be enabled on this device.", "error");
+            }
+        });
+        updateNotificationControls();
+
         const tabs = [...document.querySelectorAll('[role="tab"]')];
         const tabCopy = {
             "content-tab": {
-                title: "Content library",
+                title: "Resources",
                 description: "Publish and manage trusted marriage resources."
             },
-            "submissions-tab": {
-                title: "Intake submissions",
-                description: "Review confidential requests from couples and supporters."
+            "encounters-tab": {
+                title: "Encounters",
+                description: "Keep meetings, people, and notes connected."
+            },
+            "reminders-tab": {
+                title: "Reminders",
+                description: "See only the follow-ups that still need attention."
             }
         };
 
@@ -2621,8 +3686,6 @@
             workspaceTitle.textContent = copy.title;
             workspaceDescription.textContent = copy.description;
 
-            if (tab.id === "submissions-tab" && !LOCAL_PREVIEW) subscribeToSubmissions();
-
             if (persist) {
                 try {
                     window.localStorage.setItem(ADMIN_TAB_KEY, tab.id);
@@ -2634,15 +3697,14 @@
             if (updateUrl) {
                 const url = new URL(window.location.href);
                 if (tab.id === "content-tab") url.searchParams.delete("tab");
-                else url.searchParams.set("tab", "submissions");
+                else url.searchParams.set("tab", tab.id.replace("-tab", ""));
                 history.replaceState(null, "", url);
             }
         }
 
         function activateInitialTab() {
-            const requestedTab = new URLSearchParams(window.location.search).get("tab") === "submissions"
-                ? "submissions-tab"
-                : "";
+            const requested = new URLSearchParams(window.location.search).get("tab");
+            const requestedTab = ["encounters", "reminders"].includes(requested) ? `${requested}-tab` : "";
             let rememberedTab = "";
             try {
                 rememberedTab = window.localStorage.getItem(ADMIN_TAB_KEY) || "";
@@ -2670,8 +3732,12 @@
             adminUnlocked = false;
             contentUnsubscribe?.();
             submissionsUnsubscribe?.();
+            encountersUnsubscribe?.();
+            resolutionsUnsubscribe?.();
             contentUnsubscribe = null;
             submissionsUnsubscribe = null;
+            encountersUnsubscribe = null;
+            resolutionsUnsubscribe = null;
             try {
                 await signOut(auth);
             } finally {
@@ -2687,6 +3753,12 @@
 
         window.addEventListener("online", updateConnectionState);
         window.addEventListener("offline", updateConnectionState);
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "visible") {
+                renderReminders();
+                updateNotificationControls();
+            }
+        });
         updateConnectionState();
 
         const isStandaloneApp = window.matchMedia("(display-mode: standalone)").matches
@@ -2763,7 +3835,7 @@
         async function bootstrapAdmin() {
             if (LOCAL_PREVIEW) {
                 document.getElementById("logout-button").hidden = true;
-                document.getElementById("submissions-tab").hidden = true;
+                document.getElementById("preview-mode-indicator").hidden = false;
                 showWorkspace("Local preview");
                 return;
             }

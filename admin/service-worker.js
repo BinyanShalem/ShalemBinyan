@@ -1,8 +1,9 @@
-const CACHE_VERSION = "binyan-admin-2026-08-15.1";
+const CACHE_VERSION = "binyan-admin-2026-08-20.1";
 const APP_SHELL = [
     "/admin/",
     "/admin/index.html",
     "/admin/manifest.webmanifest",
+    "/admin/organizer-tools.mjs",
     "/admin/icons/icon-192.png",
     "/admin/icons/icon-512.png",
     "/admin/icons/apple-touch-icon.png",
@@ -72,4 +73,19 @@ self.addEventListener("fetch", (event) => {
     if (isStaticAsset || isLocalAdminAsset) {
         event.respondWith(staleWhileRevalidate(request));
     }
+});
+
+self.addEventListener("notificationclick", (event) => {
+    event.notification.close();
+    const targetUrl = new URL(event.notification.data?.url || "/admin/?tab=reminders", self.location.origin).href;
+    event.waitUntil(
+        self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(async (clients) => {
+            const existing = clients.find((client) => new URL(client.url).pathname.startsWith("/admin/"));
+            if (existing) {
+                await existing.navigate(targetUrl);
+                return existing.focus();
+            }
+            return self.clients.openWindow(targetUrl);
+        })
+    );
 });

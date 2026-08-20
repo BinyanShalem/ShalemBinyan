@@ -109,6 +109,54 @@ service cloud.firestore {
         && request.resource.data.createdBy == request.auth.uid;
     }
 
+    function isValidEncounter() {
+      return request.resource.data.keys().hasOnly([
+          'names', 'contact', 'occurredDate', 'occurredTime',
+          'method', 'notes', 'needsFollowUp', 'submissionId',
+          'rootEncounterId', 'previousEncounterId', 'archived',
+          'createdAt', 'updatedAt', 'createdBy'
+        ])
+        && request.resource.data.keys().hasAll([
+          'names', 'contact', 'occurredDate', 'occurredTime',
+          'method', 'notes', 'needsFollowUp', 'submissionId',
+          'rootEncounterId', 'previousEncounterId', 'archived',
+          'createdAt', 'updatedAt', 'createdBy'
+        ])
+        && request.resource.data.names is string
+        && request.resource.data.names.size() > 0
+        && request.resource.data.names.size() <= 240
+        && request.resource.data.contact is string
+        && request.resource.data.contact.size() <= 500
+        && request.resource.data.occurredDate is string
+        && request.resource.data.occurredDate.size() <= 10
+        && request.resource.data.occurredTime is string
+        && request.resource.data.occurredTime.size() <= 5
+        && request.resource.data.method in ['In person', 'Phone', 'Video', 'Text', 'Email', 'Other']
+        && request.resource.data.notes is string
+        && request.resource.data.notes.size() <= 5000
+        && request.resource.data.needsFollowUp is bool
+        && isOptionalString(request.resource.data.submissionId, 160)
+        && request.resource.data.rootEncounterId is string
+        && request.resource.data.rootEncounterId.size() > 0
+        && request.resource.data.rootEncounterId.size() <= 160
+        && isOptionalString(request.resource.data.previousEncounterId, 160)
+        && request.resource.data.archived is bool
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.updatedAt is timestamp
+        && request.resource.data.createdBy is string
+        && request.resource.data.createdBy.size() <= 128;
+    }
+
+    function isValidReminderResolution() {
+      return request.resource.data.keys().hasOnly(['targetKey', 'resolvedAt', 'resolvedBy'])
+        && request.resource.data.keys().hasAll(['targetKey', 'resolvedAt', 'resolvedBy'])
+        && request.resource.data.targetKey is string
+        && request.resource.data.targetKey.size() > 0
+        && request.resource.data.targetKey.size() <= 220
+        && request.resource.data.resolvedAt == request.time
+        && request.resource.data.resolvedBy == request.auth.uid;
+    }
+
     match /content/{contentId} {
       allow read: if true;
       allow create: if isSignedIn() && contentId == request.resource.data.id && isValidContentResource();
@@ -119,6 +167,27 @@ service cloud.firestore {
     match /artifacts/{appId}/public/data/submissions/{submissionId} {
       allow create: if isSignedIn() && isValidSubmission();
       allow read, update, delete: if isSignedIn();
+    }
+
+    match /admin_encounters/{encounterId} {
+      allow read, delete: if isSignedIn();
+      allow create: if isSignedIn()
+        && isValidEncounter()
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+      allow update: if isSignedIn()
+        && isValidEncounter()
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.createdBy == resource.data.createdBy
+        && request.resource.data.rootEncounterId == resource.data.rootEncounterId
+        && request.resource.data.updatedAt == request.time;
+    }
+
+    match /admin_reminder_resolutions/{resolutionId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && isValidReminderResolution();
+      allow delete: if isSignedIn();
     }
 
     match /artifacts/{appId}/users/{userId}/{document=**} {
