@@ -1,9 +1,10 @@
-const CACHE_VERSION = "binyan-admin-2026-08-20.1";
+const CACHE_VERSION = "binyan-admin-2026-08-21.2";
 const APP_SHELL = [
     "/admin/",
     "/admin/index.html",
     "/admin/manifest.webmanifest",
     "/admin/organizer-tools.mjs",
+    "/admin/directory-tools.mjs",
     "/admin/icons/icon-192.png",
     "/admin/icons/icon-512.png",
     "/admin/icons/apple-touch-icon.png",
@@ -73,6 +74,23 @@ self.addEventListener("fetch", (event) => {
     if (isStaticAsset || isLocalAdminAsset) {
         event.respondWith(staleWhileRevalidate(request));
     }
+});
+
+self.addEventListener("push", (event) => {
+    let payload = {};
+    try {
+        payload = event.data?.json() || {};
+    } catch {
+        payload = { body: event.data?.text() || "A reminder needs your attention." };
+    }
+    event.waitUntil(self.registration.showNotification(payload.title || "Binyan Shalem reminder", {
+        body: payload.body || "A reminder needs your attention.",
+        icon: payload.icon || "/admin/icons/icon-192.png",
+        badge: payload.badge || "/admin/icons/icon-192.png",
+        tag: payload.tag || "binyan-reminders",
+        renotify: false,
+        data: { url: payload.url || "/admin/?tab=reminders" }
+    }));
 });
 
 self.addEventListener("notificationclick", (event) => {

@@ -111,7 +111,7 @@ service cloud.firestore {
 
     function isValidEncounter() {
       return request.resource.data.keys().hasOnly([
-          'names', 'contact', 'occurredDate', 'occurredTime',
+          'encounterType', 'names', 'contact', 'otherPeopleInvolved', 'occurredDate', 'occurredTime',
           'method', 'notes', 'needsFollowUp', 'submissionId',
           'rootEncounterId', 'previousEncounterId', 'archived',
           'createdAt', 'updatedAt', 'createdBy'
@@ -127,8 +127,14 @@ service cloud.firestore {
         && request.resource.data.names.size() <= 240
         && request.resource.data.contact is string
         && request.resource.data.contact.size() <= 500
+        && isOptionalString(request.resource.data.get('otherPeopleInvolved', null), 500)
         && request.resource.data.occurredDate is string
         && request.resource.data.occurredDate.size() <= 10
+        && request.resource.data.get('encounterType', 'completed') in ['completed', 'scheduled']
+        && (
+          request.resource.data.get('encounterType', 'completed') != 'scheduled'
+          || request.resource.data.occurredDate.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}')
+        )
         && request.resource.data.occurredTime is string
         && request.resource.data.occurredTime.size() <= 5
         && request.resource.data.method in ['In person', 'Phone', 'Video', 'Text', 'Email', 'Other']
@@ -155,6 +161,108 @@ service cloud.firestore {
         && request.resource.data.targetKey.size() <= 220
         && request.resource.data.resolvedAt == request.time
         && request.resource.data.resolvedBy == request.auth.uid;
+    }
+
+    function isValidManualReminder() {
+      return request.resource.data.keys().hasOnly([
+          'title', 'description', 'dueDate', 'dueTime', 'completed',
+          'createdAt', 'updatedAt', 'createdBy'
+        ])
+        && request.resource.data.keys().hasAll([
+          'title', 'description', 'dueDate', 'dueTime', 'completed',
+          'createdAt', 'updatedAt', 'createdBy'
+        ])
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 240
+        && request.resource.data.description is string
+        && request.resource.data.description.size() <= 3000
+        && request.resource.data.dueDate is string
+        && request.resource.data.dueDate.size() <= 10
+        && (request.resource.data.dueDate == '' || request.resource.data.dueDate.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}'))
+        && request.resource.data.dueTime is string
+        && request.resource.data.dueTime.size() <= 5
+        && (request.resource.data.dueTime == '' || request.resource.data.dueTime.matches('[0-9]{2}:[0-9]{2}'))
+        && request.resource.data.completed is bool
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.updatedAt is timestamp
+        && request.resource.data.createdBy is string
+        && request.resource.data.createdBy.size() <= 128;
+    }
+
+    function isValidDirectoryEntry() {
+      return request.resource.data.keys().hasOnly([
+          'name', 'type', 'phone', 'email', 'url', 'notes',
+          'createdAt', 'updatedAt', 'createdBy'
+        ])
+        && request.resource.data.keys().hasAll([
+          'name', 'type', 'phone', 'email', 'url', 'notes',
+          'createdAt', 'updatedAt', 'createdBy'
+        ])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 240
+        && request.resource.data.type in ['Therapist', 'Person', 'Resource']
+        && request.resource.data.phone is string
+        && request.resource.data.phone.size() <= 80
+        && request.resource.data.email is string
+        && request.resource.data.email.size() <= 254
+        && request.resource.data.url is string
+        && (request.resource.data.url == '' || isHttpsUrl(request.resource.data.url))
+        && request.resource.data.notes is string
+        && request.resource.data.notes.size() <= 3000
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.updatedAt is timestamp
+        && request.resource.data.createdBy is string
+        && request.resource.data.createdBy.size() <= 128;
+    }
+
+    function isValidReminderSnooze() {
+      return request.resource.data.keys().hasOnly([
+          'targetKey', 'snoozedThrough', 'updatedAt', 'updatedBy'
+        ])
+        && request.resource.data.keys().hasAll([
+          'targetKey', 'snoozedThrough', 'updatedAt', 'updatedBy'
+        ])
+        && request.resource.data.targetKey is string
+        && request.resource.data.targetKey.size() > 0
+        && request.resource.data.targetKey.size() <= 220
+        && request.resource.data.snoozedThrough is string
+        && request.resource.data.snoozedThrough.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}')
+        && request.resource.data.updatedAt == request.time
+        && request.resource.data.updatedBy == request.auth.uid;
+    }
+
+    function isValidPushSubscription() {
+      return request.resource.data.keys().hasOnly([
+          'endpoint', 'expirationTime', 'p256dh', 'auth', 'deviceId',
+          'timeZone', 'enabled', 'createdAt', 'updatedAt', 'createdBy'
+        ])
+        && request.resource.data.keys().hasAll([
+          'endpoint', 'expirationTime', 'p256dh', 'auth', 'deviceId',
+          'timeZone', 'enabled', 'createdAt', 'updatedAt', 'createdBy'
+        ])
+        && request.resource.data.endpoint is string
+        && request.resource.data.endpoint.size() > 0
+        && request.resource.data.endpoint.size() <= 2048
+        && request.resource.data.endpoint.matches('https://.*')
+        && isOptionalNumber(request.resource.data.expirationTime)
+        && request.resource.data.p256dh is string
+        && request.resource.data.p256dh.size() > 0
+        && request.resource.data.p256dh.size() <= 256
+        && request.resource.data.auth is string
+        && request.resource.data.auth.size() > 0
+        && request.resource.data.auth.size() <= 128
+        && request.resource.data.deviceId is string
+        && request.resource.data.deviceId.matches('[a-zA-Z0-9-]{8,64}')
+        && request.resource.data.timeZone is string
+        && request.resource.data.timeZone.size() > 0
+        && request.resource.data.timeZone.size() <= 100
+        && request.resource.data.enabled is bool
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.updatedAt is timestamp
+        && request.resource.data.createdBy is string
+        && request.resource.data.createdBy.size() <= 128;
     }
 
     match /content/{contentId} {
@@ -188,6 +296,55 @@ service cloud.firestore {
       allow read: if isSignedIn();
       allow create, update: if isSignedIn() && isValidReminderResolution();
       allow delete: if isSignedIn();
+    }
+
+    match /admin_manual_reminders/{reminderId} {
+      allow read, delete: if isSignedIn();
+      allow create: if isSignedIn()
+        && isValidManualReminder()
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+      allow update: if isSignedIn()
+        && isValidManualReminder()
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.createdBy == resource.data.createdBy
+        && request.resource.data.updatedAt == request.time;
+    }
+
+    match /admin_reminder_snoozes/{snoozeId} {
+      allow read, delete: if isSignedIn();
+      allow create, update: if isSignedIn() && isValidReminderSnooze();
+    }
+
+    match /admin_push_subscriptions/{subscriptionId} {
+      allow read: if isSignedIn() && resource.data.createdBy == request.auth.uid;
+      allow create: if isSignedIn()
+        && isValidPushSubscription()
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+      allow update: if isSignedIn()
+        && resource.data.createdBy == request.auth.uid
+        && isValidPushSubscription()
+        && request.resource.data.createdBy == resource.data.createdBy
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if isSignedIn() && resource.data.createdBy == request.auth.uid;
+    }
+
+    match /admin_directory/{entryId} {
+      allow read, delete: if isSignedIn();
+      allow create: if isSignedIn()
+        && isValidDirectoryEntry()
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+      allow update: if isSignedIn()
+        && isValidDirectoryEntry()
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.createdBy == resource.data.createdBy
+        && request.resource.data.updatedAt == request.time;
     }
 
     match /artifacts/{appId}/users/{userId}/{document=**} {

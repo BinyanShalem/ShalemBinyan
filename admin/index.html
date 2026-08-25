@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Binyan Admin">
-    <meta name="description" content="The Binyan Shalem admin workspace for resources, encounters, and reminders.">
+    <meta name="description" content="The Binyan Shalem admin workspace for resources, encounters, directory contacts, and reminders.">
     <title>Binyan Shalem Admin</title>
     <link rel="manifest" href="./manifest.webmanifest">
     <link rel="icon" href="./icons/icon-192.png" sizes="192x192" type="image/png">
@@ -1155,7 +1155,7 @@
             gap: 1.5rem;
             margin: 0;
             padding: 1rem clamp(1rem, 4vw, 3.25rem);
-            background: rgba(255, 255, 255, 0.96);
+            background: #ffffff;
             border-bottom: 1px solid var(--admin-line);
         }
 
@@ -1816,6 +1816,70 @@
             flex: 0 0 auto;
         }
 
+        .new-encounter-menu {
+            position: relative;
+            flex: 0 0 auto;
+        }
+
+        .new-encounter-menu > summary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.48rem;
+            min-height: 44px;
+            list-style: none;
+            cursor: pointer;
+        }
+
+        .new-encounter-menu > summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .new-encounter-menu > summary svg {
+            width: 17px;
+            height: 17px;
+        }
+
+        .new-encounter-options {
+            position: absolute;
+            z-index: 8;
+            top: calc(100% + 0.5rem);
+            right: 0;
+            display: grid;
+            width: min(310px, calc(100vw - 2rem));
+            padding: 0.45rem;
+            background: #ffffff;
+            border: 1px solid var(--admin-line);
+            border-radius: 13px;
+            box-shadow: 0 18px 44px rgba(38, 23, 32, 0.18);
+        }
+
+        .new-encounter-option {
+            display: grid;
+            gap: 0.18rem;
+            min-height: 58px;
+            padding: 0.7rem 0.78rem;
+            color: var(--admin-ink);
+            background: transparent;
+            border: 0;
+            border-radius: 9px;
+            text-align: left;
+        }
+
+        .new-encounter-option:hover {
+            background: var(--admin-purple-soft);
+        }
+
+        .new-encounter-option strong {
+            color: var(--admin-purple-dark);
+            font-size: 0.8rem;
+        }
+
+        .new-encounter-option span {
+            color: var(--admin-muted);
+            font-size: 0.7rem;
+            line-height: 1.4;
+        }
+
         .organizer-switcher {
             display: inline-grid;
             grid-auto-flow: column;
@@ -1849,6 +1913,7 @@
             background: #ffffff;
             border-radius: 15px;
             box-shadow: var(--shadow-low);
+            scroll-margin-top: 96px;
         }
 
         .encounter-editor-heading {
@@ -1974,7 +2039,8 @@
         }
 
         .meta-chip,
-        .followup-badge {
+        .followup-badge,
+        .scheduled-badge {
             display: inline-flex;
             align-items: center;
             min-height: 26px;
@@ -1991,6 +2057,11 @@
             background: #fbefd8;
         }
 
+        .scheduled-badge {
+            color: #2e627d;
+            background: #e6f0f5;
+        }
+
         .encounter-actions {
             justify-content: flex-end;
         }
@@ -2003,7 +2074,7 @@
             font-size: 0.74rem;
         }
 
-        .meeting-entry .button {
+        .meeting-entry > .button {
             min-height: 44px;
         }
 
@@ -2025,8 +2096,27 @@
             display: grid;
             grid-template-columns: 12px minmax(0, 1fr) auto;
             gap: 0.75rem;
+            align-items: start;
             padding: 0.75rem 0;
             border-top: 1px solid #edf0ee;
+        }
+
+        .meeting-entry-open {
+            width: 100%;
+            min-height: 44px;
+            margin: -0.35rem 0;
+            padding: 0.45rem 0.55rem;
+            color: inherit;
+            background: transparent;
+            border: 0;
+            border-radius: 9px;
+            text-align: left;
+            transition: color 160ms ease-out, background-color 160ms ease-out;
+        }
+
+        .meeting-entry-open:hover {
+            color: var(--admin-purple-dark);
+            background: var(--admin-purple-soft);
         }
 
         .meeting-dot {
@@ -2037,6 +2127,11 @@
             border: 2px solid #ffffff;
             border-radius: 50%;
             box-shadow: 0 0 0 3px var(--admin-sage);
+        }
+
+        .meeting-entry.is-scheduled .meeting-dot {
+            background: #2e627d;
+            box-shadow: 0 0 0 3px #d8e9f1;
         }
 
         .meeting-entry strong {
@@ -2050,6 +2145,147 @@
             font-size: 0.76rem;
             line-height: 1.5;
             white-space: pre-wrap;
+        }
+
+        .meeting-dialog {
+            width: min(680px, calc(100% - 2rem));
+            max-width: none;
+            max-height: min(90dvh, 820px);
+            padding: 0;
+            color: var(--admin-ink);
+            background: var(--admin-surface);
+            border: 0;
+            border-radius: 16px;
+            box-shadow: 0 28px 80px rgba(38, 23, 32, 0.28);
+        }
+
+        .meeting-dialog::backdrop {
+            background: rgba(32, 22, 28, 0.58);
+        }
+
+        .meeting-dialog-shell {
+            max-height: min(90dvh, 820px);
+            overflow-y: auto;
+            overscroll-behavior: contain;
+        }
+
+        .meeting-dialog-header {
+            position: sticky;
+            z-index: 2;
+            top: 0;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1.35rem 1.4rem 1.15rem;
+            background: var(--admin-surface);
+            border-bottom: 1px solid var(--admin-line);
+        }
+
+        .meeting-dialog-header h2 {
+            max-width: 22ch;
+            margin: 0;
+            color: var(--admin-purple-dark);
+            font-size: clamp(1.22rem, 3vw, 1.55rem);
+            letter-spacing: -0.025em;
+        }
+
+        .meeting-dialog-header > div {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        .meeting-dialog-header p {
+            margin: 0.35rem 0 0;
+            color: var(--admin-muted);
+            font-size: 0.76rem;
+            line-height: 1.45;
+        }
+
+        .meeting-dialog-close {
+            flex: 0 0 auto;
+            width: auto;
+            min-width: 44px;
+            min-height: 44px;
+        }
+
+        .meeting-detail-view,
+        .meeting-edit-form {
+            padding: 1.35rem 1.4rem 1.5rem;
+        }
+
+        .meeting-detail-list {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1.2rem 1.5rem;
+            margin: 0;
+        }
+
+        .meeting-detail-list > div {
+            min-width: 0;
+        }
+
+        .meeting-detail-list .meeting-detail-wide {
+            grid-column: 1 / -1;
+        }
+
+        .meeting-detail-list dt {
+            color: #66716a;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        .meeting-detail-list dd {
+            margin: 0.3rem 0 0;
+            color: #26343d;
+            font-size: 0.88rem;
+            line-height: 1.55;
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;
+        }
+
+        .meeting-followup-state {
+            display: inline-flex;
+            align-items: center;
+            min-height: 28px;
+            padding: 0.3rem 0.58rem;
+            color: #52615a;
+            background: #eef2ef;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+
+        .meeting-followup-state[data-active="true"] {
+            color: #6e4b13;
+            background: #fbefd8;
+        }
+
+        .meeting-followup-state[data-kind="scheduled"] {
+            color: #2e627d;
+            background: #e6f0f5;
+        }
+
+        .meeting-dialog-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.65rem;
+            margin-top: 1.5rem;
+            padding-top: 1.1rem;
+            border-top: 1px solid var(--admin-line);
+        }
+
+        .meeting-dialog-actions .button {
+            min-height: 44px;
+        }
+
+        .meeting-edit-form .encounter-grid {
+            margin-top: 0;
+        }
+
+        .meeting-edit-form .status {
+            margin-top: 1rem;
         }
 
         .reminders-overview {
@@ -2082,6 +2318,11 @@
             gap: 0.85rem;
         }
 
+        .reminder-card.is-scheduled .reminder-icon {
+            color: #2e627d;
+            background: #e6f0f5;
+        }
+
         .reminder-icon {
             display: grid;
             width: 42px;
@@ -2099,6 +2340,80 @@
 
         .reminder-actions {
             margin-top: 0.85rem;
+        }
+
+        .reminder-editor {
+            margin-bottom: 1rem;
+            background: #fbf5e8;
+            scroll-margin-top: 96px;
+        }
+
+        .reminder-editor .directory-editor-heading h3 {
+            color: #654719;
+        }
+
+        .reminder-editor .directory-editor-heading p {
+            color: #725c38;
+        }
+
+        .reminder-editor textarea {
+            min-height: 88px;
+        }
+
+        .reminder-group {
+            display: grid;
+            gap: 0.6rem;
+        }
+
+        .reminder-group + .reminder-group {
+            margin-top: 1.35rem;
+        }
+
+        .reminder-group-heading {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0 0.2rem;
+        }
+
+        .reminder-group-heading h3 {
+            color: var(--admin-purple-dark);
+            font-size: 0.92rem;
+        }
+
+        .reminder-group-heading span {
+            color: var(--admin-muted);
+            font-size: 0.72rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .reminder-group-list {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .reminder-card.is-personal .reminder-icon {
+            color: #765118;
+            background: #fbefd8;
+        }
+
+        .reminder-card-content {
+            min-width: 0;
+        }
+
+        .reminder-due {
+            display: inline-flex;
+            min-height: 26px;
+            align-items: center;
+            margin-top: 0.55rem;
+            padding: 0.25rem 0.5rem;
+            color: #684915;
+            background: #fbefd8;
+            border-radius: 999px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
         }
 
         .submission-card header {
@@ -2125,16 +2440,226 @@
             white-space: nowrap;
         }
 
+        .directory-heading h2 {
+            max-width: 24ch;
+        }
+
+        .directory-toolbar {
+            display: grid;
+            grid-template-columns: minmax(220px, 1fr) auto;
+            gap: 0.8rem;
+            align-items: center;
+            margin-bottom: 1.2rem;
+        }
+
+        .directory-search {
+            position: relative;
+        }
+
+        .directory-search svg {
+            position: absolute;
+            top: 50%;
+            left: 0.9rem;
+            width: 18px;
+            height: 18px;
+            color: var(--admin-muted);
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        .directory-search .form-input {
+            min-height: 46px;
+            padding-left: 2.65rem;
+            background: #ffffff;
+        }
+
+        .directory-filters {
+            display: inline-grid;
+            grid-template-columns: repeat(4, auto);
+            gap: 0.22rem;
+            padding: 0.3rem;
+            background: #e5eae7;
+            border-radius: 11px;
+        }
+
+        .directory-filters button {
+            min-height: 44px;
+            padding: 0.5rem 0.7rem;
+            color: #46535c;
+            background: transparent;
+            border: 0;
+            border-radius: 8px;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+
+        .directory-filters button[aria-pressed="true"] {
+            color: var(--admin-purple-dark);
+            background: #ffffff;
+            box-shadow: 0 4px 12px rgba(36, 47, 43, 0.08);
+        }
+
+        .directory-editor {
+            margin-bottom: 1.2rem;
+            padding: clamp(1rem, 3vw, 1.5rem);
+            background: var(--admin-purple-soft);
+            border-radius: 15px;
+        }
+
+        .directory-editor-heading {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.15rem;
+        }
+
+        .directory-editor-heading h3 {
+            color: var(--admin-purple-dark);
+            font-size: 1.08rem;
+        }
+
+        .directory-editor-heading p {
+            margin: 0.35rem 0 0;
+            color: #684e5f;
+            font-size: 0.78rem;
+            line-height: 1.5;
+        }
+
+        .directory-form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.9rem 1rem;
+        }
+
+        .directory-field {
+            display: grid;
+            min-width: 0;
+            gap: 0.42rem;
+        }
+
+        .directory-field-wide {
+            grid-column: 1 / -1;
+        }
+
+        .directory-field textarea {
+            min-height: 96px;
+        }
+
+        .directory-groups {
+            display: grid;
+            gap: 1.35rem;
+        }
+
+        .directory-group-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 0.55rem;
+            padding: 0 0.2rem;
+        }
+
+        .directory-group-heading h3 {
+            color: var(--admin-purple-dark);
+            font-size: 0.92rem;
+        }
+
+        .directory-group-heading span {
+            color: var(--admin-muted);
+            font-size: 0.72rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .directory-list {
+            overflow: hidden;
+            background: #ffffff;
+            border-radius: 14px;
+            box-shadow: var(--shadow-low);
+        }
+
+        .directory-entry {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 1rem;
+            align-items: center;
+            padding: 1rem 1.1rem;
+            border-bottom: 1px solid var(--admin-line);
+        }
+
+        .directory-entry:last-child {
+            border-bottom: 0;
+        }
+
+        .directory-entry-main {
+            min-width: 0;
+        }
+
+        .directory-entry-title {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .directory-entry-title h4 {
+            color: var(--admin-purple-dark);
+            font-size: 0.94rem;
+            overflow-wrap: anywhere;
+        }
+
+        .directory-type-badge {
+            display: inline-flex;
+            min-height: 24px;
+            align-items: center;
+            padding: 0.2rem 0.48rem;
+            color: #52615a;
+            background: #eef2ef;
+            border-radius: 999px;
+            font-size: 0.65rem;
+            font-weight: 700;
+        }
+
+        .directory-entry-contact,
+        .directory-entry-notes {
+            margin: 0.35rem 0 0;
+            color: var(--admin-muted);
+            font-size: 0.76rem;
+            line-height: 1.5;
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;
+        }
+
+        .directory-entry-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 0.42rem;
+        }
+
+        .directory-entry-actions .button {
+            min-height: 44px;
+            padding: 0.5rem 0.68rem;
+            font-size: 0.72rem;
+        }
+
+        .directory-entry-actions a {
+            text-decoration: none;
+        }
+
         @media (max-width: 820px) {
             .admin-tabs {
-                grid-template-columns: repeat(3, minmax(0, 1fr));
+                grid-template-columns: repeat(4, minmax(0, 1fr));
             }
 
             .tab-button {
-                grid-template-columns: 19px auto;
-                gap: 0.35rem;
-                padding-inline: 0.4rem;
-                font-size: 0.7rem;
+                grid-template-columns: 1fr;
+                grid-template-rows: 20px auto;
+                justify-items: center;
+                gap: 0.18rem;
+                padding: 0.35rem 0.2rem;
+                font-size: 0.64rem;
+                text-align: center;
             }
 
             .tab-button svg {
@@ -2149,6 +2674,14 @@
                 flex-direction: row;
                 align-items: center;
                 justify-content: space-between;
+            }
+
+            .reminder-editor {
+                scroll-margin-top: calc(68px + env(safe-area-inset-top));
+            }
+
+            .encounter-editor {
+                scroll-margin-top: calc(68px + env(safe-area-inset-top) + 0.75rem);
             }
 
             .admin-title-block h1 {
@@ -2167,6 +2700,21 @@
                 width: 100%;
             }
 
+            .new-encounter-menu,
+            .new-encounter-menu > summary {
+                width: 100%;
+            }
+
+            .new-encounter-menu > summary {
+                justify-content: center;
+            }
+
+            .new-encounter-options {
+                right: auto;
+                left: 0;
+                width: 100%;
+            }
+
             .organizer-switcher {
                 display: grid;
                 grid-auto-flow: row;
@@ -2182,7 +2730,8 @@
 
             .encounter-grid,
             .encounter-summary,
-            .reminders-overview {
+            .reminders-overview,
+            .reminder-editor .directory-form-grid {
                 grid-template-columns: 1fr;
             }
 
@@ -2198,9 +2747,50 @@
                 grid-template-columns: 12px minmax(0, 1fr);
             }
 
-            .meeting-entry .button {
+            .meeting-entry > .button {
                 grid-column: 2;
                 justify-self: start;
+            }
+
+            .meeting-dialog {
+                width: 100%;
+                max-height: 92dvh;
+                margin: auto 0 0;
+                border-radius: 18px 18px 0 0;
+            }
+
+            .meeting-dialog-shell {
+                max-height: 92dvh;
+            }
+
+            .meeting-dialog-header,
+            .meeting-detail-view,
+            .meeting-edit-form {
+                padding-right: max(1rem, env(safe-area-inset-right));
+                padding-left: max(1rem, env(safe-area-inset-left));
+            }
+
+            .meeting-detail-view,
+            .meeting-edit-form {
+                padding-bottom: calc(1.4rem + env(safe-area-inset-bottom));
+            }
+
+            .meeting-detail-list {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .meeting-detail-list .meeting-detail-wide {
+                grid-column: auto;
+            }
+
+            .meeting-dialog-actions {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .meeting-dialog-actions .button {
+                width: 100%;
             }
 
             .reminders-overview .button {
@@ -2209,6 +2799,36 @@
 
             .submission-actions {
                 justify-content: flex-start;
+            }
+
+            .directory-toolbar,
+            .directory-form-grid,
+            .directory-entry {
+                grid-template-columns: 1fr;
+            }
+
+            .directory-field-wide {
+                grid-column: auto;
+            }
+
+            .directory-filters {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+            }
+
+            .directory-filters button {
+                min-height: 44px;
+                padding-inline: 0.3rem;
+                font-size: 0.67rem;
+            }
+
+            .directory-entry-actions {
+                justify-content: flex-start;
+            }
+
+            .directory-entry-actions .button {
+                width: auto;
+                flex: 1 1 auto;
+                justify-content: center;
             }
         }
 
@@ -2224,8 +2844,8 @@
         IMPECCABLE_DIRECTION_CONTRACT
         THESIS: A calm secretary, not a database; the admin sees the next natural action and records only what is worth remembering.
         OWN-WORLD: Deep-plum navigation, quiet gray-green canvas, white working surfaces, compact Inter type, sage reassurance, and practical low-shadow controls.
-        STORY: Unlock once → choose Resources, Encounters, or Reminders → log or continue a conversation → act on only the latest relevant follow-up.
-        FIRST VIEWPORT: A plum rail frames one clear New encounter action, a compact Active/Intake forms/Archived switch, and connected meeting threads; phones use three bottom tabs.
+        STORY: Unlock once → choose Resources, Encounters, Directory, or Reminders → publish, log what happened or schedule what comes next inside one couple timeline, look someone up, create a personal reminder, or handle the next relevant follow-up.
+        FIRST VIEWPORT: A plum rail frames four focused workspaces; Encounters opens one clear two-path action for completed and scheduled meetings, while Reminders keeps due appointments beside personal tasks and follow-ups.
         FORM [surface seed b24dcaf2]: Operate-mode established-world extension; focused entry clears bottom navigation from the keyboard area and every state remains explicit.
         FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance.
     -->
@@ -2304,6 +2924,11 @@
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm8-1a2.5 2.5 0 1 0 0-5M3 20v-2a4 4 0 0 1 4-4h2a4 4 0 0 1 4 4v2m1-6h1a4 4 0 0 1 4 4v2" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>
                         <span>Encounters</span>
                         <span class="tab-count" id="encounters-nav-count" aria-label="0 active encounters">0</span>
+                    </button>
+                    <button class="tab-button" id="directory-tab" type="button" role="tab" aria-selected="false" aria-controls="directory-panel">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12a2 2 0 0 1 2 2v14H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm0 0v16M9 9h7M9 13h7M9 17h4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>
+                        <span>Directory</span>
+                        <span class="tab-count" id="directory-nav-count" aria-label="0 directory entries">0</span>
                     </button>
                     <button class="tab-button" id="reminders-tab" type="button" role="tab" aria-selected="false" aria-controls="reminders-panel">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>
@@ -2441,12 +3066,24 @@
                         <div class="panel-heading organizer-heading">
                             <div>
                                 <h2>Keep every conversation connected.</h2>
-                                <p>Log the essentials, then let the app carry the details forward when you meet again.</p>
+                                <p>Keep past and upcoming meetings together in one timeline for each couple.</p>
                             </div>
-                            <button class="button button-primary" id="new-encounter-button" type="button">
-                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"/></svg>
-                                New encounter
-                            </button>
+                            <details class="new-encounter-menu" id="new-encounter-menu">
+                                <summary class="button button-primary">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"/></svg>
+                                    New encounter
+                                </summary>
+                                <div class="new-encounter-options" aria-label="New encounter options">
+                                    <button class="new-encounter-option" id="log-new-encounter-button" type="button">
+                                        <strong>Log a meeting</strong>
+                                        <span>Record a conversation that already happened.</span>
+                                    </button>
+                                    <button class="new-encounter-option" id="schedule-new-encounter-button" type="button">
+                                        <strong>Schedule a meeting</strong>
+                                        <span>Choose a date and receive a reminder that day.</span>
+                                    </button>
+                                </div>
+                            </details>
                         </div>
 
                         <div class="organizer-switcher" role="group" aria-label="Encounter views">
@@ -2466,17 +3103,22 @@
                             <input id="encounter-root-id" type="hidden">
                             <input id="encounter-previous-id" type="hidden">
                             <input id="encounter-submission-id" type="hidden">
+                            <input id="encounter-type" type="hidden" value="completed">
                             <div class="encounter-grid">
                                 <label class="encounter-field encounter-field-wide">
-                                    <span class="field-label">Who did you meet? <span aria-hidden="true">*</span></span>
+                                    <span class="field-label">Couple or contact <span aria-hidden="true">*</span></span>
                                     <input class="form-input" id="encounter-names" type="text" maxlength="240" autocomplete="name" placeholder="Name or couple" required>
                                 </label>
                                 <label class="encounter-field encounter-field-wide">
                                     <span class="field-label">Contact info <span class="encounter-field-hint">Optional</span></span>
                                     <input class="form-input" id="encounter-contact" type="text" maxlength="500" autocomplete="tel" placeholder="Phone or email">
                                 </label>
+                                <label class="encounter-field encounter-field-wide">
+                                    <span class="field-label">Other people involved <span class="encounter-field-hint">Optional</span></span>
+                                    <input class="form-input" id="encounter-other-people" type="text" maxlength="500" placeholder="Rabbi, counselor, family member">
+                                </label>
                                 <label class="encounter-field">
-                                    <span class="field-label">Date <span class="encounter-field-hint">Optional</span></span>
+                                    <span class="field-label"><span id="encounter-date-label">Date</span> <span class="encounter-field-hint" id="encounter-date-hint">Optional</span></span>
                                     <input class="form-input" id="encounter-date" type="date">
                                 </label>
                                 <label class="encounter-field">
@@ -2491,13 +3133,13 @@
                                     <span class="field-label">Notes <span class="encounter-field-hint">Optional — short is fine</span></span>
                                     <textarea class="paste-input" id="encounter-notes" maxlength="5000" placeholder="Anything worth remembering"></textarea>
                                 </label>
-                                <label class="encounter-followup" for="encounter-followup">
+                                <label class="encounter-followup" id="encounter-followup-field" for="encounter-followup">
                                     <span><strong>Needs a follow-up</strong><span>Keep this in Reminders until it is handled.</span></span>
                                     <input class="toggle-input" id="encounter-followup" type="checkbox" role="switch">
                                 </label>
                             </div>
                             <div class="form-actions">
-                                <button class="button button-primary" id="save-encounter-button" type="submit">Save encounter</button>
+                                <button class="button button-primary" id="save-encounter-button" type="submit">Save meeting</button>
                                 <button class="button button-secondary" id="cancel-encounter-button-bottom" type="button">Cancel</button>
                             </div>
                             <p class="status" id="encounter-form-status" role="status" aria-live="polite" hidden></p>
@@ -2524,28 +3166,245 @@
                         </div>
                     </section>
 
+                    <section class="workspace-panel" id="directory-panel" role="tabpanel" aria-labelledby="directory-tab" hidden>
+                        <div class="panel-heading organizer-heading directory-heading">
+                            <div>
+                                <h2>People worth remembering. Resources worth keeping.</h2>
+                                <p>A private directory for therapists, useful contacts, and links you want close at hand.</p>
+                            </div>
+                            <button class="button button-primary" id="new-directory-entry-button" type="button">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"/></svg>
+                                Add entry
+                            </button>
+                        </div>
+
+                        <form class="directory-editor" id="directory-form" hidden>
+                            <div class="directory-editor-heading">
+                                <div>
+                                    <h3 id="directory-form-title">Add to your directory</h3>
+                                    <p>A name is enough. Add only the details that will help later.</p>
+                                </div>
+                                <button class="button button-quiet" id="close-directory-form-button" type="button" aria-label="Close directory form">Close</button>
+                            </div>
+                            <input id="directory-entry-id" type="hidden">
+                            <div class="directory-form-grid">
+                                <label class="directory-field directory-field-wide">
+                                    <span class="field-label">Name or resource <span aria-hidden="true">*</span></span>
+                                    <input class="form-input" id="directory-name" type="text" maxlength="240" placeholder="Dr. Miriam Stein or Family support guide" required>
+                                </label>
+                                <label class="directory-field">
+                                    <span class="field-label">Type</span>
+                                    <select class="form-input" id="directory-type">
+                                        <option>Therapist</option>
+                                        <option>Person</option>
+                                        <option>Resource</option>
+                                    </select>
+                                </label>
+                                <label class="directory-field">
+                                    <span class="field-label">Phone <span class="encounter-field-hint">Optional</span></span>
+                                    <input class="form-input" id="directory-phone" type="tel" maxlength="80" autocomplete="tel" placeholder="(555) 010-2020">
+                                </label>
+                                <label class="directory-field">
+                                    <span class="field-label">Email <span class="encounter-field-hint">Optional</span></span>
+                                    <input class="form-input" id="directory-email" type="email" maxlength="254" autocomplete="email" placeholder="name@example.com">
+                                </label>
+                                <label class="directory-field">
+                                    <span class="field-label">Website <span class="encounter-field-hint">Optional</span></span>
+                                    <input class="form-input" id="directory-url" type="text" inputmode="url" maxlength="2048" placeholder="example.com">
+                                </label>
+                                <label class="directory-field directory-field-wide">
+                                    <span class="field-label">Quick note <span class="encounter-field-hint">Optional</span></span>
+                                    <textarea class="paste-input" id="directory-notes" maxlength="3000" placeholder="Specialty, how you know them, or why this is useful"></textarea>
+                                </label>
+                            </div>
+                            <p class="status" id="directory-form-status" role="status" aria-live="polite" hidden></p>
+                            <div class="form-actions">
+                                <button class="button button-primary" id="save-directory-entry-button" type="submit">Save entry</button>
+                                <button class="button button-secondary" id="cancel-directory-form-button" type="button">Cancel</button>
+                            </div>
+                        </form>
+
+                        <p class="status" id="directory-action-status" role="status" aria-live="polite" hidden></p>
+                        <div class="directory-toolbar">
+                            <label class="directory-search" aria-label="Search directory">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"/></svg>
+                                <input class="form-input" id="directory-search" type="search" placeholder="Search your directory">
+                            </label>
+                            <div class="directory-filters" role="group" aria-label="Directory categories">
+                                <button type="button" data-directory-filter="All" aria-pressed="true">All</button>
+                                <button type="button" data-directory-filter="Therapist" aria-pressed="false">Therapists</button>
+                                <button type="button" data-directory-filter="Person" aria-pressed="false">People</button>
+                                <button type="button" data-directory-filter="Resource" aria-pressed="false">Resources</button>
+                            </div>
+                        </div>
+
+                        <div class="loading-state" id="directory-loading"><span class="loading-dot" aria-hidden="true"></span>Loading your directory…</div>
+                        <div class="directory-groups" id="directory-groups"></div>
+                        <p class="empty-state" id="no-directory-entries" hidden>No entries found. Add a therapist, useful person, or private resource.</p>
+                    </section>
+
                     <section class="workspace-panel" id="reminders-panel" role="tabpanel" aria-labelledby="reminders-tab" hidden>
                         <div class="panel-heading organizer-heading">
                             <div>
                                 <h2>What needs your attention.</h2>
-                                <p>Each intake starts here. Once you log an encounter, only its latest follow-up decision counts.</p>
+                                <p>Add your own reminder here, or handle the latest follow-up from an intake or encounter.</p>
                             </div>
+                            <button class="button button-primary" id="new-manual-reminder-button" type="button">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"/></svg>
+                                New reminder
+                            </button>
                         </div>
+                        <form class="directory-editor reminder-editor" id="manual-reminder-form" hidden>
+                            <div class="directory-editor-heading">
+                                <div>
+                                    <h3 id="manual-reminder-form-title">Add a personal reminder</h3>
+                                    <p>A short name is enough. Add timing or a note only when it helps.</p>
+                                </div>
+                                <button class="button button-quiet" id="close-manual-reminder-form-button" type="button" aria-label="Close reminder form">Close</button>
+                            </div>
+                            <input id="manual-reminder-id" type="hidden">
+                            <div class="directory-form-grid">
+                                <label class="directory-field directory-field-wide">
+                                    <span class="field-label">Reminder name <span aria-hidden="true">*</span></span>
+                                    <input class="form-input" id="manual-reminder-title" type="text" maxlength="240" placeholder="Call David about the referral" required>
+                                </label>
+                                <label class="directory-field">
+                                    <span class="field-label">Date <span class="encounter-field-hint">Optional</span></span>
+                                    <input class="form-input" id="manual-reminder-date" type="date">
+                                </label>
+                                <label class="directory-field">
+                                    <span class="field-label">Time <span class="encounter-field-hint">Optional</span></span>
+                                    <input class="form-input" id="manual-reminder-time" type="time">
+                                </label>
+                                <label class="directory-field directory-field-wide">
+                                    <span class="field-label">Description <span class="encounter-field-hint">Optional</span></span>
+                                    <textarea class="paste-input" id="manual-reminder-description" maxlength="3000" placeholder="Anything useful to remember when you handle it"></textarea>
+                                </label>
+                            </div>
+                            <div class="form-actions">
+                                <button class="button button-primary" id="save-manual-reminder-button" type="submit">Save reminder</button>
+                                <button class="button button-secondary" id="cancel-manual-reminder-button" type="button">Cancel</button>
+                                <button class="button button-danger" id="delete-manual-reminder-button" type="button" hidden>Delete reminder</button>
+                            </div>
+                            <p class="status" id="manual-reminder-form-status" role="status" aria-live="polite" hidden></p>
+                        </form>
                         <div class="reminders-overview">
                             <div>
                                 <strong id="reminder-summary">You’re all caught up.</strong>
-                                <p id="notification-explanation">Allow notifications to receive one daily nudge when this app is active.</p>
+                                <p id="notification-explanation">Enable private push reminders on this device, including when the admin app is closed.</p>
                             </div>
                             <button class="button button-secondary" id="enable-notifications-button" type="button">Enable notifications</button>
                         </div>
                         <p class="status" id="reminder-action-status" role="status" aria-live="polite" hidden></p>
+                        <div class="loading-state" id="reminders-loading"><span class="loading-dot" aria-hidden="true"></span>Loading reminders…</div>
                         <div class="reminder-list" id="reminder-list"></div>
-                        <p class="empty-state" id="no-reminders">Nothing needs follow-up right now.</p>
+                        <p class="empty-state" id="no-reminders">Nothing is waiting for you right now. Add a personal reminder anytime.</p>
                     </section>
                 </div>
             </div>
         </section>
     </main>
+
+    <dialog class="meeting-dialog" id="meeting-detail-dialog" aria-labelledby="meeting-detail-title">
+        <div class="meeting-dialog-shell">
+            <header class="meeting-dialog-header">
+                <div>
+                    <h2 id="meeting-detail-title">Meeting details</h2>
+                    <p id="meeting-detail-context"></p>
+                </div>
+                <button class="button button-quiet meeting-dialog-close" id="close-meeting-detail-button" type="button" aria-label="Close meeting details">Close</button>
+            </header>
+
+            <section class="meeting-detail-view" id="meeting-detail-view" aria-label="Meeting information">
+                <dl class="meeting-detail-list">
+                    <div class="meeting-detail-wide">
+                        <dt>Couple or contact</dt>
+                        <dd id="meeting-detail-names"></dd>
+                    </div>
+                    <div class="meeting-detail-wide">
+                        <dt>Contact info</dt>
+                        <dd id="meeting-detail-contact"></dd>
+                    </div>
+                    <div class="meeting-detail-wide">
+                        <dt>Other people involved</dt>
+                        <dd id="meeting-detail-other-people"></dd>
+                    </div>
+                    <div>
+                        <dt>Status</dt>
+                        <dd><span class="meeting-followup-state" id="meeting-detail-type"></span></dd>
+                    </div>
+                    <div>
+                        <dt id="meeting-detail-date-label">Date</dt>
+                        <dd id="meeting-detail-date"></dd>
+                    </div>
+                    <div>
+                        <dt>Time</dt>
+                        <dd id="meeting-detail-time"></dd>
+                    </div>
+                    <div>
+                        <dt>How you connected</dt>
+                        <dd id="meeting-detail-method"></dd>
+                    </div>
+                    <div>
+                        <dt id="meeting-detail-followup-label">Follow-up</dt>
+                        <dd><span class="meeting-followup-state" id="meeting-detail-followup"></span></dd>
+                    </div>
+                    <div class="meeting-detail-wide">
+                        <dt>Notes</dt>
+                        <dd id="meeting-detail-notes"></dd>
+                    </div>
+                </dl>
+                <p class="status" id="meeting-detail-status" role="status" aria-live="polite" hidden></p>
+                <div class="meeting-dialog-actions">
+                    <button class="button button-primary" id="record-meeting-outcome-button" type="button" hidden>Record outcome</button>
+                    <button class="button button-primary" id="edit-meeting-button" type="button">Edit meeting</button>
+                    <button class="button button-secondary" id="close-meeting-detail-button-bottom" type="button">Close</button>
+                </div>
+            </section>
+
+            <form class="meeting-edit-form" id="meeting-edit-form" hidden>
+                <div class="encounter-grid">
+                    <label class="encounter-field encounter-field-wide">
+                        <span class="field-label">Couple or contact <span aria-hidden="true">*</span></span>
+                        <input class="form-input" id="meeting-edit-names" type="text" maxlength="240" autocomplete="name" required>
+                    </label>
+                    <label class="encounter-field encounter-field-wide">
+                        <span class="field-label">Contact info <span class="encounter-field-hint">Optional</span></span>
+                        <input class="form-input" id="meeting-edit-contact" type="text" maxlength="500" autocomplete="tel">
+                    </label>
+                    <label class="encounter-field encounter-field-wide">
+                        <span class="field-label">Other people involved <span class="encounter-field-hint">Optional</span></span>
+                        <input class="form-input" id="meeting-edit-other-people" type="text" maxlength="500">
+                    </label>
+                    <label class="encounter-field">
+                        <span class="field-label"><span id="meeting-edit-date-label">Date</span> <span class="encounter-field-hint" id="meeting-edit-date-hint">Optional</span></span>
+                        <input class="form-input" id="meeting-edit-date" type="date">
+                    </label>
+                    <label class="encounter-field">
+                        <span class="field-label">Time <span class="encounter-field-hint">Optional</span></span>
+                        <input class="form-input" id="meeting-edit-time" type="time">
+                    </label>
+                    <label class="encounter-field encounter-field-wide">
+                        <span class="field-label">How did you connect?</span>
+                        <select class="form-input" id="meeting-edit-method"></select>
+                    </label>
+                    <label class="encounter-field encounter-field-wide">
+                        <span class="field-label">Notes <span class="encounter-field-hint">Optional</span></span>
+                        <textarea class="paste-input" id="meeting-edit-notes" maxlength="5000"></textarea>
+                    </label>
+                    <label class="encounter-followup" id="meeting-edit-followup-field" for="meeting-edit-followup">
+                        <span><strong>Needs a follow-up</strong><span>Keep this in Reminders until it is handled.</span></span>
+                        <input class="toggle-input" id="meeting-edit-followup" type="checkbox" role="switch">
+                    </label>
+                </div>
+                <p class="status" id="meeting-edit-status" role="status" aria-live="polite" hidden></p>
+                <div class="meeting-dialog-actions">
+                    <button class="button button-primary" id="save-meeting-edit-button" type="submit">Save changes</button>
+                    <button class="button button-secondary" id="cancel-meeting-edit-button" type="button">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </dialog>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -2571,6 +3430,10 @@
             writeBatch
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import {
+            getFunctions,
+            httpsCallable
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-functions.js";
+        import {
             applyResourceEdits,
             buildResourceFromPaste,
             CONTENT_COLLECTION,
@@ -2584,11 +3447,25 @@
             CONTACT_METHODS,
             deriveReminders,
             ENCOUNTERS_COLLECTION,
+            findCoupleThread,
             groupEncounterThreads,
             localDayKey,
+            MANUAL_REMINDERS_COLLECTION,
             normalizeEncounter,
+            normalizeManualReminder,
+            normalizeReminderSnooze,
+            PUSH_SUBSCRIPTIONS_COLLECTION,
+            REMINDER_SNOOZES_COLLECTION,
             REMINDER_RESOLUTIONS_COLLECTION
-        } from "./organizer-tools.mjs?v=2026-08-20.1";
+        } from "./organizer-tools.mjs?v=2026-08-21.2";
+        import {
+            DIRECTORY_COLLECTION,
+            DIRECTORY_TYPES,
+            directoryEntryMatches,
+            normalizeDirectoryEntry,
+            normalizeDirectoryUrl,
+            sortDirectoryEntries
+        } from "./directory-tools.mjs?v=2026-08-20.1";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDxEV7W2m4jbJiVl0Sc6cN7gBH7oWu_rl8",
@@ -2604,7 +3481,8 @@
         const ADMIN_UNLOCK_KEY = "binyanShalem.adminUnlocked.v1";
         const ADMIN_TAB_KEY = "binyanShalem.adminTab.v1";
         const REMINDER_SNOOZE_KEY = "binyanShalem.reminderSnoozes.v1";
-        const REMINDER_NOTICE_KEY = "binyanShalem.lastReminderNotice.v1";
+        const PUSH_DEVICE_KEY = "binyanShalem.pushDevice.v1";
+        const VAPID_PUBLIC_KEY = "BL7ha4R4kMW9sE9RJAkn1tIfJFEjjRYVUVDRTGq1TZrSCuReDfCebPst902WeZbNSBZYMnt-Qx4qeDqOCR4LHAQ";
         const LOCAL_PREVIEW = ["127.0.0.1", "localhost"].includes(window.location.hostname)
             && new URLSearchParams(window.location.search).get("preview") === "1";
         const appId = firebaseConfig.projectId;
@@ -2612,6 +3490,8 @@
         const firebaseApp = initializeApp(firebaseConfig);
         const auth = getAuth(firebaseApp);
         const db = getFirestore(firebaseApp);
+        const cloudFunctions = getFunctions(firebaseApp, "us-central1");
+        const sendTestPushFunction = httpsCallable(cloudFunctions, "sendTestPush");
 
         const loginSection = document.getElementById("admin-login-form");
         const bootScreen = document.getElementById("app-boot");
@@ -2635,6 +3515,7 @@
         const createdContentCount = document.getElementById("created-content-count");
         const contentNavCount = document.getElementById("content-nav-count");
         const encountersNavCount = document.getElementById("encounters-nav-count");
+        const directoryNavCount = document.getElementById("directory-nav-count");
         const remindersNavCount = document.getElementById("reminders-nav-count");
         const workspaceTitle = document.getElementById("workspace-title");
         const workspaceDescription = document.getElementById("workspace-description");
@@ -2647,18 +3528,70 @@
         const encounterFormStatus = document.getElementById("encounter-form-status");
         const encounterActionStatus = document.getElementById("encounter-action-status");
         const reminderActionStatus = document.getElementById("reminder-action-status");
+        const manualReminderForm = document.getElementById("manual-reminder-form");
+        const manualReminderFormStatus = document.getElementById("manual-reminder-form-status");
+        const manualReminderFields = {
+            id: document.getElementById("manual-reminder-id"),
+            title: document.getElementById("manual-reminder-title"),
+            dueDate: document.getElementById("manual-reminder-date"),
+            dueTime: document.getElementById("manual-reminder-time"),
+            description: document.getElementById("manual-reminder-description")
+        };
+        const directoryForm = document.getElementById("directory-form");
+        const directoryFormStatus = document.getElementById("directory-form-status");
+        const directoryActionStatus = document.getElementById("directory-action-status");
+        const directorySearch = document.getElementById("directory-search");
+        const directoryFields = {
+            id: document.getElementById("directory-entry-id"),
+            name: document.getElementById("directory-name"),
+            type: document.getElementById("directory-type"),
+            phone: document.getElementById("directory-phone"),
+            email: document.getElementById("directory-email"),
+            url: document.getElementById("directory-url"),
+            notes: document.getElementById("directory-notes")
+        };
         const encounterFields = {
+            encounterType: document.getElementById("encounter-type"),
             rootId: document.getElementById("encounter-root-id"),
             previousId: document.getElementById("encounter-previous-id"),
             submissionId: document.getElementById("encounter-submission-id"),
             names: document.getElementById("encounter-names"),
             contact: document.getElementById("encounter-contact"),
+            otherPeopleInvolved: document.getElementById("encounter-other-people"),
             occurredDate: document.getElementById("encounter-date"),
             occurredTime: document.getElementById("encounter-time"),
             method: document.getElementById("encounter-method"),
             notes: document.getElementById("encounter-notes"),
             needsFollowUp: document.getElementById("encounter-followup")
         };
+        const meetingDetailDialog = document.getElementById("meeting-detail-dialog");
+        const meetingDetailView = document.getElementById("meeting-detail-view");
+        const meetingEditForm = document.getElementById("meeting-edit-form");
+        const meetingDetailFields = {
+            title: document.getElementById("meeting-detail-title"),
+            context: document.getElementById("meeting-detail-context"),
+            encounterType: document.getElementById("meeting-detail-type"),
+            names: document.getElementById("meeting-detail-names"),
+            contact: document.getElementById("meeting-detail-contact"),
+            otherPeopleInvolved: document.getElementById("meeting-detail-other-people"),
+            occurredDate: document.getElementById("meeting-detail-date"),
+            occurredTime: document.getElementById("meeting-detail-time"),
+            method: document.getElementById("meeting-detail-method"),
+            notes: document.getElementById("meeting-detail-notes"),
+            needsFollowUp: document.getElementById("meeting-detail-followup")
+        };
+        const meetingEditFields = {
+            names: document.getElementById("meeting-edit-names"),
+            contact: document.getElementById("meeting-edit-contact"),
+            otherPeopleInvolved: document.getElementById("meeting-edit-other-people"),
+            occurredDate: document.getElementById("meeting-edit-date"),
+            occurredTime: document.getElementById("meeting-edit-time"),
+            method: document.getElementById("meeting-edit-method"),
+            notes: document.getElementById("meeting-edit-notes"),
+            needsFollowUp: document.getElementById("meeting-edit-followup")
+        };
+        const meetingEditStatus = document.getElementById("meeting-edit-status");
+        const meetingDetailStatus = document.getElementById("meeting-detail-status");
         const previewFields = {
             title: document.getElementById("preview-title"),
             speaker: document.getElementById("preview-speaker"),
@@ -2676,21 +3609,41 @@
         let submissionsUnsubscribe = null;
         let encountersUnsubscribe = null;
         let resolutionsUnsubscribe = null;
+        let manualRemindersUnsubscribe = null;
+        let reminderSnoozesUnsubscribe = null;
+        let directoryUnsubscribe = null;
         let allSubmissions = [];
         let allEncounters = [];
         let allResolutions = [];
+        let allManualReminders = [];
+        let allReminderSnoozes = [];
+        let allDirectoryEntries = [];
         let submissionsLoaded = false;
         let encountersLoaded = false;
         let resolutionsLoaded = false;
+        let manualRemindersLoaded = false;
+        let reminderSnoozesLoaded = false;
+        let directoryLoaded = false;
         let adminUnlocked = false;
         let installPrompt = null;
         let installStatusTimer = null;
+        let selectedMeetingId = null;
+        let meetingDetailTrigger = null;
+        let meetingEditTargetType = "completed";
+        let meetingEditIsConversion = false;
+        let directoryFilter = "All";
+        let directoryFormTrigger = null;
+        let manualReminderFormTrigger = null;
+        let pushSubscriptionEnabled = false;
+        let pushControlsBusy = false;
 
         CONTACT_METHODS.forEach((method) => {
-            const option = document.createElement("option");
-            option.value = method;
-            option.textContent = method;
-            encounterFields.method.appendChild(option);
+            [encounterFields.method, meetingEditFields.method].forEach((select) => {
+                const option = document.createElement("option");
+                option.value = method;
+                option.textContent = method;
+                select.appendChild(option);
+            });
         });
 
         function setStatus(element, message, tone = "info") {
@@ -2816,6 +3769,7 @@
             if (LOCAL_PREVIEW) loadPreviewOrganizer();
             else subscribeToOrganizer();
             activateInitialTab();
+            void syncPushSubscription();
         }
 
         async function startAdminSession(identity = "Remembered access") {
@@ -3059,6 +4013,116 @@
             return `${date} · ${parsed.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}`;
         }
 
+        function formatMeetingDate(encounter) {
+            if (!encounter.occurredDate) return "Not recorded";
+            const parsed = new Date(`${encounter.occurredDate}T12:00`);
+            if (Number.isNaN(parsed.getTime())) return encounter.occurredDate;
+            return parsed.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+        }
+
+        function formatMeetingTime(encounter) {
+            if (!encounter.occurredTime) return "Not recorded";
+            const parsed = new Date(`2000-01-01T${encounter.occurredTime}`);
+            if (Number.isNaN(parsed.getTime())) return encounter.occurredTime;
+            return parsed.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+        }
+
+        function selectedMeeting() {
+            return allEncounters.find(({ id }) => id === selectedMeetingId) || null;
+        }
+
+        function selectedMeetingThread() {
+            return groupEncounterThreads(allEncounters)
+                .find(({ meetings }) => meetings.some(({ id }) => id === selectedMeetingId)) || null;
+        }
+
+        function fillMeetingEditForm(meeting, targetType = meeting.encounterType) {
+            meetingEditFields.names.value = meeting.names;
+            meetingEditFields.contact.value = meeting.contact;
+            meetingEditFields.otherPeopleInvolved.value = meeting.otherPeopleInvolved;
+            meetingEditFields.occurredDate.value = meeting.occurredDate;
+            meetingEditFields.occurredTime.value = meeting.occurredTime;
+            meetingEditFields.method.value = meeting.method;
+            meetingEditFields.notes.value = meeting.notes;
+            meetingEditFields.needsFollowUp.checked = targetType === "completed" && meeting.needsFollowUp;
+            const scheduled = targetType === "scheduled";
+            document.getElementById("meeting-edit-date-label").textContent = scheduled ? "Scheduled date" : "Date";
+            document.getElementById("meeting-edit-date-hint").textContent = scheduled ? "Required" : "Optional";
+            meetingEditFields.occurredDate.required = scheduled;
+            document.getElementById("meeting-edit-followup-field").hidden = scheduled;
+            document.getElementById("save-meeting-edit-button").textContent = meetingEditIsConversion
+                ? "Save as completed"
+                : scheduled ? "Save schedule" : "Save changes";
+        }
+
+        function renderMeetingDetail({ editing = false, converting = false } = {}) {
+            const meeting = selectedMeeting();
+            if (!meeting) {
+                if (meetingDetailDialog.open) meetingDetailDialog.close();
+                return;
+            }
+
+            const thread = selectedMeetingThread();
+            const meetingIndex = thread?.meetings.findIndex(({ id }) => id === meeting.id) ?? -1;
+            if (editing) {
+                meetingEditIsConversion = converting;
+                meetingEditTargetType = converting ? "completed" : meeting.encounterType;
+            } else {
+                meetingEditIsConversion = false;
+                meetingEditTargetType = meeting.encounterType;
+            }
+            const scheduled = meeting.encounterType === "scheduled";
+            meetingDetailFields.title.textContent = editing
+                ? converting
+                    ? `Record meeting with ${meeting.names || "this contact"}`
+                    : scheduled ? `Edit scheduled meeting` : `Edit meeting`
+                : meeting.names || "Meeting details";
+            meetingDetailFields.context.textContent = thread?.meetings.length > 1
+                ? `${scheduled ? "Scheduled meeting" : "Meeting"} ${meetingIndex + 1} of ${thread.meetings.length} in this couple timeline${thread.archived ? " · Archived" : ""}`
+                : `${scheduled ? "Scheduled meeting" : "Only meeting"} in this couple timeline${thread?.archived ? " · Archived" : ""}`;
+            if (converting) meetingDetailFields.context.textContent = "Confirm what happened and add only the details worth keeping.";
+            meetingDetailFields.names.textContent = meeting.names || "Not recorded";
+            meetingDetailFields.contact.textContent = meeting.contact || "Not recorded";
+            meetingDetailFields.otherPeopleInvolved.textContent = meeting.otherPeopleInvolved || "None recorded";
+            meetingDetailFields.encounterType.textContent = scheduled ? "Scheduled" : "Completed";
+            meetingDetailFields.encounterType.dataset.kind = scheduled ? "scheduled" : "completed";
+            document.getElementById("meeting-detail-date-label").textContent = scheduled ? "Scheduled for" : "Date";
+            meetingDetailFields.occurredDate.textContent = formatMeetingDate(meeting);
+            meetingDetailFields.occurredTime.textContent = formatMeetingTime(meeting);
+            meetingDetailFields.method.textContent = meeting.method || "Not recorded";
+            meetingDetailFields.notes.textContent = meeting.notes || "No notes were added.";
+            document.getElementById("meeting-detail-followup-label").textContent = scheduled ? "Reminder" : "Follow-up";
+            meetingDetailFields.needsFollowUp.textContent = scheduled
+                ? "Automatic on the scheduled date"
+                : meeting.needsFollowUp ? "Follow-up needed" : "No follow-up needed";
+            meetingDetailFields.needsFollowUp.dataset.active = String(!scheduled && meeting.needsFollowUp);
+            meetingDetailFields.needsFollowUp.dataset.kind = scheduled ? "scheduled" : "completed";
+
+            const recordButton = document.getElementById("record-meeting-outcome-button");
+            const editButton = document.getElementById("edit-meeting-button");
+            recordButton.hidden = !scheduled;
+            editButton.textContent = scheduled ? "Edit schedule" : "Edit meeting";
+            editButton.className = scheduled ? "button button-secondary" : "button button-primary";
+
+            meetingDetailView.hidden = editing;
+            meetingEditForm.hidden = !editing;
+            setStatus(meetingEditStatus, "");
+            if (editing) fillMeetingEditForm(meeting, meetingEditTargetType);
+        }
+
+        function openMeetingDetail(meeting, trigger, { editing = false, converting = false } = {}) {
+            selectedMeetingId = meeting.id;
+            meetingDetailTrigger = trigger;
+            renderMeetingDetail({ editing, converting });
+            setStatus(meetingDetailStatus, "");
+            if (!meetingDetailDialog.open) meetingDetailDialog.showModal();
+            if (editing) window.setTimeout(() => (converting ? meetingEditFields.notes : meetingEditFields.names).focus(), 0);
+        }
+
+        function closeMeetingDetail() {
+            if (meetingDetailDialog.open) meetingDetailDialog.close();
+        }
+
         function setEncounterView(view) {
             document.querySelectorAll("[data-encounter-view]").forEach((button) => {
                 button.setAttribute("aria-pressed", String(button.dataset.encounterView === view));
@@ -3069,11 +4133,13 @@
         }
 
         function fillEncounterForm(prefill) {
+            encounterFields.encounterType.value = prefill.encounterType || "completed";
             encounterFields.rootId.value = prefill.rootEncounterId || "";
             encounterFields.previousId.value = prefill.previousEncounterId || "";
             encounterFields.submissionId.value = prefill.submissionId || "";
             encounterFields.names.value = prefill.names || "";
             encounterFields.contact.value = prefill.contact || "";
+            encounterFields.otherPeopleInvolved.value = prefill.otherPeopleInvolved || "";
             encounterFields.occurredDate.value = prefill.occurredDate || "";
             encounterFields.occurredTime.value = prefill.occurredTime || "";
             encounterFields.method.value = prefill.method || "In person";
@@ -3081,21 +4147,41 @@
             encounterFields.needsFollowUp.checked = prefill.needsFollowUp === true;
         }
 
-        function openEncounterForm({ encounter, submission } = {}) {
-            const prefill = buildEncounterPrefill({ encounter, submission });
+        function openEncounterForm({ encounter, submission, encounterType = "completed" } = {}) {
+            let sourceEncounter = encounter;
+            if (submission && !sourceEncounter) {
+                const submissionThread = findCoupleThread(allEncounters, {
+                    submissionId: submission.id,
+                    names: [submission.data?.h_name, submission.data?.w_name].filter(Boolean).join(" & "),
+                    contact: [submission.data?.h_cell, submission.data?.w_cell, submission.data?.h_email, submission.data?.w_email].filter(Boolean).join(" · ")
+                });
+                sourceEncounter = submissionThread?.latest;
+            }
+            const prefill = buildEncounterPrefill({ encounter: sourceEncounter, submission: sourceEncounter ? undefined : submission, encounterType });
+            if (submission) prefill.submissionId ||= submission.id;
             fillEncounterForm(prefill);
             const title = document.getElementById("encounter-form-title");
             const description = document.getElementById("encounter-form-description");
-            if (encounter) {
-                title.textContent = `Another meeting with ${prefill.names}`;
-                description.textContent = "The shared details are filled in. Add only what changed this time.";
+            const scheduled = prefill.encounterType === "scheduled";
+            document.getElementById("encounter-date-label").textContent = scheduled ? "Scheduled date" : "Date";
+            document.getElementById("encounter-date-hint").textContent = scheduled ? "Required" : "Optional";
+            encounterFields.occurredDate.required = scheduled;
+            document.getElementById("encounter-followup-field").hidden = scheduled;
+            const saveButton = document.getElementById("save-encounter-button");
+            saveButton.textContent = scheduled ? "Schedule meeting" : "Save meeting";
+            if (sourceEncounter) {
+                title.textContent = `${scheduled ? "Schedule" : "Log"} another meeting with ${prefill.names}`;
+                description.textContent = "The couple details are carried forward. Add only what is new.";
             } else if (submission) {
-                title.textContent = `First encounter with ${prefill.names}`;
-                description.textContent = "The intake form filled in what it could. Review, add a note, and save.";
+                title.textContent = `Schedule with ${prefill.names}`;
+                description.textContent = "The intake form filled in the couple details. Choose when you plan to connect.";
             } else {
-                title.textContent = "New encounter";
-                description.textContent = "A name is all you need to save. Everything else is optional.";
+                title.textContent = scheduled ? "Schedule a meeting" : "Log a completed meeting";
+                description.textContent = scheduled
+                    ? "Add who it is with and choose the date. The app will remind you that day."
+                    : "A name is all you need. Add only the details worth remembering.";
             }
+            document.getElementById("new-encounter-menu").open = false;
             setStatus(encounterFormStatus, "");
             encounterForm.hidden = false;
             encounterForm.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
@@ -3169,7 +4255,7 @@
             context.className = "encounter-context";
             context.textContent = latest.notes
                 || thread.meetings.find(({ notes }) => notes)?.notes
-                || "No notes added";
+                || (latest.encounterType === "scheduled" ? "Upcoming meeting" : "No notes added");
             const meta = document.createElement("div");
             meta.className = "encounter-meta";
             [formatEncounterMoment(latest), latest.method, `${thread.meetings.length} ${thread.meetings.length === 1 ? "meeting" : "meetings"}`]
@@ -3180,7 +4266,12 @@
                     chip.textContent = value;
                     meta.appendChild(chip);
                 });
-            if (latest.needsFollowUp) {
+            if (latest.encounterType === "scheduled") {
+                const scheduled = document.createElement("span");
+                scheduled.className = "scheduled-badge";
+                scheduled.textContent = "Scheduled";
+                meta.appendChild(scheduled);
+            } else if (latest.needsFollowUp) {
                 const followup = document.createElement("span");
                 followup.className = "followup-badge";
                 followup.textContent = "Follow-up needed";
@@ -3192,7 +4283,8 @@
             actions.className = "encounter-actions";
             if (!archived) {
                 actions.append(
-                    createActionButton("Add meeting", "button button-primary", () => openEncounterForm({ encounter: latest })),
+                    createActionButton("Log meeting", "button button-secondary", () => openEncounterForm({ encounter: latest, encounterType: "completed" })),
+                    createActionButton("Schedule meeting", "button button-primary", () => openEncounterForm({ encounter: latest, encounterType: "scheduled" })),
                     createActionButton("Archive", "button button-secondary", () => setThreadArchived(thread, true))
                 );
             } else {
@@ -3203,21 +4295,27 @@
             const timeline = document.createElement("details");
             timeline.className = "encounter-timeline";
             const timelineSummary = document.createElement("summary");
-            timelineSummary.textContent = `View ${thread.meetings.length === 1 ? "meeting details" : `all ${thread.meetings.length} meetings`}`;
+            timelineSummary.textContent = `View ${thread.meetings.length === 1 ? "timeline details" : `all ${thread.meetings.length} timeline entries`}`;
             timeline.appendChild(timelineSummary);
             [...thread.meetings].reverse().forEach((meeting) => {
                 const entry = document.createElement("div");
                 entry.className = "meeting-entry";
+                entry.classList.toggle("is-scheduled", meeting.encounterType === "scheduled");
                 const dot = document.createElement("span");
                 dot.className = "meeting-dot";
                 dot.setAttribute("aria-hidden", "true");
-                const entryCopy = document.createElement("div");
+                const entryCopy = document.createElement("button");
+                entryCopy.className = "meeting-entry-open";
+                entryCopy.type = "button";
+                entryCopy.dataset.meetingId = meeting.id;
+                entryCopy.setAttribute("aria-label", `View ${meeting.encounterType === "scheduled" ? "scheduled " : ""}meeting details for ${meeting.names || "this encounter"} on ${formatMeetingDate(meeting)}`);
                 const heading = document.createElement("strong");
-                heading.textContent = `${formatEncounterMoment(meeting)} · ${meeting.method}`;
+                heading.textContent = `${meeting.encounterType === "scheduled" ? "Scheduled" : "Completed"} · ${formatEncounterMoment(meeting)} · ${meeting.method}`;
                 const notes = document.createElement("p");
                 const lines = [meeting.contact, meeting.notes].filter(Boolean);
                 notes.textContent = lines.join("\n") || "No extra details were added.";
                 entryCopy.append(heading, notes);
+                entryCopy.addEventListener("click", () => openMeetingDetail(meeting, entryCopy));
                 const remove = createActionButton("Delete", "button button-danger", () => deleteEncounter(meeting));
                 entry.append(dot, entryCopy, remove);
                 timeline.appendChild(entry);
@@ -3249,26 +4347,140 @@
             }
         }
 
+        function formatReminderTime(value) {
+            if (!value) return "";
+            const parsed = new Date(`2000-01-01T${value}`);
+            return Number.isNaN(parsed.getTime())
+                ? value
+                : parsed.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+        }
+
+        function formatManualReminderSchedule(reminder) {
+            const time = formatReminderTime(reminder.dueTime);
+            if (!reminder.dueDate) return time ? `Every day · ${time}` : "Anytime";
+
+            const dueDate = new Date(`${reminder.dueDate}T12:00`);
+            if (Number.isNaN(dueDate.getTime())) return [reminder.dueDate, time].filter(Boolean).join(" · ");
+            const today = localDayKey();
+            const tomorrow = localDayKey(new Date(Date.now() + 86400000));
+            const dateLabel = reminder.dueDate === today
+                ? "Today"
+                : reminder.dueDate === tomorrow
+                    ? "Tomorrow"
+                    : dueDate.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+            const isOverdue = reminder.dueDate < today
+                || (reminder.dueDate === today && reminder.dueTime && reminder.dueTimestamp < Date.now());
+            return [isOverdue ? "Overdue" : "", dateLabel, time].filter(Boolean).join(" · ");
+        }
+
+        function openManualReminderForm(reminder = null, trigger = null) {
+            manualReminderFormTrigger = trigger || document.activeElement;
+            manualReminderForm.reset();
+            manualReminderFields.id.value = reminder?.id || "";
+            manualReminderFields.title.value = reminder?.title || "";
+            manualReminderFields.dueDate.value = reminder?.dueDate || "";
+            manualReminderFields.dueTime.value = reminder?.dueTime || "";
+            manualReminderFields.description.value = reminder?.description || "";
+            document.getElementById("manual-reminder-form-title").textContent = reminder
+                ? `Edit ${reminder.title}`
+                : "Add a personal reminder";
+            document.getElementById("delete-manual-reminder-button").hidden = !reminder;
+            setStatus(manualReminderFormStatus, "");
+            manualReminderForm.hidden = false;
+            manualReminderForm.scrollIntoView({
+                behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+                block: "start"
+            });
+            window.setTimeout(() => manualReminderFields.title.focus(), 120);
+        }
+
+        function closeManualReminderForm() {
+            const reminderId = manualReminderFields.id.value;
+            const fallbackTarget = reminderId
+                ? [...document.querySelectorAll("[data-manual-reminder-edit-id]")]
+                    .find(({ dataset }) => dataset.manualReminderEditId === reminderId)
+                : document.getElementById("new-manual-reminder-button");
+            const restoreTarget = manualReminderFormTrigger?.isConnected
+                ? manualReminderFormTrigger
+                : fallbackTarget || document.getElementById("new-manual-reminder-button");
+            manualReminderForm.reset();
+            manualReminderFields.id.value = "";
+            manualReminderForm.hidden = true;
+            document.getElementById("delete-manual-reminder-button").hidden = true;
+            setStatus(manualReminderFormStatus, "");
+            manualReminderFormTrigger = null;
+            if (restoreTarget) window.setTimeout(() => restoreTarget.focus(), 0);
+        }
+
+        async function deleteManualReminder(reminder) {
+            if (!reminder || !window.confirm(`Delete “${reminder.title}”? This cannot be undone.`)) return;
+            const deleteButton = document.getElementById("delete-manual-reminder-button");
+            setButtonLoading(deleteButton, true, "Deleting…", "Delete reminder");
+            setStatus(manualReminderFormStatus, "");
+            try {
+                if (!LOCAL_PREVIEW) await deleteDoc(doc(db, MANUAL_REMINDERS_COLLECTION, reminder.id));
+                allManualReminders = allManualReminders.filter(({ id }) => id !== reminder.id);
+                manualReminderFormTrigger = document.getElementById("new-manual-reminder-button");
+                renderOrganizer();
+                closeManualReminderForm();
+                setStatus(reminderActionStatus, `${reminder.title} was deleted.`, "success");
+            } catch (error) {
+                console.error("Could not delete personal reminder:", error);
+                setStatus(manualReminderFormStatus, "The reminder could not be deleted. Try again.", "error");
+            } finally {
+                setButtonLoading(deleteButton, false, "Deleting…", "Delete reminder");
+            }
+        }
+
         function activeReminders() {
             const today = localDayKey();
-            const snoozes = readSnoozes();
+            const localSnoozes = readSnoozes();
             return deriveReminders({
                 submissions: allSubmissions,
                 encounters: allEncounters,
-                resolutions: allResolutions
-            }).filter(({ key }) => snoozes[key] !== today);
+                resolutions: allResolutions,
+                manualReminders: allManualReminders,
+                snoozes: allReminderSnoozes
+            }).filter(({ key }) => localSnoozes[key] !== today);
         }
 
         async function remindTomorrow(reminder) {
-            const snoozes = readSnoozes();
-            snoozes[reminder.key] = localDayKey();
+            const snoozedThrough = localDayKey();
+            const localSnoozes = readSnoozes();
+            const previousLocalSnooze = localSnoozes[reminder.key];
+            localSnoozes[reminder.key] = snoozedThrough;
             try {
-                window.localStorage.setItem(REMINDER_SNOOZE_KEY, JSON.stringify(snoozes));
+                window.localStorage.setItem(REMINDER_SNOOZE_KEY, JSON.stringify(localSnoozes));
             } catch {
-                // A snooze is device-local and optional when browser storage is unavailable.
+                // Firestore remains the durable source when browser storage is unavailable.
             }
-            renderReminders();
-            setStatus(reminderActionStatus, "Cleared for today. It will return tomorrow.", "success");
+            try {
+                if (!LOCAL_PREVIEW) {
+                    await setDoc(doc(db, REMINDER_SNOOZES_COLLECTION, resolutionDocId(reminder.key)), {
+                        targetKey: reminder.key,
+                        snoozedThrough,
+                        updatedAt: serverTimestamp(),
+                        updatedBy: auth.currentUser.uid
+                    });
+                }
+                allReminderSnoozes = [
+                    ...allReminderSnoozes.filter(({ targetKey }) => targetKey !== reminder.key),
+                    normalizeReminderSnooze({ targetKey: reminder.key, snoozedThrough, updatedAt: new Date() }, resolutionDocId(reminder.key))
+                ];
+                renderReminders();
+                setStatus(reminderActionStatus, "Cleared for today. It will return tomorrow.", "success");
+            } catch (error) {
+                if (previousLocalSnooze) localSnoozes[reminder.key] = previousLocalSnooze;
+                else delete localSnoozes[reminder.key];
+                try {
+                    window.localStorage.setItem(REMINDER_SNOOZE_KEY, JSON.stringify(localSnoozes));
+                } catch {
+                    // Keep the in-app reminder visible through the current render when storage is unavailable.
+                }
+                console.error("Could not snooze reminder:", error);
+                renderReminders();
+                setStatus(reminderActionStatus, "The reminder could not be snoozed. Check your connection and try again.", "error");
+            }
         }
 
         function resolutionDocId(key) {
@@ -3279,7 +4491,19 @@
             if (!window.confirm(`Mark “${reminder.title}” as taken care of?`)) return;
             setStatus(reminderActionStatus, "");
             try {
-                if (reminder.type === "encounter") {
+                if (reminder.type === "manual") {
+                    if (LOCAL_PREVIEW) {
+                        allManualReminders = allManualReminders.map((item) => item.id === reminder.targetId
+                            ? { ...item, completed: true, updatedAt: new Date() }
+                            : item);
+                        renderOrganizer();
+                    } else {
+                        await updateDoc(doc(db, MANUAL_REMINDERS_COLLECTION, reminder.targetId), {
+                            completed: true,
+                            updatedAt: serverTimestamp()
+                        });
+                    }
+                } else if (reminder.type === "encounter") {
                     if (LOCAL_PREVIEW) {
                         allEncounters = allEncounters.map((item) => item.id === reminder.targetId
                             ? { ...item, needsFollowUp: false }
@@ -3308,25 +4532,90 @@
             }
         }
 
-        async function maybeSendDailyNotification(reminders) {
-            if (!submissionsLoaded || !encountersLoaded || !resolutionsLoaded) return;
-            if (!("Notification" in window) || Notification.permission !== "granted" || reminders.length === 0) return;
-            const today = localDayKey();
-            try {
-                if (window.localStorage.getItem(REMINDER_NOTICE_KEY) === today) return;
-                const registration = await navigator.serviceWorker?.ready;
-                if (!registration) return;
-                await registration.showNotification("Binyan Shalem reminders", {
-                    body: reminders.length === 1 ? reminders[0].title : `${reminders.length} items need your attention today.`,
-                    icon: "./icons/icon-192.png",
-                    badge: "./icons/icon-192.png",
-                    tag: `binyan-reminders-${today}`,
-                    data: { url: "./?tab=reminders" }
-                });
-                window.localStorage.setItem(REMINDER_NOTICE_KEY, today);
-            } catch (error) {
-                console.warn("Could not show reminder notification:", error);
+        function renderReminderCard(reminder) {
+            const card = document.createElement("article");
+            card.className = `reminder-card${reminder.type === "manual" ? " is-personal" : ""}${reminder.type === "scheduled" ? " is-scheduled" : ""}`;
+            const icon = document.createElement("span");
+            icon.className = "reminder-icon";
+            icon.innerHTML = reminder.type === "manual"
+                ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7v5l3 2M5 5l2-2m10 0 2 2M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>'
+                : reminder.type === "scheduled"
+                    ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v3m10-3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v14H4V6a1 1 0 0 1 1-1Zm7 8v3l2 1" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>'
+                : reminder.type === "submission"
+                    ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10v4H7zM5 5v16h14V5M8 11h8M8 15h6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>'
+                    : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm8-1a2.5 2.5 0 1 0 0-5M3 20v-2a4 4 0 0 1 4-4h2a4 4 0 0 1 4 4v2m1-6h1a4 4 0 0 1 4 4v2" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>';
+            const body = document.createElement("div");
+            body.className = "reminder-card-content";
+            const title = document.createElement("h3");
+            title.textContent = reminder.title;
+            body.appendChild(title);
+
+            if (reminder.type === "manual" || reminder.type === "scheduled") {
+                const due = document.createElement("span");
+                due.className = "reminder-due";
+                due.textContent = reminder.type === "scheduled"
+                    ? `Scheduled · ${formatEncounterMoment(reminder.encounter)}`
+                    : formatManualReminderSchedule(reminder);
+                body.appendChild(due);
             }
+            if (reminder.detail) {
+                const detail = document.createElement("p");
+                detail.textContent = reminder.detail;
+                body.appendChild(detail);
+            }
+
+            const actions = document.createElement("div");
+            actions.className = "reminder-actions";
+            if (reminder.type === "submission") {
+                actions.append(createActionButton("Schedule encounter", "button button-primary", () => {
+                    activateTab(document.getElementById("encounters-tab"));
+                    setEncounterView("intake");
+                    openEncounterForm({ submission: reminder.submission, encounterType: "scheduled" });
+                }));
+            } else if (reminder.type === "encounter") {
+                actions.append(createActionButton("Schedule follow-up", "button button-primary", () => {
+                    activateTab(document.getElementById("encounters-tab"));
+                    setEncounterView("active");
+                    openEncounterForm({ encounter: reminder.encounter, encounterType: "scheduled" });
+                }));
+            } else if (reminder.type === "scheduled") {
+                const record = createActionButton("Record outcome", "button button-primary", () => {
+                    activateTab(document.getElementById("encounters-tab"));
+                    setEncounterView("active");
+                    openMeetingDetail(reminder.encounter, record, { editing: true, converting: true });
+                });
+                actions.append(record);
+            } else {
+                const edit = createActionButton("Edit", "button button-secondary", () => {
+                    openManualReminderForm(reminder.manualReminder, edit);
+                });
+                edit.dataset.manualReminderEditId = reminder.targetId;
+                actions.append(edit);
+            }
+            actions.append(createActionButton("Remind tomorrow", "button button-secondary", () => remindTomorrow(reminder)));
+            if (reminder.type !== "scheduled") {
+                actions.append(createActionButton("Taken care of", "button button-secondary", () => completeReminder(reminder)));
+            }
+            body.appendChild(actions);
+            card.append(icon, body);
+            return card;
+        }
+
+        function renderReminderGroup(title, reminders) {
+            const section = document.createElement("section");
+            section.className = "reminder-group";
+            const heading = document.createElement("div");
+            heading.className = "reminder-group-heading";
+            const label = document.createElement("h3");
+            label.textContent = title;
+            const count = document.createElement("span");
+            count.textContent = `${reminders.length} ${reminders.length === 1 ? "reminder" : "reminders"}`;
+            heading.append(label, count);
+            const list = document.createElement("div");
+            list.className = "reminder-group-list";
+            list.append(...reminders.map(renderReminderCard));
+            section.append(heading, list);
+            return section;
         }
 
         function renderReminders() {
@@ -3334,58 +4623,197 @@
             const list = document.getElementById("reminder-list");
             const empty = document.getElementById("no-reminders");
             const summary = document.getElementById("reminder-summary");
+            const loading = document.getElementById("reminders-loading");
             list.replaceChildren();
             empty.hidden = reminders.length !== 0;
+            loading.hidden = submissionsLoaded && encountersLoaded && resolutionsLoaded && manualRemindersLoaded && reminderSnoozesLoaded;
             summary.textContent = reminders.length === 0
                 ? "You’re all caught up."
-                : `${reminders.length} ${reminders.length === 1 ? "item needs" : "items need"} your attention.`;
+                : `${reminders.length} ${reminders.length === 1 ? "reminder is" : "reminders are"} on your list.`;
             remindersNavCount.textContent = String(reminders.length);
             remindersNavCount.setAttribute("aria-label", `${reminders.length} ${reminders.length === 1 ? "reminder" : "reminders"}`);
 
-            reminders.forEach((reminder) => {
-                const card = document.createElement("article");
-                card.className = "reminder-card";
-                const icon = document.createElement("span");
-                icon.className = "reminder-icon";
-                icon.innerHTML = reminder.type === "submission"
-                    ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10v4H7zM5 5v16h14V5M8 11h8M8 15h6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>'
-                    : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm8-1a2.5 2.5 0 1 0 0-5M3 20v-2a4 4 0 0 1 4-4h2a4 4 0 0 1 4 4v2m1-6h1a4 4 0 0 1 4 4v2" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>';
-                const body = document.createElement("div");
-                const title = document.createElement("h3");
-                title.textContent = reminder.title;
-                const detail = document.createElement("p");
-                detail.textContent = reminder.detail;
-                const actions = document.createElement("div");
-                actions.className = "reminder-actions";
-                if (reminder.type === "submission") {
-                    actions.append(createActionButton("Log encounter", "button button-primary", () => {
-                        activateTab(document.getElementById("encounters-tab"));
-                        setEncounterView("intake");
-                        openEncounterForm({ submission: reminder.submission });
-                    }));
+            const personal = reminders.filter(({ type }) => type === "manual").sort((a, b) => {
+                const aDue = a.dueTimestamp ?? Number.POSITIVE_INFINITY;
+                const bDue = b.dueTimestamp ?? Number.POSITIVE_INFINITY;
+                return aDue - bDue || b.sortTime - a.sortTime;
+            });
+            const followUps = reminders.filter(({ type }) => type !== "manual");
+            if (personal.length) list.appendChild(renderReminderGroup("Your reminders", personal));
+            if (followUps.length) list.appendChild(renderReminderGroup("Appointments & follow-ups", followUps));
+
+        }
+
+        function directoryPhoneHref(phone, protocol) {
+            const number = String(phone || "").replace(/[^\d+]/g, "");
+            return /\d/.test(number) ? `${protocol}:${number}` : "";
+        }
+
+        function createDirectoryLink(label, href, ariaLabel) {
+            const link = document.createElement("a");
+            link.className = "button button-secondary";
+            link.href = href;
+            link.textContent = label;
+            link.setAttribute("aria-label", ariaLabel);
+            if (href.startsWith("https://")) {
+                link.target = "_blank";
+                link.rel = "noopener noreferrer";
+            }
+            return link;
+        }
+
+        function openDirectoryForm(entry = null, trigger = null) {
+            directoryFormTrigger = trigger || document.activeElement;
+            directoryForm.reset();
+            directoryFields.id.value = entry?.id || "";
+            directoryFields.name.value = entry?.name || "";
+            directoryFields.type.value = entry?.type || "Therapist";
+            directoryFields.phone.value = entry?.phone || "";
+            directoryFields.email.value = entry?.email || "";
+            directoryFields.url.value = entry?.url || "";
+            directoryFields.notes.value = entry?.notes || "";
+            document.getElementById("directory-form-title").textContent = entry ? `Edit ${entry.name}` : "Add to your directory";
+            setStatus(directoryFormStatus, "");
+            directoryForm.hidden = false;
+            directoryForm.scrollIntoView({
+                behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+                block: "start"
+            });
+            window.setTimeout(() => directoryFields.name.focus(), 120);
+        }
+
+        function closeDirectoryForm() {
+            const entryId = directoryFields.id.value;
+            const fallbackTarget = entryId
+                ? [...document.querySelectorAll("[data-directory-edit-id]")]
+                    .find(({ dataset }) => dataset.directoryEditId === entryId)
+                : document.getElementById("new-directory-entry-button");
+            const restoreTarget = directoryFormTrigger?.isConnected
+                ? directoryFormTrigger
+                : fallbackTarget || document.getElementById("new-directory-entry-button");
+            directoryForm.reset();
+            directoryFields.id.value = "";
+            directoryFields.type.value = "Therapist";
+            directoryForm.hidden = true;
+            setStatus(directoryFormStatus, "");
+            directoryFormTrigger = null;
+            if (restoreTarget) window.setTimeout(() => restoreTarget.focus(), 0);
+        }
+
+        async function deleteDirectoryEntry(entry) {
+            if (!window.confirm(`Delete ${entry.name} from your directory? This cannot be undone.`)) return;
+            setStatus(directoryActionStatus, "");
+            try {
+                if (LOCAL_PREVIEW) {
+                    allDirectoryEntries = allDirectoryEntries.filter(({ id }) => id !== entry.id);
+                    renderDirectory();
                 } else {
-                    actions.append(createActionButton("Add meeting", "button button-primary", () => {
-                        activateTab(document.getElementById("encounters-tab"));
-                        setEncounterView("active");
-                        openEncounterForm({ encounter: reminder.encounter });
-                    }));
+                    await deleteDoc(doc(db, DIRECTORY_COLLECTION, entry.id));
                 }
-                actions.append(
-                    createActionButton("Remind tomorrow", "button button-secondary", () => remindTomorrow(reminder)),
-                    createActionButton("Taken care of", "button button-secondary", () => completeReminder(reminder))
-                );
-                body.append(title, detail, actions);
-                card.append(icon, body);
-                list.appendChild(card);
+                const addButton = document.getElementById("new-directory-entry-button");
+                if (directoryFields.id.value === entry.id) {
+                    directoryFormTrigger = addButton;
+                    closeDirectoryForm();
+                } else {
+                    addButton.focus();
+                }
+                setStatus(directoryActionStatus, `${entry.name} was deleted.`, "success");
+            } catch (error) {
+                console.error("Could not delete directory entry:", error);
+                setStatus(directoryActionStatus, "The entry could not be deleted. Try again.", "error");
+            }
+        }
+
+        function renderDirectoryEntry(entry) {
+            const article = document.createElement("article");
+            article.className = "directory-entry";
+
+            const main = document.createElement("div");
+            main.className = "directory-entry-main";
+            const titleRow = document.createElement("div");
+            titleRow.className = "directory-entry-title";
+            const title = document.createElement("h4");
+            title.textContent = entry.name;
+            const badge = document.createElement("span");
+            badge.className = "directory-type-badge";
+            badge.textContent = entry.type;
+            titleRow.append(title, badge);
+
+            const contact = document.createElement("p");
+            contact.className = "directory-entry-contact";
+            let websiteLabel = "";
+            if (entry.url) {
+                try {
+                    websiteLabel = new URL(entry.url).hostname.replace(/^www\./, "");
+                } catch {
+                    websiteLabel = entry.url;
+                }
+            }
+            contact.textContent = [entry.phone, entry.email, websiteLabel].filter(Boolean).join(" · ") || "No contact details added";
+            main.append(titleRow, contact);
+            if (entry.notes) {
+                const notes = document.createElement("p");
+                notes.className = "directory-entry-notes";
+                notes.textContent = entry.notes;
+                main.appendChild(notes);
+            }
+
+            const actions = document.createElement("div");
+            actions.className = "directory-entry-actions";
+            const telHref = directoryPhoneHref(entry.phone, "tel");
+            const smsHref = directoryPhoneHref(entry.phone, "sms");
+            if (telHref) actions.appendChild(createDirectoryLink("Call", telHref, `Call ${entry.name}`));
+            if (smsHref) actions.appendChild(createDirectoryLink("Text", smsHref, `Text ${entry.name}`));
+            if (entry.email) actions.appendChild(createDirectoryLink("Email", `mailto:${entry.email}`, `Email ${entry.name}`));
+            if (entry.url) actions.appendChild(createDirectoryLink("Open", entry.url, `Open ${entry.name}`));
+            const edit = createActionButton("Edit", "button button-secondary", () => openDirectoryForm(entry, edit));
+            edit.dataset.directoryEditId = entry.id;
+            actions.append(edit, createActionButton("Delete", "button button-danger", () => deleteDirectoryEntry(entry)));
+            article.append(main, actions);
+            return article;
+        }
+
+        function renderDirectory() {
+            const groups = document.getElementById("directory-groups");
+            const empty = document.getElementById("no-directory-entries");
+            const matches = sortDirectoryEntries(allDirectoryEntries)
+                .filter((entry) => directoryEntryMatches(entry, { search: directorySearch.value, type: directoryFilter }));
+            groups.replaceChildren();
+
+            DIRECTORY_TYPES.forEach((type) => {
+                const entries = matches.filter((entry) => entry.type === type);
+                if (!entries.length) return;
+                const section = document.createElement("section");
+                section.className = "directory-group";
+                const heading = document.createElement("div");
+                heading.className = "directory-group-heading";
+                const title = document.createElement("h3");
+                title.textContent = type === "Person" ? "People" : `${type}s`;
+                const count = document.createElement("span");
+                count.textContent = `${entries.length} ${entries.length === 1 ? "entry" : "entries"}`;
+                heading.append(title, count);
+                const list = document.createElement("div");
+                list.className = "directory-list";
+                list.append(...entries.map(renderDirectoryEntry));
+                section.append(heading, list);
+                groups.appendChild(section);
             });
 
-            void maybeSendDailyNotification(reminders);
+            const hasQuery = directorySearch.value.trim() || directoryFilter !== "All";
+            empty.textContent = hasQuery
+                ? "No directory entries match this search."
+                : "No entries yet. Add a therapist, useful person, or private resource.";
+            empty.hidden = matches.length !== 0 || !directoryLoaded;
+            document.getElementById("directory-loading").hidden = directoryLoaded;
+            directoryNavCount.textContent = String(allDirectoryEntries.length);
+            directoryNavCount.setAttribute("aria-label", `${allDirectoryEntries.length} directory ${allDirectoryEntries.length === 1 ? "entry" : "entries"}`);
         }
 
         function renderOrganizer() {
             renderSubmissions(allSubmissions);
             renderEncounters();
             renderReminders();
+            renderDirectory();
         }
 
         function renderSubmissions(submissions) {
@@ -3423,11 +4851,11 @@
 
                 const actions = document.createElement("div");
                 actions.className = "submission-actions";
-                const logButton = document.createElement("button");
-                logButton.className = "button button-primary";
-                logButton.type = "button";
-                logButton.textContent = "Log encounter";
-                logButton.addEventListener("click", () => openEncounterForm({ submission }));
+                const scheduleButton = document.createElement("button");
+                scheduleButton.className = "button button-primary";
+                scheduleButton.type = "button";
+                scheduleButton.textContent = "Schedule encounter";
+                scheduleButton.addEventListener("click", () => openEncounterForm({ submission, encounterType: "scheduled" }));
 
                 const deleteButton = document.createElement("button");
                 deleteButton.className = "button button-danger";
@@ -3455,7 +4883,7 @@
                         deleteButton.textContent = "Delete";
                     }
                 });
-                actions.append(logButton, deleteButton);
+                actions.append(scheduleButton, deleteButton);
                 header.append(headerCopy, actions);
 
                 const fields = document.createElement("dl");
@@ -3516,6 +4944,40 @@
                     setStatus(reminderActionStatus, "Reminder history could not be loaded.", "error");
                 });
             }
+            if (!manualRemindersUnsubscribe) {
+                manualRemindersUnsubscribe = onSnapshot(collection(db, MANUAL_REMINDERS_COLLECTION), (snapshot) => {
+                    allManualReminders = snapshot.docs.map((document) => normalizeManualReminder(document.data(), document.id));
+                    manualRemindersLoaded = true;
+                    renderOrganizer();
+                }, (error) => {
+                    console.error("Could not load personal reminders:", error);
+                    manualRemindersLoaded = true;
+                    renderReminders();
+                    setStatus(reminderActionStatus, "Personal reminders could not be loaded. Check your connection and try again.", "error");
+                });
+            }
+            if (!reminderSnoozesUnsubscribe) {
+                reminderSnoozesUnsubscribe = onSnapshot(collection(db, REMINDER_SNOOZES_COLLECTION), (snapshot) => {
+                    allReminderSnoozes = snapshot.docs.map((document) => normalizeReminderSnooze(document.data(), document.id));
+                    reminderSnoozesLoaded = true;
+                    renderReminders();
+                }, (error) => {
+                    console.error("Could not load reminder snoozes:", error);
+                    reminderSnoozesLoaded = true;
+                    renderReminders();
+                    setStatus(reminderActionStatus, "Snoozed reminders could not be loaded. Check your connection and try again.", "error");
+                });
+            }
+            if (!directoryUnsubscribe) {
+                directoryUnsubscribe = onSnapshot(collection(db, DIRECTORY_COLLECTION), (snapshot) => {
+                    allDirectoryEntries = snapshot.docs.map((document) => normalizeDirectoryEntry(document.data(), document.id));
+                    directoryLoaded = true;
+                    renderDirectory();
+                }, (error) => {
+                    console.error("Could not load directory:", error);
+                    document.getElementById("directory-loading").textContent = "Your directory could not be loaded.";
+                });
+            }
         }
 
         function loadPreviewOrganizer() {
@@ -3534,6 +4996,7 @@
                 normalizeEncounter({
                     names: "Ari & Leah Cohen",
                     contact: "ari@example.com · (555) 019-2040",
+                    otherPeopleInvolved: "Rabbi Feldman",
                     occurredDate: localDayKey(new Date(Date.now() - 7 * 86400000)),
                     occurredTime: "19:30",
                     method: "Video",
@@ -3546,6 +5009,7 @@
                 normalizeEncounter({
                     names: "Ari & Leah Cohen",
                     contact: "ari@example.com · (555) 019-2040",
+                    otherPeopleInvolved: "Rabbi Feldman",
                     occurredDate: localDayKey(new Date(Date.now() - 2 * 86400000)),
                     occurredTime: "20:00",
                     method: "Phone",
@@ -3555,23 +5019,167 @@
                     previousEncounterId: "preview-thread",
                     archived: false,
                     createdAt: new Date(Date.now() - 2 * 86400000)
-                }, "preview-followup")
+                }, "preview-followup"),
+                normalizeEncounter({
+                    encounterType: "scheduled",
+                    names: "Ari & Leah Cohen",
+                    contact: "ari@example.com · (555) 019-2040",
+                    otherPeopleInvolved: "Rabbi Feldman",
+                    occurredDate: localDayKey(),
+                    occurredTime: "20:00",
+                    method: "Video",
+                    notes: "Review how the new check-in routine is going.",
+                    needsFollowUp: false,
+                    rootEncounterId: "preview-thread",
+                    previousEncounterId: "preview-followup",
+                    archived: false,
+                    createdAt: new Date()
+                }, "preview-scheduled")
+            ];
+            allManualReminders = [
+                normalizeManualReminder({
+                    title: "Call Sarah about Thursday",
+                    description: "Confirm the meeting time and send the address.",
+                    dueDate: localDayKey(new Date(Date.now() + 86400000)),
+                    dueTime: "10:00",
+                    completed: false,
+                    createdAt: new Date()
+                }, "preview-personal-reminder")
+            ];
+            allDirectoryEntries = [
+                normalizeDirectoryEntry({
+                    name: "Dr. Miriam Stein",
+                    type: "Therapist",
+                    phone: "(555) 010-2020",
+                    email: "miriam@example.com",
+                    notes: "Communication and relationship counseling",
+                    createdAt: new Date(Date.now() - 5 * 86400000)
+                }, "preview-therapist"),
+                normalizeDirectoryEntry({
+                    name: "Rabbi David Adler",
+                    type: "Person",
+                    phone: "(555) 010-1180",
+                    notes: "Good person to call for local referrals",
+                    createdAt: new Date(Date.now() - 3 * 86400000)
+                }, "preview-person"),
+                normalizeDirectoryEntry({
+                    name: "Community referral guide",
+                    type: "Resource",
+                    url: "https://example.org/referrals",
+                    notes: "Private working list of local support options",
+                    createdAt: new Date(Date.now() - 2 * 86400000)
+                }, "preview-resource")
             ];
             submissionsLoaded = true;
             encountersLoaded = true;
             resolutionsLoaded = true;
+            manualRemindersLoaded = true;
+            reminderSnoozesLoaded = true;
+            directoryLoaded = true;
             renderOrganizer();
         }
 
         document.querySelectorAll("[data-encounter-view]").forEach((button) => {
             button.addEventListener("click", () => setEncounterView(button.dataset.encounterView));
         });
-        document.getElementById("new-encounter-button").addEventListener("click", () => {
+        document.getElementById("log-new-encounter-button").addEventListener("click", () => {
             setEncounterView("active");
-            openEncounterForm();
+            openEncounterForm({ encounterType: "completed" });
+        });
+        document.getElementById("schedule-new-encounter-button").addEventListener("click", () => {
+            setEncounterView("active");
+            openEncounterForm({ encounterType: "scheduled" });
         });
         document.getElementById("cancel-encounter-button").addEventListener("click", closeEncounterForm);
         document.getElementById("cancel-encounter-button-bottom").addEventListener("click", closeEncounterForm);
+        document.getElementById("close-meeting-detail-button").addEventListener("click", closeMeetingDetail);
+        document.getElementById("close-meeting-detail-button-bottom").addEventListener("click", closeMeetingDetail);
+        document.getElementById("edit-meeting-button").addEventListener("click", () => {
+            renderMeetingDetail({ editing: true });
+            meetingEditFields.names.focus();
+        });
+        document.getElementById("record-meeting-outcome-button").addEventListener("click", () => {
+            renderMeetingDetail({ editing: true, converting: true });
+            meetingEditFields.notes.focus();
+        });
+        document.getElementById("cancel-meeting-edit-button").addEventListener("click", () => {
+            renderMeetingDetail();
+            const meeting = selectedMeeting();
+            document.getElementById(meeting?.encounterType === "scheduled" ? "record-meeting-outcome-button" : "edit-meeting-button").focus();
+        });
+        meetingDetailDialog.addEventListener("click", (event) => {
+            if (event.target === meetingDetailDialog) closeMeetingDetail();
+        });
+        meetingDetailDialog.addEventListener("close", () => {
+            const restoreTarget = meetingDetailTrigger?.isConnected
+                ? meetingDetailTrigger
+                : [...document.querySelectorAll(".meeting-entry-open")]
+                    .find(({ dataset }) => dataset.meetingId === selectedMeetingId);
+            selectedMeetingId = null;
+            meetingDetailTrigger = null;
+            meetingEditTargetType = "completed";
+            meetingEditIsConversion = false;
+            meetingDetailView.hidden = false;
+            meetingEditForm.hidden = true;
+            if (restoreTarget) window.setTimeout(() => restoreTarget.focus(), 0);
+        });
+
+        meetingEditForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const meeting = selectedMeeting();
+            if (!meeting) {
+                setStatus(meetingEditStatus, "This meeting is no longer available. Close this window and try again.", "error");
+                return;
+            }
+            if (!meetingEditFields.names.value.trim()) {
+                setStatus(meetingEditStatus, "Add at least one name before saving.", "error");
+                meetingEditFields.names.focus();
+                return;
+            }
+            if (meetingEditTargetType === "scheduled" && !meetingEditFields.occurredDate.value) {
+                setStatus(meetingEditStatus, "Choose a date for this scheduled meeting.", "error");
+                meetingEditFields.occurredDate.focus();
+                return;
+            }
+
+            const saveButton = document.getElementById("save-meeting-edit-button");
+            const saveIdleLabel = meetingEditIsConversion
+                ? "Save as completed"
+                : meetingEditTargetType === "scheduled" ? "Save schedule" : "Save changes";
+            const changes = {
+                encounterType: meetingEditTargetType,
+                names: meetingEditFields.names.value.trim(),
+                contact: meetingEditFields.contact.value.trim(),
+                otherPeopleInvolved: meetingEditFields.otherPeopleInvolved.value.trim(),
+                occurredDate: meetingEditFields.occurredDate.value,
+                occurredTime: meetingEditFields.occurredTime.value,
+                method: meetingEditFields.method.value,
+                notes: meetingEditFields.notes.value.trim(),
+                needsFollowUp: meetingEditTargetType === "completed" && meetingEditFields.needsFollowUp.checked,
+                updatedAt: LOCAL_PREVIEW ? new Date() : serverTimestamp()
+            };
+            setButtonLoading(saveButton, true, "Saving…", saveIdleLabel);
+            setStatus(meetingEditStatus, "");
+            try {
+                if (!LOCAL_PREVIEW) {
+                    await updateDoc(doc(db, ENCOUNTERS_COLLECTION, meeting.id), changes);
+                }
+                allEncounters = allEncounters.map((item) => item.id === meeting.id
+                    ? normalizeEncounter({ ...item, ...changes }, item.id)
+                    : item);
+                renderOrganizer();
+                renderMeetingDetail();
+                setStatus(meetingDetailStatus, meeting.encounterType === "scheduled" && changes.encounterType === "completed"
+                    ? "The scheduled meeting is now recorded as completed."
+                    : "Changes saved.", "success");
+                document.getElementById("edit-meeting-button").focus();
+            } catch (error) {
+                console.error("Could not update meeting:", error);
+                setStatus(meetingEditStatus, "The meeting could not be updated. Check your connection and try again.", "error");
+            } finally {
+                setButtonLoading(saveButton, false, "Saving…", saveIdleLabel);
+            }
+        });
 
         encounterForm.addEventListener("submit", async (event) => {
             event.preventDefault();
@@ -3580,25 +5188,43 @@
                 encounterFields.names.focus();
                 return;
             }
+            const encounterType = encounterFields.encounterType.value === "scheduled" ? "scheduled" : "completed";
+            if (encounterType === "scheduled" && !encounterFields.occurredDate.value) {
+                setStatus(encounterFormStatus, "Choose the date for this scheduled meeting.", "error");
+                encounterFields.occurredDate.focus();
+                return;
+            }
 
             const saveButton = document.getElementById("save-encounter-button");
-            setButtonLoading(saveButton, true, "Saving…", "Save encounter");
+            const saveIdleLabel = encounterType === "scheduled" ? "Schedule meeting" : "Save meeting";
+            setButtonLoading(saveButton, true, encounterType === "scheduled" ? "Scheduling…" : "Saving…", saveIdleLabel);
             setStatus(encounterFormStatus, "");
             try {
                 const encounterRef = LOCAL_PREVIEW
                     ? { id: `preview-${Date.now()}` }
                     : doc(collection(db, ENCOUNTERS_COLLECTION));
+                const existingThread = encounterFields.rootId.value
+                    ? null
+                    : findCoupleThread(allEncounters, {
+                        submissionId: encounterFields.submissionId.value,
+                        names: encounterFields.names.value,
+                        contact: encounterFields.contact.value
+                    });
+                const rootEncounterId = encounterFields.rootId.value || existingThread?.rootId || encounterRef.id;
+                const previousEncounterId = encounterFields.previousId.value || existingThread?.latest.id || null;
                 const payload = {
+                    encounterType,
                     names: encounterFields.names.value.trim(),
                     contact: encounterFields.contact.value.trim(),
+                    otherPeopleInvolved: encounterFields.otherPeopleInvolved.value.trim(),
                     occurredDate: encounterFields.occurredDate.value,
                     occurredTime: encounterFields.occurredTime.value,
                     method: encounterFields.method.value,
                     notes: encounterFields.notes.value.trim(),
-                    needsFollowUp: encounterFields.needsFollowUp.checked,
+                    needsFollowUp: encounterType === "completed" && encounterFields.needsFollowUp.checked,
                     submissionId: encounterFields.submissionId.value || null,
-                    rootEncounterId: encounterFields.rootId.value || encounterRef.id,
-                    previousEncounterId: encounterFields.previousId.value || null,
+                    rootEncounterId,
+                    previousEncounterId,
                     archived: false,
                     createdAt: LOCAL_PREVIEW ? new Date() : serverTimestamp(),
                     updatedAt: LOCAL_PREVIEW ? new Date() : serverTimestamp(),
@@ -3612,46 +5238,328 @@
                 }
                 closeEncounterForm();
                 setEncounterView("active");
-                setStatus(encounterActionStatus, "Encounter saved. The reminder list is already up to date.", "success");
+                setStatus(encounterActionStatus, encounterType === "scheduled"
+                    ? `Meeting scheduled${existingThread ? " in the existing couple timeline" : ""}. A reminder will appear that day.`
+                    : `Meeting saved${existingThread ? " in the existing couple timeline" : ""}.`, "success");
             } catch (error) {
                 console.error("Could not save encounter:", error);
                 setStatus(encounterFormStatus, "The encounter could not be saved. Check your connection and try again.", "error");
             } finally {
-                setButtonLoading(saveButton, false, "Saving…", "Save encounter");
+                setButtonLoading(saveButton, false, encounterType === "scheduled" ? "Scheduling…" : "Saving…", saveIdleLabel);
+            }
+        });
+
+        document.getElementById("new-manual-reminder-button").addEventListener("click", () => openManualReminderForm());
+        document.getElementById("close-manual-reminder-form-button").addEventListener("click", closeManualReminderForm);
+        document.getElementById("cancel-manual-reminder-button").addEventListener("click", closeManualReminderForm);
+        document.getElementById("delete-manual-reminder-button").addEventListener("click", () => {
+            const reminder = allManualReminders.find(({ id }) => id === manualReminderFields.id.value);
+            if (reminder) void deleteManualReminder(reminder);
+        });
+
+        manualReminderForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const title = manualReminderFields.title.value.trim();
+            if (!title) {
+                setStatus(manualReminderFormStatus, "Add a short reminder name before saving.", "error");
+                manualReminderFields.title.focus();
+                return;
+            }
+            if (!LOCAL_PREVIEW && (!adminUnlocked || !auth.currentUser)) {
+                setStatus(manualReminderFormStatus, "Your admin session is not ready. Sign in again and retry.", "error");
+                return;
+            }
+
+            const reminderId = manualReminderFields.id.value;
+            const saveButton = document.getElementById("save-manual-reminder-button");
+            const fields = {
+                title,
+                description: manualReminderFields.description.value.trim(),
+                dueDate: manualReminderFields.dueDate.value,
+                dueTime: manualReminderFields.dueTime.value,
+                completed: false
+            };
+            setButtonLoading(saveButton, true, "Saving…", "Save reminder");
+            setStatus(manualReminderFormStatus, "");
+            setStatus(reminderActionStatus, "");
+            try {
+                if (reminderId) {
+                    const changes = {
+                        ...fields,
+                        updatedAt: LOCAL_PREVIEW ? new Date() : serverTimestamp()
+                    };
+                    if (!LOCAL_PREVIEW) await updateDoc(doc(db, MANUAL_REMINDERS_COLLECTION, reminderId), changes);
+                    allManualReminders = allManualReminders.map((reminder) => reminder.id === reminderId
+                        ? normalizeManualReminder({ ...reminder, ...changes }, reminder.id)
+                        : reminder);
+                } else {
+                    const reminderRef = LOCAL_PREVIEW
+                        ? { id: `preview-reminder-${Date.now()}` }
+                        : doc(collection(db, MANUAL_REMINDERS_COLLECTION));
+                    const payload = {
+                        ...fields,
+                        createdAt: LOCAL_PREVIEW ? new Date() : serverTimestamp(),
+                        updatedAt: LOCAL_PREVIEW ? new Date() : serverTimestamp(),
+                        createdBy: LOCAL_PREVIEW ? "preview" : auth.currentUser.uid
+                    };
+                    if (LOCAL_PREVIEW) {
+                        allManualReminders = [...allManualReminders, normalizeManualReminder(payload, reminderRef.id)];
+                    } else {
+                        await setDoc(reminderRef, payload);
+                    }
+                }
+                renderOrganizer();
+                closeManualReminderForm();
+                setStatus(
+                    reminderActionStatus,
+                    reminderId ? `${title} was updated.` : `${title} was added to your reminders.`,
+                    "success"
+                );
+            } catch (error) {
+                console.error("Could not save personal reminder:", error);
+                setStatus(manualReminderFormStatus, "The reminder could not be saved. Check your connection and try again.", "error");
+            } finally {
+                setButtonLoading(saveButton, false, "Saving…", "Save reminder");
+            }
+        });
+
+        document.getElementById("new-directory-entry-button").addEventListener("click", () => openDirectoryForm());
+        document.getElementById("close-directory-form-button").addEventListener("click", closeDirectoryForm);
+        document.getElementById("cancel-directory-form-button").addEventListener("click", closeDirectoryForm);
+        directorySearch.addEventListener("input", renderDirectory);
+        document.querySelectorAll("[data-directory-filter]").forEach((button) => {
+            button.addEventListener("click", () => {
+                directoryFilter = button.dataset.directoryFilter;
+                document.querySelectorAll("[data-directory-filter]").forEach((item) => {
+                    item.setAttribute("aria-pressed", String(item === button));
+                });
+                renderDirectory();
+            });
+        });
+
+        directoryForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const name = directoryFields.name.value.trim();
+            if (!name) {
+                setStatus(directoryFormStatus, "Add a name or resource title before saving.", "error");
+                directoryFields.name.focus();
+                return;
+            }
+            const rawUrl = directoryFields.url.value.trim();
+            const url = normalizeDirectoryUrl(rawUrl);
+            if (rawUrl && !url) {
+                setStatus(directoryFormStatus, "Add a valid website, such as example.com.", "error");
+                directoryFields.url.focus();
+                return;
+            }
+
+            const entryId = directoryFields.id.value;
+            const saveButton = document.getElementById("save-directory-entry-button");
+            const fields = {
+                name,
+                type: directoryFields.type.value,
+                phone: directoryFields.phone.value.trim(),
+                email: directoryFields.email.value.trim(),
+                url,
+                notes: directoryFields.notes.value.trim()
+            };
+            setButtonLoading(saveButton, true, "Saving…", "Save entry");
+            setStatus(directoryFormStatus, "");
+            setStatus(directoryActionStatus, "");
+            try {
+                if (entryId) {
+                    const changes = {
+                        ...fields,
+                        updatedAt: LOCAL_PREVIEW ? new Date() : serverTimestamp()
+                    };
+                    if (!LOCAL_PREVIEW) await updateDoc(doc(db, DIRECTORY_COLLECTION, entryId), changes);
+                    allDirectoryEntries = allDirectoryEntries.map((entry) => entry.id === entryId
+                        ? normalizeDirectoryEntry({ ...entry, ...changes }, entry.id)
+                        : entry);
+                } else {
+                    const entryRef = LOCAL_PREVIEW
+                        ? { id: `preview-directory-${Date.now()}` }
+                        : doc(collection(db, DIRECTORY_COLLECTION));
+                    const payload = {
+                        ...fields,
+                        createdAt: LOCAL_PREVIEW ? new Date() : serverTimestamp(),
+                        updatedAt: LOCAL_PREVIEW ? new Date() : serverTimestamp(),
+                        createdBy: LOCAL_PREVIEW ? "preview" : auth.currentUser.uid
+                    };
+                    if (LOCAL_PREVIEW) {
+                        allDirectoryEntries = [...allDirectoryEntries, normalizeDirectoryEntry(payload, entryRef.id)];
+                    } else {
+                        await setDoc(entryRef, payload);
+                    }
+                }
+                renderDirectory();
+                closeDirectoryForm();
+                setStatus(directoryActionStatus, `${name} was saved to your directory.`, "success");
+            } catch (error) {
+                console.error("Could not save directory entry:", error);
+                setStatus(directoryFormStatus, "The entry could not be saved. Check your connection and try again.", "error");
+            } finally {
+                setButtonLoading(saveButton, false, "Saving…", "Save entry");
             }
         });
 
         const notificationButton = document.getElementById("enable-notifications-button");
 
-        function updateNotificationControls() {
-            const explanation = document.getElementById("notification-explanation");
-            if (!("Notification" in window)) {
-                notificationButton.hidden = true;
-                explanation.textContent = "This browser does not support notifications. Reminders still appear here every day.";
+        function supportsPushNotifications() {
+            return "Notification" in window && "serviceWorker" in navigator && "PushManager" in window;
+        }
+
+        function pushDeviceId() {
+            let deviceId = "";
+            try {
+                deviceId = window.localStorage.getItem(PUSH_DEVICE_KEY) || "";
+                if (!deviceId) {
+                    deviceId = crypto.randomUUID instanceof Function
+                        ? crypto.randomUUID()
+                        : [...crypto.getRandomValues(new Uint8Array(16))]
+                            .map((value) => value.toString(16).padStart(2, "0"))
+                            .join("");
+                    window.localStorage.setItem(PUSH_DEVICE_KEY, deviceId);
+                }
+            } catch {
+                deviceId = `device-${Date.now().toString(36)}`;
+            }
+            return deviceId;
+        }
+
+        function pushSubscriptionDocId(deviceId = pushDeviceId()) {
+            return `${auth.currentUser.uid}_${deviceId}`;
+        }
+
+        function base64UrlBytes(value) {
+            const padding = "=".repeat((4 - value.length % 4) % 4);
+            const base64 = (value + padding).replace(/-/g, "+").replace(/_/g, "/");
+            const raw = window.atob(base64);
+            return Uint8Array.from(raw, (character) => character.charCodeAt(0));
+        }
+
+        async function savePushSubscription(subscription, deviceId) {
+            const json = subscription.toJSON();
+            if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) {
+                throw new Error("The browser returned an incomplete push subscription.");
+            }
+            const reference = doc(db, PUSH_SUBSCRIPTIONS_COLLECTION, pushSubscriptionDocId(deviceId));
+            const existing = await getDoc(reference);
+            const payload = {
+                endpoint: json.endpoint,
+                expirationTime: Number.isFinite(json.expirationTime) ? json.expirationTime : null,
+                p256dh: json.keys.p256dh,
+                auth: json.keys.auth,
+                deviceId,
+                timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || "America/New_York",
+                enabled: true,
+                updatedAt: serverTimestamp(),
+                createdBy: auth.currentUser.uid
+            };
+            if (!existing.exists()) payload.createdAt = serverTimestamp();
+            await setDoc(reference, payload, { merge: true });
+        }
+
+        async function syncPushSubscription() {
+            if (LOCAL_PREVIEW || !supportsPushNotifications() || Notification.permission !== "granted" || !auth.currentUser) {
+                pushSubscriptionEnabled = false;
+                updateNotificationControls();
                 return;
             }
-            if (Notification.permission === "granted") {
-                notificationButton.textContent = "Notifications on";
+            try {
+                const registration = await navigator.serviceWorker.ready;
+                const subscription = await registration.pushManager.getSubscription();
+                pushSubscriptionEnabled = Boolean(subscription);
+                if (subscription) await savePushSubscription(subscription, pushDeviceId());
+            } catch (error) {
+                console.warn("Could not synchronize push notifications:", error);
+                pushSubscriptionEnabled = false;
+            }
+            updateNotificationControls();
+        }
+
+        async function enablePushNotifications() {
+            if (!supportsPushNotifications()) throw new Error("Push notifications are not supported on this device.");
+            const permission = Notification.permission === "granted"
+                ? "granted"
+                : await Notification.requestPermission();
+            if (permission !== "granted") throw new Error("Notification permission was not granted.");
+            const registration = await navigator.serviceWorker.ready;
+            const subscription = await registration.pushManager.getSubscription()
+                || await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: base64UrlBytes(VAPID_PUBLIC_KEY)
+                });
+            const deviceId = pushDeviceId();
+            await savePushSubscription(subscription, deviceId);
+            pushSubscriptionEnabled = true;
+            updateNotificationControls();
+            return sendTestPushFunction({ deviceId });
+        }
+
+        async function disablePushNotifications() {
+            if (!supportsPushNotifications()) return;
+            const registration = await navigator.serviceWorker.ready;
+            const subscription = await registration.pushManager.getSubscription();
+            if (auth.currentUser) {
+                await deleteDoc(doc(db, PUSH_SUBSCRIPTIONS_COLLECTION, pushSubscriptionDocId()));
+            }
+            if (subscription) await subscription.unsubscribe();
+            pushSubscriptionEnabled = false;
+            updateNotificationControls();
+        }
+
+        function updateNotificationControls() {
+            const explanation = document.getElementById("notification-explanation");
+            notificationButton.disabled = pushControlsBusy;
+            if (LOCAL_PREVIEW) {
+                notificationButton.textContent = "Enable notifications";
                 notificationButton.disabled = true;
-                explanation.textContent = "You’ll receive one daily nudge when the app is opened or active.";
-            } else if (Notification.permission === "denied") {
+                explanation.textContent = "Push setup is available in the live admin app.";
+                return;
+            }
+            if (!supportsPushNotifications()) {
+                notificationButton.hidden = true;
+                explanation.textContent = "Install this app on a supported device to receive background notifications. Every reminder still stays visible here.";
+                return;
+            }
+            notificationButton.hidden = false;
+            if (Notification.permission === "denied") {
                 notificationButton.textContent = "Notifications blocked";
                 notificationButton.disabled = true;
                 explanation.textContent = "Notifications are blocked in browser settings. Reminders still stay visible here.";
+            } else if (pushSubscriptionEnabled) {
+                notificationButton.textContent = pushControlsBusy ? "Updating…" : "Turn off notifications";
+                explanation.textContent = "Background push is on. Reminder details stay private until you open the admin app.";
+            } else {
+                notificationButton.textContent = pushControlsBusy ? "Enabling…" : "Enable notifications";
+                explanation.textContent = Notification.permission === "granted"
+                    ? "Finish setup to receive reminders when the app is closed."
+                    : "Enable private push reminders on this device, including when the admin app is closed.";
             }
         }
 
         notificationButton.addEventListener("click", async () => {
+            if (pushControlsBusy) return;
+            pushControlsBusy = true;
+            updateNotificationControls();
+            setStatus(reminderActionStatus, "");
             try {
-                const permission = await Notification.requestPermission();
-                updateNotificationControls();
-                if (permission === "granted") {
-                    setStatus(reminderActionStatus, "Notifications are on for this device.", "success");
-                    void maybeSendDailyNotification(activeReminders());
+                if (pushSubscriptionEnabled) {
+                    await disablePushNotifications();
+                    setStatus(reminderActionStatus, "Background notifications are off for this device.", "success");
+                } else {
+                    await enablePushNotifications();
+                    setStatus(reminderActionStatus, "Background notifications are on. A test notification was sent.", "success");
                 }
             } catch (error) {
                 console.warn("Notification permission could not be requested:", error);
-                setStatus(reminderActionStatus, "Notifications could not be enabled on this device.", "error");
+                setStatus(reminderActionStatus, Notification.permission === "denied"
+                    ? "Notifications are blocked in this browser’s settings."
+                    : "Notifications could not be updated on this device. Check your connection and try again.", "error");
+            } finally {
+                pushControlsBusy = false;
+                updateNotificationControls();
             }
         });
         updateNotificationControls();
@@ -3666,9 +5574,13 @@
                 title: "Encounters",
                 description: "Keep meetings, people, and notes connected."
             },
+            "directory-tab": {
+                title: "Directory",
+                description: "Keep trusted people and private resources close at hand."
+            },
             "reminders-tab": {
                 title: "Reminders",
-                description: "See only the follow-ups that still need attention."
+                description: "Create personal reminders and handle only the follow-ups that still matter."
             }
         };
 
@@ -3704,7 +5616,7 @@
 
         function activateInitialTab() {
             const requested = new URLSearchParams(window.location.search).get("tab");
-            const requestedTab = ["encounters", "reminders"].includes(requested) ? `${requested}-tab` : "";
+            const requestedTab = ["encounters", "directory", "reminders"].includes(requested) ? `${requested}-tab` : "";
             let rememberedTab = "";
             try {
                 rememberedTab = window.localStorage.getItem(ADMIN_TAB_KEY) || "";
@@ -3734,11 +5646,18 @@
             submissionsUnsubscribe?.();
             encountersUnsubscribe?.();
             resolutionsUnsubscribe?.();
+            manualRemindersUnsubscribe?.();
+            reminderSnoozesUnsubscribe?.();
+            directoryUnsubscribe?.();
             contentUnsubscribe = null;
             submissionsUnsubscribe = null;
             encountersUnsubscribe = null;
             resolutionsUnsubscribe = null;
+            manualRemindersUnsubscribe = null;
+            reminderSnoozesUnsubscribe = null;
+            directoryUnsubscribe = null;
             try {
+                if (pushSubscriptionEnabled) await disablePushNotifications();
                 await signOut(auth);
             } finally {
                 showLogin();
