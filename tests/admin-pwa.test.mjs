@@ -49,6 +49,8 @@ test("registers durable background push and sends reminders from Firebase", () =
     assert.match(adminPage, /applicationServerKey: base64UrlBytes\(VAPID_PUBLIC_KEY\)/);
     assert.match(adminPage, /PUSH_SUBSCRIPTIONS_COLLECTION/);
     assert.match(adminPage, /sendTestPushFunction/);
+    assert.match(adminPage, /id="test-notifications-button"/);
+    assert.match(adminPage, /Test notification sent\. It may take a few seconds to appear\./);
     assert.match(adminPage, /Background notifications are on/);
     assert.doesNotMatch(adminPage, /maybeSendDailyNotification/);
     assert.match(firestoreRules, /match \/admin_push_subscriptions\/\{subscriptionId\}/);

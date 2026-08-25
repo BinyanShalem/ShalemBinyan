@@ -2312,6 +2312,12 @@
             line-height: 1.5;
         }
 
+        .notification-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.55rem;
+        }
+
         .reminder-card {
             display: grid;
             grid-template-columns: 42px minmax(0, 1fr);
@@ -3293,7 +3299,10 @@
                                 <strong id="reminder-summary">You’re all caught up.</strong>
                                 <p id="notification-explanation">Enable private push reminders on this device, including when the admin app is closed.</p>
                             </div>
-                            <button class="button button-secondary" id="enable-notifications-button" type="button">Enable notifications</button>
+                            <div class="notification-actions">
+                                <button class="button button-secondary" id="test-notifications-button" type="button" hidden>Send test</button>
+                                <button class="button button-secondary" id="enable-notifications-button" type="button">Enable notifications</button>
+                            </div>
                         </div>
                         <p class="status" id="reminder-action-status" role="status" aria-live="polite" hidden></p>
                         <div class="loading-state" id="reminders-loading"><span class="loading-dot" aria-hidden="true"></span>Loading reminders…</div>
@@ -5404,6 +5413,7 @@
         });
 
         const notificationButton = document.getElementById("enable-notifications-button");
+        const testNotificationButton = document.getElementById("test-notifications-button");
 
         function supportsPushNotifications() {
             return "Notification" in window && "serviceWorker" in navigator && "PushManager" in window;
@@ -5512,14 +5522,18 @@
         function updateNotificationControls() {
             const explanation = document.getElementById("notification-explanation");
             notificationButton.disabled = pushControlsBusy;
+            testNotificationButton.disabled = pushControlsBusy;
+            testNotificationButton.hidden = !pushSubscriptionEnabled;
             if (LOCAL_PREVIEW) {
                 notificationButton.textContent = "Enable notifications";
                 notificationButton.disabled = true;
+                testNotificationButton.hidden = true;
                 explanation.textContent = "Push setup is available in the live admin app.";
                 return;
             }
             if (!supportsPushNotifications()) {
                 notificationButton.hidden = true;
+                testNotificationButton.hidden = true;
                 explanation.textContent = "Install this app on a supported device to receive background notifications. Every reminder still stays visible here.";
                 return;
             }
@@ -5527,6 +5541,7 @@
             if (Notification.permission === "denied") {
                 notificationButton.textContent = "Notifications blocked";
                 notificationButton.disabled = true;
+                testNotificationButton.hidden = true;
                 explanation.textContent = "Notifications are blocked in browser settings. Reminders still stay visible here.";
             } else if (pushSubscriptionEnabled) {
                 notificationButton.textContent = pushControlsBusy ? "Updating…" : "Turn off notifications";
@@ -5557,6 +5572,23 @@
                 setStatus(reminderActionStatus, Notification.permission === "denied"
                     ? "Notifications are blocked in this browser’s settings."
                     : "Notifications could not be updated on this device. Check your connection and try again.", "error");
+            } finally {
+                pushControlsBusy = false;
+                updateNotificationControls();
+            }
+        });
+
+        testNotificationButton.addEventListener("click", async () => {
+            if (pushControlsBusy || !pushSubscriptionEnabled) return;
+            pushControlsBusy = true;
+            updateNotificationControls();
+            setStatus(reminderActionStatus, "");
+            try {
+                await sendTestPushFunction({ deviceId: pushDeviceId() });
+                setStatus(reminderActionStatus, "Test notification sent. It may take a few seconds to appear.", "success");
+            } catch (error) {
+                console.error("Could not send test notification:", error);
+                setStatus(reminderActionStatus, "The test notification could not be delivered. Try turning notifications off and on again.", "error");
             } finally {
                 pushControlsBusy = false;
                 updateNotificationControls();
