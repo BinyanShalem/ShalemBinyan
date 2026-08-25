@@ -52,6 +52,7 @@ test("registers durable background push and sends reminders from Firebase", () =
     assert.match(adminPage, /Background notifications are on/);
     assert.doesNotMatch(adminPage, /maybeSendDailyNotification/);
     assert.match(firestoreRules, /match \/admin_push_subscriptions\/\{subscriptionId\}/);
+    assert.match(firestoreRules, /subscriptionId\.matches\(request\.auth\.uid \+ '_\[a-zA-Z0-9-\]\{8,64\}'\)/);
     assert.match(firestoreRules, /match \/admin_reminder_snoozes\/\{snoozeId\}/);
     assert.match(functionsSource, /exports\.sendAdminReminders = onSchedule/);
     assert.match(functionsSource, /schedule: "every 15 minutes"/);

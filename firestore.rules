@@ -265,6 +265,11 @@ service cloud.firestore {
         && request.resource.data.createdBy.size() <= 128;
     }
 
+    function ownsPushSubscriptionId(subscriptionId) {
+      return isSignedIn()
+        && subscriptionId.matches(request.auth.uid + '_[a-zA-Z0-9-]{8,64}');
+    }
+
     match /content/{contentId} {
       allow read: if true;
       allow create: if isSignedIn() && contentId == request.resource.data.id && isValidContentResource();
@@ -318,19 +323,20 @@ service cloud.firestore {
     }
 
     match /admin_push_subscriptions/{subscriptionId} {
-      allow read: if isSignedIn() && resource.data.createdBy == request.auth.uid;
-      allow create: if isSignedIn()
+      allow read: if ownsPushSubscriptionId(subscriptionId);
+      allow create: if ownsPushSubscriptionId(subscriptionId)
         && isValidPushSubscription()
         && request.resource.data.createdBy == request.auth.uid
         && request.resource.data.createdAt == request.time
         && request.resource.data.updatedAt == request.time;
-      allow update: if isSignedIn()
+      allow update: if ownsPushSubscriptionId(subscriptionId)
         && resource.data.createdBy == request.auth.uid
         && isValidPushSubscription()
         && request.resource.data.createdBy == resource.data.createdBy
         && request.resource.data.createdAt == resource.data.createdAt
         && request.resource.data.updatedAt == request.time;
-      allow delete: if isSignedIn() && resource.data.createdBy == request.auth.uid;
+      allow delete: if ownsPushSubscriptionId(subscriptionId)
+        && resource.data.createdBy == request.auth.uid;
     }
 
     match /admin_directory/{entryId} {
