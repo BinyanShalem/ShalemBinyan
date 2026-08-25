@@ -58,6 +58,7 @@ test("registers durable background push and sends reminders from Firebase", () =
     assert.match(functionsSource, /schedule: "every 15 minutes"/);
     assert.match(functionsSource, /exports\.sendTestPush = onCall/);
     assert.match(functionsSource, /WEB_PUSH_VAPID_PRIVATE_KEY/);
+    assert.match(functionsSource, /VAPID_PRIVATE_KEY\.value\(\)\.trim\(\)/);
     assert.equal(JSON.parse(functionsPackage).engines.node, "22");
 });
 

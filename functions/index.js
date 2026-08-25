@@ -20,10 +20,11 @@ const VAPID_PUBLIC_KEY = "BL7ha4R4kMW9sE9RJAkn1tIfJFEjjRYVUVDRTGq1TZrSCuReDfCebP
 const VAPID_PRIVATE_KEY = defineSecret("WEB_PUSH_VAPID_PRIVATE_KEY");
 
 function configureWebPush() {
+    const privateKey = VAPID_PRIVATE_KEY.value().trim();
     webpush.setVapidDetails(
         "https://www.binyan-shalem.com",
         VAPID_PUBLIC_KEY,
-        VAPID_PRIVATE_KEY.value()
+        privateKey
     );
 }
 
