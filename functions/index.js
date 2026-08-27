@@ -7,6 +7,7 @@ const { defineSecret } = require("firebase-functions/params");
 const { HttpsError, onCall } = require("firebase-functions/v2/https");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const webpush = require("web-push");
+const { generateAssistantPlan, usageKeys } = require("./gemini-assistant");
 const { deriveDueReminders } = require("./reminders");
 
 initializeApp();
@@ -16,8 +17,12 @@ const PROJECT_ID = "binyanshalem-28b1a";
 const PUSH_SUBSCRIPTIONS_COLLECTION = "admin_push_subscriptions";
 const PUSH_SNOOZES_COLLECTION = "admin_reminder_snoozes";
 const PUSH_DELIVERIES_COLLECTION = "admin_push_deliveries";
+const AI_USAGE_COLLECTION = "admin_ai_usage";
+const AI_DAILY_LIMIT = 30;
+const AI_MONTHLY_LIMIT = 500;
 const VAPID_PUBLIC_KEY = "BL7ha4R4kMW9sE9RJAkn1tIfJFEjjRYVUVDRTGq1TZrSCuReDfCebPst902WeZbNSBZYMnt-Qx4qeDqOCR4LHAQ";
 const VAPID_PRIVATE_KEY = defineSecret("WEB_PUSH_VAPID_PRIVATE_KEY");
+const GEMINI_API_KEY = defineSecret("GEMINI_API_KEY");
 
 function configureWebPush() {
     const privateKey = VAPID_PRIVATE_KEY.value().trim();
@@ -87,6 +92,42 @@ function notificationPayload(reminders, { test = false } = {}) {
         badge: "/admin/icons/icon-192.png",
         tag: test ? "binyan-push-test" : "binyan-reminders",
         url: "/admin/?tab=reminders"
+    });
+}
+
+async function reserveAssistantUsage(uid, now = new Date()) {
+    const keys = usageKeys(uid, now);
+    const dailyRef = db.collection(AI_USAGE_COLLECTION).doc(keys.dailyId);
+    const monthlyRef = db.collection(AI_USAGE_COLLECTION).doc(keys.monthlyId);
+    return db.runTransaction(async (transaction) => {
+        const [dailySnapshot, monthlySnapshot] = await Promise.all([
+            transaction.get(dailyRef),
+            transaction.get(monthlyRef)
+        ]);
+        const dailyCount = Number(dailySnapshot.data()?.count || 0);
+        const monthlyCount = Number(monthlySnapshot.data()?.count || 0);
+        if (dailyCount >= AI_DAILY_LIMIT) {
+            throw new HttpsError("resource-exhausted", "The Smart assistant has reached today’s safety limit. The guided menu still works.");
+        }
+        if (monthlyCount >= AI_MONTHLY_LIMIT) {
+            throw new HttpsError("resource-exhausted", "The Smart assistant has reached this month’s cost limit. The guided menu still works.");
+        }
+        const updatedAt = FieldValue.serverTimestamp();
+        transaction.set(dailyRef, {
+            uid,
+            day: keys.day,
+            count: dailyCount + 1,
+            updatedAt
+        }, { merge: true });
+        transaction.set(monthlyRef, {
+            month: keys.month,
+            count: monthlyCount + 1,
+            updatedAt
+        }, { merge: true });
+        return {
+            dailyRemaining: AI_DAILY_LIMIT - dailyCount - 1,
+            monthlyRemaining: AI_MONTHLY_LIMIT - monthlyCount - 1
+        };
     });
 }
 
@@ -178,5 +219,43 @@ exports.sendTestPush = onCall({
     } catch (error) {
         await removeExpiredSubscription(ref, error);
         throw new HttpsError("unavailable", "The test notification could not be delivered.");
+    }
+});
+
+exports.adminAssistant = onCall({
+    region: "us-central1",
+    memory: "256MiB",
+    timeoutSeconds: 30,
+    maxInstances: 2,
+    secrets: [GEMINI_API_KEY]
+}, async (request) => {
+    if (!request.auth) throw new HttpsError("unauthenticated", "Unlock the admin app before using the Smart assistant.");
+    const message = typeof request.data?.message === "string" ? request.data.message.trim() : "";
+    if (!message || message.length > 500) {
+        throw new HttpsError("invalid-argument", "Write a message between 1 and 500 characters.");
+    }
+    const apiKey = GEMINI_API_KEY.value().trim();
+    if (!apiKey) {
+        throw new HttpsError("failed-precondition", "Smart assistant setup is not finished yet. The guided menu still works.");
+    }
+    const usage = await reserveAssistantUsage(request.auth.uid);
+    try {
+        const plan = await generateAssistantPlan({
+            apiKey,
+            message,
+            context: request.data?.context,
+            history: request.data?.history
+        });
+        return { ...plan, usage };
+    } catch (error) {
+        console.error("Gemini assistant request failed", {
+            name: error?.name,
+            status: error?.status,
+            code: error?.code
+        });
+        if ([400, 401, 403].includes(Number(error?.status))) {
+            throw new HttpsError("failed-precondition", "Smart assistant setup needs attention. The guided menu still works.");
+        }
+        throw new HttpsError("unavailable", "The Smart assistant could not respond right now. The guided menu still works.");
     }
 });

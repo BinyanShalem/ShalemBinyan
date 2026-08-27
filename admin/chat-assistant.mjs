@@ -74,6 +74,7 @@ export function createAdminChat({
     composer,
     composerInput,
     menuButton,
+    smartStatus = null,
     getState,
     actions,
     contactMethods = ["In person", "Phone", "Video", "Text", "Email", "Other"]
@@ -84,6 +85,8 @@ export function createAdminChat({
     let currentSection = "today";
     let pendingSection = null;
     let messageId = 0;
+    let smartBusy = false;
+    let assistantHistory = [];
 
     function scrollToLatest() {
         window.requestAnimationFrame(() => {
@@ -194,6 +197,407 @@ export function createAdminChat({
         composerInput.placeholder = "Message the assistant";
         if (announce) sayUser("Menu");
         say("What would you like to handle?", { buttons: menuButtons() });
+    }
+
+    function setSmartStatus(tone, text) {
+        if (!smartStatus) return;
+        smartStatus.dataset.tone = tone;
+        const copy = smartStatus.querySelector("span:last-child");
+        if (copy) copy.textContent = text;
+    }
+
+    function normalized(value) {
+        return clean(value).toLocaleLowerCase();
+    }
+
+    function findThreadForAI(args = {}) {
+        const state = getState();
+        const targetId = clean(args.targetId);
+        if (targetId) {
+            const direct = state.threads.find((thread) => thread.rootId === targetId
+                || thread.latest.id === targetId
+                || thread.meetings.some(({ id }) => id === targetId));
+            if (direct) return direct;
+        }
+        const names = normalized(args.names || args.query);
+        return names
+            ? state.threads.find((thread) => normalized(thread.latest.names).includes(names)
+                || names.includes(normalized(thread.latest.names))) || null
+            : null;
+    }
+
+    function findEncounterForAI(args = {}) {
+        const state = getState();
+        const targetId = clean(args.targetId);
+        if (targetId) {
+            const direct = state.encounters.find(({ id }) => id === targetId);
+            if (direct) return direct;
+        }
+        return findThreadForAI(args)?.latest || null;
+    }
+
+    function findReminderForAI(args = {}) {
+        const state = getState();
+        const targetId = clean(args.targetId);
+        const title = normalized(args.title || args.query);
+        return state.reminders.find((reminder) => (targetId && [reminder.key, reminder.targetId, reminder.manualReminder?.id].includes(targetId))
+            || (title && normalized(reminder.title).includes(title))) || null;
+    }
+
+    function findDirectoryEntryForAI(args = {}) {
+        const state = getState();
+        const targetId = clean(args.targetId);
+        const query = normalized(args.query || args.name || args.names || args.title);
+        return state.directoryEntries.find((entry) => (targetId && entry.id === targetId)
+            || (query && normalized(entry.name).includes(query))) || null;
+    }
+
+    function findResourceForAI(args = {}) {
+        const state = getState();
+        const targetId = clean(args.targetId);
+        const query = normalized(args.query || args.title);
+        return state.resources.find((resource) => (targetId && resource.id === targetId)
+            || (query && normalized(resource.title).includes(query))) || null;
+    }
+
+    function findIntakeForAI(args = {}) {
+        const state = getState();
+        const targetId = clean(args.targetId);
+        const query = normalized(args.names || args.query);
+        return state.submissions.find((submission) => (targetId && submission.id === targetId)
+            || (query && normalized(submissionNames(submission)).includes(query))) || null;
+    }
+
+    function encounterDraft(args = {}) {
+        const selectedMethod = contactMethods.find((method) => normalized(method) === normalized(args.method));
+        return {
+            names: clean(args.names),
+            contact: clean(args.contact),
+            otherPeopleInvolved: clean(args.otherPeopleInvolved),
+            occurredDate: clean(args.date),
+            occurredTime: clean(args.time),
+            method: selectedMethod || "",
+            notes: clean(args.notes),
+            needsFollowUp: args.needsFollowUp === true
+        };
+    }
+
+    function missingSmartTarget(section, label = "that item") {
+        say(`I couldn’t safely match ${label}. Choose it here and I’ll keep helping.`, {
+            buttons: [actionButton(`Open ${section}`, () => showSection(section)), actionButton("Menu", () => showMainMenu(), { tone: "secondary" })]
+        });
+    }
+
+    function smartActionLabel(skill) {
+        const labels = {
+            show_today: "Open Today",
+            show_encounters: "Open encounters",
+            show_reminders: "Open reminders",
+            show_directory: "Open directory",
+            show_resources: "Open resources",
+            show_intakes: "Open intake forms",
+            open_encounter_thread: "Open timeline",
+            open_intake: "Open intake",
+            find_directory: "Show results",
+            create_reminder: "Review reminder",
+            edit_reminder: "Review changes",
+            schedule_encounter: "Review meeting",
+            log_encounter: "Review meeting",
+            edit_encounter: "Review changes",
+            record_outcome: "Review outcome",
+            add_directory_entry: "Review entry",
+            edit_directory_entry: "Review changes",
+            add_resource: "Review resource",
+            delete_reminder: "Confirm delete",
+            complete_reminder: "Confirm done",
+            snooze_reminder: "Confirm tomorrow",
+            delete_encounter: "Confirm delete",
+            archive_thread: "Confirm archive",
+            restore_thread: "Confirm restore",
+            delete_directory_entry: "Confirm delete",
+            remove_resource: "Confirm removal",
+            delete_intake: "Confirm delete",
+            enable_notifications: "Confirm enable",
+            disable_notifications: "Confirm disable",
+            test_notifications: "Send test"
+        };
+        return labels[skill] || "Continue";
+    }
+
+    function directSmartTask(action) {
+        const args = action.arguments || {};
+        switch (action.skill) {
+            case "delete_reminder": {
+                const reminder = findReminderForAI(args);
+                return reminder?.type === "manual"
+                    ? {
+                        task: () => actions.deleteReminder(reminder.manualReminder),
+                        success: `${reminder.title} was deleted.`,
+                        confirmationTitle: `Delete reminder “${reminder.title}”?`,
+                        confirmationMeta: "This permanently removes this personal reminder. This cannot be undone.",
+                        confirmationTone: "danger"
+                    }
+                    : null;
+            }
+            case "complete_reminder": {
+                const reminder = findReminderForAI(args);
+                return reminder ? {
+                    task: () => actions.completeReminder(reminder),
+                    success: "Done — I cleared that reminder.",
+                    confirmationTitle: `Mark “${reminder.title}” taken care of?`,
+                    confirmationMeta: "This marks the latest follow-up as handled and removes it from active reminders."
+                } : null;
+            }
+            case "snooze_reminder": {
+                const reminder = findReminderForAI(args);
+                return reminder ? {
+                    task: () => actions.snoozeReminder(reminder),
+                    success: "Okay — I’ll bring it back tomorrow.",
+                    confirmationTitle: `Remind you tomorrow about “${reminder.title}”?`,
+                    confirmationMeta: "This hides the reminder for today. It will return automatically tomorrow."
+                } : null;
+            }
+            case "delete_encounter": {
+                const encounter = findEncounterForAI(args);
+                const names = clean(encounter?.names) || "this couple";
+                return encounter ? {
+                    task: () => actions.deleteEncounter(encounter),
+                    success: "The meeting was deleted.",
+                    confirmationTitle: `Delete the ${formatDate(encounter.occurredDate)} meeting with ${names}?`,
+                    confirmationMeta: "This permanently removes this meeting from the timeline. This cannot be undone.",
+                    confirmationTone: "danger"
+                } : null;
+            }
+            case "archive_thread":
+            case "restore_thread": {
+                const thread = findThreadForAI(args);
+                const archived = action.skill === "archive_thread";
+                const names = clean(thread?.latest?.names) || "this couple";
+                return thread ? {
+                    task: () => actions.setThreadArchived(thread, archived),
+                    success: archived ? "The full timeline was archived." : "The full timeline is active again.",
+                    confirmationTitle: `${archived ? "Archive" : "Restore"} the full timeline for ${names}?`,
+                    confirmationMeta: archived
+                        ? "This moves every meeting in this timeline out of the active list. The timeline stays saved and can be restored."
+                        : "This returns the full saved timeline to the active encounter list.",
+                    confirmationTone: archived ? "danger" : "primary"
+                } : null;
+            }
+            case "delete_directory_entry": {
+                const entry = findDirectoryEntryForAI(args);
+                return entry ? {
+                    task: () => actions.deleteDirectoryEntry(entry),
+                    success: `${entry.name} was deleted from your directory.`,
+                    confirmationTitle: `Delete ${entry.name} from the private directory?`,
+                    confirmationMeta: "This permanently removes the saved directory entry. This cannot be undone.",
+                    confirmationTone: "danger"
+                } : null;
+            }
+            case "remove_resource": {
+                const resource = findResourceForAI(args);
+                return resource ? {
+                    task: () => actions.deleteResource(resource),
+                    success: `“${resource.title}” was removed from the public library.`,
+                    confirmationTitle: `Remove “${resource.title}” from the public library?`,
+                    confirmationMeta: "This permanently removes the published resource. This cannot be undone.",
+                    confirmationTone: "danger"
+                } : null;
+            }
+            case "delete_intake": {
+                const submission = findIntakeForAI(args);
+                const names = submissionNames(submission);
+                return submission ? {
+                    task: () => actions.deleteSubmission(submission),
+                    success: "The intake form was permanently deleted.",
+                    confirmationTitle: `Delete the intake form for ${names}?`,
+                    confirmationMeta: "This permanently removes the intake submission. This cannot be undone.",
+                    confirmationTone: "danger"
+                } : null;
+            }
+            case "enable_notifications":
+                return {
+                    task: actions.enableNotifications,
+                    success: "Notifications are on. I sent a private test notification.",
+                    confirmationTitle: "Enable background notifications on this device?",
+                    confirmationMeta: "This subscribes this device and sends one private test notification."
+                };
+            case "disable_notifications":
+                return {
+                    task: actions.disableNotifications,
+                    success: "Background notifications are off for this device.",
+                    confirmationTitle: "Disable background notifications on this device?",
+                    confirmationMeta: "This unsubscribes this device. In-app reminders will still remain available."
+                };
+            case "test_notifications":
+                return {
+                    task: actions.testNotifications,
+                    success: "Test notification sent. It should arrive in a few seconds.",
+                    confirmationTitle: "Send one private test notification to this device?",
+                    confirmationMeta: "This sends only a test and does not change reminder data."
+                };
+            default:
+                return null;
+        }
+    }
+
+    function smartActionPresentation(action) {
+        const direct = directSmartTask(action);
+        if (direct?.confirmationTitle) {
+            return {
+                title: direct.confirmationTitle,
+                meta: direct.confirmationMeta,
+                tone: direct.confirmationTone || "primary"
+            };
+        }
+        return {
+            title: action.summary || "Review this action",
+            meta: action.requiresConfirmation ? "Nothing changes until you review the details" : "Ready to open",
+            tone: action.requiresConfirmation && /delete|remove|archive/.test(action.skill) ? "danger" : "primary"
+        };
+    }
+
+    function runSmartAction(action, trigger) {
+        const args = action.arguments || {};
+        switch (action.skill) {
+            case "show_today": return showToday({ announce: false });
+            case "show_encounters": return showEncounters({ announce: false });
+            case "show_reminders": return showReminders({ announce: false });
+            case "show_directory": return showDirectory({ announce: false });
+            case "show_resources": return showResources({ announce: false });
+            case "show_intakes": return showIntakes({ announce: false });
+            case "open_encounter_thread": {
+                const thread = findThreadForAI(args);
+                return thread ? showThread(thread) : missingSmartTarget("encounters", "that encounter timeline");
+            }
+            case "open_intake": {
+                const submission = findIntakeForAI(args);
+                return submission ? showIntakeDetails(submission) : missingSmartTarget("intakes", "that intake form");
+            }
+            case "find_directory": return showDirectory({ query: args.query || args.names || args.title, announce: false });
+            case "create_reminder": return showReminderForm(null, args);
+            case "edit_reminder": {
+                const reminder = findReminderForAI(args);
+                return reminder?.type === "manual"
+                    ? showReminderForm(reminder.manualReminder, args)
+                    : missingSmartTarget("reminders", "that personal reminder");
+            }
+            case "schedule_encounter":
+            case "log_encounter": {
+                const encounterType = action.skill === "schedule_encounter" ? "scheduled" : "completed";
+                const thread = findThreadForAI(args);
+                const submission = thread ? null : findIntakeForAI(args);
+                return showEncounterForm({
+                    encounterType,
+                    encounter: thread?.latest || null,
+                    submission,
+                    draft: encounterDraft(args)
+                });
+            }
+            case "edit_encounter": {
+                const encounter = findEncounterForAI(args);
+                return encounter
+                    ? showEncounterForm({ existing: encounter, encounterType: encounter.encounterType, draft: encounterDraft(args) })
+                    : missingSmartTarget("encounters", "that meeting");
+            }
+            case "record_outcome": {
+                const encounter = findEncounterForAI(args);
+                return encounter?.encounterType === "scheduled"
+                    ? showEncounterForm({ existing: encounter, encounterType: "completed", converting: true, draft: encounterDraft(args) })
+                    : missingSmartTarget("encounters", "that scheduled meeting");
+            }
+            case "add_directory_entry": return showDirectoryForm(null, args);
+            case "edit_directory_entry": {
+                const entry = findDirectoryEntryForAI(args);
+                return entry ? showDirectoryForm(entry, args) : missingSmartTarget("directory", "that directory entry");
+            }
+            case "add_resource": return showResourcePasteForm(args.resourceInput || args.url || "");
+            default: {
+                const task = directSmartTask(action);
+                if (!task) {
+                    const section = action.skill.includes("reminder") ? "reminders"
+                        : action.skill.includes("directory") ? "directory"
+                            : action.skill.includes("resource") ? "resources"
+                                : action.skill.includes("intake") ? "intakes" : "encounters";
+                    return missingSmartTarget(section);
+                }
+                return runAction(trigger, task.task, {
+                    busyLabel: "Saving…",
+                    success: task.success
+                });
+            }
+        }
+    }
+
+    function presentSmartPlan(plan) {
+        const actionsList = Array.isArray(plan?.actions) ? plan.actions : [];
+        const content = actionsList.length ? recordList(actionsList.map((action) => {
+            const presentation = smartActionPresentation(action);
+            return record({
+                title: presentation.title,
+                meta: presentation.meta,
+                buttons: [actionButton(smartActionLabel(action.skill), (button) => runSmartAction(action, button), {
+                    tone: presentation.tone
+                })]
+            });
+        })) : null;
+        const message = [plan?.reply, plan?.clarification].map(clean).filter(Boolean).join(" ")
+            || "I’m ready for your next request.";
+        say(message, {
+            content,
+            buttons: actionsList.length ? [actionButton("Menu", () => showMainMenu(), { tone: "secondary" })] : menuButtons()
+        });
+        assistantHistory = [...assistantHistory, { role: "assistant", text: message }].slice(-6);
+    }
+
+    function routeGuidedText(text) {
+        const lower = normalized(text);
+        if (/new reminder|add reminder|remind me/.test(lower)) showReminderForm();
+        else if (/add (a )?(contact|therapist|person)|new contact/.test(lower)) showDirectoryForm();
+        else if (/add (a )?resource|new resource/.test(lower)) showResourcePasteForm();
+        else if (/log (a )?meeting|record (a )?meeting|met with/.test(lower)) chooseEncounterSource("completed");
+        else if (/remind|todo|task/.test(lower)) showReminders({ announce: false });
+        else if (/schedule|appointment/.test(lower)) chooseEncounterSource("scheduled");
+        else if (/meeting|encounter|met with/.test(lower)) showEncounters({ announce: false });
+        else if (/contact|directory|therapist|phone/.test(lower)) showDirectory({ announce: false });
+        else if (/resource|youtube|amazon|itorah|torahanytime/.test(lower)) showResources({ announce: false });
+        else if (/intake|form/.test(lower)) showIntakes({ announce: false });
+        else if (/today|attention|what.*next/.test(lower)) showToday({ announce: false });
+        else return false;
+        return true;
+    }
+
+    async function handleSmartText(text) {
+        if (smartBusy) {
+            say("I’m still handling your last message. Give me one moment.");
+            return;
+        }
+        smartBusy = true;
+        const submitButton = composer.querySelector('button[type="submit"]');
+        composerInput.disabled = true;
+        if (submitButton) submitButton.disabled = true;
+        setSmartStatus("busy", "Gemini is reading your request…");
+        const thinking = say("One moment — I’m putting that into a safe, reviewable action.", { quiet: true });
+        try {
+            const plan = await actions.askAssistant({
+                message: text,
+                history: assistantHistory
+            });
+            thinking.row.remove();
+            assistantHistory = [...assistantHistory, { role: "user", text }].slice(-6);
+            setSmartStatus("ready", "Gemini ready · confirms before saving");
+            presentSmartPlan(plan);
+        } catch (error) {
+            thinking.row.remove();
+            console.warn("Smart assistant unavailable:", error);
+            setSmartStatus("error", "Guided mode · Gemini needs attention");
+            say(error?.userMessage || "The Smart assistant couldn’t respond, so I switched to the guided assistant.");
+            if (!routeGuidedText(text)) showMainMenu({ announce: false });
+        } finally {
+            smartBusy = false;
+            composerInput.disabled = false;
+            if (submitButton) submitButton.disabled = false;
+            window.setTimeout(() => composerInput.focus(), 0);
+        }
     }
 
     function record({ title, meta = "", text = "", buttons = [], tag = "" }) {
@@ -443,10 +847,17 @@ export function createAdminChat({
         return { wrap, form, fields, status, submit };
     }
 
-    function showEncounterForm({ encounterType = "completed", encounter = null, submission = null, existing = null, converting = false } = {}) {
-        const prefill = existing
+    function showEncounterForm({ encounterType = "completed", encounter = null, submission = null, existing = null, converting = false, draft = null } = {}) {
+        const basePrefill = existing
             ? { ...existing, encounterType }
             : actions.encounterPrefill({ encounter, submission, encounterType });
+        const prefill = { ...basePrefill };
+        if (draft) {
+            ["names", "contact", "otherPeopleInvolved", "occurredDate", "occurredTime", "method", "notes"].forEach((key) => {
+                if (clean(draft[key])) prefill[key] = clean(draft[key]);
+            });
+            if (typeof draft.needsFollowUp === "boolean") prefill.needsFollowUp = draft.needsFollowUp;
+        }
         const scheduled = encounterType === "scheduled";
         const editing = Boolean(existing);
         sayUser(editing ? (converting ? "Record meeting outcome" : "Edit meeting") : scheduled ? "Schedule meeting" : "Log meeting");
@@ -554,7 +965,10 @@ export function createAdminChat({
         });
     }
 
-    function showReminderForm(reminder = null) {
+    function showReminderForm(reminder = null, draft = null) {
+        const values = { ...(reminder || {}), ...(draft || {}) };
+        if (clean(draft?.date)) values.dueDate = clean(draft.date);
+        if (clean(draft?.time)) values.dueTime = clean(draft.time);
         sayUser(reminder ? `Edit ${reminder.title}` : "Add a reminder");
         const secondaryButtons = [actionButton("Cancel", () => showReminders(), { tone: "secondary" })];
         if (reminder) secondaryButtons.push(actionButton("Delete", () => confirmAction({
@@ -585,12 +999,12 @@ export function createAdminChat({
                 });
             }
         });
-        const title = textInput({ name: "title", value: reminder?.title || "", placeholder: "What should I remind you about?", required: true, maxLength: 240 });
+        const title = textInput({ name: "title", value: values.title || "", placeholder: "What should I remind you about?", required: true, maxLength: 240 });
         fields.append(
             labeledField("Reminder", title, { wide: true }),
-            labeledField("Date", textInput({ name: "dueDate", type: "date", value: reminder?.dueDate || "" }), { optional: true }),
-            labeledField("Time", textInput({ name: "dueTime", type: "time", value: reminder?.dueTime || "" }), { optional: true }),
-            labeledField("Description", textArea({ name: "description", value: reminder?.description || "", placeholder: "Anything useful when you handle it", maxLength: 3000 }), { optional: true, wide: true })
+            labeledField("Date", textInput({ name: "dueDate", type: "date", value: values.dueDate || values.date || "" }), { optional: true }),
+            labeledField("Time", textInput({ name: "dueTime", type: "time", value: values.dueTime || values.time || "" }), { optional: true }),
+            labeledField("Description", textArea({ name: "description", value: values.description || "", placeholder: "Anything useful when you handle it", maxLength: 3000 }), { optional: true, wide: true })
         );
         say("Here’s a short reminder form.", { content: wrap });
         window.setTimeout(() => title.focus(), 0);
@@ -643,7 +1057,8 @@ export function createAdminChat({
         });
     }
 
-    function showDirectoryForm(entry = null) {
+    function showDirectoryForm(entry = null, draft = null) {
+        const values = { ...(entry || {}), ...(draft || {}) };
         sayUser(entry ? `Edit ${entry.name}` : "Add a directory entry");
         const { wrap, fields, form } = formShell({
             title: entry ? "Edit directory entry" : "Add to your directory",
@@ -667,19 +1082,19 @@ export function createAdminChat({
                 });
             }
         });
-        const name = textInput({ name: "name", value: entry?.name || "", placeholder: "Name or resource", required: true, maxLength: 240 });
+        const name = textInput({ name: "name", value: values.name || values.names || values.title || "", placeholder: "Name or resource", required: true, maxLength: 240 });
         fields.append(
             labeledField("Name or resource", name, { wide: true }),
-            labeledField("Type", selectInput({ name: "type", value: entry?.type || "Therapist", options: ["Therapist", "Person", "Resource"] }), { wide: true })
+            labeledField("Type", selectInput({ name: "type", value: values.type || "Therapist", options: ["Therapist", "Person", "Resource"] }), { wide: true })
         );
         const details = element("details", "chat-more-fields chat-field-wide");
         details.appendChild(element("summary", "", "Contact details and note"));
         const grid = element("div", "chat-form-grid");
         grid.append(
-            labeledField("Phone", textInput({ name: "phone", type: "tel", value: entry?.phone || "", placeholder: "Phone number", maxLength: 80, autocomplete: "tel" }), { optional: true }),
-            labeledField("Email", textInput({ name: "email", type: "email", value: entry?.email || "", placeholder: "name@example.com", maxLength: 254, autocomplete: "email" }), { optional: true }),
-            labeledField("Website", textInput({ name: "url", type: "text", value: entry?.url || "", placeholder: "example.com", maxLength: 2048 }), { optional: true, wide: true }),
-            labeledField("Quick note", textArea({ name: "notes", value: entry?.notes || "", placeholder: "Specialty, how you know them, or why this is useful", maxLength: 3000 }), { optional: true, wide: true })
+            labeledField("Phone", textInput({ name: "phone", type: "tel", value: values.phone || "", placeholder: "Phone number", maxLength: 80, autocomplete: "tel" }), { optional: true }),
+            labeledField("Email", textInput({ name: "email", type: "email", value: values.email || "", placeholder: "name@example.com", maxLength: 254, autocomplete: "email" }), { optional: true }),
+            labeledField("Website", textInput({ name: "url", type: "text", value: values.url || "", placeholder: "example.com", maxLength: 2048 }), { optional: true, wide: true }),
+            labeledField("Quick note", textArea({ name: "notes", value: values.notes || values.description || "", placeholder: "Specialty, how you know them, or why this is useful", maxLength: 3000 }), { optional: true, wide: true })
         );
         details.appendChild(grid);
         fields.appendChild(details);
@@ -713,7 +1128,7 @@ export function createAdminChat({
         });
     }
 
-    function showResourcePasteForm() {
+    function showResourcePasteForm(draft = "") {
         sayUser("Add a resource");
         const { wrap, fields, form, submit } = formShell({
             title: "Paste a resource link",
@@ -729,7 +1144,7 @@ export function createAdminChat({
                 showResourceReview(resource);
             }
         });
-        const pasted = textArea({ name: "pasted", placeholder: "Paste the link or complete TorahAnytime text", required: true, rows: 5 });
+        const pasted = textArea({ name: "pasted", value: draft, placeholder: "Paste the link or complete TorahAnytime text", required: true, rows: 5 });
         fields.appendChild(labeledField("Resource link or text", pasted, { wide: true }));
         say("Send me the link and I’ll prepare the details for review.", { content: wrap });
         window.setTimeout(() => pasted.focus(), 0);
@@ -842,18 +1257,17 @@ export function createAdminChat({
         }
         const lower = text.toLocaleLowerCase();
         if (/^(menu|help|home)$/.test(lower)) return showMainMenu({ announce: false });
-        if (/new reminder|add reminder|remind me/.test(lower)) return showReminderForm();
-        if (/add (a )?(contact|therapist|person)|new contact/.test(lower)) return showDirectoryForm();
-        if (/add (a )?resource|new resource/.test(lower)) return showResourcePasteForm();
-        if (/log (a )?meeting|record (a )?meeting|met with/.test(lower)) return chooseEncounterSource("completed");
-        if (/remind|todo|task/.test(lower)) return showReminders({ announce: false });
-        if (/schedule|appointment/.test(lower)) return chooseEncounterSource("scheduled");
-        if (/meeting|encounter|met with/.test(lower)) return showEncounters({ announce: false });
-        if (/contact|directory|therapist|phone/.test(lower)) return showDirectory({ announce: false });
-        if (/resource|youtube|amazon|itorah|torahanytime/.test(lower)) return showResources({ announce: false });
-        if (/intake|form/.test(lower)) return showIntakes({ announce: false });
-        if (/today|attention|what.*next/.test(lower)) return showToday({ announce: false });
-        say("I work best with a short command or one of these buttons. Try “new reminder,” “schedule meeting,” “find a contact,” or choose below.", { buttons: menuButtons() });
+        if (/^(today|encounters?|reminders?|directory|resources?|intake forms?|intakes)$/.test(lower)) {
+            routeGuidedText(text);
+            return;
+        }
+        if (actions.askAssistant) {
+            handleSmartText(text);
+            return;
+        }
+        if (!routeGuidedText(text)) {
+            say("I work best with a short command or one of these buttons. Try “new reminder,” “schedule meeting,” “find a contact,” or choose below.", { buttons: menuButtons() });
+        }
     }
 
     composer.addEventListener("submit", (event) => {
@@ -868,7 +1282,7 @@ export function createAdminChat({
         if (!initialized) {
             initialized = true;
             conversation.replaceChildren();
-            const greeting = say("Hi — I’m ready. I’ll keep things short and ask only for what is needed.", {
+            const greeting = say("Hi — write naturally or use a button. I’ll understand the request, reuse what you already entered, and show every change before saving.", {
                 title: "How can I help?",
                 buttons: menuButtons()
             });

@@ -2,13 +2,14 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [adminPage, chatAssistant, manifestSource, serviceWorker, firestoreRules, functionsSource, functionsPackage] = await Promise.all([
+const [adminPage, chatAssistant, manifestSource, serviceWorker, firestoreRules, functionsSource, geminiAssistantSource, functionsPackage] = await Promise.all([
     readFile(new URL("../admin/index.html", import.meta.url), "utf8"),
     readFile(new URL("../admin/chat-assistant.mjs", import.meta.url), "utf8"),
     readFile(new URL("../admin/manifest.webmanifest", import.meta.url), "utf8"),
     readFile(new URL("../admin/service-worker.js", import.meta.url), "utf8"),
     readFile(new URL("../firestore.rules", import.meta.url), "utf8"),
     readFile(new URL("../functions/index.js", import.meta.url), "utf8"),
+    readFile(new URL("../functions/gemini-assistant.js", import.meta.url), "utf8"),
     readFile(new URL("../functions/package.json", import.meta.url), "utf8")
 ]);
 
@@ -78,6 +79,28 @@ test("supports viewing and mutating every admin data area inside chat", () => {
     assert.match(chatAssistant, /actions\.enableNotifications/);
     assert.match(chatAssistant, /actions\.disableNotifications/);
     assert.match(chatAssistant, /actions\.testNotifications/);
+});
+
+test("adds a protected Gemini assistant with allowlisted, confirmation-gated skills", () => {
+    assert.match(adminPage, /const adminAssistantFunction = httpsCallable\(cloudFunctions, "adminAssistant"/);
+    assert.match(adminPage, /function compactAssistantContext\(\)/);
+    assert.match(adminPage, /skill: "delete_reminder"/);
+    assert.match(adminPage, /id="chat-smart-status"/);
+    assert.match(chatAssistant, /actions\.askAssistant/);
+    assert.match(chatAssistant, /presentSmartPlan/);
+    assert.match(chatAssistant, /Nothing changes until you review the details/);
+    assert.match(chatAssistant, /This cannot be undone\./);
+    assert.match(chatAssistant, /smartActionPresentation/);
+    assert.match(functionsSource, /const GEMINI_API_KEY = defineSecret\("GEMINI_API_KEY"\)/);
+    assert.match(functionsSource, /exports\.adminAssistant = onCall/);
+    assert.match(functionsSource, /const AI_DAILY_LIMIT = 30/);
+    assert.match(functionsSource, /const AI_MONTHLY_LIMIT = 500/);
+    assert.match(geminiAssistantSource, /const MODEL_ID = "gemini-2\.5-flash-lite"/);
+    assert.match(geminiAssistantSource, /const SKILLS = Object\.freeze/);
+    assert.match(geminiAssistantSource, /responseJsonSchema: RESPONSE_SCHEMA/);
+    assert.match(geminiAssistantSource, /requiresConfirmation: WRITE_SKILLS\.has\(skill\)/);
+    assert.doesNotMatch(geminiAssistantSource, /names: 240, contact:/);
+    assert.equal(JSON.parse(functionsPackage).dependencies["@google/genai"], "^2.19.0");
 });
 
 test("registers durable background push and sends reminders from Firebase", () => {
