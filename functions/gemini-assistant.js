@@ -173,6 +173,22 @@ function cleanText(value, maxLength = 500) {
         : "";
 }
 
+function summarizeGeminiError(error) {
+    const status = Number(error?.status) || 0;
+    let body = null;
+    try {
+        body = JSON.parse(typeof error?.message === "string" ? error.message : "");
+    } catch {
+        body = null;
+    }
+    return {
+        status,
+        reason: cleanText(body?.error?.status, 80),
+        message: cleanText(body?.error?.message, 500)
+            .replace(/AIza[0-9A-Za-z_-]{20,}/g, "[redacted]")
+    };
+}
+
 function sanitizeRows(rows, fieldLimits, limit) {
     if (!Array.isArray(rows)) return [];
     return rows.slice(0, limit).map((row) => {
@@ -311,5 +327,6 @@ module.exports = {
     normalizePlan,
     sanitizeContext,
     sanitizeHistory,
+    summarizeGeminiError,
     usageKeys
 };

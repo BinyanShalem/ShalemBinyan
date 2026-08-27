@@ -7,7 +7,7 @@ const { defineSecret } = require("firebase-functions/params");
 const { HttpsError, onCall } = require("firebase-functions/v2/https");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const webpush = require("web-push");
-const { generateAssistantPlan, usageKeys } = require("./gemini-assistant");
+const { generateAssistantPlan, summarizeGeminiError, usageKeys } = require("./gemini-assistant");
 const { deriveDueReminders } = require("./reminders");
 
 initializeApp();
@@ -248,13 +248,18 @@ exports.adminAssistant = onCall({
         });
         return { ...plan, usage };
     } catch (error) {
+        const summary = summarizeGeminiError(error);
         console.error("Gemini assistant request failed", {
             name: error?.name,
-            status: error?.status,
-            code: error?.code
+            status: summary.status,
+            reason: summary.reason,
+            message: summary.message
         });
-        if ([400, 401, 403].includes(Number(error?.status))) {
+        if ([400, 401, 403, 404].includes(summary.status)) {
             throw new HttpsError("failed-precondition", "Smart assistant setup needs attention. The guided menu still works.");
+        }
+        if (summary.status === 429) {
+            throw new HttpsError("resource-exhausted", "Gemini billing or quota is not active for this API key. The guided menu still works.");
         }
         throw new HttpsError("unavailable", "The Smart assistant could not respond right now. The guided menu still works.");
     }

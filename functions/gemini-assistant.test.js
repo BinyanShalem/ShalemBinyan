@@ -7,6 +7,7 @@ const {
     normalizePlan,
     sanitizeContext,
     sanitizeHistory,
+    summarizeGeminiError,
     usageKeys
 } = require("./gemini-assistant");
 
@@ -81,5 +82,22 @@ test("creates stable UTC usage keys", () => {
         month: "2026-08",
         dailyId: "daily_user-a_2026-08-27",
         monthlyId: "monthly_2026-08"
+    });
+});
+
+test("extracts safe Gemini quota errors without logging an API key", () => {
+    const summary = summarizeGeminiError({
+        status: 429,
+        message: JSON.stringify({
+            error: {
+                status: "RESOURCE_EXHAUSTED",
+                message: "Quota unavailable for key AIzaSyExampleCredentialThatMustBeRedacted."
+            }
+        })
+    });
+    assert.deepEqual(summary, {
+        status: 429,
+        reason: "RESOURCE_EXHAUSTED",
+        message: "Quota unavailable for key [redacted]."
     });
 });
