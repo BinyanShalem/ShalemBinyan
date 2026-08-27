@@ -10,8 +10,8 @@ const {
     usageKeys
 } = require("./gemini-assistant");
 
-test("uses the cost-controlled Gemini Flash-Lite model", () => {
-    assert.equal(MODEL_ID, "gemini-2.5-flash-lite");
+test("uses the current cost-controlled Gemini Flash-Lite model", () => {
+    assert.equal(MODEL_ID, "gemini-3.1-flash-lite");
 });
 
 test("keeps only compact assistant context and omits full private notes", () => {

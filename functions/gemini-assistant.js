@@ -2,7 +2,7 @@
 
 const { GoogleGenAI } = require("@google/genai");
 
-const MODEL_ID = "gemini-2.5-flash-lite";
+const MODEL_ID = "gemini-3.1-flash-lite";
 const MAX_ACTIONS = 3;
 const MAX_HISTORY_ITEMS = 6;
 

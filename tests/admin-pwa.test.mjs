@@ -95,7 +95,7 @@ test("adds a protected Gemini assistant with allowlisted, confirmation-gated ski
     assert.match(functionsSource, /exports\.adminAssistant = onCall/);
     assert.match(functionsSource, /const AI_DAILY_LIMIT = 30/);
     assert.match(functionsSource, /const AI_MONTHLY_LIMIT = 500/);
-    assert.match(geminiAssistantSource, /const MODEL_ID = "gemini-2\.5-flash-lite"/);
+    assert.match(geminiAssistantSource, /const MODEL_ID = "gemini-3\.1-flash-lite"/);
     assert.match(geminiAssistantSource, /const SKILLS = Object\.freeze/);
     assert.match(geminiAssistantSource, /responseJsonSchema: RESPONSE_SCHEMA/);
     assert.match(geminiAssistantSource, /requiresConfirmation: WRITE_SKILLS\.has\(skill\)/);

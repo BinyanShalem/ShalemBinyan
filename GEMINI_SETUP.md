@@ -1,6 +1,6 @@
 # Gemini assistant setup
 
-The admin PWA uses `gemini-2.5-flash-lite` through a Firebase callable function. The browser never receives the Gemini API key.
+The admin PWA uses `gemini-3.1-flash-lite` through a Firebase callable function. The browser never receives the Gemini API key.
 
 ## 1. Create the key and connect billing
 
@@ -33,7 +33,7 @@ The GitHub Pages frontend also needs the matching admin changes published before
 
 ## Cost and safety controls
 
-- Gemini 2.5 Flash-Lite currently costs $0.10 per million text input tokens and $0.40 per million output tokens on the paid tier.
+- Gemini 3.1 Flash-Lite currently costs $0.25 per million text input tokens and $1.50 per million output tokens on the paid tier.
 - The function allows at most 30 assistant requests per Firebase user per UTC day.
 - It allows at most 500 assistant requests across the project per UTC month.
 - Each request is limited to 500 input characters, six short chat-history items, compact record summaries, and 900 output tokens.
