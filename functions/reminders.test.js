@@ -2,7 +2,7 @@
 
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { clockParts, deriveDueReminders } = require("./reminders");
+const { clockParts, deriveDueReminders, filterNotificationPreferences } = require("./reminders");
 
 function atNewYorkTime(iso) {
     return new Date(iso);
@@ -101,5 +101,23 @@ test("resolutions and persisted snoozes suppress background delivery", () => {
     assert.deepEqual(
         deriveDueReminders({ ...base, now: atNewYorkTime("2026-08-22T14:00:00Z") }).reminders.map(({ key }) => key),
         ["submission:form-b"]
+    );
+});
+
+test("meeting and new-intake notifications default on and can be disabled independently", () => {
+    const reminders = [
+        { key: "scheduled:meeting-a", type: "scheduled" },
+        { key: "submission:form-a", type: "submission" },
+        { key: "encounter:meeting-b", type: "encounter" },
+        { key: "manual:reminder-a", type: "manual" }
+    ];
+    assert.deepEqual(filterNotificationPreferences(reminders, {}), reminders);
+    assert.deepEqual(
+        filterNotificationPreferences(reminders, { notifyScheduledEncounters: false }).map(({ type }) => type),
+        ["submission", "encounter", "manual"]
+    );
+    assert.deepEqual(
+        filterNotificationPreferences(reminders, { notifyNewIntakes: false }).map(({ type }) => type),
+        ["scheduled", "encounter", "manual"]
     );
 });

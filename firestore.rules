@@ -13,6 +13,10 @@ service cloud.firestore {
       return value == null || value is number;
     }
 
+    function isOptionalBool(value) {
+      return value == null || value is bool;
+    }
+
     function isHttpsUrl(value) {
       return value is string
         && value.size() <= 2048
@@ -236,7 +240,8 @@ service cloud.firestore {
     function isValidPushSubscription() {
       return request.resource.data.keys().hasOnly([
           'endpoint', 'expirationTime', 'p256dh', 'auth', 'deviceId',
-          'timeZone', 'enabled', 'createdAt', 'updatedAt', 'createdBy'
+          'timeZone', 'enabled', 'notifyScheduledEncounters', 'notifyNewIntakes',
+          'createdAt', 'updatedAt', 'createdBy'
         ])
         && request.resource.data.keys().hasAll([
           'endpoint', 'expirationTime', 'p256dh', 'auth', 'deviceId',
@@ -259,6 +264,8 @@ service cloud.firestore {
         && request.resource.data.timeZone.size() > 0
         && request.resource.data.timeZone.size() <= 100
         && request.resource.data.enabled is bool
+        && isOptionalBool(request.resource.data.get('notifyScheduledEncounters', null))
+        && isOptionalBool(request.resource.data.get('notifyNewIntakes', null))
         && request.resource.data.createdAt is timestamp
         && request.resource.data.updatedAt is timestamp
         && request.resource.data.createdBy is string

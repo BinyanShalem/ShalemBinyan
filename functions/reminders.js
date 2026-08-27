@@ -88,6 +88,14 @@ function reminderBody(type) {
     return "A follow-up needs your attention.";
 }
 
+function filterNotificationPreferences(reminders = [], subscription = {}) {
+    return reminders.filter(({ type }) => {
+        if (type === "scheduled") return subscription.notifyScheduledEncounters !== false;
+        if (type === "submission") return subscription.notifyNewIntakes !== false;
+        return true;
+    });
+}
+
 function deriveDueReminders({
     submissions = [],
     encounters = [],
@@ -148,6 +156,7 @@ module.exports = {
     DEFAULT_DAILY_MINUTES,
     clockParts,
     deriveDueReminders,
+    filterNotificationPreferences,
     reminderBody,
     timeMinutes
 };

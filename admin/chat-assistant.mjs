@@ -939,7 +939,7 @@ export function createAdminChat({
 
     function showReminders({ announce = true } = {}) {
         currentSection = "reminders";
-        const { reminders, notificationEnabled, notificationsSupported } = getState();
+        const { reminders, notificationEnabled, notificationPreferences = {}, notificationsSupported } = getState();
         if (announce) sayUser("Show reminders");
         const buttons = [actionButton("New reminder", () => showReminderForm())];
         if (notificationsSupported) {
@@ -952,6 +952,26 @@ export function createAdminChat({
                 }
             ), { tone: "secondary" }));
             if (notificationEnabled) {
+                const meetingAlertsOn = notificationPreferences.notifyScheduledEncounters !== false;
+                const intakeAlertsOn = notificationPreferences.notifyNewIntakes !== false;
+                buttons.push(actionButton(`Meeting alerts: ${meetingAlertsOn ? "on" : "off"}`, (button) => runAction(
+                    button,
+                    () => actions.setNotificationPreference("notifyScheduledEncounters", !meetingAlertsOn),
+                    {
+                        busyLabel: "Saving…",
+                        success: `Scheduled meeting notifications are ${meetingAlertsOn ? "off" : "on"} for this device.`,
+                        after: () => showReminders({ announce: false })
+                    }
+                ), { tone: "secondary" }));
+                buttons.push(actionButton(`New form alerts: ${intakeAlertsOn ? "on" : "off"}`, (button) => runAction(
+                    button,
+                    () => actions.setNotificationPreference("notifyNewIntakes", !intakeAlertsOn),
+                    {
+                        busyLabel: "Saving…",
+                        success: `New intake form notifications are ${intakeAlertsOn ? "off" : "on"} for this device.`,
+                        after: () => showReminders({ announce: false })
+                    }
+                ), { tone: "secondary" }));
                 buttons.push(actionButton("Turn off notifications", (button) => runAction(button, actions.disableNotifications, {
                     busyLabel: "Turning off…",
                     success: "Background notifications are off for this device."

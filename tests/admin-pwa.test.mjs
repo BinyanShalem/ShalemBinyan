@@ -109,6 +109,10 @@ test("registers durable background push and sends reminders from Firebase", () =
     assert.match(adminPage, /PUSH_SUBSCRIPTIONS_COLLECTION/);
     assert.match(adminPage, /sendTestPushFunction/);
     assert.match(adminPage, /id="test-notifications-button"/);
+    assert.match(adminPage, /id="scheduled-meeting-notifications"[^>]+role="switch"[^>]+checked/);
+    assert.match(adminPage, /id="new-intake-notifications"[^>]+role="switch"[^>]+checked/);
+    assert.match(adminPage, /notifyScheduledEncounters: true/);
+    assert.match(adminPage, /notifyNewIntakes: true/);
     assert.match(adminPage, /Test notification sent\. It may take a few seconds to appear\./);
     assert.match(adminPage, /Background notifications are on/);
     assert.doesNotMatch(adminPage, /maybeSendDailyNotification/);
@@ -117,9 +121,16 @@ test("registers durable background push and sends reminders from Firebase", () =
     assert.match(firestoreRules, /match \/admin_reminder_snoozes\/\{snoozeId\}/);
     assert.match(functionsSource, /exports\.sendAdminReminders = onSchedule/);
     assert.match(functionsSource, /schedule: "every 15 minutes"/);
+    assert.match(functionsSource, /exports\.sendNewIntakeNotification = onDocumentCreated/);
+    assert.match(functionsSource, /A new intake form was submitted\./);
+    assert.match(functionsSource, /filterNotificationPreferences/);
     assert.match(functionsSource, /exports\.sendTestPush = onCall/);
     assert.match(functionsSource, /WEB_PUSH_VAPID_PRIVATE_KEY/);
     assert.match(functionsSource, /VAPID_PRIVATE_KEY\.value\(\)\.trim\(\)/);
+    assert.match(firestoreRules, /notifyScheduledEncounters/);
+    assert.match(firestoreRules, /notifyNewIntakes/);
+    assert.match(chatAssistant, /Meeting alerts:/);
+    assert.match(chatAssistant, /New form alerts:/);
     assert.equal(JSON.parse(functionsPackage).engines.node, "22");
 });
 

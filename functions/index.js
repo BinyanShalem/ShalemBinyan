@@ -4,11 +4,12 @@ const { createHash } = require("node:crypto");
 const { initializeApp } = require("firebase-admin/app");
 const { FieldValue, getFirestore, Timestamp } = require("firebase-admin/firestore");
 const { defineSecret } = require("firebase-functions/params");
+const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const { HttpsError, onCall } = require("firebase-functions/v2/https");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const webpush = require("web-push");
 const { generateAssistantPlan, summarizeGeminiError, usageKeys } = require("./gemini-assistant");
-const { deriveDueReminders } = require("./reminders");
+const { clockParts, deriveDueReminders, filterNotificationPreferences } = require("./reminders");
 
 initializeApp();
 
@@ -80,7 +81,7 @@ async function removeExpiredSubscription(ref, error) {
     return true;
 }
 
-function notificationPayload(reminders, { test = false } = {}) {
+function notificationPayload(reminders, { test = false, tag = "" } = {}) {
     return JSON.stringify({
         title: test ? "Binyan Shalem notifications are ready" : "Binyan Shalem reminder",
         body: test
@@ -90,7 +91,7 @@ function notificationPayload(reminders, { test = false } = {}) {
                 : `${reminders.length} reminders need your attention.`,
         icon: "/admin/icons/icon-192.png",
         badge: "/admin/icons/icon-192.png",
-        tag: test ? "binyan-push-test" : "binyan-reminders",
+        tag: tag || (test ? "binyan-push-test" : "binyan-reminders"),
         url: "/admin/?tab=reminders"
     });
 }
@@ -165,7 +166,8 @@ exports.sendAdminReminders = onSchedule({
             now: new Date(),
             timeZone: subscriptionData.timeZone || "America/New_York"
         });
-        const unsent = await unsentReminders(subscriptionDoc.id, day, reminders);
+        const wanted = filterNotificationPreferences(reminders, subscriptionData);
+        const unsent = await unsentReminders(subscriptionDoc.id, day, wanted);
         if (!unsent.length) return;
         try {
             await webpush.sendNotification(
@@ -190,6 +192,40 @@ exports.sendAdminReminders = onSchedule({
         oldDeliveries.docs.forEach((item) => cleanup.delete(item.ref));
         await cleanup.commit();
     }
+});
+
+exports.sendNewIntakeNotification = onDocumentCreated({
+    document: "artifacts/{appId}/public/data/submissions/{submissionId}",
+    region: "us-central1",
+    memory: "256MiB",
+    timeoutSeconds: 120,
+    maxInstances: 2,
+    secrets: [VAPID_PRIVATE_KEY]
+}, async (event) => {
+    if (event.params.appId !== PROJECT_ID) return;
+    configureWebPush();
+    const reminder = { key: `submission:${event.params.submissionId}`, type: "submission", body: "A new intake form was submitted." };
+    const tag = `binyan-intake-${createHash("sha256").update(event.params.submissionId).digest("hex").slice(0, 12)}`;
+    const subscriptions = await db.collection(PUSH_SUBSCRIPTIONS_COLLECTION).where("enabled", "==", true).get();
+
+    await Promise.all(subscriptions.docs.map(async (subscriptionDoc) => {
+        const subscriptionData = subscriptionDoc.data();
+        if (subscriptionData.notifyNewIntakes === false) return;
+        const { day } = clockParts(new Date(), subscriptionData.timeZone || "America/New_York");
+        const [unsent] = await unsentReminders(subscriptionDoc.id, day, [reminder]);
+        if (!unsent) return;
+        try {
+            await webpush.sendNotification(
+                subscriptionFrom(subscriptionData),
+                notificationPayload([reminder], { tag }),
+                { TTL: 3600, urgency: "high" }
+            );
+            await recordDeliveries(subscriptionDoc.id, day, [reminder]);
+        } catch (error) {
+            const removed = await removeExpiredSubscription(subscriptionDoc.ref, error);
+            if (!removed) console.error("Immediate intake notification failed", { statusCode: error?.statusCode });
+        }
+    }));
 });
 
 exports.sendTestPush = onCall({

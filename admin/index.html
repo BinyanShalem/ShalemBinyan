@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-    <script defer src="/cache-refresh.js?v=2026-08-27.3"></script>
+    <script defer src="/cache-refresh.js?v=2026-08-27.4"></script>
     <style>
         :root {
             --admin-purple: #723358;
@@ -2331,6 +2331,86 @@
             gap: 0.55rem;
         }
 
+        .notification-preferences {
+            grid-column: 1 / -1;
+            min-width: 0;
+            margin: 0;
+            padding: 0.95rem 0 0;
+            border: 0;
+            border-top: 1px solid rgba(35, 92, 70, 0.18);
+        }
+
+        .notification-preferences[hidden] {
+            display: none;
+        }
+
+        .notification-preferences legend {
+            padding: 0;
+            color: #304d41;
+            font-size: 0.74rem;
+            font-weight: 700;
+        }
+
+        .notification-preference-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.55rem 1.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .notification-preference {
+            display: flex;
+            min-width: 0;
+            min-height: 54px;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            cursor: pointer;
+        }
+
+        .notification-preference span,
+        .notification-preference strong,
+        .notification-preference small {
+            display: block;
+            min-width: 0;
+        }
+
+        .notification-preference small {
+            margin-top: 0.15rem;
+            color: #456558;
+            font-size: 0.7rem;
+            line-height: 1.45;
+        }
+
+        .notification-toggle {
+            appearance: none;
+            border: 1px solid rgba(48, 77, 65, 0.24);
+            border-radius: 999px;
+            background:
+                radial-gradient(circle at 13px 50%, #ffffff 0 9px, transparent 9.5px),
+                #9daaa4;
+            box-shadow: inset 0 1px 2px rgba(23, 35, 44, 0.12);
+            cursor: pointer;
+            transition: background-color 160ms ease-out, border-color 160ms ease-out;
+        }
+
+        .notification-toggle:checked {
+            border-color: var(--admin-purple);
+            background:
+                radial-gradient(circle at calc(100% - 13px) 50%, #ffffff 0 9px, transparent 9.5px),
+                var(--admin-purple);
+        }
+
+        .notification-toggle:focus-visible {
+            outline: 3px solid var(--admin-focus);
+            outline-offset: 2px;
+        }
+
+        .notification-toggle:disabled {
+            cursor: not-allowed;
+            opacity: 0.55;
+        }
+
         .reminder-card {
             display: grid;
             grid-template-columns: 42px minmax(0, 1fr);
@@ -2750,6 +2830,7 @@
             .encounter-grid,
             .encounter-summary,
             .reminders-overview,
+            .notification-preference-grid,
             .reminder-editor .directory-form-grid {
                 grid-template-columns: 1fr;
             }
@@ -3992,6 +4073,25 @@
                                 <button class="button button-secondary" id="test-notifications-button" type="button" hidden>Send test</button>
                                 <button class="button button-secondary" id="enable-notifications-button" type="button">Enable notifications</button>
                             </div>
+                            <fieldset class="notification-preferences" id="notification-preferences" hidden>
+                                <legend>Notify me about</legend>
+                                <div class="notification-preference-grid">
+                                    <label class="notification-preference">
+                                        <span>
+                                            <strong>Scheduled meetings</strong>
+                                            <small>On the scheduled day, at its time or 9:00 AM.</small>
+                                        </span>
+                                        <input class="toggle-input notification-toggle" id="scheduled-meeting-notifications" type="checkbox" role="switch" checked>
+                                    </label>
+                                    <label class="notification-preference">
+                                        <span>
+                                            <strong>New intake forms</strong>
+                                            <small>As soon as a new form is submitted.</small>
+                                        </span>
+                                        <input class="toggle-input notification-toggle" id="new-intake-notifications" type="checkbox" role="switch" checked>
+                                    </label>
+                                </div>
+                            </fieldset>
                         </div>
                         <p class="status" id="reminder-action-status" role="status" aria-live="polite" hidden></p>
                         <div class="loading-state" id="reminders-loading"><span class="loading-dot" aria-hidden="true"></span>Loading reminders…</div>
@@ -4164,7 +4264,7 @@
             normalizeDirectoryUrl,
             sortDirectoryEntries
         } from "./directory-tools.mjs?v=2026-08-20.1";
-        import { createAdminChat } from "./chat-assistant.mjs?v=2026-08-27.3";
+        import { createAdminChat } from "./chat-assistant.mjs?v=2026-08-27.4";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDxEV7W2m4jbJiVl0Sc6cN7gBH7oWu_rl8",
@@ -4343,6 +4443,10 @@
         let manualReminderFormTrigger = null;
         let pushSubscriptionEnabled = false;
         let pushControlsBusy = false;
+        let pushNotificationPreferences = {
+            notifyScheduledEncounters: true,
+            notifyNewIntakes: true
+        };
         let adminMode = "chat";
         let chatAssistant = null;
 
@@ -6122,6 +6226,9 @@
 
         const notificationButton = document.getElementById("enable-notifications-button");
         const testNotificationButton = document.getElementById("test-notifications-button");
+        const notificationPreferencesPanel = document.getElementById("notification-preferences");
+        const scheduledMeetingNotificationsToggle = document.getElementById("scheduled-meeting-notifications");
+        const newIntakeNotificationsToggle = document.getElementById("new-intake-notifications");
 
         function supportsPushNotifications() {
             return "Notification" in window && "serviceWorker" in navigator && "PushManager" in window;
@@ -6156,13 +6263,20 @@
             return Uint8Array.from(raw, (character) => character.charCodeAt(0));
         }
 
-        async function savePushSubscription(subscription, deviceId) {
+        async function savePushSubscription(subscription, deviceId, { loadPreferences = false } = {}) {
             const json = subscription.toJSON();
             if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) {
                 throw new Error("The browser returned an incomplete push subscription.");
             }
             const reference = doc(db, PUSH_SUBSCRIPTIONS_COLLECTION, pushSubscriptionDocId(deviceId));
             const existing = await getDoc(reference);
+            if (loadPreferences && existing.exists()) {
+                const stored = existing.data();
+                pushNotificationPreferences = {
+                    notifyScheduledEncounters: stored.notifyScheduledEncounters !== false,
+                    notifyNewIntakes: stored.notifyNewIntakes !== false
+                };
+            }
             const payload = {
                 endpoint: json.endpoint,
                 expirationTime: Number.isFinite(json.expirationTime) ? json.expirationTime : null,
@@ -6171,6 +6285,7 @@
                 deviceId,
                 timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || "America/New_York",
                 enabled: true,
+                ...pushNotificationPreferences,
                 updatedAt: serverTimestamp(),
                 createdBy: auth.currentUser.uid
             };
@@ -6188,7 +6303,7 @@
                 const registration = await navigator.serviceWorker.ready;
                 const subscription = await registration.pushManager.getSubscription();
                 pushSubscriptionEnabled = Boolean(subscription);
-                if (subscription) await savePushSubscription(subscription, pushDeviceId());
+                if (subscription) await savePushSubscription(subscription, pushDeviceId(), { loadPreferences: true });
             } catch (error) {
                 console.warn("Could not synchronize push notifications:", error);
                 pushSubscriptionEnabled = false;
@@ -6224,7 +6339,33 @@
             }
             if (subscription) await subscription.unsubscribe();
             pushSubscriptionEnabled = false;
+            pushNotificationPreferences = {
+                notifyScheduledEncounters: true,
+                notifyNewIntakes: true
+            };
             updateNotificationControls();
+        }
+
+        async function setPushNotificationPreference(field, enabled) {
+            if (!["notifyScheduledEncounters", "notifyNewIntakes"].includes(field)) {
+                throw new Error("Unknown notification preference.");
+            }
+            if (!pushSubscriptionEnabled || !auth.currentUser) {
+                throw new Error("Enable notifications before changing what this device receives.");
+            }
+            const previous = pushNotificationPreferences[field];
+            pushNotificationPreferences = { ...pushNotificationPreferences, [field]: enabled === true };
+            updateNotificationControls();
+            try {
+                await updateDoc(doc(db, PUSH_SUBSCRIPTIONS_COLLECTION, pushSubscriptionDocId()), {
+                    [field]: enabled === true,
+                    updatedAt: serverTimestamp()
+                });
+            } catch (error) {
+                pushNotificationPreferences = { ...pushNotificationPreferences, [field]: previous };
+                updateNotificationControls();
+                throw error;
+            }
         }
 
         function updateNotificationControls() {
@@ -6232,16 +6373,23 @@
             notificationButton.disabled = pushControlsBusy;
             testNotificationButton.disabled = pushControlsBusy;
             testNotificationButton.hidden = !pushSubscriptionEnabled;
+            notificationPreferencesPanel.hidden = !pushSubscriptionEnabled;
+            scheduledMeetingNotificationsToggle.checked = pushNotificationPreferences.notifyScheduledEncounters;
+            newIntakeNotificationsToggle.checked = pushNotificationPreferences.notifyNewIntakes;
+            scheduledMeetingNotificationsToggle.disabled = pushControlsBusy || !pushSubscriptionEnabled;
+            newIntakeNotificationsToggle.disabled = pushControlsBusy || !pushSubscriptionEnabled;
             if (LOCAL_PREVIEW) {
                 notificationButton.textContent = "Enable notifications";
                 notificationButton.disabled = true;
                 testNotificationButton.hidden = true;
-                explanation.textContent = "Push setup is available in the live admin app.";
+                notificationPreferencesPanel.hidden = false;
+                explanation.textContent = "Push setup is available in the live admin app. Both alert types default to on.";
                 return;
             }
             if (!supportsPushNotifications()) {
                 notificationButton.hidden = true;
                 testNotificationButton.hidden = true;
+                notificationPreferencesPanel.hidden = true;
                 explanation.textContent = "Install this app on a supported device to receive background notifications. Every reminder still stays visible here.";
                 return;
             }
@@ -6250,6 +6398,7 @@
                 notificationButton.textContent = "Notifications blocked";
                 notificationButton.disabled = true;
                 testNotificationButton.hidden = true;
+                notificationPreferencesPanel.hidden = true;
                 explanation.textContent = "Notifications are blocked in browser settings. Reminders still stay visible here.";
             } else if (pushSubscriptionEnabled) {
                 notificationButton.textContent = pushControlsBusy ? "Updating…" : "Turn off notifications";
@@ -6302,6 +6451,36 @@
                 updateNotificationControls();
             }
         });
+
+        async function handleNotificationPreferenceChange(toggle, field, label) {
+            if (pushControlsBusy) return;
+            const enabled = toggle.checked;
+            pushControlsBusy = true;
+            updateNotificationControls();
+            setStatus(reminderActionStatus, "");
+            try {
+                await setPushNotificationPreference(field, enabled);
+                setStatus(reminderActionStatus, `${label} notifications are ${enabled ? "on" : "off"} for this device.`, "success");
+            } catch (error) {
+                console.error("Could not update notification preference:", error);
+                toggle.checked = !enabled;
+                setStatus(reminderActionStatus, "That notification preference could not be saved. Check your connection and try again.", "error");
+            } finally {
+                pushControlsBusy = false;
+                updateNotificationControls();
+            }
+        }
+
+        scheduledMeetingNotificationsToggle.addEventListener("change", () => handleNotificationPreferenceChange(
+            scheduledMeetingNotificationsToggle,
+            "notifyScheduledEncounters",
+            "Scheduled meeting"
+        ));
+        newIntakeNotificationsToggle.addEventListener("change", () => handleNotificationPreferenceChange(
+            newIntakeNotificationsToggle,
+            "notifyNewIntakes",
+            "New intake form"
+        ));
         updateNotificationControls();
 
         function currentChatState() {
@@ -6313,6 +6492,7 @@
                 directoryEntries: allDirectoryEntries,
                 reminders: activeReminders(),
                 notificationEnabled: pushSubscriptionEnabled,
+                notificationPreferences: { ...pushNotificationPreferences },
                 notificationsSupported: !LOCAL_PREVIEW && supportsPushNotifications() && Notification.permission !== "denied",
                 resourcesLoaded: contentLoaded,
                 organizerLoaded: submissionsLoaded && encountersLoaded && resolutionsLoaded && manualRemindersLoaded && reminderSnoozesLoaded && directoryLoaded
@@ -6687,7 +6867,8 @@
                 submissionValue: formatSubmissionValue,
                 enableNotifications: enablePushNotifications,
                 disableNotifications: disablePushNotifications,
-                testNotifications: () => sendTestPushFunction({ deviceId: pushDeviceId() })
+                testNotifications: () => sendTestPushFunction({ deviceId: pushDeviceId() }),
+                setNotificationPreference: setPushNotificationPreference
             }
         });
 
