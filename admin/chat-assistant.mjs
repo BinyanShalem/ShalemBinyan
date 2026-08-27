@@ -74,6 +74,7 @@ export function createAdminChat({
     composer,
     composerInput,
     menuButton,
+    clearButton = null,
     smartStatus = null,
     getState,
     actions,
@@ -87,14 +88,26 @@ export function createAdminChat({
     let messageId = 0;
     let smartBusy = false;
     let assistantHistory = [];
+    let chatEpoch = 0;
+    const submitButton = composer.querySelector('button[type="submit"]');
 
-    function scrollToLatest() {
+    function scrollToLatest({ smooth = true } = {}) {
         window.requestAnimationFrame(() => {
             conversation.scrollTo({
                 top: conversation.scrollHeight,
-                behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"
+                behavior: smooth && !window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "smooth" : "auto"
             });
         });
+    }
+
+    function syncComposerState() {
+        composerInput.style.height = "auto";
+        const maximum = Number.parseFloat(window.getComputedStyle(composerInput).maxHeight) || composerInput.scrollHeight;
+        const nextHeight = Math.min(composerInput.scrollHeight, maximum);
+        composerInput.style.height = `${nextHeight}px`;
+        composerInput.style.overflowY = composerInput.scrollHeight > nextHeight ? "auto" : "hidden";
+        composer.dataset.hasText = String(Boolean(clean(composerInput.value)));
+        if (submitButton) submitButton.disabled = smartBusy || !clean(composerInput.value);
     }
 
     function actionButton(label, handler, { tone = "primary", ariaLabel = "" } = {}) {
@@ -179,6 +192,34 @@ export function createAdminChat({
 
     function updateLiveSummary() {
         if (liveSummary) liveSummary.textContent = summaryText();
+    }
+
+    function renderGreeting() {
+        conversation.replaceChildren();
+        messageId = 0;
+        const greeting = say("Hi — write naturally or use a button. I’ll understand the request, reuse what you already entered, and show every change before saving.", {
+            title: "How can I help?",
+            buttons: menuButtons()
+        });
+        liveSummary = element("p", "chat-live-summary", summaryText());
+        greeting.bubble.insertBefore(liveSummary, greeting.bubble.querySelector(".chat-message-actions"));
+        scrollToLatest({ smooth: false });
+    }
+
+    function clearConversation() {
+        chatEpoch += 1;
+        pendingTextAction = null;
+        pendingSection = null;
+        currentSection = "today";
+        assistantHistory = [];
+        smartBusy = false;
+        composer.removeAttribute("aria-busy");
+        composerInput.value = "";
+        composerInput.placeholder = "Message the assistant";
+        setSmartStatus("ready", "Gemini ready");
+        syncComposerState();
+        initialized = true;
+        renderGreeting();
     }
 
     function menuButtons() {
@@ -571,9 +612,9 @@ export function createAdminChat({
             say("I’m still handling your last message. Give me one moment.");
             return;
         }
+        const requestEpoch = chatEpoch;
         smartBusy = true;
-        const submitButton = composer.querySelector('button[type="submit"]');
-        composerInput.disabled = true;
+        composer.setAttribute("aria-busy", "true");
         if (submitButton) submitButton.disabled = true;
         setSmartStatus("busy", "Gemini is reading your request…");
         const thinking = say("One moment — I’m putting that into a safe, reviewable action.", { quiet: true });
@@ -582,21 +623,23 @@ export function createAdminChat({
                 message: text,
                 history: assistantHistory
             });
-            thinking.row.remove();
+            if (requestEpoch !== chatEpoch) return;
+            if (thinking.row.isConnected) thinking.row.remove();
             assistantHistory = [...assistantHistory, { role: "user", text }].slice(-6);
-            setSmartStatus("ready", "Gemini ready · confirms before saving");
+            setSmartStatus("ready", "Gemini ready");
             presentSmartPlan(plan);
         } catch (error) {
-            thinking.row.remove();
+            if (requestEpoch !== chatEpoch) return;
+            if (thinking.row.isConnected) thinking.row.remove();
             console.warn("Smart assistant unavailable:", error);
             setSmartStatus("error", "Guided mode · Gemini needs attention");
             say(error?.userMessage || "The Smart assistant couldn’t respond, so I switched to the guided assistant.");
             if (!routeGuidedText(text)) showMainMenu({ announce: false });
         } finally {
+            if (requestEpoch !== chatEpoch) return;
             smartBusy = false;
-            composerInput.disabled = false;
-            if (submitButton) submitButton.disabled = false;
-            window.setTimeout(() => composerInput.focus(), 0);
+            composer.removeAttribute("aria-busy");
+            syncComposerState();
         }
     }
 
@@ -1294,20 +1337,24 @@ export function createAdminChat({
         event.preventDefault();
         const value = composerInput.value;
         composerInput.value = "";
+        syncComposerState();
         handleFreeText(value);
     });
+    composerInput.addEventListener("input", syncComposerState);
+    composerInput.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" || event.shiftKey || event.isComposing) return;
+        event.preventDefault();
+        if (!submitButton?.disabled) composer.requestSubmit();
+    });
+    composerInput.addEventListener("focus", () => scrollToLatest({ smooth: false }));
     menuButton.addEventListener("click", () => showMainMenu());
+    clearButton?.addEventListener("click", clearConversation);
+    syncComposerState();
 
     function start({ section = "today" } = {}) {
         if (!initialized) {
             initialized = true;
-            conversation.replaceChildren();
-            const greeting = say("Hi — write naturally or use a button. I’ll understand the request, reuse what you already entered, and show every change before saving.", {
-                title: "How can I help?",
-                buttons: menuButtons()
-            });
-            liveSummary = element("p", "chat-live-summary", summaryText());
-            greeting.bubble.insertBefore(liveSummary, greeting.bubble.querySelector(".chat-message-actions"));
+            renderGreeting();
         }
         if (CHAT_SECTIONS.includes(section) && section !== currentSection) showSection(section, { announce: false });
         updateLiveSummary();
@@ -1348,5 +1395,5 @@ export function createAdminChat({
         }
     }
 
-    return { start, refresh, showSection, showMainMenu };
+    return { clear: clearConversation, scrollToLatest, start, refresh, showSection, showMainMenu };
 }

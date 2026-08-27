@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-    <script defer src="/cache-refresh.js?v=2026-08-27.4"></script>
+    <script defer src="/cache-refresh.js?v=2026-08-27.5"></script>
     <style>
         :root {
             --admin-purple: #723358;
@@ -2976,6 +2976,10 @@
             min-height: 100dvh;
         }
 
+        body:has(.app-shell.is-chat-mode:not([hidden])) {
+            overflow: hidden;
+        }
+
         .chat-workspace {
             height: calc(100vh - 82px);
             height: calc(100dvh - 82px);
@@ -2997,15 +3001,19 @@
         }
 
         .chat-conversation {
+            min-height: 0;
             overflow-x: hidden;
             overflow-y: auto;
             overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
             padding: clamp(1rem, 3vw, 2rem) clamp(0.8rem, 3vw, 2.25rem) 1.5rem;
             scroll-padding-bottom: 2rem;
+            touch-action: pan-y;
         }
 
         .chat-message-row {
             display: flex;
+            min-width: 0;
             max-width: min(82%, 720px);
             align-items: flex-end;
             gap: 0.55rem;
@@ -3053,6 +3061,7 @@
 
         .chat-message-user .chat-bubble {
             min-width: 0;
+            max-width: 100%;
             color: #ffffff;
             background: var(--admin-purple);
             border-radius: 15px 15px 4px 15px;
@@ -3070,7 +3079,17 @@
         .chat-live-summary {
             margin: 0;
             white-space: pre-line;
+            overflow-wrap: anywhere;
+            word-break: break-word;
             line-height: 1.55;
+        }
+
+        .chat-message-row + .chat-message-row {
+            margin-top: -0.35rem;
+        }
+
+        .chat-message-assistant + .chat-message-assistant .chat-avatar {
+            visibility: hidden;
         }
 
         .chat-live-summary {
@@ -3382,6 +3401,7 @@
             padding: 0;
             border: 0;
             border-radius: 50%;
+            touch-action: manipulation;
         }
 
         .chat-menu-button {
@@ -3403,7 +3423,7 @@
             display: grid;
             grid-template-columns: minmax(0, 1fr) 46px;
             gap: 0.55rem;
-            align-items: center;
+            align-items: end;
         }
 
         .chat-smart-status {
@@ -3442,27 +3462,62 @@
             background: var(--admin-error);
         }
 
-        .chat-composer input {
+        .chat-composer textarea {
+            display: block;
             width: 100%;
+            height: 46px;
             min-height: 46px;
-            padding: 0.7rem 0.95rem;
+            max-height: 126px;
+            overflow-y: hidden;
+            resize: none;
+            padding: 0.68rem 0.95rem;
             color: var(--admin-ink);
             background: #f3f6f4;
             border: 1px solid var(--admin-line-strong);
             border-radius: 23px;
             caret-color: var(--admin-purple);
+            font: inherit;
+            font-size: 1rem;
+            line-height: 1.35;
+            scrollbar-width: thin;
         }
 
-        .chat-composer input:focus {
+        .chat-composer textarea:focus {
             border-color: var(--admin-purple);
             outline: none;
             box-shadow: 0 0 0 4px rgba(154, 82, 123, 0.16);
+        }
+
+        .chat-composer textarea::placeholder {
+            color: #68756e;
+            opacity: 1;
         }
 
         .chat-send-button {
             color: #ffffff;
             background: var(--admin-purple);
             box-shadow: 0 5px 12px rgba(63, 31, 51, 0.16);
+            transition: color 160ms ease-out, background-color 160ms ease-out, box-shadow 160ms ease-out, transform 160ms ease-out;
+        }
+
+        .chat-send-button:disabled {
+            color: #79857f;
+            background: #dce2df;
+            box-shadow: none;
+            cursor: default;
+        }
+
+        .chat-send-button:not(:disabled):active {
+            transform: translateY(1px);
+        }
+
+        .chat-clear-button {
+            flex: 0 0 auto;
+        }
+
+        .chat-clear-button svg {
+            width: 18px;
+            height: 18px;
         }
 
         @keyframes chat-bubble-in {
@@ -3484,12 +3539,32 @@
 
         @media (max-width: 820px) {
             .app-shell.is-chat-mode {
+                position: fixed;
+                z-index: 20;
+                top: var(--chat-viewport-top, 0px);
+                right: 0;
+                left: 0;
+                width: 100%;
+                height: var(--chat-viewport-height, 100dvh);
+                overflow: hidden;
                 padding-bottom: 0;
             }
 
+            .app-shell.is-chat-mode .app-stage {
+                display: grid;
+                grid-template-rows: auto minmax(0, 1fr);
+                height: 100%;
+                min-height: 0;
+            }
+
+            .app-shell.is-chat-mode .admin-header {
+                position: relative;
+                top: auto;
+            }
+
             .chat-workspace {
-                height: calc(100vh - 72px);
-                height: calc(100dvh - 72px);
+                height: auto;
+                min-height: 0;
                 padding: 0;
             }
 
@@ -3509,8 +3584,7 @@
 
         @media (max-width: 620px) {
             .chat-workspace {
-                height: calc(100vh - 68px - env(safe-area-inset-top));
-                height: calc(100dvh - 68px - env(safe-area-inset-top));
+                height: auto;
                 min-height: 0;
             }
 
@@ -3553,6 +3627,10 @@
             .app-shell.is-chat-mode .mode-switch {
                 min-width: 0;
                 flex: 1 1 auto;
+            }
+
+            .app-shell.is-chat-keyboard-open .chat-composer-wrap {
+                padding-bottom: 0.55rem;
             }
         }
 
@@ -3710,6 +3788,10 @@
                             <strong id="admin-identity-label">Remembered access</strong>
                         </div>
                         <span class="preview-mode-indicator" id="preview-mode-indicator" hidden>Preview data</span>
+                        <button class="button button-quiet chat-clear-button" id="clear-chat-button" type="button" aria-label="Clear chat">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V5h6v2m-8 0 1 13h8l1-13M10 11v5m4-5v5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>
+                            <span>Clear chat</span>
+                        </button>
                         <button class="button button-quiet" id="install-app-button" type="button" aria-label="Install the Binyan Shalem admin app" hidden>
                             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>
                             <span>Install app</span>
@@ -3732,12 +3814,12 @@
                             <form class="chat-composer" id="chat-composer">
                                 <div class="chat-smart-status" id="chat-smart-status" data-tone="ready" role="status" aria-live="polite">
                                     <span class="chat-smart-dot" aria-hidden="true"></span>
-                                    <span>Smart assistant · confirms before saving</span>
+                                    <span>Gemini ready</span>
                                 </div>
                                 <label class="sr-only" for="chat-composer-input">Message the assistant</label>
                                 <div class="chat-composer-entry">
-                                    <input id="chat-composer-input" type="text" maxlength="500" autocomplete="off" placeholder="Ask naturally or type a command">
-                                    <button class="chat-send-button" type="submit" aria-label="Send message">
+                                    <textarea id="chat-composer-input" rows="1" maxlength="500" autocomplete="off" enterkeyhint="send" spellcheck="true" placeholder="Message the assistant"></textarea>
+                                    <button class="chat-send-button" type="submit" aria-label="Send message" disabled>
                                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 5 16 7-16 7 3-7-3-7Zm3 7h13" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/></svg>
                                     </button>
                                 </div>
@@ -4264,7 +4346,7 @@
             normalizeDirectoryUrl,
             sortDirectoryEntries
         } from "./directory-tools.mjs?v=2026-08-20.1";
-        import { createAdminChat } from "./chat-assistant.mjs?v=2026-08-27.4";
+        import { createAdminChat } from "./chat-assistant.mjs?v=2026-08-27.5";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDxEV7W2m4jbJiVl0Sc6cN7gBH7oWu_rl8",
@@ -4324,6 +4406,7 @@
         const chatWorkspace = document.getElementById("chat-workspace");
         const chatModeButton = document.getElementById("chat-mode-button");
         const dashboardModeButton = document.getElementById("dashboard-mode-button");
+        const clearChatButton = document.getElementById("clear-chat-button");
         const installButton = document.getElementById("install-app-button");
         const installStatus = document.getElementById("install-status");
         const connectionState = document.getElementById("connection-state");
@@ -6840,6 +6923,7 @@
             composer: document.getElementById("chat-composer"),
             composerInput: document.getElementById("chat-composer-input"),
             menuButton: document.getElementById("chat-menu-button"),
+            clearButton: clearChatButton,
             smartStatus: document.getElementById("chat-smart-status"),
             getState: currentChatState,
             contactMethods: CONTACT_METHODS,
@@ -6904,12 +6988,40 @@
             })[requested] || "today";
         }
 
+        let chatViewportFrame = 0;
+
+        function syncChatViewport() {
+            chatViewportFrame = 0;
+            const viewport = window.visualViewport;
+            const height = Math.max(320, Math.round(viewport?.height || window.innerHeight));
+            const top = Math.max(0, Math.round(viewport?.offsetTop || 0));
+            appShell.style.setProperty("--chat-viewport-height", `${height}px`);
+            appShell.style.setProperty("--chat-viewport-top", `${top}px`);
+            const composerFocused = document.activeElement === document.getElementById("chat-composer-input");
+            const keyboardOpen = Boolean(viewport && composerFocused && window.innerHeight - viewport.height > 120);
+            appShell.classList.toggle("is-chat-keyboard-open", adminMode === "chat" && keyboardOpen);
+            if (adminMode === "chat" && keyboardOpen) chatAssistant?.scrollToLatest({ smooth: false });
+        }
+
+        function scheduleChatViewportSync() {
+            if (chatViewportFrame) window.cancelAnimationFrame(chatViewportFrame);
+            chatViewportFrame = window.requestAnimationFrame(syncChatViewport);
+        }
+
+        window.visualViewport?.addEventListener("resize", scheduleChatViewportSync);
+        window.visualViewport?.addEventListener("scroll", scheduleChatViewportSync);
+        window.addEventListener("resize", scheduleChatViewportSync);
+        document.getElementById("chat-composer-input").addEventListener("focus", scheduleChatViewportSync);
+        document.getElementById("chat-composer-input").addEventListener("blur", scheduleChatViewportSync);
+        scheduleChatViewportSync();
+
         function activateAdminMode(mode, { focus = false } = {}) {
             adminMode = mode === "dashboard" ? "dashboard" : "chat";
             const chatActive = adminMode === "chat";
             appShell.classList.toggle("is-chat-mode", chatActive);
             chatWorkspace.hidden = !chatActive;
             dashboardWorkspace.hidden = chatActive;
+            clearChatButton.hidden = !chatActive;
             chatModeButton.setAttribute("aria-pressed", String(chatActive));
             dashboardModeButton.setAttribute("aria-pressed", String(!chatActive));
 
@@ -6930,9 +7042,10 @@
                 skipLink.textContent = "Skip to dashboard";
                 if (focus) dashboardWorkspace.focus({ preventScroll: true });
             }
+            scheduleChatViewportSync();
         }
 
-        chatModeButton.addEventListener("click", () => activateAdminMode("chat", { focus: true }));
+        chatModeButton.addEventListener("click", () => activateAdminMode("chat"));
         dashboardModeButton.addEventListener("click", () => activateAdminMode("dashboard", { focus: true }));
 
         function activateTab(tab, { persist = true, updateUrl = true } = {}) {
