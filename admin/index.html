@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-    <script defer src="/cache-refresh.js?v=2026-08-27.5"></script>
+    <script defer src="/cache-refresh.js?v=2026-08-27.6"></script>
     <style>
         :root {
             --admin-purple: #723358;
@@ -2978,6 +2978,7 @@
 
         body:has(.app-shell.is-chat-mode:not([hidden])) {
             overflow: hidden;
+            overscroll-behavior: none;
         }
 
         .chat-workspace {
@@ -2989,6 +2990,8 @@
         }
 
         .chat-frame {
+            position: relative;
+            isolation: isolate;
             width: min(100%, 960px);
             height: 100%;
             display: grid;
@@ -3383,6 +3386,9 @@
         }
 
         .chat-composer-wrap {
+            position: sticky;
+            z-index: 4;
+            bottom: 0;
             display: grid;
             grid-template-columns: 46px minmax(0, 1fr);
             gap: 0.6rem;
@@ -3390,6 +3396,7 @@
             padding: 0.75rem clamp(0.75rem, 2vw, 1.25rem) calc(0.75rem + env(safe-area-inset-bottom));
             background: #ffffff;
             border-top: 1px solid var(--admin-line);
+            box-shadow: 0 -5px 16px rgba(37, 56, 47, 0.06);
         }
 
         .chat-menu-button,
@@ -4346,7 +4353,7 @@
             normalizeDirectoryUrl,
             sortDirectoryEntries
         } from "./directory-tools.mjs?v=2026-08-20.1";
-        import { createAdminChat } from "./chat-assistant.mjs?v=2026-08-27.5";
+        import { createAdminChat } from "./chat-assistant.mjs?v=2026-08-27.6";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDxEV7W2m4jbJiVl0Sc6cN7gBH7oWu_rl8",

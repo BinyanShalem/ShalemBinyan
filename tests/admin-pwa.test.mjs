@@ -69,6 +69,7 @@ test("keeps the mobile chat composer visible, multiline, and easy to reset", () 
     assert.match(adminPage, /id="clear-chat-button"[^>]+aria-label="Clear chat"/);
     assert.match(adminPage, /window\.visualViewport\?\.addEventListener\("resize"/);
     assert.match(adminPage, /is-chat-keyboard-open/);
+    assert.match(adminPage, /\.chat-composer-wrap\s*\{[\s\S]*?position:\s*sticky;[\s\S]*?bottom:\s*0;/);
     assert.match(chatAssistant, /function syncComposerState\(\)/);
     assert.match(chatAssistant, /composer\.requestSubmit\(\)/);
     assert.match(chatAssistant, /function clearConversation\(\)/);
