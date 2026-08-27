@@ -2,7 +2,7 @@
   "id": "/admin/",
   "name": "Binyan Shalem Admin",
   "short_name": "Binyan Admin",
-  "description": "Manage Binyan Shalem resources, encounters, private directory contacts, and follow-up reminders.",
+  "description": "Handle Binyan Shalem resources, encounters, private contacts, and reminders through a simple admin assistant or full dashboard.",
   "lang": "en-US",
   "start_url": "/admin/",
   "scope": "/admin/",
@@ -30,7 +30,7 @@
     {
       "name": "Resources",
       "short_name": "Resources",
-      "url": "/admin/",
+      "url": "/admin/?tab=resources",
       "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }]
     },
     {

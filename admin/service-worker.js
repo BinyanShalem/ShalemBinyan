@@ -1,10 +1,11 @@
-const CACHE_VERSION = "binyan-admin-2026-08-21.2";
+const CACHE_VERSION = "binyan-admin-2026-08-27.1";
 const APP_SHELL = [
     "/admin/",
     "/admin/index.html",
     "/admin/manifest.webmanifest",
     "/admin/organizer-tools.mjs",
     "/admin/directory-tools.mjs",
+    "/admin/chat-assistant.mjs",
     "/admin/icons/icon-192.png",
     "/admin/icons/icon-512.png",
     "/admin/icons/apple-touch-icon.png",

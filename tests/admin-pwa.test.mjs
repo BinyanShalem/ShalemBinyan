@@ -2,8 +2,9 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [adminPage, manifestSource, serviceWorker, firestoreRules, functionsSource, functionsPackage] = await Promise.all([
+const [adminPage, chatAssistant, manifestSource, serviceWorker, firestoreRules, functionsSource, functionsPackage] = await Promise.all([
     readFile(new URL("../admin/index.html", import.meta.url), "utf8"),
+    readFile(new URL("../admin/chat-assistant.mjs", import.meta.url), "utf8"),
     readFile(new URL("../admin/manifest.webmanifest", import.meta.url), "utf8"),
     readFile(new URL("../admin/service-worker.js", import.meta.url), "utf8"),
     readFile(new URL("../firestore.rules", import.meta.url), "utf8"),
@@ -40,8 +41,43 @@ test("keeps the app shell cached without caching Firestore writes", () => {
     assert.match(serviceWorker, /notificationclick/);
     assert.match(serviceWorker, /organizer-tools\.mjs/);
     assert.match(serviceWorker, /directory-tools\.mjs/);
+    assert.match(serviceWorker, /chat-assistant\.mjs/);
     assert.match(serviceWorker, /addEventListener\("push"/);
     assert.match(serviceWorker, /showNotification/);
+});
+
+test("opens into a conversational assistant with a complete dashboard switch", () => {
+    assert.match(adminPage, /id="chat-mode-button"[^>]+aria-pressed="true"/);
+    assert.match(adminPage, /id="dashboard-mode-button"/);
+    assert.match(adminPage, /id="chat-conversation"[^>]+role="log"/);
+    assert.match(adminPage, /id="chat-composer-input"/);
+    assert.match(adminPage, /activateAdminMode\("chat"\)/);
+    assert.match(adminPage, /createAdminChat\(/);
+    assert.match(chatAssistant, /How can I help\?/);
+    assert.match(chatAssistant, /actionButton\("Today"/);
+    assert.match(chatAssistant, /actionButton\("Encounters"/);
+    assert.match(chatAssistant, /actionButton\("Reminders"/);
+    assert.match(chatAssistant, /actionButton\("Directory"/);
+    assert.match(chatAssistant, /actionButton\("Resources"/);
+    assert.match(chatAssistant, /actionButton\("Intake forms"/);
+});
+
+test("supports viewing and mutating every admin data area inside chat", () => {
+    assert.match(chatAssistant, /showEncounterForm/);
+    assert.match(chatAssistant, /showReminderForm/);
+    assert.match(chatAssistant, /showDirectoryForm/);
+    assert.match(chatAssistant, /showResourcePasteForm/);
+    assert.match(chatAssistant, /showIntakeDetails/);
+    assert.match(chatAssistant, /actions\.saveEncounter/);
+    assert.match(chatAssistant, /actions\.saveReminder/);
+    assert.match(chatAssistant, /actions\.saveDirectoryEntry/);
+    assert.match(chatAssistant, /actions\.publishResource/);
+    assert.match(chatAssistant, /actions\.deleteSubmission/);
+    assert.match(chatAssistant, /actions\.setThreadArchived/);
+    assert.match(chatAssistant, /actions\.completeReminder/);
+    assert.match(chatAssistant, /actions\.enableNotifications/);
+    assert.match(chatAssistant, /actions\.disableNotifications/);
+    assert.match(chatAssistant, /actions\.testNotifications/);
 });
 
 test("registers durable background push and sends reminders from Firebase", () => {

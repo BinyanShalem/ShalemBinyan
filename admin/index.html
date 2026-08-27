@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Binyan Admin">
-    <meta name="description" content="The Binyan Shalem admin workspace for resources, encounters, directory contacts, and reminders.">
+    <meta name="description" content="The Binyan Shalem admin assistant for resources, encounters, directory contacts, and reminders.">
     <title>Binyan Shalem Admin</title>
     <link rel="manifest" href="./manifest.webmanifest">
     <link rel="icon" href="./icons/icon-192.png" sizes="192x192" type="image/png">
@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-    <script defer src="/cache-refresh.js?v=2026-08-20.1"></script>
+    <script defer src="/cache-refresh.js?v=2026-08-27.1"></script>
     <style>
         :root {
             --admin-purple: #723358;
@@ -70,6 +70,19 @@
 
         [hidden] {
             display: none !important;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            margin: -1px;
+            padding: 0;
+            white-space: nowrap;
+            border: 0;
+            clip: rect(0 0 0 0);
+            clip-path: inset(50%);
         }
 
         .admin-shell {
@@ -2838,6 +2851,610 @@
             }
         }
 
+        /* Conversational admin mode */
+        .mode-switch {
+            display: inline-grid;
+            min-width: 224px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.25rem;
+            padding: 0.25rem;
+            background: #edf0ee;
+            border-radius: 12px;
+        }
+
+        .mode-switch button {
+            min-height: 40px;
+            padding: 0.5rem 0.75rem;
+            color: #46535c;
+            background: transparent;
+            border: 0;
+            border-radius: 9px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            transition: color 160ms ease-out, background 160ms ease-out, box-shadow 160ms ease-out;
+        }
+
+        .mode-switch button[aria-pressed="true"] {
+            color: var(--admin-purple-dark);
+            background: #ffffff;
+            box-shadow: 0 1px 2px rgba(28, 39, 43, 0.08), 0 5px 14px rgba(28, 39, 43, 0.08);
+        }
+
+        .app-shell.is-chat-mode {
+            display: block;
+            padding-bottom: 0;
+            background: #e7ece9;
+        }
+
+        .app-shell.is-chat-mode .app-sidebar {
+            display: none;
+        }
+
+        .app-shell.is-chat-mode .app-stage {
+            min-height: 100vh;
+            min-height: 100dvh;
+        }
+
+        .chat-workspace {
+            height: calc(100vh - 82px);
+            height: calc(100dvh - 82px);
+            min-height: 520px;
+            padding: clamp(0.8rem, 2.4vw, 1.5rem);
+            background: #e7ece9;
+        }
+
+        .chat-frame {
+            width: min(100%, 960px);
+            height: 100%;
+            display: grid;
+            grid-template-rows: minmax(0, 1fr) auto;
+            overflow: hidden;
+            margin: 0 auto;
+            background: #f3f6f4;
+            border-radius: 16px;
+            box-shadow: var(--shadow-low);
+        }
+
+        .chat-conversation {
+            overflow-x: hidden;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            padding: clamp(1rem, 3vw, 2rem) clamp(0.8rem, 3vw, 2.25rem) 1.5rem;
+            scroll-padding-bottom: 2rem;
+        }
+
+        .chat-message-row {
+            display: flex;
+            max-width: min(82%, 720px);
+            align-items: flex-end;
+            gap: 0.55rem;
+            margin: 0 0 1rem;
+            animation: chat-bubble-in 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        .chat-message-row.is-complete {
+            opacity: 0.72;
+        }
+
+        .chat-message-row.is-complete .chat-inline-form {
+            pointer-events: none;
+        }
+
+        .chat-message-user {
+            margin-left: auto;
+            justify-content: flex-end;
+        }
+
+        .chat-avatar {
+            width: 32px;
+            height: 32px;
+            flex: 0 0 auto;
+            overflow: hidden;
+            background: #ffffff;
+            border-radius: 50%;
+            box-shadow: 0 1px 5px rgba(28, 39, 43, 0.12);
+        }
+
+        .chat-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .chat-bubble {
+            min-width: min(100%, 270px);
+            padding: 0.85rem 0.95rem;
+            color: var(--admin-ink);
+            background: #ffffff;
+            border-radius: 15px 15px 15px 4px;
+            box-shadow: 0 1px 2px rgba(28, 39, 43, 0.08), 0 5px 16px rgba(28, 39, 43, 0.05);
+        }
+
+        .chat-message-user .chat-bubble {
+            min-width: 0;
+            color: #ffffff;
+            background: var(--admin-purple);
+            border-radius: 15px 15px 4px 15px;
+            box-shadow: 0 5px 16px rgba(63, 31, 51, 0.16);
+        }
+
+        .chat-message-title {
+            margin: 0 0 0.35rem;
+            color: var(--admin-purple-dark);
+            font-size: 1.05rem;
+            letter-spacing: -0.02em;
+        }
+
+        .chat-message-copy,
+        .chat-live-summary {
+            margin: 0;
+            white-space: pre-line;
+            line-height: 1.55;
+        }
+
+        .chat-live-summary {
+            margin-top: 0.65rem;
+            padding-top: 0.65rem;
+            color: var(--admin-sage-deep);
+            border-top: 1px solid var(--admin-line);
+            font-weight: 650;
+        }
+
+        .chat-message-actions,
+        .chat-record-actions,
+        .chat-form-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+        }
+
+        .chat-message-actions {
+            margin-top: 0.8rem;
+        }
+
+        .chat-action {
+            display: inline-flex;
+            min-height: 44px;
+            align-items: center;
+            justify-content: center;
+            padding: 0.58rem 0.78rem;
+            color: var(--admin-purple);
+            background: var(--admin-purple-soft);
+            border: 1px solid transparent;
+            border-radius: 10px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            line-height: 1.25;
+            text-decoration: none;
+            transition: color 160ms ease-out, background 160ms ease-out, border-color 160ms ease-out, transform 160ms ease-out;
+        }
+
+        .chat-action:hover {
+            color: #ffffff;
+            background: var(--admin-purple);
+        }
+
+        .chat-action:active {
+            transform: translateY(1px);
+        }
+
+        .chat-action-primary {
+            color: #ffffff;
+            background: var(--admin-purple);
+            box-shadow: 0 5px 12px rgba(63, 31, 51, 0.14);
+        }
+
+        .chat-action-primary:hover {
+            background: var(--admin-purple-dark);
+        }
+
+        .chat-action-secondary {
+            color: #36434c;
+            background: #ffffff;
+            border-color: var(--admin-line-strong);
+        }
+
+        .chat-action-secondary:hover {
+            color: var(--admin-purple-dark);
+            background: var(--admin-purple-soft);
+            border-color: #d5bbc9;
+        }
+
+        .chat-action-danger {
+            color: var(--admin-error);
+            background: #fffafa;
+            border-color: #e2b8bb;
+        }
+
+        .chat-action-danger:hover {
+            color: #ffffff;
+            background: var(--admin-error);
+            border-color: var(--admin-error);
+        }
+
+        .chat-record-list {
+            margin-top: 0.8rem;
+            border-top: 1px solid var(--admin-line);
+        }
+
+        .chat-record {
+            padding: 0.85rem 0;
+            border-bottom: 1px solid var(--admin-line);
+        }
+
+        .chat-record:last-child {
+            border-bottom: 0;
+        }
+
+        .chat-record-heading {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.75rem;
+        }
+
+        .chat-record h3 {
+            color: var(--admin-purple-dark);
+            font-size: 0.94rem;
+        }
+
+        .chat-record-tag {
+            flex: 0 0 auto;
+            padding: 0.2rem 0.45rem;
+            color: var(--admin-sage-deep);
+            background: var(--admin-sage);
+            border-radius: 999px;
+            font-size: 0.64rem;
+            font-weight: 700;
+        }
+
+        .chat-record-meta,
+        .chat-record-copy {
+            margin: 0.35rem 0 0;
+            white-space: pre-line;
+            line-height: 1.5;
+        }
+
+        .chat-record-meta {
+            color: #46535c;
+            font-size: 0.72rem;
+            font-variant-numeric: tabular-nums;
+            font-weight: 650;
+        }
+
+        .chat-record-copy {
+            color: var(--admin-muted);
+            font-size: 0.8rem;
+        }
+
+        .chat-record-actions {
+            margin-top: 0.65rem;
+        }
+
+        .chat-form-wrap {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--admin-line);
+        }
+
+        .chat-form-heading h3 {
+            color: var(--admin-purple-dark);
+            font-size: 1rem;
+        }
+
+        .chat-form-heading p {
+            margin: 0.3rem 0 0;
+            color: var(--admin-muted);
+            font-size: 0.78rem;
+        }
+
+        .chat-form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.75rem;
+            margin-top: 0.85rem;
+        }
+
+        .chat-field {
+            min-width: 0;
+        }
+
+        .chat-field-wide,
+        .chat-more-fields {
+            grid-column: 1 / -1;
+        }
+
+        .chat-field-label {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 0.5rem;
+            margin-bottom: 0.35rem;
+            color: #344149;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+
+        .chat-field-label small {
+            color: var(--admin-muted);
+            font-size: 0.64rem;
+            font-weight: 500;
+        }
+
+        .chat-input {
+            width: 100%;
+            min-height: 44px;
+            padding: 0.65rem 0.72rem;
+            color: var(--admin-ink);
+            background: #f8faf8;
+            border: 1px solid var(--admin-line-strong);
+            border-radius: 10px;
+            caret-color: var(--admin-purple);
+        }
+
+        .chat-input:focus {
+            border-color: var(--admin-purple);
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(154, 82, 123, 0.16);
+        }
+
+        .chat-textarea {
+            min-height: 86px;
+            resize: vertical;
+            line-height: 1.45;
+        }
+
+        .chat-more-fields {
+            padding: 0.15rem 0;
+        }
+
+        .chat-more-fields > summary {
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            color: var(--admin-purple);
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .chat-check {
+            display: flex;
+            min-height: 58px;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0.7rem 0.8rem;
+            color: var(--admin-purple-dark);
+            background: var(--admin-purple-soft);
+            border-radius: 11px;
+        }
+
+        .chat-check strong,
+        .chat-check small {
+            display: block;
+        }
+
+        .chat-check small {
+            margin-top: 0.12rem;
+            color: #685463;
+            font-size: 0.68rem;
+        }
+
+        .chat-check input {
+            width: 22px;
+            height: 22px;
+            flex: 0 0 auto;
+            accent-color: var(--admin-purple);
+        }
+
+        .chat-form-actions {
+            margin-top: 0.9rem;
+        }
+
+        .chat-form-status {
+            margin: 0.8rem 0 0;
+            padding: 0.7rem;
+            color: var(--admin-error);
+            background: var(--admin-error-soft);
+            border-radius: 10px;
+            font-size: 0.76rem;
+        }
+
+        .chat-detail-list {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.7rem;
+            margin: 0.8rem 0 0;
+            padding-top: 0.8rem;
+            border-top: 1px solid var(--admin-line);
+        }
+
+        .chat-detail-list dt {
+            color: var(--admin-muted);
+            font-size: 0.65rem;
+            font-weight: 700;
+        }
+
+        .chat-detail-list dd {
+            margin: 0.2rem 0 0;
+            white-space: pre-line;
+            font-size: 0.78rem;
+        }
+
+        .chat-composer-wrap {
+            display: grid;
+            grid-template-columns: 46px minmax(0, 1fr);
+            gap: 0.6rem;
+            align-items: center;
+            padding: 0.75rem clamp(0.75rem, 2vw, 1.25rem) calc(0.75rem + env(safe-area-inset-bottom));
+            background: #ffffff;
+            border-top: 1px solid var(--admin-line);
+        }
+
+        .chat-menu-button,
+        .chat-send-button {
+            width: 46px;
+            height: 46px;
+            display: grid;
+            place-items: center;
+            padding: 0;
+            border: 0;
+            border-radius: 50%;
+        }
+
+        .chat-menu-button {
+            color: var(--admin-purple);
+            background: var(--admin-purple-soft);
+        }
+
+        .chat-menu-button svg,
+        .chat-send-button svg {
+            width: 21px;
+            height: 21px;
+        }
+
+        .chat-composer {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 46px;
+            gap: 0.55rem;
+            align-items: center;
+        }
+
+        .chat-composer input {
+            width: 100%;
+            min-height: 46px;
+            padding: 0.7rem 0.95rem;
+            color: var(--admin-ink);
+            background: #f3f6f4;
+            border: 1px solid var(--admin-line-strong);
+            border-radius: 23px;
+            caret-color: var(--admin-purple);
+        }
+
+        .chat-composer input:focus {
+            border-color: var(--admin-purple);
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(154, 82, 123, 0.16);
+        }
+
+        .chat-send-button {
+            color: #ffffff;
+            background: var(--admin-purple);
+            box-shadow: 0 5px 12px rgba(63, 31, 51, 0.16);
+        }
+
+        @keyframes chat-bubble-in {
+            from {
+                opacity: 0;
+                clip-path: inset(0 0 18% 0 round 15px);
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                clip-path: inset(0 0 0 0 round 15px);
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 820px) {
+            .app-shell.is-chat-mode {
+                padding-bottom: 0;
+            }
+
+            .chat-workspace {
+                height: calc(100vh - 72px);
+                height: calc(100dvh - 72px);
+                padding: 0;
+            }
+
+            .chat-frame {
+                border-radius: 0;
+                box-shadow: none;
+            }
+
+            .admin-header {
+                gap: 0.8rem;
+            }
+
+            .mode-switch {
+                min-width: 192px;
+            }
+        }
+
+        @media (max-width: 620px) {
+            .chat-workspace {
+                height: calc(100vh - 68px - env(safe-area-inset-top));
+                height: calc(100dvh - 68px - env(safe-area-inset-top));
+                min-height: 0;
+            }
+
+            .chat-message-row {
+                max-width: 94%;
+            }
+
+            .chat-bubble {
+                min-width: min(100%, 230px);
+            }
+
+            .chat-form-grid,
+            .chat-detail-list {
+                grid-template-columns: 1fr;
+            }
+
+            .chat-field-wide,
+            .chat-more-fields {
+                grid-column: auto;
+            }
+
+            .chat-record-heading {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 0.35rem;
+            }
+
+            .chat-action {
+                flex: 1 1 auto;
+            }
+
+            .admin-title-block {
+                display: none;
+            }
+
+            .app-shell.is-chat-mode .admin-header {
+                padding-left: max(0.75rem, env(safe-area-inset-left));
+            }
+
+            .app-shell.is-chat-mode .mode-switch {
+                min-width: 0;
+                flex: 1 1 auto;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .mode-switch {
+                min-width: 164px;
+            }
+
+            .mode-switch button {
+                padding-inline: 0.5rem;
+                font-size: 0.72rem;
+            }
+
+            .chat-conversation {
+                padding-inline: 0.65rem;
+            }
+
+            .chat-avatar {
+                width: 28px;
+                height: 28px;
+            }
+
+            .chat-bubble {
+                padding-inline: 0.78rem;
+            }
+        }
+
         @media (display-mode: standalone) {
             .admin-header {
                 padding-top: max(0.8rem, env(safe-area-inset-top));
@@ -2848,14 +3465,14 @@
 <body>
     <!--
         IMPECCABLE_DIRECTION_CONTRACT
-        THESIS: A calm secretary, not a database; the admin sees the next natural action and records only what is worth remembering.
-        OWN-WORLD: Deep-plum navigation, quiet gray-green canvas, white working surfaces, compact Inter type, sage reassurance, and practical low-shadow controls.
-        STORY: Unlock once → choose Resources, Encounters, Directory, or Reminders → publish, log what happened or schedule what comes next inside one couple timeline, look someone up, create a personal reminder, or handle the next relevant follow-up.
-        FIRST VIEWPORT: A plum rail frames four focused workspaces; Encounters opens one clear two-path action for completed and scheduled meetings, while Reminders keeps due appointments beside personal tasks and follow-ups.
-        FORM [surface seed b24dcaf2]: Operate-mode established-world extension; focused entry clears bottom navigation from the keyboard area and every state remains explicit.
+        THESIS: A calm secretary speaks in short, familiar messages; the default view replaces database-shaped navigation with one natural next question while preserving the complete dashboard.
+        OWN-WORLD: Deep plum, quiet gray-green, white assistant bubbles, sage status, compact Inter type, and practical WhatsApp-familiar controls without imitating another brand.
+        STORY: Unlock once → ask what needs attention or choose a menu button → view, add, edit, schedule, resolve, archive, or remove information inside the conversation → switch to Dashboard whenever a full overview is useful.
+        FIRST VIEWPORT: A persistent Chat / Dashboard switch sits in the top bar above one focused conversation; the assistant greets the admin with the live workload and six plain-language menu choices, while a message field stays thumb-reachable below.
+        FORM [surface seed b24dcaf2-chat]: Operate-mode established-world extension; guided message forms reveal optional detail only when wanted and reuse existing couple and intake information automatically.
         FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance.
     -->
-    <a class="skip-link" href="#workspace">Skip to workspace</a>
+    <a class="skip-link" href="#chat-conversation">Skip to admin assistant</a>
 
     <div class="app-boot" id="app-boot" role="status" aria-live="polite">
         <div class="app-boot-inner">
@@ -2954,8 +3571,12 @@
             <div class="app-stage">
                 <header class="admin-header">
                     <div class="admin-title-block">
-                        <h1 id="workspace-title">Resources</h1>
-                        <p id="workspace-description">Publish and manage trusted marriage resources.</p>
+                        <h1 id="workspace-title">Assistant</h1>
+                        <p id="workspace-description">Handle your work through a simple conversation.</p>
+                    </div>
+                    <div class="mode-switch" role="group" aria-label="Choose admin view">
+                        <button id="chat-mode-button" type="button" aria-pressed="true">Chat</button>
+                        <button id="dashboard-mode-button" type="button" aria-pressed="false">Dashboard</button>
                     </div>
                     <div class="admin-identity">
                         <span class="connection-state" id="connection-state"><span class="connection-dot" aria-hidden="true"></span><span id="connection-label">Connected</span></span>
@@ -2976,7 +3597,25 @@
                     <p class="install-status" id="install-status" role="status" aria-live="polite" hidden></p>
                 </header>
 
-                <div class="workspace" id="workspace">
+                <section class="chat-workspace" id="chat-workspace" aria-label="Binyan Shalem admin assistant">
+                    <div class="chat-frame">
+                        <div class="chat-conversation" id="chat-conversation" role="log" aria-live="polite" aria-relevant="additions" tabindex="-1"></div>
+                        <div class="chat-composer-wrap">
+                            <button class="chat-menu-button" id="chat-menu-button" type="button" aria-label="Open assistant menu">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M5 12h14M5 17h14" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"/></svg>
+                            </button>
+                            <form class="chat-composer" id="chat-composer">
+                                <label class="sr-only" for="chat-composer-input">Message the assistant</label>
+                                <input id="chat-composer-input" type="text" maxlength="500" autocomplete="off" placeholder="Message the assistant">
+                                <button class="chat-send-button" type="submit" aria-label="Send message">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 5 16 7-16 7 3-7-3-7Zm3 7h13" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/></svg>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="workspace" id="workspace" tabindex="-1" hidden>
                     <section class="workspace-panel" id="content-panel" role="tabpanel" aria-labelledby="content-tab">
                         <div class="panel-heading">
                             <div>
@@ -3475,6 +4114,7 @@
             normalizeDirectoryUrl,
             sortDirectoryEntries
         } from "./directory-tools.mjs?v=2026-08-20.1";
+        import { createAdminChat } from "./chat-assistant.mjs?v=2026-08-27.1";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDxEV7W2m4jbJiVl0Sc6cN7gBH7oWu_rl8",
@@ -3528,6 +4168,11 @@
         const remindersNavCount = document.getElementById("reminders-nav-count");
         const workspaceTitle = document.getElementById("workspace-title");
         const workspaceDescription = document.getElementById("workspace-description");
+        const appShell = document.getElementById("admin-content");
+        const dashboardWorkspace = document.getElementById("workspace");
+        const chatWorkspace = document.getElementById("chat-workspace");
+        const chatModeButton = document.getElementById("chat-mode-button");
+        const dashboardModeButton = document.getElementById("dashboard-mode-button");
         const installButton = document.getElementById("install-app-button");
         const installStatus = document.getElementById("install-status");
         const connectionState = document.getElementById("connection-state");
@@ -3621,12 +4266,14 @@
         let manualRemindersUnsubscribe = null;
         let reminderSnoozesUnsubscribe = null;
         let directoryUnsubscribe = null;
+        let allAdminResources = [];
         let allSubmissions = [];
         let allEncounters = [];
         let allResolutions = [];
         let allManualReminders = [];
         let allReminderSnoozes = [];
         let allDirectoryEntries = [];
+        let contentLoaded = false;
         let submissionsLoaded = false;
         let encountersLoaded = false;
         let resolutionsLoaded = false;
@@ -3645,6 +4292,8 @@
         let manualReminderFormTrigger = null;
         let pushSubscriptionEnabled = false;
         let pushControlsBusy = false;
+        let adminMode = "chat";
+        let chatAssistant = null;
 
         CONTACT_METHODS.forEach((method) => {
             [encounterFields.method, meetingEditFields.method].forEach((select) => {
@@ -3778,6 +4427,7 @@
             if (LOCAL_PREVIEW) loadPreviewOrganizer();
             else subscribeToOrganizer();
             activateInitialTab();
+            activateAdminMode("chat");
             void syncPushSubscription();
         }
 
@@ -3819,6 +4469,7 @@
             const resources = documents
                 .map((document) => normalizeStoredResource(document.data(), document.id))
                 .filter(Boolean);
+            allAdminResources = resources;
 
             createdContentCount.textContent = `${resources.length} ${resources.length === 1 ? "resource" : "resources"}`;
             contentNavCount.textContent = String(resources.length);
@@ -3869,6 +4520,7 @@
                 fragment.appendChild(item);
             });
             adminResourceList.appendChild(fragment);
+            chatAssistant?.refresh();
         }
 
         function subscribeToAdminContent() {
@@ -3876,11 +4528,14 @@
             contentListLoading.hidden = false;
             const contentQuery = query(collection(db, CONTENT_COLLECTION), orderBy("sortOrder", "desc"));
             contentUnsubscribe = onSnapshot(contentQuery, (snapshot) => {
+                contentLoaded = true;
                 renderAdminResources(snapshot.docs);
                 contentListLoading.hidden = true;
             }, (error) => {
                 console.error("Could not load admin-created resources:", error);
                 contentListLoading.textContent = "Resources could not be loaded.";
+                contentLoaded = true;
+                chatAssistant?.refresh();
             });
         }
 
@@ -4496,8 +5151,8 @@
             return key.replace(/[^a-zA-Z0-9_-]/g, "_");
         }
 
-        async function completeReminder(reminder) {
-            if (!window.confirm(`Mark “${reminder.title}” as taken care of?`)) return;
+        async function completeReminder(reminder, { confirm = true } = {}) {
+            if (confirm && !window.confirm(`Mark “${reminder.title}” as taken care of?`)) return;
             setStatus(reminderActionStatus, "");
             try {
                 if (reminder.type === "manual") {
@@ -4823,6 +5478,7 @@
             renderEncounters();
             renderReminders();
             renderDirectory();
+            chatAssistant?.refresh();
         }
 
         function renderSubmissions(submissions) {
@@ -5079,6 +5735,7 @@
                     createdAt: new Date(Date.now() - 2 * 86400000)
                 }, "preview-resource")
             ];
+            contentLoaded = true;
             submissionsLoaded = true;
             encountersLoaded = true;
             resolutionsLoaded = true;
@@ -5596,6 +6253,263 @@
         });
         updateNotificationControls();
 
+        function currentChatState() {
+            return {
+                resources: allAdminResources,
+                submissions: allSubmissions,
+                encounters: allEncounters,
+                threads: groupEncounterThreads(allEncounters),
+                directoryEntries: allDirectoryEntries,
+                reminders: activeReminders(),
+                notificationEnabled: pushSubscriptionEnabled,
+                notificationsSupported: !LOCAL_PREVIEW && supportsPushNotifications() && Notification.permission !== "denied",
+                resourcesLoaded: contentLoaded,
+                organizerLoaded: submissionsLoaded && encountersLoaded && resolutionsLoaded && manualRemindersLoaded && reminderSnoozesLoaded && directoryLoaded
+            };
+        }
+
+        async function saveEncounterFromChat(fields, existing = null) {
+            if (!adminUnlocked || (!LOCAL_PREVIEW && !auth.currentUser)) {
+                throw Object.assign(new Error("Admin session unavailable"), {
+                    userMessage: "Your admin session is not ready. Lock and reopen the app, then try again."
+                });
+            }
+            const encounterType = fields.encounterType === "scheduled" ? "scheduled" : "completed";
+            if (existing) {
+                const changes = {
+                    encounterType,
+                    names: fields.names,
+                    contact: fields.contact,
+                    otherPeopleInvolved: fields.otherPeopleInvolved,
+                    occurredDate: fields.occurredDate,
+                    occurredTime: fields.occurredTime,
+                    method: fields.method,
+                    notes: fields.notes,
+                    needsFollowUp: encounterType === "completed" && fields.needsFollowUp,
+                    updatedAt: LOCAL_PREVIEW ? new Date() : serverTimestamp()
+                };
+                if (!LOCAL_PREVIEW) await updateDoc(doc(db, ENCOUNTERS_COLLECTION, existing.id), changes);
+                allEncounters = allEncounters.map((item) => item.id === existing.id
+                    ? normalizeEncounter({ ...item, ...changes }, item.id)
+                    : item);
+                renderOrganizer();
+                return allEncounters.find(({ id }) => id === existing.id);
+            }
+
+            const encounterRef = LOCAL_PREVIEW
+                ? { id: `preview-chat-${Date.now()}` }
+                : doc(collection(db, ENCOUNTERS_COLLECTION));
+            const existingThread = fields.rootEncounterId
+                ? null
+                : findCoupleThread(allEncounters, {
+                    submissionId: fields.submissionId,
+                    names: fields.names,
+                    contact: fields.contact
+                });
+            const payload = {
+                encounterType,
+                names: fields.names,
+                contact: fields.contact,
+                otherPeopleInvolved: fields.otherPeopleInvolved,
+                occurredDate: fields.occurredDate,
+                occurredTime: fields.occurredTime,
+                method: fields.method,
+                notes: fields.notes,
+                needsFollowUp: encounterType === "completed" && fields.needsFollowUp,
+                submissionId: fields.submissionId || null,
+                rootEncounterId: fields.rootEncounterId || existingThread?.rootId || encounterRef.id,
+                previousEncounterId: fields.previousEncounterId || existingThread?.latest.id || null,
+                archived: false,
+                createdAt: LOCAL_PREVIEW ? new Date() : serverTimestamp(),
+                updatedAt: LOCAL_PREVIEW ? new Date() : serverTimestamp(),
+                createdBy: LOCAL_PREVIEW ? "preview" : auth.currentUser.uid
+            };
+            if (LOCAL_PREVIEW) {
+                const normalized = normalizeEncounter(payload, encounterRef.id);
+                allEncounters = [...allEncounters, normalized];
+                renderOrganizer();
+                return normalized;
+            }
+            await setDoc(encounterRef, payload);
+            return normalizeEncounter(payload, encounterRef.id);
+        }
+
+        async function deleteEncounterFromChat(encounter) {
+            if (LOCAL_PREVIEW) {
+                allEncounters = allEncounters.filter(({ id }) => id !== encounter.id);
+                renderOrganizer();
+                return;
+            }
+            await deleteDoc(doc(db, ENCOUNTERS_COLLECTION, encounter.id));
+        }
+
+        async function saveReminderFromChat(fields, reminder = null) {
+            const base = {
+                title: fields.title,
+                description: fields.description,
+                dueDate: fields.dueDate,
+                dueTime: fields.dueTime,
+                completed: false
+            };
+            if (reminder) {
+                const changes = { ...base, updatedAt: LOCAL_PREVIEW ? new Date() : serverTimestamp() };
+                if (!LOCAL_PREVIEW) await updateDoc(doc(db, MANUAL_REMINDERS_COLLECTION, reminder.id), changes);
+                allManualReminders = allManualReminders.map((item) => item.id === reminder.id
+                    ? normalizeManualReminder({ ...item, ...changes }, item.id)
+                    : item);
+                renderOrganizer();
+                return allManualReminders.find(({ id }) => id === reminder.id);
+            }
+            const reminderRef = LOCAL_PREVIEW
+                ? { id: `preview-chat-reminder-${Date.now()}` }
+                : doc(collection(db, MANUAL_REMINDERS_COLLECTION));
+            const payload = {
+                ...base,
+                createdAt: LOCAL_PREVIEW ? new Date() : serverTimestamp(),
+                updatedAt: LOCAL_PREVIEW ? new Date() : serverTimestamp(),
+                createdBy: LOCAL_PREVIEW ? "preview" : auth.currentUser.uid
+            };
+            if (LOCAL_PREVIEW) {
+                const normalized = normalizeManualReminder(payload, reminderRef.id);
+                allManualReminders = [...allManualReminders, normalized];
+                renderOrganizer();
+                return normalized;
+            }
+            await setDoc(reminderRef, payload);
+            return normalizeManualReminder(payload, reminderRef.id);
+        }
+
+        async function deleteReminderFromChat(reminder) {
+            if (!LOCAL_PREVIEW) await deleteDoc(doc(db, MANUAL_REMINDERS_COLLECTION, reminder.id));
+            allManualReminders = allManualReminders.filter(({ id }) => id !== reminder.id);
+            renderOrganizer();
+        }
+
+        async function saveDirectoryEntryFromChat(fields, entry = null) {
+            const url = normalizeDirectoryUrl(fields.url);
+            if (fields.url && !url) {
+                throw Object.assign(new Error("Invalid directory URL"), {
+                    userMessage: "That website does not look valid. Try something like example.com."
+                });
+            }
+            const base = {
+                name: fields.name,
+                type: DIRECTORY_TYPES.includes(fields.type) ? fields.type : "Person",
+                phone: fields.phone,
+                email: fields.email,
+                url,
+                notes: fields.notes
+            };
+            if (entry) {
+                const changes = { ...base, updatedAt: LOCAL_PREVIEW ? new Date() : serverTimestamp() };
+                if (!LOCAL_PREVIEW) await updateDoc(doc(db, DIRECTORY_COLLECTION, entry.id), changes);
+                allDirectoryEntries = allDirectoryEntries.map((item) => item.id === entry.id
+                    ? normalizeDirectoryEntry({ ...item, ...changes }, item.id)
+                    : item);
+                renderDirectory();
+                chatAssistant?.refresh();
+                return allDirectoryEntries.find(({ id }) => id === entry.id);
+            }
+            const entryRef = LOCAL_PREVIEW
+                ? { id: `preview-chat-directory-${Date.now()}` }
+                : doc(collection(db, DIRECTORY_COLLECTION));
+            const payload = {
+                ...base,
+                createdAt: LOCAL_PREVIEW ? new Date() : serverTimestamp(),
+                updatedAt: LOCAL_PREVIEW ? new Date() : serverTimestamp(),
+                createdBy: LOCAL_PREVIEW ? "preview" : auth.currentUser.uid
+            };
+            if (LOCAL_PREVIEW) {
+                const normalized = normalizeDirectoryEntry(payload, entryRef.id);
+                allDirectoryEntries = [...allDirectoryEntries, normalized];
+                renderDirectory();
+                chatAssistant?.refresh();
+                return normalized;
+            }
+            await setDoc(entryRef, payload);
+            return normalizeDirectoryEntry(payload, entryRef.id);
+        }
+
+        async function deleteDirectoryEntryFromChat(entry) {
+            if (!LOCAL_PREVIEW) await deleteDoc(doc(db, DIRECTORY_COLLECTION, entry.id));
+            allDirectoryEntries = allDirectoryEntries.filter(({ id }) => id !== entry.id);
+            renderDirectory();
+            chatAssistant?.refresh();
+        }
+
+        async function publishResourceFromChat(resource, edits) {
+            let editedResource;
+            try {
+                editedResource = applyResourceEdits(resource, edits);
+            } catch (error) {
+                if (error instanceof ContentParseError) {
+                    throw Object.assign(error, { userMessage: error.message });
+                }
+                throw Object.assign(error, { userMessage: "One or more resource details are invalid. Check the links and try again." });
+            }
+            const resourceRef = doc(db, CONTENT_COLLECTION, editedResource.id);
+            const existing = await getDoc(resourceRef);
+            if (existing.exists()) {
+                throw Object.assign(new Error("Duplicate resource"), { userMessage: "That resource has already been published." });
+            }
+            await setDoc(resourceRef, {
+                ...editedResource,
+                schemaVersion: 1,
+                published: true,
+                sortOrder: Date.now(),
+                createdAt: serverTimestamp(),
+                createdBy: auth.currentUser.uid
+            });
+            return editedResource;
+        }
+
+        async function deleteResourceFromChat(resource) {
+            await deleteDoc(doc(db, CONTENT_COLLECTION, resource.id));
+        }
+
+        async function deleteSubmissionFromChat(submission) {
+            if (LOCAL_PREVIEW) {
+                allSubmissions = allSubmissions.filter(({ id }) => id !== submission.id);
+                renderOrganizer();
+                return;
+            }
+            await deleteDoc(doc(db, `artifacts/${appId}/public/data/submissions/${submission.id}`));
+        }
+
+        chatAssistant = createAdminChat({
+            conversation: document.getElementById("chat-conversation"),
+            composer: document.getElementById("chat-composer"),
+            composerInput: document.getElementById("chat-composer-input"),
+            menuButton: document.getElementById("chat-menu-button"),
+            getState: currentChatState,
+            contactMethods: CONTACT_METHODS,
+            actions: {
+                encounterPrefill: ({ encounter, submission, encounterType }) => buildEncounterPrefill({ encounter, submission, encounterType }),
+                saveEncounter: saveEncounterFromChat,
+                deleteEncounter: deleteEncounterFromChat,
+                setThreadArchived,
+                formatReminderSchedule: formatManualReminderSchedule,
+                saveReminder: saveReminderFromChat,
+                deleteReminder: deleteReminderFromChat,
+                snoozeReminder: remindTomorrow,
+                completeReminder: (reminder) => completeReminder(reminder, { confirm: false }),
+                saveDirectoryEntry: saveDirectoryEntryFromChat,
+                deleteDirectoryEntry: deleteDirectoryEntryFromChat,
+                resourceTypeLabel: getResourceTypeLabel,
+                resourceProviderName: getProviderName,
+                prepareResource: buildResourceFromPaste,
+                publishResource: publishResourceFromChat,
+                deleteResource: deleteResourceFromChat,
+                deleteSubmission: deleteSubmissionFromChat,
+                submissionLabel: (key) => submissionFieldLabels[key]
+                    || key.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase()),
+                submissionValue: formatSubmissionValue,
+                enableNotifications: enablePushNotifications,
+                disableNotifications: disablePushNotifications,
+                testNotifications: () => sendTestPushFunction({ deviceId: pushDeviceId() })
+            }
+        });
+
         const tabs = [...document.querySelectorAll('[role="tab"]')];
         const tabCopy = {
             "content-tab": {
@@ -5616,6 +6530,49 @@
             }
         };
 
+        function requestedChatSection() {
+            const requested = new URLSearchParams(window.location.search).get("tab");
+            return ({
+                content: "resources",
+                resources: "resources",
+                encounters: "encounters",
+                directory: "directory",
+                reminders: "reminders",
+                intakes: "intakes"
+            })[requested] || "today";
+        }
+
+        function activateAdminMode(mode, { focus = false } = {}) {
+            adminMode = mode === "dashboard" ? "dashboard" : "chat";
+            const chatActive = adminMode === "chat";
+            appShell.classList.toggle("is-chat-mode", chatActive);
+            chatWorkspace.hidden = !chatActive;
+            dashboardWorkspace.hidden = chatActive;
+            chatModeButton.setAttribute("aria-pressed", String(chatActive));
+            dashboardModeButton.setAttribute("aria-pressed", String(!chatActive));
+
+            const skipLink = document.querySelector(".skip-link");
+            if (chatActive) {
+                workspaceTitle.textContent = "Assistant";
+                workspaceDescription.textContent = "Handle your work through a simple conversation.";
+                skipLink.href = "#chat-conversation";
+                skipLink.textContent = "Skip to admin assistant";
+                chatAssistant.start({ section: requestedChatSection() });
+                if (focus) document.getElementById("chat-composer-input").focus();
+            } else {
+                const selectedTab = tabs.find((tab) => tab.getAttribute("aria-selected") === "true") || tabs[0];
+                const copy = tabCopy[selectedTab.id];
+                workspaceTitle.textContent = copy.title;
+                workspaceDescription.textContent = copy.description;
+                skipLink.href = "#workspace";
+                skipLink.textContent = "Skip to dashboard";
+                if (focus) dashboardWorkspace.focus({ preventScroll: true });
+            }
+        }
+
+        chatModeButton.addEventListener("click", () => activateAdminMode("chat", { focus: true }));
+        dashboardModeButton.addEventListener("click", () => activateAdminMode("dashboard", { focus: true }));
+
         function activateTab(tab, { persist = true, updateUrl = true } = {}) {
             if (!tab || tab.hidden) tab = document.getElementById("content-tab");
 
@@ -5626,9 +6583,11 @@
                 document.getElementById(item.getAttribute("aria-controls")).hidden = !selected;
             });
 
-            const copy = tabCopy[tab.id];
-            workspaceTitle.textContent = copy.title;
-            workspaceDescription.textContent = copy.description;
+            if (adminMode === "dashboard") {
+                const copy = tabCopy[tab.id];
+                workspaceTitle.textContent = copy.title;
+                workspaceDescription.textContent = copy.description;
+            }
 
             if (persist) {
                 try {
@@ -5648,7 +6607,9 @@
 
         function activateInitialTab() {
             const requested = new URLSearchParams(window.location.search).get("tab");
-            const requestedTab = ["encounters", "directory", "reminders"].includes(requested) ? `${requested}-tab` : "";
+            const requestedTab = requested === "resources"
+                ? "content-tab"
+                : ["encounters", "directory", "reminders"].includes(requested) ? `${requested}-tab` : "";
             let rememberedTab = "";
             try {
                 rememberedTab = window.localStorage.getItem(ADMIN_TAB_KEY) || "";
