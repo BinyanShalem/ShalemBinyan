@@ -71,7 +71,9 @@ test("keeps the mobile chat composer visible, multiline, and easy to reset", () 
     assert.match(adminPage, /window\.visualViewport\?\.addEventListener\("resize"/);
     assert.match(adminPage, /is-chat-keyboard-open/);
     assert.match(adminPage, /\.chat-composer-wrap\s*\{[\s\S]*?position:\s*relative;/);
-    assert.match(adminPage, /transform:\s*translate3d\(0, var\(--chat-viewport-top, 0px\), 0\)/);
+    assert.match(adminPage, /\.app-shell\.is-chat-mode\s*\{[\s\S]*?position:\s*absolute;[\s\S]*?top:\s*var\(--chat-viewport-top, 0px\)/);
+    assert.doesNotMatch(adminPage, /\.app-shell\.is-chat-mode\s*\{[\s\S]*?position:\s*fixed;/);
+    assert.doesNotMatch(adminPage, /transform:\s*translate3d\(0, var\(--chat-viewport-top/);
     assert.match(adminPage, /chatViewportBaselineHeight - height > 100/);
     assert.doesNotMatch(adminPage, /Math\.max\(320, Math\.round\(viewport\?\.height/);
     assert.doesNotMatch(adminPage, /keyboardOpen\) chatAssistant\?\.scrollToLatest/);

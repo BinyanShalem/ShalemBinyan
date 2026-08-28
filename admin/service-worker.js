@@ -1,4 +1,4 @@
-const CACHE_VERSION = "binyan-admin-2026-08-27.7";
+const CACHE_VERSION = "binyan-admin-2026-08-27.8";
 const APP_SHELL = [
     "/admin/",
     "/admin/index.html",
