@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
     <meta name="robots" content="noindex, nofollow">
     <meta name="theme-color" content="#3f1f33">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-    <script defer src="/cache-refresh.js?v=2026-08-27.6"></script>
+    <script defer src="/cache-refresh.js?v=2026-08-27.7"></script>
     <style>
         :root {
             --admin-purple: #723358;
@@ -2976,6 +2976,7 @@
             min-height: 100dvh;
         }
 
+        html:has(.app-shell.is-chat-mode:not([hidden])),
         body:has(.app-shell.is-chat-mode:not([hidden])) {
             overflow: hidden;
             overscroll-behavior: none;
@@ -3007,6 +3008,7 @@
             min-height: 0;
             overflow-x: hidden;
             overflow-y: auto;
+            overflow-anchor: none;
             overscroll-behavior: contain;
             -webkit-overflow-scrolling: touch;
             padding: clamp(1rem, 3vw, 2rem) clamp(0.8rem, 3vw, 2.25rem) 1.5rem;
@@ -3386,9 +3388,8 @@
         }
 
         .chat-composer-wrap {
-            position: sticky;
+            position: relative;
             z-index: 4;
-            bottom: 0;
             display: grid;
             grid-template-columns: 46px minmax(0, 1fr);
             gap: 0.6rem;
@@ -3548,13 +3549,14 @@
             .app-shell.is-chat-mode {
                 position: fixed;
                 z-index: 20;
-                top: var(--chat-viewport-top, 0px);
+                top: 0;
                 right: 0;
                 left: 0;
                 width: 100%;
                 height: var(--chat-viewport-height, 100dvh);
                 overflow: hidden;
                 padding-bottom: 0;
+                transform: translate3d(0, var(--chat-viewport-top, 0px), 0);
             }
 
             .app-shell.is-chat-mode .app-stage {
@@ -4353,7 +4355,7 @@
             normalizeDirectoryUrl,
             sortDirectoryEntries
         } from "./directory-tools.mjs?v=2026-08-20.1";
-        import { createAdminChat } from "./chat-assistant.mjs?v=2026-08-27.6";
+        import { createAdminChat } from "./chat-assistant.mjs?v=2026-08-27.7";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDxEV7W2m4jbJiVl0Sc6cN7gBH7oWu_rl8",
@@ -6996,18 +6998,21 @@
         }
 
         let chatViewportFrame = 0;
+        let chatViewportSettleTimers = [];
+        let chatViewportBaselineHeight = Math.round(window.visualViewport?.height || window.innerHeight);
+        const chatComposerInput = document.getElementById("chat-composer-input");
 
         function syncChatViewport() {
             chatViewportFrame = 0;
             const viewport = window.visualViewport;
-            const height = Math.max(320, Math.round(viewport?.height || window.innerHeight));
+            const height = Math.max(1, Math.round(viewport?.height || window.innerHeight));
             const top = Math.max(0, Math.round(viewport?.offsetTop || 0));
             appShell.style.setProperty("--chat-viewport-height", `${height}px`);
             appShell.style.setProperty("--chat-viewport-top", `${top}px`);
-            const composerFocused = document.activeElement === document.getElementById("chat-composer-input");
-            const keyboardOpen = Boolean(viewport && composerFocused && window.innerHeight - viewport.height > 120);
+            const composerFocused = document.activeElement === chatComposerInput;
+            if (!composerFocused) chatViewportBaselineHeight = Math.max(chatViewportBaselineHeight, height);
+            const keyboardOpen = Boolean(composerFocused && chatViewportBaselineHeight - height > 100);
             appShell.classList.toggle("is-chat-keyboard-open", adminMode === "chat" && keyboardOpen);
-            if (adminMode === "chat" && keyboardOpen) chatAssistant?.scrollToLatest({ smooth: false });
         }
 
         function scheduleChatViewportSync() {
@@ -7015,11 +7020,18 @@
             chatViewportFrame = window.requestAnimationFrame(syncChatViewport);
         }
 
+        function settleChatViewport() {
+            chatViewportSettleTimers.forEach((timer) => window.clearTimeout(timer));
+            chatViewportSettleTimers = [0, 80, 220, 420].map((delay) => window.setTimeout(scheduleChatViewportSync, delay));
+        }
+
         window.visualViewport?.addEventListener("resize", scheduleChatViewportSync);
         window.visualViewport?.addEventListener("scroll", scheduleChatViewportSync);
         window.addEventListener("resize", scheduleChatViewportSync);
-        document.getElementById("chat-composer-input").addEventListener("focus", scheduleChatViewportSync);
-        document.getElementById("chat-composer-input").addEventListener("blur", scheduleChatViewportSync);
+        window.addEventListener("orientationchange", settleChatViewport);
+        window.addEventListener("pageshow", settleChatViewport);
+        chatComposerInput.addEventListener("focus", settleChatViewport);
+        chatComposerInput.addEventListener("blur", settleChatViewport);
         scheduleChatViewportSync();
 
         function activateAdminMode(mode, { focus = false } = {}) {

@@ -64,12 +64,17 @@ test("opens into a conversational assistant with a complete dashboard switch", (
 });
 
 test("keeps the mobile chat composer visible, multiline, and easy to reset", () => {
+    assert.match(adminPage, /interactive-widget=resizes-content/);
     assert.match(adminPage, /<textarea id="chat-composer-input"[^>]+rows="1"[^>]+maxlength="500"/);
     assert.match(adminPage, /enterkeyhint="send"/);
     assert.match(adminPage, /id="clear-chat-button"[^>]+aria-label="Clear chat"/);
     assert.match(adminPage, /window\.visualViewport\?\.addEventListener\("resize"/);
     assert.match(adminPage, /is-chat-keyboard-open/);
-    assert.match(adminPage, /\.chat-composer-wrap\s*\{[\s\S]*?position:\s*sticky;[\s\S]*?bottom:\s*0;/);
+    assert.match(adminPage, /\.chat-composer-wrap\s*\{[\s\S]*?position:\s*relative;/);
+    assert.match(adminPage, /transform:\s*translate3d\(0, var\(--chat-viewport-top, 0px\), 0\)/);
+    assert.match(adminPage, /chatViewportBaselineHeight - height > 100/);
+    assert.doesNotMatch(adminPage, /Math\.max\(320, Math\.round\(viewport\?\.height/);
+    assert.doesNotMatch(adminPage, /keyboardOpen\) chatAssistant\?\.scrollToLatest/);
     assert.match(chatAssistant, /function syncComposerState\(\)/);
     assert.match(chatAssistant, /composer\.requestSubmit\(\)/);
     assert.match(chatAssistant, /function clearConversation\(\)/);
