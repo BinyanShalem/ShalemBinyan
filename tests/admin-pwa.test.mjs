@@ -108,6 +108,8 @@ test("adds a protected Gemini assistant with allowlisted, confirmation-gated ski
     assert.match(adminPage, /id="chat-smart-status"/);
     assert.match(chatAssistant, /actions\.askAssistant/);
     assert.match(chatAssistant, /presentSmartPlan/);
+    assert.match(chatAssistant, /say\(message, \{ content \}\)/);
+    assert.doesNotMatch(chatAssistant, /buttons: actionsList\.length \?/);
     assert.match(chatAssistant, /Nothing changes until you review the details/);
     assert.match(chatAssistant, /This cannot be undone\./);
     assert.match(chatAssistant, /smartActionPresentation/);

@@ -583,10 +583,7 @@ export function createAdminChat({
         })) : null;
         const message = [plan?.reply, plan?.clarification].map(clean).filter(Boolean).join(" ")
             || "I’m ready for your next request.";
-        say(message, {
-            content,
-            buttons: actionsList.length ? [actionButton("Menu", () => showMainMenu(), { tone: "secondary" })] : menuButtons()
-        });
+        say(message, { content });
         assistantHistory = [...assistantHistory, { role: "assistant", text: message }].slice(-6);
     }
 
