@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-    <script defer src="/cache-refresh.js?v=2026-08-27.8"></script>
+    <script defer src="/cache-refresh.js?v=2026-08-28.1"></script>
     <style>
         :root {
             --admin-purple: #723358;
@@ -3547,13 +3547,12 @@
 
         @media (max-width: 820px) {
             .app-shell.is-chat-mode {
-                position: absolute;
+                position: relative;
                 z-index: 20;
-                top: var(--chat-viewport-top, 0px);
-                right: 0;
-                left: 0;
                 width: 100%;
-                height: var(--chat-viewport-height, 100dvh);
+                height: 100vh;
+                height: 100dvh;
+                min-height: 0;
                 overflow: hidden;
                 padding-bottom: 0;
             }
@@ -3637,7 +3636,7 @@
                 flex: 1 1 auto;
             }
 
-            .app-shell.is-chat-keyboard-open .chat-composer-wrap {
+            .app-shell.is-chat-mode:has(#chat-composer-input:focus) .chat-composer-wrap {
                 padding-bottom: 0.55rem;
             }
         }
@@ -4354,7 +4353,7 @@
             normalizeDirectoryUrl,
             sortDirectoryEntries
         } from "./directory-tools.mjs?v=2026-08-20.1";
-        import { createAdminChat } from "./chat-assistant.mjs?v=2026-08-27.8";
+        import { createAdminChat } from "./chat-assistant.mjs?v=2026-08-28.1";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDxEV7W2m4jbJiVl0Sc6cN7gBH7oWu_rl8",
@@ -6996,43 +6995,6 @@
             })[requested] || "today";
         }
 
-        let chatViewportFrame = 0;
-        let chatViewportSettleTimers = [];
-        let chatViewportBaselineHeight = Math.round(window.visualViewport?.height || window.innerHeight);
-        const chatComposerInput = document.getElementById("chat-composer-input");
-
-        function syncChatViewport() {
-            chatViewportFrame = 0;
-            const viewport = window.visualViewport;
-            const height = Math.max(1, Math.round(viewport?.height || window.innerHeight));
-            const top = Math.max(0, Math.round(viewport?.offsetTop || 0));
-            appShell.style.setProperty("--chat-viewport-height", `${height}px`);
-            appShell.style.setProperty("--chat-viewport-top", `${top}px`);
-            const composerFocused = document.activeElement === chatComposerInput;
-            if (!composerFocused) chatViewportBaselineHeight = Math.max(chatViewportBaselineHeight, height);
-            const keyboardOpen = Boolean(composerFocused && chatViewportBaselineHeight - height > 100);
-            appShell.classList.toggle("is-chat-keyboard-open", adminMode === "chat" && keyboardOpen);
-        }
-
-        function scheduleChatViewportSync() {
-            if (chatViewportFrame) window.cancelAnimationFrame(chatViewportFrame);
-            chatViewportFrame = window.requestAnimationFrame(syncChatViewport);
-        }
-
-        function settleChatViewport() {
-            chatViewportSettleTimers.forEach((timer) => window.clearTimeout(timer));
-            chatViewportSettleTimers = [0, 80, 220, 420].map((delay) => window.setTimeout(scheduleChatViewportSync, delay));
-        }
-
-        window.visualViewport?.addEventListener("resize", scheduleChatViewportSync);
-        window.visualViewport?.addEventListener("scroll", scheduleChatViewportSync);
-        window.addEventListener("resize", scheduleChatViewportSync);
-        window.addEventListener("orientationchange", settleChatViewport);
-        window.addEventListener("pageshow", settleChatViewport);
-        chatComposerInput.addEventListener("focus", settleChatViewport);
-        chatComposerInput.addEventListener("blur", settleChatViewport);
-        scheduleChatViewportSync();
-
         function activateAdminMode(mode, { focus = false } = {}) {
             adminMode = mode === "dashboard" ? "dashboard" : "chat";
             const chatActive = adminMode === "chat";
@@ -7060,7 +7022,6 @@
                 skipLink.textContent = "Skip to dashboard";
                 if (focus) dashboardWorkspace.focus({ preventScroll: true });
             }
-            scheduleChatViewportSync();
         }
 
         chatModeButton.addEventListener("click", () => activateAdminMode("chat"));
