@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-    <script defer src="/cache-refresh.js?v=2026-08-28.2"></script>
+    <script defer src="/cache-refresh.js?v=2026-09-01.1"></script>
     <style>
         :root {
             --admin-purple: #723358;
@@ -4344,7 +4344,7 @@
             PUSH_SUBSCRIPTIONS_COLLECTION,
             REMINDER_SNOOZES_COLLECTION,
             REMINDER_RESOLUTIONS_COLLECTION
-        } from "./organizer-tools.mjs?v=2026-08-21.2";
+        } from "./organizer-tools.mjs?v=2026-09-01.1";
         import {
             DIRECTORY_COLLECTION,
             DIRECTORY_TYPES,
@@ -4353,7 +4353,7 @@
             normalizeDirectoryUrl,
             sortDirectoryEntries
         } from "./directory-tools.mjs?v=2026-08-20.1";
-        import { createAdminChat } from "./chat-assistant.mjs?v=2026-08-28.2";
+        import { createAdminChat } from "./chat-assistant.mjs?v=2026-09-01.1";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDxEV7W2m4jbJiVl0Sc6cN7gBH7oWu_rl8",
@@ -4894,8 +4894,8 @@
         const submissionFieldLabels = {
             formType: "Submitted by",
             submitter_relationship: "Relationship to couple",
-            h_name: "Husband name",
-            w_name: "Wife name",
+            h_name: "Husband or primary name",
+            w_name: "Wife or second name",
             h_cell: "Husband cell",
             w_cell: "Wife cell",
             h_email: "Husband email",
@@ -4906,6 +4906,8 @@
             issue_presenting: "Issue presenting",
             family_rabbi: "Family rabbi",
             anyone_else_involved: "Anyone else involved",
+            anyone_else_involvement: "How they are involved",
+            anyone_else_contact: "Their contact information",
             other_notes: "Other notes",
             parents_names: "Parents’ names",
             num_kids: "Number of children",
@@ -6660,6 +6662,23 @@
                     };
                 }
             }
+            if (/(?:create|make|add|start|new).*(?:intake|form)|(?:intake|form)\s+for\b/.test(lower)) {
+                const name = text.match(/\b(?:for|about)\s+(.+?)(?=\s+(?:who|with|phone|email|age|at|about)\b|[,.]|$)/i)?.[1]?.trim() || "";
+                return name ? {
+                    reply: "I prepared an intake for review.",
+                    clarification: "",
+                    actions: [{
+                        skill: "create_intake",
+                        summary: `Create an intake for ${name}`,
+                        requiresConfirmation: true,
+                        arguments: { name }
+                    }]
+                } : {
+                    reply: "I can create that intake.",
+                    clarification: "What name should I put on it?",
+                    actions: []
+                };
+            }
             if (/remind me|new reminder|add reminder/.test(lower)) {
                 const title = text.replace(/^.*?remind me\s+(?:tomorrow\s+)?(?:at\s+\d{1,2}(?::\d{2})?\s*(?:am|pm)\s+)?(?:to\s+)?/i, "").trim() || "New reminder";
                 return {
@@ -6916,6 +6935,66 @@
             await deleteDoc(doc(db, CONTENT_COLLECTION, resource.id));
         }
 
+        async function saveSubmissionFromChat(fields) {
+            if (!adminUnlocked || (!LOCAL_PREVIEW && !auth.currentUser)) {
+                throw Object.assign(new Error("Admin session unavailable"), {
+                    userMessage: "Your admin session is not ready. Lock and reopen the app, then try again."
+                });
+            }
+            const textValue = (value) => typeof value === "string" ? value.trim() : "";
+            const name = textValue(fields.name);
+            if (!name) {
+                throw Object.assign(new Error("Name required"), { userMessage: "Add a name or couple name before saving." });
+            }
+            const optionalInteger = (value, minimum = 0) => {
+                const input = textValue(value);
+                if (!input) return null;
+                const parsed = Number.parseInt(input, 10);
+                if (!Number.isInteger(parsed) || parsed < minimum) {
+                    throw Object.assign(new Error("Invalid number"), {
+                        userMessage: minimum === 18 ? "Ages must be 18 or older." : "Use a whole number of 0 or more."
+                    });
+                }
+                return parsed;
+            };
+            const submissionRef = LOCAL_PREVIEW
+                ? { id: `preview-chat-intake-${Date.now()}` }
+                : doc(collection(db, `artifacts/${appId}/public/data/submissions`));
+            const payload = {
+                h_name: name,
+                w_name: textValue(fields.spouseName) || null,
+                h_cell: textValue(fields.phone) || null,
+                h_email: textValue(fields.email) || null,
+                w_cell: textValue(fields.spousePhone) || null,
+                w_email: textValue(fields.spouseEmail) || null,
+                h_age: optionalInteger(fields.age, 18),
+                w_age: optionalInteger(fields.spouseAge, 18),
+                address: textValue(fields.address) || null,
+                years_married: optionalInteger(fields.yearsMarried),
+                issue_presenting: textValue(fields.issuePresenting) || null,
+                family_rabbi: textValue(fields.familyRabbi) || null,
+                anyone_else_involved: textValue(fields.anyoneElseInvolved) || null,
+                anyone_else_involvement: textValue(fields.anyoneElseInvolvement) || null,
+                anyone_else_contact: textValue(fields.anyoneElseContact) || null,
+                submitter_relationship: "Rabbi creating this intake on the couple’s behalf",
+                other_notes: textValue(fields.otherNotes) || null,
+                parents_names: textValue(fields.parentsNames) || null,
+                num_kids: optionalInteger(fields.numberOfChildren),
+                donation: "No",
+                timestamp: new Date().toISOString(),
+                uid: LOCAL_PREVIEW ? "preview" : auth.currentUser.uid,
+                formType: "someone-else"
+            };
+            const submission = { id: submissionRef.id, data: payload };
+            if (LOCAL_PREVIEW) {
+                allSubmissions = [...allSubmissions, submission];
+                renderOrganizer();
+                return submission;
+            }
+            await setDoc(submissionRef, payload);
+            return submission;
+        }
+
         async function deleteSubmissionFromChat(submission) {
             if (LOCAL_PREVIEW) {
                 allSubmissions = allSubmissions.filter(({ id }) => id !== submission.id);
@@ -6952,6 +7031,7 @@
                 prepareResource: buildResourceFromPaste,
                 publishResource: publishResourceFromChat,
                 deleteResource: deleteResourceFromChat,
+                saveSubmission: saveSubmissionFromChat,
                 deleteSubmission: deleteSubmissionFromChat,
                 submissionLabel: (key) => submissionFieldLabels[key]
                     || key.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase()),

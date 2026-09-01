@@ -32,7 +32,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;750&amp;display=swap" rel="stylesheet">
-    <script defer src="/cache-refresh.js?v=2026-08-13.3"></script>
+    <script defer src="/cache-refresh.js?v=2026-09-01.1"></script>
     <style>
         :root {
             --mist: #f4fafd;
@@ -968,10 +968,38 @@
             border-radius: 4px;
         }
 
+        .form-note-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.6rem 1rem;
+            margin: 0.45rem 0 1.6rem;
+        }
+
         .form-note {
-            margin: 0.4rem 0 1.6rem;
+            margin: 0;
             color: var(--muted);
             font-size: 0.85rem;
+        }
+
+        .privacy-note {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.42rem;
+            margin: 0;
+            padding: 0.4rem 0.62rem;
+            color: var(--deep-water);
+            background: #edf7fb;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            line-height: 1.35;
+        }
+
+        .privacy-note svg {
+            flex: 0 0 auto;
+            width: 15px;
+            height: 15px;
         }
 
         .submitter-choice {
@@ -2103,7 +2131,13 @@
                             <h3>Who is submitting the form?</h3>
                             <a class="form-faq-link" href="faq/">Have questions? Read the FAQ <span aria-hidden="true">→</span></a>
                         </div>
-                        <p class="form-note">Fields marked with * are required.</p>
+                        <div class="form-note-row">
+                            <p class="form-note">Fields marked with * are required.</p>
+                            <p class="privacy-note">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 10V7.5a4.5 4.5 0 0 1 9 0V10M6 10h12v10H6z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/></svg>
+                                <span>Your form is confidential—only the rabbi reviews it.</span>
+                            </p>
+                        </div>
 
                         <div class="submitter-choice" role="group" aria-label="Who is submitting the form?">
                             <button class="choice-button" type="button" data-form-type="husband" aria-pressed="false">Husband</button>
@@ -2194,8 +2228,18 @@
 
                         <div class="field field-wide">
                             <label for="anyone-else">Is anyone else involved?</label>
-                            <p class="field-help" id="anyone-else-help">This could be a rabbi, teacher, family member, friend, or anyone else supporting the couple. If so, please share their name and role—we may be able to work together.</p>
-                            <input id="anyone-else" name="anyone_else_involved" type="text" maxlength="500" aria-describedby="anyone-else-help" placeholder="Name and relationship, if applicable">
+                            <p class="field-help" id="anyone-else-help">This could be a rabbi, teacher, family member, friend, or anyone else supporting the couple.</p>
+                            <input id="anyone-else" name="anyone_else_involved" type="text" maxlength="500" aria-describedby="anyone-else-help" placeholder="Name, if applicable">
+                        </div>
+
+                        <div class="field">
+                            <label for="anyone-else-involvement">How are they involved?</label>
+                            <input id="anyone-else-involvement" name="anyone_else_involvement" type="text" maxlength="500" placeholder="Rabbi, teacher, family member, or friend">
+                        </div>
+
+                        <div class="field">
+                            <label for="anyone-else-contact">Their number or contact information</label>
+                            <input id="anyone-else-contact" name="anyone_else_contact" type="text" maxlength="500" placeholder="Phone number or email">
                         </div>
 
                         <div class="field">
@@ -2596,6 +2640,8 @@
                 issue_presenting: data.issue_presenting,
                 family_rabbi: data.family_rabbi,
                 anyone_else_involved: data.anyone_else_involved,
+                anyone_else_involvement: data.anyone_else_involvement,
+                anyone_else_contact: data.anyone_else_contact,
                 submitter_relationship: formType === "someone-else" ? data.submitter_relationship : null,
                 other_notes: data.other_notes,
                 parents_names: data.parents_names,

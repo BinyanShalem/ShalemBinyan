@@ -30,3 +30,22 @@ test("keeps the frontend, admin, and Firestore submission contract aligned", () 
     assert.match(firestoreRules, /'husband', 'wife', 'both', 'someone-else'/);
     assert.match(firestoreRules, /request\.resource\.data\.submitter_relationship\.size\(\) > 0/);
 });
+
+test("pairs the required-field note with a clear confidentiality message", () => {
+    assert.match(homePage, /Fields marked with \* are required\./);
+    assert.match(homePage, /Your form is confidential—only the rabbi reviews it\./);
+});
+
+test("stores separate name, involvement, and contact details for other people", () => {
+    for (const field of ["anyone_else_involved", "anyone_else_involvement", "anyone_else_contact"]) {
+        assert.match(homePage, new RegExp(`name="${field}"`));
+        assert.match(homePage, new RegExp(`${field}: data\\.${field}`));
+        if (field === "anyone_else_involved") {
+            assert.match(firestoreRules, /isOptionalString\(request\.resource\.data\.anyone_else_involved, 500\)/);
+        } else {
+            assert.match(firestoreRules, new RegExp(`isOptionalString\\(request\\.resource\\.data\\.get\\('${field}', null\\), 500\\)`));
+        }
+    }
+    assert.match(adminPage, /anyone_else_involvement: "How they are involved"/);
+    assert.match(adminPage, /anyone_else_contact: "Their contact information"/);
+});

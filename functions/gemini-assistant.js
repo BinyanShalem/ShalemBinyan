@@ -16,6 +16,7 @@ const SKILLS = Object.freeze([
     "open_encounter_thread",
     "open_intake",
     "find_directory",
+    "create_intake",
     "create_reminder",
     "edit_reminder",
     "delete_reminder",
@@ -40,6 +41,7 @@ const SKILLS = Object.freeze([
 ]);
 
 const WRITE_SKILLS = new Set([
+    "create_intake",
     "create_reminder",
     "edit_reminder",
     "delete_reminder",
@@ -68,6 +70,7 @@ const ARGUMENT_LIMITS = Object.freeze({
     title: 240,
     name: 240,
     names: 240,
+    spouseName: 160,
     date: 10,
     time: 5,
     method: 40,
@@ -76,7 +79,21 @@ const ARGUMENT_LIMITS = Object.freeze({
     notes: 1500,
     type: 40,
     phone: 80,
+    spousePhone: 80,
     email: 254,
+    spouseEmail: 254,
+    age: 3,
+    spouseAge: 3,
+    address: 500,
+    yearsMarried: 3,
+    numberOfChildren: 3,
+    issuePresenting: 1500,
+    familyRabbi: 240,
+    anyoneElseInvolved: 500,
+    anyoneElseInvolvement: 500,
+    anyoneElseContact: 500,
+    parentsNames: 500,
+    otherNotes: 1200,
     url: 1200,
     description: 800,
     query: 240,
@@ -116,6 +133,7 @@ const RESPONSE_SCHEMA = {
                             title: { type: "string" },
                             name: { type: "string" },
                             names: { type: "string" },
+                            spouseName: { type: "string" },
                             date: { type: "string", description: "Local date in YYYY-MM-DD format." },
                             time: { type: "string", description: "Local time in HH:MM 24-hour format." },
                             method: { type: "string" },
@@ -125,7 +143,21 @@ const RESPONSE_SCHEMA = {
                             needsFollowUp: { type: "boolean" },
                             type: { type: "string", enum: ["Therapist", "Person", "Resource", ""] },
                             phone: { type: "string" },
+                            spousePhone: { type: "string" },
                             email: { type: "string" },
+                            spouseEmail: { type: "string" },
+                            age: { type: "string" },
+                            spouseAge: { type: "string" },
+                            address: { type: "string" },
+                            yearsMarried: { type: "string" },
+                            numberOfChildren: { type: "string" },
+                            issuePresenting: { type: "string" },
+                            familyRabbi: { type: "string" },
+                            anyoneElseInvolved: { type: "string" },
+                            anyoneElseInvolvement: { type: "string" },
+                            anyoneElseContact: { type: "string" },
+                            parentsNames: { type: "string" },
+                            otherNotes: { type: "string" },
                             url: { type: "string" },
                             description: { type: "string" },
                             query: { type: "string" },
@@ -149,7 +181,7 @@ Rules:
 - Never say an action was completed. The app always previews or confirms writes after your response.
 - Do not invent a name, record ID, contact detail, date, time, meeting method, note, or reminder detail.
 - Resolve relative dates such as today, tomorrow, Friday, or next Tuesday using the supplied local date and timezone.
-- A reminder needs only a title. A logged encounter needs only names. A scheduled encounter needs names and a date.
+- An admin-created intake needs only a name or couple name. A reminder needs only a title. A logged encounter needs only names. A scheduled encounter needs names and a date.
 - Use a targetId exactly as supplied in context when a request clearly matches one existing record. Otherwise omit targetId and preserve the user's name or query.
 - For questions asking to see information, use a show, open, or find skill. Never place private record details in the reply.
 - For changes, extract only information the user actually gave. The app will show a prefilled review or confirmation.
@@ -160,6 +192,7 @@ Skill intent:
 - show_today, show_encounters, show_reminders, show_directory, show_resources, show_intakes: open those areas.
 - open_encounter_thread/open_intake: use the matching context targetId.
 - find_directory: place the search words in query.
+- create_intake: use this when the admin asks to create, make, add, or start an intake form for someone. Put the primary name or couple name in name, a second spouse name in spouseName when stated, and extract only the intake details explicitly supplied. The app opens a review form and requires only name.
 - create/edit/delete/complete/snooze reminder: use reminder fields or targetId.
 - schedule/log/edit/delete encounter, record_outcome, archive_thread, restore_thread: use encounter/couple fields or targetId.
 - add/edit/delete directory entry: use directory fields or targetId.

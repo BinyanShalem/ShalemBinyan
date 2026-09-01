@@ -27,7 +27,8 @@ service cloud.firestore {
       return request.resource.data.keys().hasOnly([
           'h_name', 'w_name', 'h_cell', 'h_email', 'w_cell', 'w_email',
           'h_age', 'w_age', 'address', 'years_married', 'issue_presenting',
-          'family_rabbi', 'anyone_else_involved', 'submitter_relationship', 'other_notes', 'parents_names', 'num_kids',
+          'family_rabbi', 'anyone_else_involved', 'anyone_else_involvement', 'anyone_else_contact',
+          'submitter_relationship', 'other_notes', 'parents_names', 'num_kids',
           'donation', 'timestamp', 'uid', 'formType'
         ])
         && request.resource.data.keys().hasAll([
@@ -54,6 +55,8 @@ service cloud.firestore {
         && isOptionalString(request.resource.data.issue_presenting, 5000)
         && isOptionalString(request.resource.data.family_rabbi, 240)
         && isOptionalString(request.resource.data.anyone_else_involved, 500)
+        && isOptionalString(request.resource.data.get('anyone_else_involvement', null), 500)
+        && isOptionalString(request.resource.data.get('anyone_else_contact', null), 500)
         && isOptionalString(request.resource.data.submitter_relationship, 160)
         && (
           (request.resource.data.formType == 'someone-else'

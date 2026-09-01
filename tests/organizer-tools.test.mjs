@@ -21,6 +21,8 @@ const submission = {
         w_email: "leah@example.com",
         issue_presenting: "Communication",
         anyone_else_involved: "Rabbi Feldman",
+        anyone_else_involvement: "Family rabbi",
+        anyone_else_contact: "555-0134",
         timestamp: "2026-08-18T15:00:00.000Z"
     }
 };
@@ -34,7 +36,7 @@ test("prefills a first encounter from an intake submission", () => {
 
     assert.equal(prefill.names, "Ari Cohen & Leah Cohen");
     assert.equal(prefill.contact, "555-0101 · leah@example.com");
-    assert.equal(prefill.otherPeopleInvolved, "Rabbi Feldman");
+    assert.equal(prefill.otherPeopleInvolved, "Rabbi Feldman · Involvement: Family rabbi · Contact: 555-0134");
     assert.equal(prefill.notes, "Communication");
     assert.equal(prefill.submissionId, "form-1");
     assert.equal(prefill.encounterType, "scheduled");

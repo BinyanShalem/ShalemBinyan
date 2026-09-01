@@ -63,6 +63,35 @@ test("normalizes allowlisted skills and forces confirmation for writes", () => {
     assert.equal(result.actions[0].requiresConfirmation, true);
 });
 
+test("allows a name-only intake draft and keeps supplied optional details", () => {
+    const result = normalizePlan({
+        reply: "I prepared it.",
+        clarification: "",
+        actions: [{
+            skill: "create_intake",
+            summary: "Create an intake for Ari Cohen",
+            arguments: {
+                name: "Ari Cohen",
+                spouseName: "Leah Cohen",
+                issuePresenting: "Communication",
+                anyoneElseInvolved: "Rabbi Feldman",
+                anyoneElseInvolvement: "Family rabbi",
+                anyoneElseContact: "555-0134"
+            }
+        }]
+    }, sanitizeContext({}));
+    assert.equal(result.actions[0].skill, "create_intake");
+    assert.equal(result.actions[0].requiresConfirmation, true);
+    assert.deepEqual(result.actions[0].arguments, {
+        name: "Ari Cohen",
+        spouseName: "Leah Cohen",
+        issuePresenting: "Communication",
+        anyoneElseInvolved: "Rabbi Feldman",
+        anyoneElseInvolvement: "Family rabbi",
+        anyoneElseContact: "555-0134"
+    });
+});
+
 test("drops invented record IDs and malformed dates", () => {
     const result = normalizePlan({
         reply: "I prepared it.",

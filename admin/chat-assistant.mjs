@@ -69,6 +69,14 @@ function selectInput({ name, value = "", options = [] }) {
     return select;
 }
 
+function numberInput({ name, value = "", min = 0, placeholder = "" }) {
+    const input = textInput({ name, type: "number", value: String(value ?? ""), placeholder });
+    input.min = String(min);
+    input.step = "1";
+    input.inputMode = "numeric";
+    return input;
+}
+
 export function createAdminChat({
     conversation,
     composer,
@@ -323,6 +331,29 @@ export function createAdminChat({
         };
     }
 
+    function intakeDraft(args = {}) {
+        return {
+            name: clean(args.name || args.names).slice(0, 160),
+            spouseName: clean(args.spouseName),
+            phone: clean(args.phone),
+            spousePhone: clean(args.spousePhone),
+            email: clean(args.email),
+            spouseEmail: clean(args.spouseEmail),
+            age: clean(args.age),
+            spouseAge: clean(args.spouseAge),
+            address: clean(args.address),
+            yearsMarried: clean(args.yearsMarried),
+            numberOfChildren: clean(args.numberOfChildren),
+            issuePresenting: clean(args.issuePresenting || args.notes),
+            familyRabbi: clean(args.familyRabbi),
+            anyoneElseInvolved: clean(args.anyoneElseInvolved || args.otherPeopleInvolved),
+            anyoneElseInvolvement: clean(args.anyoneElseInvolvement),
+            anyoneElseContact: clean(args.anyoneElseContact),
+            parentsNames: clean(args.parentsNames),
+            otherNotes: clean(args.otherNotes)
+        };
+    }
+
     function missingSmartTarget(section, label = "that item") {
         say(`I couldn’t safely match ${label}. Choose it here and I’ll keep helping.`, {
             buttons: [actionButton(`Open ${section}`, () => showSection(section)), actionButton("Menu", () => showMainMenu(), { tone: "secondary" })]
@@ -340,6 +371,7 @@ export function createAdminChat({
             open_encounter_thread: "Open timeline",
             open_intake: "Open intake",
             find_directory: "Show results",
+            create_intake: "Review intake",
             create_reminder: "Review reminder",
             edit_reminder: "Review changes",
             schedule_encounter: "Review meeting",
@@ -515,6 +547,7 @@ export function createAdminChat({
                 return submission ? showIntakeDetails(submission) : missingSmartTarget("intakes", "that intake form");
             }
             case "find_directory": return showDirectory({ query: args.query || args.names || args.title, announce: false });
+            case "create_intake": return showIntakeForm(intakeDraft(args));
             case "create_reminder": return showReminderForm(null, args);
             case "edit_reminder": {
                 const reminder = findReminderForAI(args);
@@ -589,7 +622,8 @@ export function createAdminChat({
 
     function routeGuidedText(text) {
         const lower = normalized(text);
-        if (/new reminder|add reminder|remind me/.test(lower)) showReminderForm();
+        if (/(?:create|make|add|start|new).*(?:intake|form)|(?:intake|form)\s+for\b/.test(lower)) showIntakeForm();
+        else if (/new reminder|add reminder|remind me/.test(lower)) showReminderForm();
         else if (/add (a )?(contact|therapist|person)|new contact/.test(lower)) showDirectoryForm();
         else if (/add (a )?resource|new resource/.test(lower)) showResourcePasteForm();
         else if (/log (a )?meeting|record (a )?meeting|met with/.test(lower)) chooseEncounterSource("completed");
@@ -1259,10 +1293,15 @@ export function createAdminChat({
         const items = submissions.map((submission) => {
             const data = submission.data || {};
             const submitted = Date.parse(data.timestamp || "");
+            const otherPersonDetails = [
+                data.anyone_else_involved,
+                data.anyone_else_involvement,
+                data.anyone_else_contact
+            ].map(clean).filter(Boolean).join(" · ");
             return record({
                 title: submissionNames(submission),
                 meta: Number.isNaN(submitted) ? "Date unavailable" : new Date(submitted).toLocaleString(),
-                text: [data.issue_presenting, data.anyone_else_involved ? `Others involved: ${data.anyone_else_involved}` : ""].filter(Boolean).join("\n"),
+                text: [data.issue_presenting, otherPersonDetails ? `Others involved: ${otherPersonDetails}` : ""].filter(Boolean).join("\n"),
                 buttons: [
                     actionButton("View details", () => showIntakeDetails(submission)),
                     actionButton("Schedule meeting", () => showEncounterForm({ encounterType: "scheduled", submission })),
@@ -1279,8 +1318,102 @@ export function createAdminChat({
         });
         say(submissions.length ? `${submissions.length} ${submissions.length === 1 ? "intake form is" : "intake forms are"} available.` : "There are no intake forms right now.", {
             content: submissions.length ? recordList(items) : null,
-            buttons: [actionButton("Menu", () => showMainMenu(), { tone: "secondary" })]
+            buttons: [
+                actionButton("Create intake", () => showIntakeForm()),
+                actionButton("Menu", () => showMainMenu(), { tone: "secondary" })
+            ]
         });
+    }
+
+    function showIntakeForm(draft = {}) {
+        const values = intakeDraft(draft);
+        sayUser("Create an intake for someone");
+        const { wrap, fields, form } = formShell({
+            title: "Create an intake on someone’s behalf",
+            description: "Only a name is required. Review what Gemini filled in, add anything useful, and leave the rest blank.",
+            submitLabel: "Create intake",
+            secondaryButtons: [actionButton("Cancel", () => showIntakes(), { tone: "secondary" })],
+            onSubmit: async (data) => {
+                const name = clean(data.get("name"));
+                if (!name) throw Object.assign(new Error("Name required"), { userMessage: "Add a name or couple name before saving." });
+                await actions.saveSubmission({
+                    name,
+                    spouseName: clean(data.get("spouseName")),
+                    phone: clean(data.get("phone")),
+                    spousePhone: clean(data.get("spousePhone")),
+                    email: clean(data.get("email")),
+                    spouseEmail: clean(data.get("spouseEmail")),
+                    age: clean(data.get("age")),
+                    spouseAge: clean(data.get("spouseAge")),
+                    address: clean(data.get("address")),
+                    yearsMarried: clean(data.get("yearsMarried")),
+                    numberOfChildren: clean(data.get("numberOfChildren")),
+                    issuePresenting: clean(data.get("issuePresenting")),
+                    familyRabbi: clean(data.get("familyRabbi")),
+                    anyoneElseInvolved: clean(data.get("anyoneElseInvolved")),
+                    anyoneElseInvolvement: clean(data.get("anyoneElseInvolvement")),
+                    anyoneElseContact: clean(data.get("anyoneElseContact")),
+                    parentsNames: clean(data.get("parentsNames")),
+                    otherNotes: clean(data.get("otherNotes"))
+                });
+                form.closest(".chat-message-row")?.classList.add("is-complete");
+                say(`The intake for ${name} was created and is now in Intake forms.`, {
+                    buttons: [actionButton("View intake forms", () => showIntakes()), actionButton("Menu", () => showMainMenu(), { tone: "secondary" })]
+                });
+            }
+        });
+
+        const name = textInput({
+            name: "name",
+            value: values.name,
+            placeholder: "Person or couple name",
+            required: true,
+            maxLength: 160,
+            autocomplete: "name"
+        });
+        fields.append(
+            labeledField("Name or couple", name, { wide: true }),
+            labeledField("What brings them to Binyan Shalem?", textArea({
+                name: "issuePresenting",
+                value: values.issuePresenting,
+                placeholder: "Issue or reason for reaching out",
+                maxLength: 5000
+            }), { optional: true, wide: true })
+        );
+
+        const coupleDetails = element("details", "chat-more-fields");
+        const coupleSummary = element("summary", "", "Couple and contact details");
+        const coupleGrid = element("div", "chat-form-grid");
+        coupleGrid.append(
+            labeledField("Spouse or second name", textInput({ name: "spouseName", value: values.spouseName, maxLength: 160, autocomplete: "name" }), { optional: true, wide: true }),
+            labeledField("Primary phone", textInput({ name: "phone", type: "tel", value: values.phone, maxLength: 80, autocomplete: "tel" }), { optional: true }),
+            labeledField("Second phone", textInput({ name: "spousePhone", type: "tel", value: values.spousePhone, maxLength: 80 }), { optional: true }),
+            labeledField("Primary email", textInput({ name: "email", type: "email", value: values.email, maxLength: 254, autocomplete: "email" }), { optional: true }),
+            labeledField("Second email", textInput({ name: "spouseEmail", type: "email", value: values.spouseEmail, maxLength: 254 }), { optional: true }),
+            labeledField("Primary age", numberInput({ name: "age", value: values.age, min: 18 }), { optional: true }),
+            labeledField("Second age", numberInput({ name: "spouseAge", value: values.spouseAge, min: 18 }), { optional: true }),
+            labeledField("Address", textInput({ name: "address", value: values.address, maxLength: 500, autocomplete: "street-address" }), { optional: true, wide: true }),
+            labeledField("Years married", numberInput({ name: "yearsMarried", value: values.yearsMarried }), { optional: true }),
+            labeledField("Number of children", numberInput({ name: "numberOfChildren", value: values.numberOfChildren }), { optional: true })
+        );
+        coupleDetails.append(coupleSummary, coupleGrid);
+
+        const contextDetails = element("details", "chat-more-fields");
+        const contextSummary = element("summary", "", "Rabbi, family, and other context");
+        const contextGrid = element("div", "chat-form-grid");
+        contextGrid.append(
+            labeledField("Family rabbi", textInput({ name: "familyRabbi", value: values.familyRabbi, maxLength: 240 }), { optional: true }),
+            labeledField("Parents’ names", textInput({ name: "parentsNames", value: values.parentsNames, maxLength: 500 }), { optional: true }),
+            labeledField("Anyone else involved", textInput({ name: "anyoneElseInvolved", value: values.anyoneElseInvolved, placeholder: "Name", maxLength: 500 }), { optional: true, wide: true }),
+            labeledField("How they are involved", textInput({ name: "anyoneElseInvolvement", value: values.anyoneElseInvolvement, placeholder: "Rabbi, teacher, family member, or friend", maxLength: 500 }), { optional: true }),
+            labeledField("Their contact information", textInput({ name: "anyoneElseContact", value: values.anyoneElseContact, placeholder: "Phone number or email", maxLength: 500 }), { optional: true }),
+            labeledField("Anything else to know", textArea({ name: "otherNotes", value: values.otherNotes, maxLength: 3000 }), { optional: true, wide: true })
+        );
+        contextDetails.append(contextSummary, contextGrid);
+        fields.append(coupleDetails, contextDetails);
+
+        say("Review the intake before saving. Nothing is created until you choose Create intake.", { content: wrap });
+        window.setTimeout(() => name.focus(), 0);
     }
 
     function showIntakeDetails(submission) {

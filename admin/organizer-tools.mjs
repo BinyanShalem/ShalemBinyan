@@ -140,6 +140,14 @@ function submissionContact(data = {}) {
     return [data.h_cell, data.w_cell, data.h_email, data.w_email].map(clean).filter(Boolean).join(" · ");
 }
 
+function submissionOtherPeople(data = {}) {
+    return [
+        clean(data.anyone_else_involved),
+        clean(data.anyone_else_involvement) ? `Involvement: ${clean(data.anyone_else_involvement)}` : "",
+        clean(data.anyone_else_contact) ? `Contact: ${clean(data.anyone_else_contact)}` : ""
+    ].filter(Boolean).join(" · ");
+}
+
 export function buildEncounterPrefill({ encounter, submission, encounterType = "completed", now = new Date() } = {}) {
     const current = dateParts(now);
     const type = encounterType === "scheduled" ? "scheduled" : "completed";
@@ -168,7 +176,7 @@ export function buildEncounterPrefill({ encounter, submission, encounterType = "
             encounterType: type,
             names: submissionNames(submission.data) || "Intake submission",
             contact: submissionContact(submission.data),
-            otherPeopleInvolved: clean(submission.data?.anyone_else_involved),
+            otherPeopleInvolved: submissionOtherPeople(submission.data),
             occurredDate: eventDate,
             occurredTime: eventTime,
             method: "Phone",

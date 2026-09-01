@@ -89,10 +89,12 @@ test("supports viewing and mutating every admin data area inside chat", () => {
     assert.match(chatAssistant, /showDirectoryForm/);
     assert.match(chatAssistant, /showResourcePasteForm/);
     assert.match(chatAssistant, /showIntakeDetails/);
+    assert.match(chatAssistant, /showIntakeForm/);
     assert.match(chatAssistant, /actions\.saveEncounter/);
     assert.match(chatAssistant, /actions\.saveReminder/);
     assert.match(chatAssistant, /actions\.saveDirectoryEntry/);
     assert.match(chatAssistant, /actions\.publishResource/);
+    assert.match(chatAssistant, /actions\.saveSubmission/);
     assert.match(chatAssistant, /actions\.deleteSubmission/);
     assert.match(chatAssistant, /actions\.setThreadArchived/);
     assert.match(chatAssistant, /actions\.completeReminder/);
@@ -121,8 +123,21 @@ test("adds a protected Gemini assistant with allowlisted, confirmation-gated ski
     assert.match(geminiAssistantSource, /const SKILLS = Object\.freeze/);
     assert.match(geminiAssistantSource, /responseJsonSchema: RESPONSE_SCHEMA/);
     assert.match(geminiAssistantSource, /requiresConfirmation: WRITE_SKILLS\.has\(skill\)/);
+    assert.match(geminiAssistantSource, /"create_intake"/);
     assert.doesNotMatch(geminiAssistantSource, /names: 240, contact:/);
     assert.equal(JSON.parse(functionsPackage).dependencies["@google/genai"], "^2.19.0");
+});
+
+test("lets the admin create a partial intake through a review form", () => {
+    assert.match(chatAssistant, /title: "Create an intake on someone’s behalf"/);
+    assert.match(chatAssistant, /Only a name is required/);
+    assert.match(chatAssistant, /name: "name"[\s\S]*?required: true/);
+    assert.match(chatAssistant, /name: "issuePresenting"/);
+    assert.match(chatAssistant, /name: "anyoneElseInvolvement"/);
+    assert.match(chatAssistant, /name: "anyoneElseContact"/);
+    assert.match(adminPage, /async function saveSubmissionFromChat/);
+    assert.match(adminPage, /issue_presenting: textValue\(fields\.issuePresenting\) \|\| null/);
+    assert.match(adminPage, /saveSubmission: saveSubmissionFromChat/);
 });
 
 test("registers durable background push and sends reminders from Firebase", () => {

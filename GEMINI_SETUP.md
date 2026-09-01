@@ -39,7 +39,7 @@ The GitHub Pages frontend also needs the matching admin changes published before
 - Each request is limited to 500 input characters, six short chat-history items, compact record summaries, and 900 output tokens.
 - Full encounter notes, intake issue text, phone numbers, email addresses, and couple contact fields are excluded from the model context.
 - Chat messages are not stored by the assistant. Only daily and monthly request counters are written.
-- Every write is either opened in a review form or shown with a locally resolved target and effect before the admin confirms it.
+- Every write is either opened in a review form or shown with a locally resolved target and effect before the admin confirms it. Creating an intake for someone opens a form with only the name required; all supplied details remain editable and every unsupplied field may stay blank.
 
 At the expected 200–300 short messages per month, model usage should usually cost only cents. The 500-request application cap plus the optional $2 AI Studio project cap provide separate safeguards.
 
