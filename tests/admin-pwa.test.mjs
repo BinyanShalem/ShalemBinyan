@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { INTAKE_REQUEST_TEXT } from "../admin/chat-assistant.mjs";
 
 const [adminPage, chatAssistant, manifestSource, serviceWorker, firestoreRules, functionsSource, geminiAssistantSource, functionsPackage] = await Promise.all([
     readFile(new URL("../admin/index.html", import.meta.url), "utf8"),
@@ -61,6 +62,23 @@ test("opens into a conversational assistant with a complete dashboard switch", (
     assert.match(chatAssistant, /actionButton\("Directory"/);
     assert.match(chatAssistant, /actionButton\("Resources"/);
     assert.match(chatAssistant, /actionButton\("Intake forms"/);
+    assert.match(chatAssistant, /ariaLabel: "Copy intake information request"/);
+    assert.match(chatAssistant, /Text copied to clipboard/);
+    assert.match(chatAssistant, /navigator\.clipboard\?\.writeText/);
+    assert.match(chatAssistant, /Husband’s full name[\s\S]*Anyone else involved and their relationship to the couple/);
+    assert.match(adminPage, /\.chat-copy-intake-button/);
+    assert.match(adminPage, /const alphabeticalGroups = new Map\(\)/);
+    assert.equal(INTAKE_REQUEST_TEXT, [
+        "Hi, can you please send me:",
+        "Husband’s full name",
+        "Wife’s first and maiden name",
+        "Both of their ages",
+        "How many years they’ve been married",
+        "Number of children",
+        "A brief description of the issue",
+        "Family rabbi, if applicable",
+        "Anyone else involved and their relationship to the couple"
+    ].join("\n"));
 });
 
 test("keeps the mobile chat composer visible, multiline, and easy to reset", () => {

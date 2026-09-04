@@ -45,5 +45,5 @@ export function directoryEntryMatches(entry, { search = "", type = "All" } = {})
 export function sortDirectoryEntries(entries = []) {
     return entries
         .map((entry) => normalizeDirectoryEntry(entry, entry.id))
-        .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
+        .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base", numeric: true }));
 }

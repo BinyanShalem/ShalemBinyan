@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-    <script defer src="/cache-refresh.js?v=2026-09-01.1"></script>
+    <script defer src="/cache-refresh.js?v=2026-09-04.1"></script>
     <style>
         :root {
             --admin-purple: #723358;
@@ -3117,6 +3117,54 @@
             margin-top: 0.8rem;
         }
 
+        .chat-intake-menu-control {
+            display: inline-flex;
+            flex-wrap: wrap;
+            min-width: 0;
+            gap: 0.38rem;
+        }
+
+        .chat-intake-menu-control > .chat-action:first-child {
+            flex: 1 1 auto;
+        }
+
+        .chat-copy-intake-button {
+            flex: 0 0 44px;
+            width: 44px;
+            padding: 0;
+        }
+
+        .chat-copy-intake-button svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .chat-copy-feedback {
+            flex: 1 0 100%;
+            order: 3;
+            max-width: min(260px, 82vw);
+            padding: 0.5rem 0.65rem;
+            color: var(--admin-success);
+            background: var(--admin-success-soft);
+            border-radius: 10px;
+            box-shadow: var(--shadow-low);
+            font-size: 0.75rem;
+            font-weight: 700;
+            line-height: 1.3;
+            overflow-wrap: anywhere;
+            pointer-events: none;
+        }
+
+        .chat-copy-feedback[data-tone="error"] {
+            color: var(--admin-error);
+            background: var(--admin-error-soft);
+        }
+
         .chat-action {
             display: inline-flex;
             min-height: 44px;
@@ -4352,8 +4400,8 @@
             normalizeDirectoryEntry,
             normalizeDirectoryUrl,
             sortDirectoryEntries
-        } from "./directory-tools.mjs?v=2026-08-20.1";
-        import { createAdminChat } from "./chat-assistant.mjs?v=2026-09-01.1";
+        } from "./directory-tools.mjs?v=2026-09-04.1";
+        import { createAdminChat } from "./chat-assistant.mjs?v=2026-09-04.1";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDxEV7W2m4jbJiVl0Sc6cN7gBH7oWu_rl8",
@@ -5691,15 +5739,21 @@
                 .filter((entry) => directoryEntryMatches(entry, { search: directorySearch.value, type: directoryFilter }));
             groups.replaceChildren();
 
-            DIRECTORY_TYPES.forEach((type) => {
-                const entries = matches.filter((entry) => entry.type === type);
-                if (!entries.length) return;
+            const alphabeticalGroups = new Map();
+            matches.forEach((entry) => {
+                const initial = entry.name.trim().charAt(0).toLocaleUpperCase() || "#";
+                const group = /\p{L}/u.test(initial) ? initial : "#";
+                if (!alphabeticalGroups.has(group)) alphabeticalGroups.set(group, []);
+                alphabeticalGroups.get(group).push(entry);
+            });
+
+            alphabeticalGroups.forEach((entries, initial) => {
                 const section = document.createElement("section");
                 section.className = "directory-group";
                 const heading = document.createElement("div");
                 heading.className = "directory-group-heading";
                 const title = document.createElement("h3");
-                title.textContent = type === "Person" ? "People" : `${type}s`;
+                title.textContent = initial;
                 const count = document.createElement("span");
                 count.textContent = `${entries.length} ${entries.length === 1 ? "entry" : "entries"}`;
                 heading.append(title, count);
@@ -6581,7 +6635,7 @@
                 submissions: allSubmissions,
                 encounters: allEncounters,
                 threads: groupEncounterThreads(allEncounters),
-                directoryEntries: allDirectoryEntries,
+                directoryEntries: sortDirectoryEntries(allDirectoryEntries),
                 reminders: activeReminders(),
                 notificationEnabled: pushSubscriptionEnabled,
                 notificationPreferences: { ...pushNotificationPreferences },

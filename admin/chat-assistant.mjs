@@ -1,5 +1,15 @@
 const CHAT_SECTIONS = ["today", "encounters", "reminders", "directory", "resources", "intakes"];
 
+export const INTAKE_REQUEST_TEXT = `Hi, can you please send me:
+Husband’s full name
+Wife’s first and maiden name
+Both of their ages
+How many years they’ve been married
+Number of children
+A brief description of the issue
+Family rabbi, if applicable
+Anyone else involved and their relationship to the couple`;
+
 function clean(value) {
     return typeof value === "string" ? value.trim() : "";
 }
@@ -97,6 +107,7 @@ export function createAdminChat({
     let smartBusy = false;
     let assistantHistory = [];
     let chatEpoch = 0;
+    let copyFeedbackTimer = 0;
     const submitButton = composer.querySelector('button[type="submit"]');
 
     function scrollToLatest({ smooth = true } = {}) {
@@ -135,6 +146,66 @@ export function createAdminChat({
             link.rel = "noopener noreferrer";
         }
         return link;
+    }
+
+    function copyIcon() {
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("viewBox", "0 0 24 24");
+        svg.setAttribute("aria-hidden", "true");
+        svg.setAttribute("focusable", "false");
+        svg.innerHTML = '<rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path>';
+        return svg;
+    }
+
+    async function writeClipboard(text) {
+        if (navigator.clipboard?.writeText) {
+            try {
+                await navigator.clipboard.writeText(text);
+                return;
+            } catch {
+                // Fall through to the selection-based copy path when permission is unavailable.
+            }
+        }
+
+        const fallback = element("textarea", "sr-only");
+        fallback.value = text;
+        fallback.setAttribute("readonly", "");
+        document.body.appendChild(fallback);
+        fallback.select();
+        const copied = typeof document.execCommand === "function" && document.execCommand("copy");
+        fallback.remove();
+        if (!copied) throw new Error("Clipboard unavailable");
+    }
+
+    function showCopyFeedback(wrap, message, tone = "success") {
+        window.clearTimeout(copyFeedbackTimer);
+        wrap.querySelector(".chat-copy-feedback")?.remove();
+        const feedback = element("span", "chat-copy-feedback", message);
+        feedback.dataset.tone = tone;
+        feedback.setAttribute("role", tone === "error" ? "alert" : "status");
+        feedback.setAttribute("aria-live", "polite");
+        wrap.appendChild(feedback);
+        copyFeedbackTimer = window.setTimeout(() => feedback.remove(), 2400);
+    }
+
+    function intakeMenuControl() {
+        const wrap = element("span", "chat-intake-menu-control");
+        const intakeButton = actionButton("Intake forms", () => showIntakes());
+        const copyButton = actionButton("", async (button) => {
+            try {
+                await writeClipboard(INTAKE_REQUEST_TEXT);
+                showCopyFeedback(wrap, "Text copied to clipboard");
+            } catch {
+                showCopyFeedback(wrap, "Couldn’t copy. Please try again.", "error");
+            } finally {
+                button.focus();
+            }
+        }, { tone: "secondary", ariaLabel: "Copy intake information request" });
+        copyButton.classList.add("chat-copy-intake-button");
+        copyButton.title = "Copy intake information request";
+        copyButton.appendChild(copyIcon());
+        wrap.append(intakeButton, copyButton);
+        return wrap;
     }
 
     function appendMessage(kind, { title = "", text = "", content = null, buttons = [], quiet = false } = {}) {
@@ -237,7 +308,7 @@ export function createAdminChat({
             actionButton("Reminders", () => showReminders()),
             actionButton("Directory", () => showDirectory()),
             actionButton("Resources", () => showResources()),
-            actionButton("Intake forms", () => showIntakes())
+            intakeMenuControl()
         ];
     }
 
@@ -1113,7 +1184,7 @@ export function createAdminChat({
             const searchMatches = !normalizedQuery || [entry.name, entry.phone, entry.email, entry.url, entry.notes]
                 .some((value) => clean(value).toLocaleLowerCase().includes(normalizedQuery));
             return typeMatches && searchMatches;
-        });
+        }).sort((a, b) => clean(a.name).localeCompare(clean(b.name), undefined, { sensitivity: "base", numeric: true }));
         if (announce) sayUser(query ? `Find ${query}` : filter === "All" ? "Open directory" : `Show ${filter.toLocaleLowerCase()}s`);
         const items = entries.map((entry) => {
             const buttons = [];

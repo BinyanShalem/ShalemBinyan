@@ -35,9 +35,11 @@ test("filters the directory across contact details and notes", () => {
 
 test("sorts directory entries alphabetically", () => {
     const sorted = sortDirectoryEntries([
-        { id: "2", name: "Zev", type: "Person" },
-        { id: "1", name: "Ari", type: "Person" }
+        { id: "3", name: "Person 10", type: "Person" },
+        { id: "2", name: "zev", type: "Person" },
+        { id: "1", name: "Ari", type: "Therapist" },
+        { id: "4", name: "Person 2", type: "Resource" }
     ]);
 
-    assert.deepEqual(sorted.map(({ name }) => name), ["Ari", "Zev"]);
+    assert.deepEqual(sorted.map(({ name }) => name), ["Ari", "Person 2", "Person 10", "zev"]);
 });
