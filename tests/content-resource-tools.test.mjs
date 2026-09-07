@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 
 import {
     applyResourceEdits,
@@ -12,6 +13,15 @@ import {
     mergeResourceCollections,
     normalizeStoredResource
 } from "../content-resource-tools.mjs";
+
+const contentPage = await readFile(new URL("../content/index.html", import.meta.url), "utf8");
+
+test("labels the podcast section as exclusive content without changing its filter contract", () => {
+    assert.match(contentPage, /data-filter="podcast"[\s\S]*?<span>Exclusive content<\/span>/);
+    assert.match(contentPage, /podcastMode\s*\? "Exclusive content\."/);
+    assert.match(contentPage, /count\.textContent = podcastMode\s*\? "Exclusive content"/);
+    assert.match(contentPage, /logo_podcast\.png/);
+});
 
 function jsonResponse(data, ok = true) {
     return {

@@ -33,7 +33,7 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;750&amp;display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../blue-concept-pages.css?v=2026-08-13.1">
-    <script defer src="/cache-refresh.js?v=2026-08-13.1"></script>
+    <script defer src="/cache-refresh.js?v=2026-09-07.1"></script>
 </head>
 <body class="content-page">
     <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -91,7 +91,7 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
                     <div class="filter-featured" role="group" aria-label="Featured content">
                         <button class="filter-button filter-button--featured filter-button--podcast" type="button" data-filter="podcast" aria-pressed="false">
                             <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3.5 8v4M7 5.5v9M10 3v14M13 6v8M16.5 8v4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.6"/></svg>
-                            <span>Podcasts</span>
+                            <span>Exclusive content</span>
                         </button>
                         <button class="filter-button filter-button--featured filter-button--new" type="button" data-filter="new" aria-pressed="false">
                             <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 6v4.25l2.75 1.65" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/></svg>
@@ -431,7 +431,7 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
             librarySection.classList.toggle("podcast-mode", podcastMode);
             librarySection.classList.toggle("new-mode", newMode);
             libraryTitle.textContent = podcastMode
-                ? "Podcasts."
+                ? "Exclusive content."
                 : newMode
                     ? "New this week."
                     : "Resources for the home.";
@@ -448,7 +448,7 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
             emptyStateCopy.hidden = podcastMode;
             podcastPreview.hidden = !podcastMode;
             count.textContent = podcastMode
-                ? "Podcasts"
+                ? "Exclusive content"
                 : newMode
                     ? `${visible} added this week`
                     : `${visible} ${visible === 1 ? "resource" : "resources"}`;

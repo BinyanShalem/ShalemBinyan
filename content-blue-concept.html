@@ -74,7 +74,7 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
                     <div class="filter-featured" role="group" aria-label="Featured content">
                         <button class="filter-button filter-button--featured filter-button--podcast" type="button" data-filter="podcast" aria-pressed="false">
                             <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3.5 8v4M7 5.5v9M10 3v14M13 6v8M16.5 8v4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.6"/></svg>
-                            <span>Podcasts</span>
+                            <span>Exclusive content</span>
                         </button>
                         <button class="filter-button filter-button--featured filter-button--new" type="button" data-filter="new" aria-pressed="false">
                             <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 6v4.25l2.75 1.65" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/></svg>
@@ -400,7 +400,7 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
             librarySection.classList.toggle("podcast-mode", podcastMode);
             librarySection.classList.toggle("new-mode", newMode);
             libraryTitle.textContent = podcastMode
-                ? "Podcasts."
+                ? "Exclusive content."
                 : newMode
                     ? "New this week."
                     : "Resources for the home.";
@@ -418,7 +418,7 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
                 : defaultEmptyDescription;
             emptyStateDescription.hidden = podcastMode;
             count.textContent = podcastMode
-                ? "Podcasts"
+                ? "Exclusive content"
                 : newMode
                     ? `${visible} added this week`
                     : `${visible} ${visible === 1 ? "resource" : "resources"}`;
