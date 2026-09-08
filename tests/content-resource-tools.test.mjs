@@ -21,6 +21,10 @@ test("labels the podcast section as exclusive content without changing its filte
     assert.match(contentPage, /podcastMode\s*\? "Exclusive content\."/);
     assert.match(contentPage, /count\.textContent = podcastMode\s*\? "Exclusive content"/);
     assert.match(contentPage, /logo_podcast\.png/);
+    assert.match(contentPage, />New exclusive content from Binyan Shalem<\/p>/);
+    assert.match(contentPage, />More content coming soon\.<\/p>/);
+    assert.doesNotMatch(contentPage, />A new podcast from Binyan Shalem<\/p>/);
+    assert.doesNotMatch(contentPage, />Episodes coming soon\.<\/p>/);
 });
 
 function jsonResponse(data, ok = true) {
