@@ -12,6 +12,16 @@ export const DONATION_METHODS = Object.freeze({
     zelle: "zelle"
 });
 
+export const DONATION_SUGGESTED_AMOUNTS = Object.freeze([
+    101,
+    301,
+    501,
+    1000,
+    2600,
+    5000,
+    10000
+]);
+
 const METHOD_LABELS = Object.freeze({
     [DONATION_METHODS.creditCard]: "Credit card",
     [DONATION_METHODS.donorAdvisedFund]: "Charitable account or donor-advised fund",
@@ -34,6 +44,15 @@ export function paymentMethodLabel(method) {
 
 export function donationFrequencyLabel(frequency) {
     return FREQUENCY_LABELS[frequency] || "One-time gift";
+}
+
+export function suggestedDonationAmountKey(value) {
+    const raw = typeof value === "string" ? value.trim() : String(value ?? "").trim();
+    if (!raw) return "";
+    const numericAmount = Number(raw);
+    return Number.isFinite(numericAmount) && DONATION_SUGGESTED_AMOUNTS.includes(numericAmount)
+        ? String(numericAmount)
+        : "other";
 }
 
 export function validateDonationSelection({ name, amount, frequency, paymentMethod } = {}) {

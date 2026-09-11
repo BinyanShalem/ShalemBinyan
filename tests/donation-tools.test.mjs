@@ -8,6 +8,7 @@ import {
     donationFrequencyLabel,
     normalizeDonationIntent,
     paymentMethodLabel,
+    suggestedDonationAmountKey,
     validateDonationSelection
 } from "../donation-tools.mjs";
 
@@ -43,6 +44,14 @@ test("unavailable payment methods cannot be selected", () => {
             paymentMethod
         }), /currently unavailable/);
     }
+});
+
+test("maps typed amounts to a preset or Other", () => {
+    assert.equal(suggestedDonationAmountKey("101"), "101");
+    assert.equal(suggestedDonationAmountKey("1000.00"), "1000");
+    assert.equal(suggestedDonationAmountKey("2600"), "2600");
+    assert.equal(suggestedDonationAmountKey("777"), "other");
+    assert.equal(suggestedDonationAmountKey(""), "");
 });
 
 test("builds a Banquest URL with the amount and donor name in the description", () => {

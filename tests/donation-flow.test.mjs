@@ -32,6 +32,25 @@ test("supports card, charitable-account, Venmo, and Zelle destinations", () => {
     assert.match(donationPage, /Unavailable for monthly/);
 });
 
+test("offers the approved donation amounts and selects Other for custom input", () => {
+    for (const amount of ["101", "301", "501", "1000", "2600", "5000", "10000"]) {
+        assert.match(donationPage, new RegExp(`data-amount="${amount}"`));
+    }
+    assert.match(donationPage, /data-amount="other"[\s\S]*?>Other</);
+    assert.match(donationPage, /suggestedDonationAmountKey\(amountInput\.value\)/);
+    assert.match(donationPage, /syncAmountShortcut\(\{ manual: true \}\)/);
+});
+
+test("uses donation wording and a post-donation home action", () => {
+    assert.match(donationPage, /Donation details/);
+    assert.match(donationPage, /Donation amount/);
+    assert.match(donationPage, /Donation timing/);
+    assert.match(donationPage, /Make one donation today/);
+    assert.match(donationPage, />Return to home</);
+    assert.doesNotMatch(donationPage, /Start another donation/);
+    assert.doesNotMatch(donationPage, /donation-hero-mark/);
+});
+
 test("records an unconfirmed donation intent before showing payment", () => {
     assert.match(donationPage, /addDoc\(collection\(db, DONATIONS_COLLECTION\)/);
     assert.match(donationPage, /status: "unconfirmed"/);

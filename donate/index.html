@@ -25,8 +25,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;750&amp;display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../blue-concept-pages.css?v=2026-09-11.2">
-    <script defer src="/cache-refresh.js?v=2026-09-11.2"></script>
+    <link rel="stylesheet" href="../blue-concept-pages.css?v=2026-09-11.3">
+    <script defer src="/cache-refresh.js?v=2026-09-11.3"></script>
     <style>
         .donation-page {
             --donation-success: #1f684d;
@@ -71,22 +71,6 @@
             align-items: center;
         }
 
-        .donation-hero-mark {
-            display: grid;
-            width: clamp(72px, 8vw, 96px);
-            aspect-ratio: 1;
-            margin-bottom: 2rem;
-            place-items: center;
-            color: var(--deep-water);
-            background: rgba(255, 255, 255, 0.82);
-            border-radius: 50%;
-            box-shadow: 0 18px 50px rgba(36, 77, 104, 0.14);
-        }
-
-        .donation-hero-mark svg {
-            width: 42%;
-        }
-
         .donation-trust-line {
             display: flex;
             align-items: center;
@@ -115,28 +99,11 @@
             text-wrap: balance;
         }
 
-        .donation-copy-list {
-            display: grid;
-            gap: 0.8rem;
-            margin: 2rem 0 0;
-            padding: 0;
-            list-style: none;
-        }
-
-        .donation-copy-list li {
-            display: grid;
-            grid-template-columns: 22px minmax(0, 1fr);
-            align-items: start;
-            gap: 0.65rem;
-            color: var(--ink-soft);
+        .donation-copy-trust {
+            max-width: 32rem;
+            margin-top: 1.8rem;
             font-size: 0.9rem;
             line-height: 1.55;
-        }
-
-        .donation-copy-list svg {
-            width: 19px;
-            margin-top: 0.12rem;
-            color: var(--deep-water);
         }
 
         .donation-page .form-surface {
@@ -620,16 +587,17 @@
             }
         }
 
+        @media (min-width: 701px) {
+            .donation-page .donation-hero .donation-trust-line {
+                display: none;
+            }
+        }
+
         @media (max-width: 700px) {
             .donation-page .donation-hero .hero-shell {
                 gap: 0.7rem;
                 padding-top: 1.35rem;
                 padding-bottom: 1.35rem;
-            }
-
-            .donation-hero-mark {
-                width: 56px;
-                margin-bottom: 0.75rem;
             }
 
             .donation-page .donation-hero h1 {
@@ -791,9 +759,6 @@
         <section class="page-hero donation-hero" aria-labelledby="donation-page-title">
             <div class="hero-shell">
                 <div>
-                    <span class="donation-hero-mark" aria-hidden="true">
-                        <svg viewBox="0 0 24 24"><path d="M12 20.2S4.5 16 4.5 9.9A4.1 4.1 0 0 1 12 7.6a4.1 4.1 0 0 1 7.5 2.3c0 6.1-7.5 10.3-7.5 10.3Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>
-                    </span>
                     <h1 id="donation-page-title">Support stronger homes.</h1>
                 </div>
                 <div class="donation-callout">
@@ -811,16 +776,15 @@
                 <div class="donation-copy">
                     <h2 id="donation-form-title">Choose how you’d like to give.</h2>
                     <p>Tell us about your intended gift, then continue to the right payment destination.</p>
-                    <ul class="donation-copy-list">
-                        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4 10-10" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/></svg><span>One-time and monthly giving options</span></li>
-                        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4 10-10" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/></svg><span>Credit card and charitable-account instructions</span></li>
-                        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4 10-10" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/></svg><span>A seamless handoff to secure processing</span></li>
-                    </ul>
+                    <p class="donation-trust-line donation-copy-trust">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s8-3.8 8-10V5l-8-3-8 3v6c0 6.2 8 10 8 10Z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="1.7"/><path d="m9 12 2 2 4-5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>
+                        Your payment is completed securely with the provider you choose.
+                    </p>
                 </div>
 
                 <div class="form-surface" id="donation-surface">
                     <div class="donation-progress" aria-label="Donation progress">
-                        <div class="donation-step" id="details-step" aria-current="step"><span class="donation-step-number">1</span><span class="donation-step-label">Gift details</span></div>
+                        <div class="donation-step" id="details-step" aria-current="step"><span class="donation-step-number">1</span><span class="donation-step-label">Donation details</span></div>
                         <div class="donation-step" id="payment-step"><span class="donation-step-number">2</span><span class="donation-step-label">Payment</span></div>
                     </div>
 
@@ -836,26 +800,30 @@
                                 <input class="donation-input" id="donor-name" name="name" type="text" autocomplete="name" maxlength="160" required placeholder="Full name">
                             </label>
                             <label class="donation-field">
-                                <span>Gift amount</span>
+                                <span>Donation amount</span>
                                 <span class="amount-control">
                                     <span class="amount-symbol" aria-hidden="true">$</span>
-                                    <input class="donation-input" id="donation-amount" name="amount" type="number" inputmode="decimal" min="1" max="1000000" step="0.01" required placeholder="180">
+                                    <input class="donation-input" id="donation-amount" name="amount" type="number" inputmode="decimal" min="1" max="1000000" step="0.01" required placeholder="101">
                                 </span>
                             </label>
                             <div class="amount-shortcuts" aria-label="Suggested donation amounts">
-                                <button class="amount-shortcut" type="button" data-amount="36">$36</button>
-                                <button class="amount-shortcut" type="button" data-amount="72">$72</button>
-                                <button class="amount-shortcut" type="button" data-amount="180">$180</button>
-                                <button class="amount-shortcut" type="button" data-amount="360">$360</button>
+                                <button class="amount-shortcut" type="button" data-amount="101" aria-pressed="false">$101</button>
+                                <button class="amount-shortcut" type="button" data-amount="301" aria-pressed="false">$301</button>
+                                <button class="amount-shortcut" type="button" data-amount="501" aria-pressed="false">$501</button>
+                                <button class="amount-shortcut" type="button" data-amount="1000" aria-pressed="false">$1,000</button>
+                                <button class="amount-shortcut" type="button" data-amount="2600" aria-pressed="false">$2,600</button>
+                                <button class="amount-shortcut" type="button" data-amount="5000" aria-pressed="false">$5,000</button>
+                                <button class="amount-shortcut" type="button" data-amount="10000" aria-pressed="false">$10,000</button>
+                                <button class="amount-shortcut" type="button" data-amount="other" aria-pressed="false">Other</button>
                             </div>
                         </div>
 
                         <fieldset class="donation-fieldset">
-                            <legend>Gift timing</legend>
+                            <legend>Donation timing</legend>
                             <div class="choice-grid">
                                 <label class="choice-option">
                                     <input type="radio" name="frequency" value="one_time" checked>
-                                    <span class="choice-copy"><strong>One-time</strong><small>Make one gift today</small></span>
+                                    <span class="choice-copy"><strong>One-time</strong><small>Make one donation today</small></span>
                                 </label>
                                 <label class="choice-option">
                                     <input type="radio" name="frequency" value="monthly">
@@ -930,7 +898,7 @@
                             <div class="giving-instruction"><span>Required memo</span><strong>Binyan Shalem</strong></div>
                         </div>
                         <p class="banquest-note">Please include “Binyan Shalem” clearly in the memo so the gift can be directed correctly.</p>
-                        <div class="destination-actions"><button class="destination-action primary" type="button" data-start-over>Start another donation</button></div>
+                        <div class="destination-actions"><a class="destination-action primary" href="../">Return to home</a></div>
                     </section>
 
                     <section class="donation-destination" id="unavailable-destination" aria-labelledby="unavailable-title" hidden>
@@ -972,7 +940,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { addDoc, collection, getFirestore, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { FIREBASE_CONFIG } from "../content-library.mjs?v=2026-09-11.2";
+        import { FIREBASE_CONFIG } from "../content-library.mjs?v=2026-09-11.3";
         import {
             buildBanquestUrl,
             DONATIONS_COLLECTION,
@@ -980,8 +948,9 @@
             DONATION_METHODS,
             donationFrequencyLabel,
             paymentMethodLabel,
+            suggestedDonationAmountKey,
             validateDonationSelection
-        } from "../donation-tools.mjs?v=2026-09-11.2";
+        } from "../donation-tools.mjs?v=2026-09-11.3";
 
         const menuButton = document.querySelector(".menu-button");
         const mobileMenu = document.getElementById("mobile-menu");
@@ -1109,18 +1078,30 @@
             if (event.key === "Escape" && menuButton.getAttribute("aria-expanded") === "true") setMenu(false);
         });
 
-        document.querySelectorAll(".amount-shortcut").forEach((button) => {
+        const amountShortcutButtons = [...document.querySelectorAll(".amount-shortcut")];
+
+        function syncAmountShortcut({ manual = false } = {}) {
+            const amountKey = suggestedDonationAmountKey(amountInput.value) || (manual ? "other" : "");
+            amountShortcutButtons.forEach((button) => {
+                const selected = button.dataset.amount === amountKey;
+                button.classList.toggle("is-selected", selected);
+                button.setAttribute("aria-pressed", String(selected));
+            });
+        }
+
+        amountShortcutButtons.forEach((button) => {
             button.addEventListener("click", () => {
-                amountInput.value = button.dataset.amount;
-                document.querySelectorAll(".amount-shortcut").forEach((item) => item.classList.toggle("is-selected", item === button));
+                if (button.dataset.amount === "other") {
+                    if (suggestedDonationAmountKey(amountInput.value) !== "other") amountInput.value = "";
+                    syncAmountShortcut({ manual: true });
+                } else {
+                    amountInput.value = button.dataset.amount;
+                    syncAmountShortcut();
+                }
                 amountInput.focus();
             });
         });
-        amountInput.addEventListener("input", () => {
-            document.querySelectorAll(".amount-shortcut").forEach((button) => {
-                button.classList.toggle("is-selected", button.dataset.amount === amountInput.value);
-            });
-        });
+        amountInput.addEventListener("input", () => syncAmountShortcut({ manual: true }));
         donationForm.elements.frequency.forEach((radio) => radio.addEventListener("change", updateFrequency));
         document.querySelectorAll("[data-start-over]").forEach((button) => button.addEventListener("click", () => startOver()));
         document.getElementById("switch-to-card").addEventListener("click", () => {
@@ -1186,6 +1167,7 @@
         }
 
         updateFrequency();
+        syncAmountShortcut();
         void initializeDonations();
     </script>
 </body>
