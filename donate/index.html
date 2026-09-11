@@ -1,16 +1,9 @@
 <!DOCTYPE html>
-<!--
-THESIS: Donation is a calm act of support with the secure form reached immediately, not a decorative fundraising pitch.
-OWN-WORLD: Morning-blue atmosphere, deep-water controls, open typography, and one grounded white form surface.
-STORY: Visitors understand what their contribution supports and move directly into the existing secure form.
-FIRST VIEWPORT: A concise donation statement sits in a compact blue field with the full embedded form directly below.
-FORM: A direct support threshold extending the approved blue concept; no new visual world or behavior.
--->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="description" content="Support Binyan Shalem and help couples receive guidance free of charge.">
+    <meta name="description" content="Support Binyan Shalem with a one-time or monthly gift and help couples receive guidance free of charge.">
     <title>Donate — Binyan Shalem</title>
     <link rel="canonical" href="https://www.binyan-shalem.com/donate/">
     <meta property="og:type" content="website">
@@ -32,11 +25,737 @@ FORM: A direct support threshold extending the approved blue concept; no new vis
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;750&amp;display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../blue-concept-pages.css?v=2026-08-13.1">
-    <script defer src="/cache-refresh.js?v=2026-08-13.1"></script>
+    <link rel="stylesheet" href="../blue-concept-pages.css?v=2026-09-11.2">
+    <script defer src="/cache-refresh.js?v=2026-09-11.2"></script>
+    <style>
+        .donation-page {
+            --donation-success: #1f684d;
+            --donation-error: #9b3036;
+            --donation-wash: #edf6fa;
+        }
+
+        .donation-page ::selection {
+            color: var(--white);
+            background: var(--deep-water);
+        }
+
+        html {
+            scrollbar-color: var(--harbor) var(--mist);
+            scrollbar-width: thin;
+        }
+
+        html::-webkit-scrollbar {
+            width: 11px;
+        }
+
+        html::-webkit-scrollbar-track {
+            background: var(--mist);
+        }
+
+        html::-webkit-scrollbar-thumb {
+            background: var(--harbor);
+            border: 3px solid var(--mist);
+            border-radius: 999px;
+        }
+
+        .donation-page button,
+        .donation-page input {
+            font: inherit;
+        }
+
+        .donation-page input {
+            caret-color: var(--deep-water);
+        }
+
+        .donation-page .donation-hero .hero-shell {
+            align-items: center;
+        }
+
+        .donation-hero-mark {
+            display: grid;
+            width: clamp(72px, 8vw, 96px);
+            aspect-ratio: 1;
+            margin-bottom: 2rem;
+            place-items: center;
+            color: var(--deep-water);
+            background: rgba(255, 255, 255, 0.82);
+            border-radius: 50%;
+            box-shadow: 0 18px 50px rgba(36, 77, 104, 0.14);
+        }
+
+        .donation-hero-mark svg {
+            width: 42%;
+        }
+
+        .donation-trust-line {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            margin: 1.5rem 0 0;
+            color: var(--deep-water);
+            font-size: 0.83rem;
+            font-weight: 700;
+        }
+
+        .donation-trust-line svg {
+            width: 18px;
+            flex: 0 0 auto;
+        }
+
+        .donation-page .donation-shell {
+            align-items: start;
+        }
+
+        .donation-copy h2 {
+            max-width: 9ch;
+            margin: 0;
+            font-size: clamp(2.4rem, 4vw, 4.2rem);
+            line-height: 1.02;
+            letter-spacing: -0.035em;
+            text-wrap: balance;
+        }
+
+        .donation-copy-list {
+            display: grid;
+            gap: 0.8rem;
+            margin: 2rem 0 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .donation-copy-list li {
+            display: grid;
+            grid-template-columns: 22px minmax(0, 1fr);
+            align-items: start;
+            gap: 0.65rem;
+            color: var(--ink-soft);
+            font-size: 0.9rem;
+            line-height: 1.55;
+        }
+
+        .donation-copy-list svg {
+            width: 19px;
+            margin-top: 0.12rem;
+            color: var(--deep-water);
+        }
+
+        .donation-page .form-surface {
+            color: var(--midnight);
+            background: var(--white);
+        }
+
+        .donation-progress {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            background: var(--morning);
+            border-bottom: 1px solid var(--line);
+        }
+
+        .donation-step {
+            display: flex;
+            min-height: 58px;
+            align-items: center;
+            gap: 0.7rem;
+            padding: 0.8rem 1.15rem;
+            color: #527286;
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+
+        .donation-step + .donation-step {
+            border-left: 1px solid var(--line);
+        }
+
+        .donation-step-number {
+            display: grid;
+            width: 27px;
+            height: 27px;
+            place-items: center;
+            color: var(--deep-water);
+            background: rgba(255, 255, 255, 0.72);
+            border-radius: 50%;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .donation-step[aria-current="step"] {
+            color: var(--midnight);
+        }
+
+        .donation-step[aria-current="step"] .donation-step-number {
+            color: var(--white);
+            background: var(--deep-water);
+        }
+
+        .donation-form,
+        .donation-destination {
+            padding: clamp(1.35rem, 4vw, 2.4rem);
+        }
+
+        .donation-destination.is-entering {
+            animation: donation-destination-in 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        @keyframes donation-destination-in {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .donation-form-heading h3,
+        .destination-heading h3 {
+            margin: 0;
+            font-size: clamp(1.45rem, 3vw, 2rem);
+            line-height: 1.15;
+            letter-spacing: -0.025em;
+            text-wrap: balance;
+        }
+
+        .donation-form-heading p,
+        .destination-heading p {
+            max-width: 64ch;
+            margin: 0.65rem 0 0;
+            color: var(--ink-soft);
+            font-size: 0.92rem;
+            line-height: 1.65;
+        }
+
+        .donation-fields {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(180px, 0.62fr);
+            gap: 1.2rem;
+            margin-top: 2rem;
+        }
+
+        .donation-field {
+            display: grid;
+            gap: 0.48rem;
+        }
+
+        .donation-field > span,
+        .donation-fieldset legend {
+            color: var(--midnight);
+            font-size: 0.82rem;
+            font-weight: 750;
+        }
+
+        .donation-input {
+            width: 100%;
+            min-height: 52px;
+            padding: 0.8rem 0.9rem;
+            color: var(--midnight);
+            background: #f9fcfd;
+            border: 1px solid #adc9d8;
+            border-radius: 11px;
+            outline: none;
+            transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+        }
+
+        .donation-input:hover {
+            border-color: var(--harbor);
+        }
+
+        .donation-input:focus {
+            background: var(--white);
+            border-color: var(--deep-water);
+            box-shadow: 0 0 0 4px rgba(111, 159, 189, 0.2);
+        }
+
+        .amount-control {
+            position: relative;
+        }
+
+        .amount-symbol {
+            position: absolute;
+            top: 50%;
+            left: 0.95rem;
+            color: var(--deep-water);
+            font-weight: 750;
+            transform: translateY(-50%);
+        }
+
+        .amount-control .donation-input {
+            padding-left: 2rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .amount-shortcuts {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.5rem;
+            grid-column: 1 / -1;
+            margin-top: -0.35rem;
+        }
+
+        .amount-shortcut {
+            min-height: 42px;
+            color: var(--deep-water);
+            background: var(--donation-wash);
+            border: 1px solid transparent;
+            border-radius: 9px;
+            font-size: 0.8rem;
+            font-weight: 750;
+            font-variant-numeric: tabular-nums;
+            cursor: pointer;
+        }
+
+        .amount-shortcut:hover,
+        .amount-shortcut.is-selected {
+            background: var(--morning);
+            border-color: var(--harbor);
+        }
+
+        .donation-fieldset {
+            margin: 2rem 0 0;
+            padding: 0;
+            border: 0;
+        }
+
+        .donation-fieldset legend {
+            margin-bottom: 0.75rem;
+        }
+
+        .choice-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.7rem;
+        }
+
+        .choice-option {
+            position: relative;
+            display: flex;
+            min-height: 58px;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.85rem 0.95rem;
+            background: #f9fcfd;
+            border: 1px solid #bdd2dd;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+        }
+
+        .choice-option:hover {
+            border-color: var(--harbor);
+        }
+
+        .choice-option:has(input:checked) {
+            background: var(--morning);
+            border-color: var(--deep-water);
+            box-shadow: 0 8px 22px rgba(36, 77, 104, 0.09);
+        }
+
+        .choice-option:has(input:disabled) {
+            cursor: not-allowed;
+            opacity: 0.58;
+        }
+
+        .choice-option input {
+            width: 18px;
+            height: 18px;
+            flex: 0 0 auto;
+            accent-color: var(--deep-water);
+        }
+
+        .choice-option input:focus-visible {
+            outline: none;
+        }
+
+        .choice-option:has(input:focus-visible) {
+            box-shadow: 0 0 0 4px rgba(111, 159, 189, 0.24);
+        }
+
+        .choice-copy {
+            display: grid;
+            gap: 0.12rem;
+            min-width: 0;
+        }
+
+        .choice-copy strong {
+            font-size: 0.88rem;
+        }
+
+        .choice-copy small {
+            color: var(--ink-soft);
+            font-size: 0.72rem;
+            line-height: 1.35;
+        }
+
+        .method-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .method-option {
+            min-height: 68px;
+        }
+
+        .method-option svg {
+            width: 23px;
+            flex: 0 0 auto;
+            color: var(--deep-water);
+        }
+
+        .method-option .choice-copy {
+            flex: 1;
+        }
+
+        .method-badge {
+            margin-left: auto;
+            padding: 0.28rem 0.48rem;
+            color: #6f5966;
+            background: #f5ecef;
+            border-radius: 999px;
+            font-size: 0.65rem;
+            font-weight: 750;
+            white-space: nowrap;
+        }
+
+        .monthly-card-badge {
+            color: var(--deep-water);
+            background: var(--donation-wash);
+        }
+
+        .monthly-notice {
+            margin: 0.8rem 0 0;
+            padding: 0.8rem 0.9rem;
+            color: #315d73;
+            background: var(--donation-wash);
+            border-radius: 10px;
+            font-size: 0.78rem;
+            line-height: 1.5;
+        }
+
+        .donation-submit {
+            display: flex;
+            width: 100%;
+            min-height: 54px;
+            align-items: center;
+            justify-content: center;
+            gap: 0.65rem;
+            margin-top: 2rem;
+            padding: 0.85rem 1.2rem;
+            color: var(--white);
+            background: var(--deep-water);
+            border: 0;
+            border-radius: 999px;
+            box-shadow: 0 12px 26px rgba(36, 77, 104, 0.2);
+            font-weight: 750;
+            cursor: pointer;
+        }
+
+        .donation-submit:hover {
+            background: var(--midnight);
+            transform: translateY(-1px);
+        }
+
+        .donation-submit svg {
+            width: 18px;
+        }
+
+        .donation-submit:disabled {
+            cursor: wait;
+            opacity: 0.65;
+            transform: none;
+        }
+
+        .donation-status {
+            margin: 1rem 0 0;
+            padding: 0.8rem 0.9rem;
+            color: var(--donation-error);
+            background: #fff1f2;
+            border-radius: 10px;
+            font-size: 0.82rem;
+            line-height: 1.5;
+        }
+
+        .destination-summary {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1px;
+            margin: 1.6rem 0;
+            overflow: hidden;
+            background: var(--line);
+            border-radius: 12px;
+        }
+
+        .destination-summary div {
+            min-width: 0;
+            padding: 0.9rem;
+            background: var(--donation-wash);
+        }
+
+        .destination-summary span,
+        .destination-summary strong {
+            display: block;
+        }
+
+        .destination-summary span {
+            margin-bottom: 0.25rem;
+            color: var(--ink-soft);
+            font-size: 0.68rem;
+            font-weight: 700;
+        }
+
+        .destination-summary strong {
+            overflow: hidden;
+            font-size: 0.85rem;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .banquest-note {
+            margin: 0 0 1rem;
+            color: var(--ink-soft);
+            font-size: 0.8rem;
+            line-height: 1.55;
+        }
+
+        .banquest-frame-wrap {
+            overflow: hidden;
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: inset 0 0 0 1px var(--line);
+        }
+
+        .banquest-frame {
+            display: block;
+            width: 100%;
+            min-height: 1120px;
+            border: 0;
+        }
+
+        .destination-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.7rem;
+            margin-top: 1.2rem;
+        }
+
+        .destination-action {
+            display: inline-flex;
+            min-height: 46px;
+            align-items: center;
+            justify-content: center;
+            padding: 0.7rem 1rem;
+            color: var(--deep-water);
+            background: var(--donation-wash);
+            border: 1px solid transparent;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 750;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .destination-action.primary {
+            color: var(--white);
+            background: var(--deep-water);
+        }
+
+        .giving-instructions {
+            display: grid;
+            gap: 1px;
+            margin-top: 1.6rem;
+            overflow: hidden;
+            background: var(--line);
+            border-radius: 14px;
+        }
+
+        .giving-instruction {
+            display: grid;
+            grid-template-columns: minmax(130px, 0.62fr) minmax(0, 1.38fr);
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--donation-wash);
+        }
+
+        .giving-instruction span {
+            color: var(--ink-soft);
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .giving-instruction strong {
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .unavailable-mark {
+            display: grid;
+            width: 58px;
+            height: 58px;
+            margin-bottom: 1.4rem;
+            place-items: center;
+            color: var(--deep-water);
+            background: var(--morning);
+            border-radius: 50%;
+        }
+
+        .unavailable-mark svg {
+            width: 26px;
+        }
+
+        @media (min-width: 1180px) {
+            .donation-page-main {
+                grid-template-columns: minmax(390px, 0.7fr) minmax(650px, 1.3fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .donation-page .donation-callout {
+                display: grid;
+                gap: 0.85rem;
+            }
+
+            .donation-page .donation-callout .donation-trust-line {
+                max-width: 31rem;
+                margin-top: 0;
+                font-size: 0.9rem;
+                line-height: 1.55;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .donation-page .donation-hero .hero-shell {
+                gap: 0.7rem;
+                padding-top: 1.35rem;
+                padding-bottom: 1.35rem;
+            }
+
+            .donation-hero-mark {
+                width: 56px;
+                margin-bottom: 0.75rem;
+            }
+
+            .donation-page .donation-hero h1 {
+                max-width: 9ch;
+                font-size: clamp(2.35rem, 11vw, 2.8rem);
+            }
+
+            .donation-page .donation-callout > p:first-child {
+                font-size: 0.9rem;
+                line-height: 1.5;
+            }
+
+            .donation-trust-line {
+                gap: 0.5rem;
+                margin-top: 0.75rem;
+                font-size: 0.74rem;
+            }
+
+            .donation-copy {
+                display: none;
+            }
+
+            .donation-page .donation-shell {
+                padding-top: 0;
+            }
+
+            .donation-form,
+            .donation-destination {
+                padding-right: var(--page-gutter);
+                padding-left: var(--page-gutter);
+            }
+
+            .donation-fields,
+            .choice-grid,
+            .destination-summary {
+                grid-template-columns: 1fr;
+            }
+
+            .method-option {
+                display: grid;
+                grid-template-columns: 18px 23px minmax(0, 1fr);
+            }
+
+            .method-option input,
+            .method-option svg,
+            .method-option .choice-copy {
+                grid-row: 1;
+            }
+
+            .method-option input {
+                grid-column: 1;
+            }
+
+            .method-option svg {
+                grid-column: 2;
+            }
+
+            .method-option .choice-copy {
+                grid-column: 3;
+            }
+
+            .method-option > .method-badge {
+                grid-row: 2;
+                grid-column: 3;
+                justify-self: start;
+                margin: 0;
+            }
+
+            .destination-summary {
+                gap: 1px;
+            }
+
+            .giving-instruction {
+                grid-template-columns: 1fr;
+                gap: 0.35rem;
+            }
+
+            .banquest-frame-wrap {
+                margin-right: calc(var(--page-gutter) * -1);
+                margin-left: calc(var(--page-gutter) * -1);
+                border-radius: 0;
+            }
+
+            .banquest-frame {
+                min-height: 1320px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .amount-shortcuts {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .donation-step {
+                padding-inline: 0.8rem;
+            }
+
+            .donation-step-label {
+                font-size: 0.72rem;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .donation-submit,
+            .donation-input,
+            .choice-option {
+                transition: none;
+            }
+
+            .donation-destination.is-entering {
+                animation: none;
+            }
+        }
+    </style>
 </head>
 <body class="donation-page">
-    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <!--
+        IMPECCABLE_DIRECTION_CONTRACT
+        THESIS: Giving begins with one calm commitment and reveals only the payment instructions the donor chose, replacing the generic embedded-form experience.
+        OWN-WORLD: Morning blue, white working surfaces, deep-water actions, circular assurance marks, compact choice rows, and Manrope typography from the public Calm Threshold system.
+        STORY: Enter name and gift → choose timing and method → record an unconfirmed intent → continue to the correct secure payment destination.
+        FIRST VIEWPORT: A quiet support statement anchors the left while the complete native donation form begins immediately on the right; mobile moves the form directly beneath a compressed statement.
+        FORM [donation-flow-2026-09-11]: Established-world, code-led Persuade/Operate extension with a focused two-step handoff and a single state transition as its signature interaction.
+        FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance.
+    -->
+    <a class="skip-link" href="#main-content">Skip to donation form</a>
 
     <header class="site-header">
         <div class="nav-shell">
@@ -53,9 +772,7 @@ FORM: A direct support threshold extending the approved blue concept; no new vis
                 <a class="nav-donate" aria-current="page" href="./">Donate</a>
             </nav>
             <button class="menu-button" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"/>
-                </svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"/></svg>
             </button>
         </div>
     </header>
@@ -71,14 +788,20 @@ FORM: A direct support threshold extending the approved blue concept; no new vis
     </nav>
 
     <main class="donation-page-main" id="main-content">
-        <section class="page-hero donation-hero">
+        <section class="page-hero donation-hero" aria-labelledby="donation-page-title">
             <div class="hero-shell">
                 <div>
-                    <p class="hero-kicker">Help keep guidance accessible</p>
-                    <h1>Support stronger homes.</h1>
+                    <span class="donation-hero-mark" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M12 20.2S4.5 16 4.5 9.9A4.1 4.1 0 0 1 12 7.6a4.1 4.1 0 0 1 7.5 2.3c0 6.1-7.5 10.3-7.5 10.3Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>
+                    </span>
+                    <h1 id="donation-page-title">Support stronger homes.</h1>
                 </div>
                 <div class="donation-callout">
                     <p>Your generous contribution allows us to continue offering our services free of charge, helping couples build stronger, healthier homes in our community.</p>
+                    <p class="donation-trust-line">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s8-3.8 8-10V5l-8-3-8 3v6c0 6.2 8 10 8 10Z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="1.7"/><path d="m9 12 2 2 4-5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>
+                        Your payment is completed securely with the provider you choose.
+                    </p>
                 </div>
             </div>
         </section>
@@ -86,21 +809,142 @@ FORM: A direct support threshold extending the approved blue concept; no new vis
         <section class="donation-main" aria-labelledby="donation-form-title">
             <div class="donation-shell">
                 <div class="donation-copy">
-                    <h2 id="donation-form-title">Donate securely.</h2>
-                    <p>Use our secure donation form to complete your contribution.</p>
+                    <h2 id="donation-form-title">Choose how you’d like to give.</h2>
+                    <p>Tell us about your intended gift, then continue to the right payment destination.</p>
+                    <ul class="donation-copy-list">
+                        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4 10-10" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/></svg><span>One-time and monthly giving options</span></li>
+                        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4 10-10" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/></svg><span>Credit card and charitable-account instructions</span></li>
+                        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4 10-10" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/></svg><span>A seamless handoff to secure processing</span></li>
+                    </ul>
                 </div>
 
-                <div class="form-surface">
-                    <div class="form-toolbar">
-                        <p>Secure donation form</p>
-                        <a class="form-fallback" href="https://docs.google.com/forms/d/e/1FAIpQLSeO4R-VYVDwYFks93J2QbgwkDo4MnsL1DqFojvveSsreRe1iA/viewform" target="_blank" rel="noopener noreferrer">Open form in a new tab</a>
+                <div class="form-surface" id="donation-surface">
+                    <div class="donation-progress" aria-label="Donation progress">
+                        <div class="donation-step" id="details-step" aria-current="step"><span class="donation-step-number">1</span><span class="donation-step-label">Gift details</span></div>
+                        <div class="donation-step" id="payment-step"><span class="donation-step-number">2</span><span class="donation-step-label">Payment</span></div>
                     </div>
-                    <iframe
-                        class="google-form"
-                        src="https://docs.google.com/forms/d/e/1FAIpQLSeO4R-VYVDwYFks93J2QbgwkDo4MnsL1DqFojvveSsreRe1iA/viewform?embedded=true"
-                        title="Binyan Shalem secure donation form"
-                        loading="lazy"
-                    >Loading…</iframe>
+
+                    <form class="donation-form" id="donation-form" novalidate>
+                        <div class="donation-form-heading">
+                            <h3>Begin your donation.</h3>
+                            <p>We’ll use these details to prepare the next step. This form does not charge you.</p>
+                        </div>
+
+                        <div class="donation-fields">
+                            <label class="donation-field">
+                                <span>Your name</span>
+                                <input class="donation-input" id="donor-name" name="name" type="text" autocomplete="name" maxlength="160" required placeholder="Full name">
+                            </label>
+                            <label class="donation-field">
+                                <span>Gift amount</span>
+                                <span class="amount-control">
+                                    <span class="amount-symbol" aria-hidden="true">$</span>
+                                    <input class="donation-input" id="donation-amount" name="amount" type="number" inputmode="decimal" min="1" max="1000000" step="0.01" required placeholder="180">
+                                </span>
+                            </label>
+                            <div class="amount-shortcuts" aria-label="Suggested donation amounts">
+                                <button class="amount-shortcut" type="button" data-amount="36">$36</button>
+                                <button class="amount-shortcut" type="button" data-amount="72">$72</button>
+                                <button class="amount-shortcut" type="button" data-amount="180">$180</button>
+                                <button class="amount-shortcut" type="button" data-amount="360">$360</button>
+                            </div>
+                        </div>
+
+                        <fieldset class="donation-fieldset">
+                            <legend>Gift timing</legend>
+                            <div class="choice-grid">
+                                <label class="choice-option">
+                                    <input type="radio" name="frequency" value="one_time" checked>
+                                    <span class="choice-copy"><strong>One-time</strong><small>Make one gift today</small></span>
+                                </label>
+                                <label class="choice-option">
+                                    <input type="radio" name="frequency" value="monthly">
+                                    <span class="choice-copy"><strong>Monthly</strong><small>Give automatically each month</small></span>
+                                    <span class="method-badge monthly-card-badge">CC only</span>
+                                </label>
+                            </div>
+                        </fieldset>
+
+                        <fieldset class="donation-fieldset">
+                            <legend>Payment method</legend>
+                            <div class="choice-grid method-grid">
+                                <label class="choice-option method-option">
+                                    <input type="radio" name="paymentMethod" value="credit_card" checked>
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M3 10h18M7 15h4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.7"/></svg>
+                                    <span class="choice-copy"><strong>Credit card</strong><small>Secure processing through Banquest</small></span>
+                                </label>
+                                <label class="choice-option method-option" data-one-time-only>
+                                    <input type="radio" name="paymentMethod" value="donor_advised_fund">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9h18M5 9V7l7-4 7 4v2M6 9v8m4-8v8m4-8v8m4-8v8M4 21h16v-4H4v4Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>
+                                    <span class="choice-copy"><strong>Charitable account or donor-advised fund</strong><small>JCF, Fidelity Charitable, The Donors Fund, OJC, DAFgiving360, Pledger, and similar providers</small></span>
+                                    <span class="method-badge" data-availability-badge hidden>Unavailable for monthly</span>
+                                </label>
+                                <label class="choice-option method-option" data-one-time-only data-always-unavailable aria-disabled="true">
+                                    <input type="radio" name="paymentMethod" value="venmo" disabled>
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14v10H5zM8 7V5h8v2M8 12h8" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>
+                                    <span class="choice-copy"><strong>Venmo</strong><small>Currently unavailable</small></span>
+                                    <span class="method-badge" data-availability-badge>Unavailable</span>
+                                </label>
+                                <label class="choice-option method-option" data-one-time-only data-always-unavailable aria-disabled="true">
+                                    <input type="radio" name="paymentMethod" value="zelle" disabled>
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h10L7 19h10M12 2v3m0 14v3" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>
+                                    <span class="choice-copy"><strong>Zelle</strong><small>Currently unavailable</small></span>
+                                    <span class="method-badge" data-availability-badge>Unavailable</span>
+                                </label>
+                            </div>
+                            <p class="monthly-notice" id="monthly-notice" hidden>Monthly gifts currently require a credit card. You’ll choose “Monthly” once more inside the secure Banquest form.</p>
+                        </fieldset>
+
+                        <button class="donation-submit" id="donation-submit" type="submit" disabled>
+                            <span>Connecting securely…</span>
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/></svg>
+                        </button>
+                        <p class="donation-status" id="donation-status" role="alert" tabindex="-1" hidden></p>
+                    </form>
+
+                    <section class="donation-destination" id="credit-card-destination" aria-labelledby="credit-card-title" hidden>
+                        <div class="destination-heading">
+                            <h3 id="credit-card-title" tabindex="-1">Complete your secure card payment.</h3>
+                            <p>Your amount and name are already prepared in the Banquest form below.</p>
+                        </div>
+                        <div class="destination-summary" data-donation-summary></div>
+                        <p class="banquest-note" id="monthly-banquest-note" hidden>To activate your monthly gift, choose <strong>Monthly</strong> under Frequency in the secure form before submitting.</p>
+                        <div class="banquest-frame-wrap">
+                            <iframe class="banquest-frame" id="banquest-frame" title="Secure Binyan Shalem credit card donation form" allow="payment" loading="eager"></iframe>
+                        </div>
+                        <div class="destination-actions">
+                            <a class="destination-action" id="banquest-fallback" href="https://pay.banquest.com/binyanshalem" target="_blank" rel="noopener noreferrer">Open secure form in a new tab</a>
+                            <button class="destination-action" type="button" data-start-over>Change donation details</button>
+                        </div>
+                    </section>
+
+                    <section class="donation-destination" id="fund-destination" aria-labelledby="fund-title" hidden>
+                        <div class="destination-heading">
+                            <h3 id="fund-title" tabindex="-1">Send your gift through your charitable account.</h3>
+                            <p>Use the following recipient details with JCF, Fidelity Charitable, The Donors Fund, OJC, DAFgiving360, Pledger, or another charitable-giving provider.</p>
+                        </div>
+                        <div class="destination-summary" data-donation-summary></div>
+                        <div class="giving-instructions">
+                            <div class="giving-instruction"><span>Organization</span><strong>Sephardic Congregation of Long Branch</strong></div>
+                            <div class="giving-instruction"><span>Tax ID</span><strong>47-5112423</strong></div>
+                            <div class="giving-instruction"><span>Required memo</span><strong>Binyan Shalem</strong></div>
+                        </div>
+                        <p class="banquest-note">Please include “Binyan Shalem” clearly in the memo so the gift can be directed correctly.</p>
+                        <div class="destination-actions"><button class="destination-action primary" type="button" data-start-over>Start another donation</button></div>
+                    </section>
+
+                    <section class="donation-destination" id="unavailable-destination" aria-labelledby="unavailable-title" hidden>
+                        <span class="unavailable-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 8v5m0 3.5v.1M12 3 2.8 20h18.4L12 3Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg></span>
+                        <div class="destination-heading">
+                            <h3 id="unavailable-title" tabindex="-1"><span id="unavailable-method">This payment method</span> is temporarily unavailable.</h3>
+                            <p>Thank you for your intent to give. Please choose credit card or charitable account for now, or return later when this option becomes available.</p>
+                        </div>
+                        <div class="destination-summary" data-donation-summary></div>
+                        <div class="destination-actions">
+                            <button class="destination-action primary" id="switch-to-card" type="button">Continue by credit card</button>
+                            <button class="destination-action" type="button" data-start-over>Choose another method</button>
+                        </div>
+                    </section>
                 </div>
             </div>
         </section>
@@ -114,8 +958,42 @@ FORM: A direct support threshold extending the approved blue concept; no new vis
     </footer>
 
     <script>
+        if (window.location.protocol === "file:") {
+            window.addEventListener("DOMContentLoaded", () => {
+                const submit = document.getElementById("donation-submit");
+                const status = document.getElementById("donation-status");
+                submit.querySelector("span").textContent = "Open from the published site";
+                status.textContent = "Local file previews cannot connect to the secure donation service. Open the published donation page to continue.";
+                status.hidden = false;
+            });
+        }
+    </script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { addDoc, collection, getFirestore, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { FIREBASE_CONFIG } from "../content-library.mjs?v=2026-09-11.2";
+        import {
+            buildBanquestUrl,
+            DONATIONS_COLLECTION,
+            DONATION_FREQUENCIES,
+            DONATION_METHODS,
+            donationFrequencyLabel,
+            paymentMethodLabel,
+            validateDonationSelection
+        } from "../donation-tools.mjs?v=2026-09-11.2";
+
         const menuButton = document.querySelector(".menu-button");
         const mobileMenu = document.getElementById("mobile-menu");
+        const donationForm = document.getElementById("donation-form");
+        const donationSubmit = document.getElementById("donation-submit");
+        const donationStatus = document.getElementById("donation-status");
+        const amountInput = document.getElementById("donation-amount");
+        const monthlyNotice = document.getElementById("monthly-notice");
+        const destinations = [...document.querySelectorAll(".donation-destination")];
+        let db = null;
+        let userId = "";
+        let currentSelection = null;
 
         function setMenu(open, restoreFocus = true) {
             menuButton.setAttribute("aria-expanded", String(open));
@@ -124,12 +1002,103 @@ FORM: A direct support threshold extending the approved blue concept; no new vis
             mobileMenu.setAttribute("aria-hidden", String(!open));
             mobileMenu.inert = !open;
             document.body.classList.toggle("menu-open", open);
+            if (open) window.setTimeout(() => mobileMenu.querySelector("a").focus(), 0);
+            else if (restoreFocus) menuButton.focus();
+        }
 
-            if (open) {
-                window.setTimeout(() => mobileMenu.querySelector("a").focus(), 0);
-            } else if (restoreFocus) {
-                menuButton.focus();
+        function setSubmitState({ disabled, label }) {
+            donationSubmit.disabled = disabled;
+            donationSubmit.querySelector("span").textContent = label;
+            donationSubmit.setAttribute("aria-busy", String(label === "Preparing your payment…"));
+        }
+
+        function setStatus(message = "") {
+            donationStatus.textContent = message;
+            donationStatus.hidden = !message;
+            if (message) donationStatus.focus({ preventScroll: true });
+        }
+
+        function updateFrequency() {
+            const monthly = donationForm.elements.frequency.value === DONATION_FREQUENCIES.monthly;
+            if (monthly) donationForm.elements.paymentMethod.value = DONATION_METHODS.creditCard;
+            document.querySelectorAll("[data-one-time-only]").forEach((option) => {
+                const input = option.querySelector("input");
+                const badge = option.querySelector("[data-availability-badge]");
+                const alwaysUnavailable = option.hasAttribute("data-always-unavailable");
+                input.disabled = monthly || alwaysUnavailable;
+                option.setAttribute("aria-disabled", String(input.disabled));
+                if (badge) {
+                    badge.hidden = !monthly && !alwaysUnavailable;
+                    badge.textContent = monthly ? "Unavailable for monthly" : "Unavailable";
+                }
+            });
+            monthlyNotice.hidden = !monthly;
+        }
+
+        function summaryMarkup(selection) {
+            const amount = selection.amount.toLocaleString(undefined, { style: "currency", currency: "USD" });
+            return [
+                ["Donor", selection.name],
+                ["Gift", amount],
+                ["Plan", donationFrequencyLabel(selection.frequency)]
+            ].map(([label, value]) => `<div><span>${label}</span><strong></strong></div>`).join("");
+        }
+
+        function fillSummaries(selection) {
+            const values = [
+                selection.name,
+                selection.amount.toLocaleString(undefined, { style: "currency", currency: "USD" }),
+                donationFrequencyLabel(selection.frequency)
+            ];
+            document.querySelectorAll("[data-donation-summary]").forEach((summary) => {
+                summary.innerHTML = summaryMarkup(selection);
+                summary.querySelectorAll("strong").forEach((node, index) => {
+                    node.textContent = values[index];
+                });
+            });
+        }
+
+        function showDestination(selection) {
+            currentSelection = selection;
+            donationForm.hidden = true;
+            destinations.forEach((destination) => { destination.hidden = true; });
+            document.getElementById("details-step").removeAttribute("aria-current");
+            document.getElementById("payment-step").setAttribute("aria-current", "step");
+            fillSummaries(selection);
+
+            let target;
+            if (selection.paymentMethod === DONATION_METHODS.creditCard) {
+                target = document.getElementById("credit-card-destination");
+                const banquestUrl = buildBanquestUrl(selection);
+                document.getElementById("banquest-frame").src = banquestUrl;
+                document.getElementById("banquest-fallback").href = banquestUrl;
+                document.getElementById("monthly-banquest-note").hidden = selection.frequency !== DONATION_FREQUENCIES.monthly;
+            } else if (selection.paymentMethod === DONATION_METHODS.donorAdvisedFund) {
+                target = document.getElementById("fund-destination");
+            } else {
+                target = document.getElementById("unavailable-destination");
+                document.getElementById("unavailable-method").textContent = paymentMethodLabel(selection.paymentMethod);
             }
+            target.hidden = false;
+            target.classList.remove("is-entering");
+            void target.offsetWidth;
+            target.classList.add("is-entering");
+            window.location.hash = "payment";
+            target.querySelector("h3").focus?.({ preventScroll: true });
+            target.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+        }
+
+        function startOver({ creditCard = false } = {}) {
+            destinations.forEach((destination) => { destination.hidden = true; });
+            donationForm.hidden = false;
+            document.getElementById("payment-step").removeAttribute("aria-current");
+            document.getElementById("details-step").setAttribute("aria-current", "step");
+            if (creditCard) donationForm.elements.paymentMethod.value = DONATION_METHODS.creditCard;
+            currentSelection = null;
+            history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
+            setStatus();
+            document.getElementById("donor-name").focus({ preventScroll: true });
+            document.getElementById("donation-surface").scrollIntoView({ behavior: "smooth", block: "start" });
         }
 
         menuButton.addEventListener("click", () => setMenu(menuButton.getAttribute("aria-expanded") !== "true"));
@@ -137,10 +1106,87 @@ FORM: A direct support threshold extending the approved blue concept; no new vis
             if (event.target.closest("a")) setMenu(false, false);
         });
         document.addEventListener("keydown", (event) => {
-            if (event.key === "Escape" && menuButton.getAttribute("aria-expanded") === "true") {
-                setMenu(false);
+            if (event.key === "Escape" && menuButton.getAttribute("aria-expanded") === "true") setMenu(false);
+        });
+
+        document.querySelectorAll(".amount-shortcut").forEach((button) => {
+            button.addEventListener("click", () => {
+                amountInput.value = button.dataset.amount;
+                document.querySelectorAll(".amount-shortcut").forEach((item) => item.classList.toggle("is-selected", item === button));
+                amountInput.focus();
+            });
+        });
+        amountInput.addEventListener("input", () => {
+            document.querySelectorAll(".amount-shortcut").forEach((button) => {
+                button.classList.toggle("is-selected", button.dataset.amount === amountInput.value);
+            });
+        });
+        donationForm.elements.frequency.forEach((radio) => radio.addEventListener("change", updateFrequency));
+        document.querySelectorAll("[data-start-over]").forEach((button) => button.addEventListener("click", () => startOver()));
+        document.getElementById("switch-to-card").addEventListener("click", () => {
+            if (!currentSelection) return;
+            showDestination({ ...currentSelection, paymentMethod: DONATION_METHODS.creditCard });
+        });
+
+        donationForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            setStatus();
+            if (!donationForm.reportValidity()) return;
+
+            let selection;
+            try {
+                selection = validateDonationSelection({
+                    name: donationForm.elements.name.value,
+                    amount: donationForm.elements.amount.value,
+                    frequency: donationForm.elements.frequency.value,
+                    paymentMethod: donationForm.elements.paymentMethod.value
+                });
+            } catch (error) {
+                setStatus(error.message || "Review your donation details and try again.");
+                return;
+            }
+
+            if (!db || !userId) {
+                setStatus("The secure service is still connecting. Wait a moment and try again.");
+                return;
+            }
+
+            donationForm.querySelector("fieldset").disabled = true;
+            setSubmitState({ disabled: true, label: "Preparing your payment…" });
+            try {
+                await addDoc(collection(db, DONATIONS_COLLECTION), {
+                    ...selection,
+                    status: "unconfirmed",
+                    adminViewed: false,
+                    createdAt: serverTimestamp(),
+                    createdBy: userId
+                });
+                showDestination(selection);
+            } catch (error) {
+                console.error("Donation intent could not be saved:", error);
+                setStatus("We couldn’t prepare the payment page. Your card has not been charged. Check your connection and try again.");
+            } finally {
+                donationForm.querySelector("fieldset").disabled = false;
+                setSubmitState({ disabled: false, label: "Continue securely" });
             }
         });
+
+        async function initializeDonations() {
+            try {
+                const app = initializeApp(FIREBASE_CONFIG);
+                const credential = await signInAnonymously(getAuth(app));
+                db = getFirestore(app);
+                userId = credential.user.uid;
+                setSubmitState({ disabled: false, label: "Continue securely" });
+            } catch (error) {
+                console.error("Donation service could not connect:", error);
+                setSubmitState({ disabled: true, label: "Unable to connect" });
+                setStatus("The secure donation service is unavailable. Please refresh the page and try again.");
+            }
+        }
+
+        updateFrequency();
+        void initializeDonations();
     </script>
 </body>
 </html>

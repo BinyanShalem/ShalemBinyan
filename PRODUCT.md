@@ -25,7 +25,8 @@ Visitors learn about the approach, submit a private intake form, text the organi
 ## Capabilities and Constraints
 
 - The public experience is a static website with Firebase-backed intake submissions and admin-created content resources.
-- Donations are completed through the existing embedded Google Form; Venmo is not offered.
+- Donations begin with a native intent form and continue to the selected destination. Credit-card gifts hand off to an embedded Banquest checkout; monthly giving is credit-card-only for now. Charitable-account gifts receive organization, Tax ID, and memo instructions, while Venmo and Zelle remain visibly unavailable.
+- Every submitted donation intent is stored as unconfirmed until staff verifies the payment separately. Admins receive a push notification and review new intents in the PWA Donations center.
 - The calm-blue frontend is the production design. The preceding production design is preserved on the remote backup branch documented in `ROLLBACK.md`.
 - Shalom bayit resources use a baked-in frontend baseline plus Firebase-backed admin additions. Admin resources store links and metadata only; images remain remotely hosted and there are no image uploads.
 - Existing factual copy, organization name, contact details, and intake terminology must be preserved.

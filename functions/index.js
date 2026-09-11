@@ -81,18 +81,18 @@ async function removeExpiredSubscription(ref, error) {
     return true;
 }
 
-function notificationPayload(reminders, { test = false, tag = "" } = {}) {
+function notificationPayload(reminders, { test = false, tag = "", title = "", body = "", url = "" } = {}) {
     return JSON.stringify({
-        title: test ? "Binyan Shalem notifications are ready" : "Binyan Shalem reminder",
-        body: test
+        title: title || (test ? "Binyan Shalem notifications are ready" : "Binyan Shalem reminder"),
+        body: body || (test
             ? "You’ll now receive reminders even when the admin app is closed."
             : reminders.length === 1
                 ? reminders[0].body
-                : `${reminders.length} reminders need your attention.`,
+                : `${reminders.length} reminders need your attention.`),
         icon: "/admin/icons/icon-192.png",
         badge: "/admin/icons/icon-192.png",
         tag: tag || (test ? "binyan-push-test" : "binyan-reminders"),
-        url: "/admin/?tab=reminders"
+        url: url || "/admin/?tab=reminders"
     });
 }
 
@@ -224,6 +224,47 @@ exports.sendNewIntakeNotification = onDocumentCreated({
         } catch (error) {
             const removed = await removeExpiredSubscription(subscriptionDoc.ref, error);
             if (!removed) console.error("Immediate intake notification failed", { statusCode: error?.statusCode });
+        }
+    }));
+});
+
+exports.sendNewDonationNotification = onDocumentCreated({
+    document: "donation_intents/{donationId}",
+    region: "us-central1",
+    memory: "256MiB",
+    timeoutSeconds: 120,
+    maxInstances: 2,
+    secrets: [VAPID_PRIVATE_KEY]
+}, async (event) => {
+    configureWebPush();
+    const donationId = event.params.donationId;
+    const reminder = {
+        key: `donation:${donationId}`,
+        type: "donation",
+        body: "A new donation interest form was submitted. Payment is not yet confirmed."
+    };
+    const tag = `binyan-donation-${createHash("sha256").update(donationId).digest("hex").slice(0, 12)}`;
+    const subscriptions = await db.collection(PUSH_SUBSCRIPTIONS_COLLECTION).where("enabled", "==", true).get();
+
+    await Promise.all(subscriptions.docs.map(async (subscriptionDoc) => {
+        const subscriptionData = subscriptionDoc.data();
+        const { day } = clockParts(new Date(), subscriptionData.timeZone || "America/New_York");
+        const [unsent] = await unsentReminders(subscriptionDoc.id, day, [reminder]);
+        if (!unsent) return;
+        try {
+            await webpush.sendNotification(
+                subscriptionFrom(subscriptionData),
+                notificationPayload([reminder], {
+                    title: "New donation interest",
+                    tag,
+                    url: "/admin/?view=donations"
+                }),
+                { TTL: 3600, urgency: "high" }
+            );
+            await recordDeliveries(subscriptionDoc.id, day, [reminder]);
+        } catch (error) {
+            const removed = await removeExpiredSubscription(subscriptionDoc.ref, error);
+            if (!removed) console.error("Donation notification failed", { statusCode: error?.statusCode });
         }
     }));
 });

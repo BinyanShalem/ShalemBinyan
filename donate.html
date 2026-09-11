@@ -1,128 +1,13 @@
 <!DOCTYPE html>
-<!--
-THESIS: Donation is a calm act of support with the secure form reached immediately, not a decorative fundraising pitch.
-OWN-WORLD: Morning-blue atmosphere, deep-water controls, open typography, and one grounded white form surface.
-STORY: Visitors understand what their contribution supports and move directly into the existing secure form.
-FIRST VIEWPORT: A concise donation statement sits in a compact blue field with the full embedded form directly below.
-FORM: A direct support threshold extending the approved blue concept; no new visual world or behavior.
--->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="description" content="Support Binyan Shalem and help couples receive guidance free of charge.">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="refresh" content="0; url=donate/">
+    <link rel="canonical" href="https://www.binyan-shalem.com/donate/">
     <title>Donate — Binyan Shalem</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;750&amp;display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="blue-concept-pages.css?v=2026-08-10.2">
-    <script defer src="/cache-refresh.js?v=2026-08-10.2"></script>
 </head>
 <body>
-    <a class="skip-link" href="#main-content">Skip to main content</a>
-
-    <header class="site-header">
-        <div class="nav-shell">
-            <a class="wordmark" href="./" aria-label="Binyan Shalem home">
-                <strong>BINYAN SHALEM</strong>
-                <span>בנין שלם</span>
-            </a>
-            <nav class="desktop-nav" aria-label="Primary navigation">
-                <a href="./">Home</a>
-                <a href="./#mission">Our Mission</a>
-                <a href="./#contact">Get Help</a>
-                <a href="content/">Shalom Bayit Content</a>
-                <a href="contact/">Contact Us</a>
-                <a class="nav-donate" aria-current="page" href="donate/">Donate</a>
-            </nav>
-            <button class="menu-button" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"/>
-                </svg>
-            </button>
-        </div>
-    </header>
-
-    <nav class="mobile-menu" id="mobile-menu" aria-label="Mobile navigation" aria-hidden="true" inert>
-        <a href="./">Home</a>
-        <a href="./#mission">Our Mission</a>
-        <a href="./#contact">Get Help</a>
-        <a href="content/">Shalom Bayit Content</a>
-        <a href="contact/">Contact Us</a>
-        <a aria-current="page" href="donate/">Donate</a>
-    </nav>
-
-    <main id="main-content">
-        <section class="page-hero donation-hero">
-            <div class="hero-shell">
-                <div>
-                    <p class="hero-kicker">Help keep guidance accessible</p>
-                    <h1>Support stronger homes.</h1>
-                </div>
-                <div class="donation-callout">
-                    <p>Your generous contribution allows us to continue offering our services free of charge, helping couples build stronger, healthier homes in our community.</p>
-                </div>
-            </div>
-        </section>
-
-        <section class="donation-main" aria-labelledby="donation-form-title">
-            <div class="donation-shell">
-                <div class="donation-copy">
-                    <h2 id="donation-form-title">Donate securely.</h2>
-                    <p>Use our secure donation form to complete your contribution.</p>
-                </div>
-
-                <div class="form-surface">
-                    <div class="form-toolbar">
-                        <p>Secure donation form</p>
-                        <a class="form-fallback" href="https://docs.google.com/forms/d/e/1FAIpQLSeO4R-VYVDwYFks93J2QbgwkDo4MnsL1DqFojvveSsreRe1iA/viewform" target="_blank" rel="noopener noreferrer">Open form in a new tab</a>
-                    </div>
-                    <iframe
-                        class="google-form"
-                        src="https://docs.google.com/forms/d/e/1FAIpQLSeO4R-VYVDwYFks93J2QbgwkDo4MnsL1DqFojvveSsreRe1iA/viewform?embedded=true"
-                        title="Binyan Shalem secure donation form"
-                        loading="lazy"
-                    >Loading…</iframe>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer class="site-footer">
-        <div class="footer-shell">
-            <p>© 2026 Binyan Shalem. All Rights Reserved.</p>
-            <p><a href="contact/">Contact Us</a></p>
-        </div>
-    </footer>
-
-    <script>
-        const menuButton = document.querySelector(".menu-button");
-        const mobileMenu = document.getElementById("mobile-menu");
-
-        function setMenu(open, restoreFocus = true) {
-            menuButton.setAttribute("aria-expanded", String(open));
-            menuButton.setAttribute("aria-label", open ? "Close menu" : "Open menu");
-            mobileMenu.classList.toggle("open", open);
-            mobileMenu.setAttribute("aria-hidden", String(!open));
-            mobileMenu.inert = !open;
-            document.body.classList.toggle("menu-open", open);
-
-            if (open) {
-                window.setTimeout(() => mobileMenu.querySelector("a").focus(), 0);
-            } else if (restoreFocus) {
-                menuButton.focus();
-            }
-        }
-
-        menuButton.addEventListener("click", () => setMenu(menuButton.getAttribute("aria-expanded") !== "true"));
-        mobileMenu.addEventListener("click", (event) => {
-            if (event.target.closest("a")) setMenu(false, false);
-        });
-        document.addEventListener("keydown", (event) => {
-            if (event.key === "Escape" && menuButton.getAttribute("aria-expanded") === "true") {
-                setMenu(false);
-            }
-        });
-    </script>
+    <p><a href="donate/">Continue to the Binyan Shalem donation page</a></p>
 </body>
 </html>

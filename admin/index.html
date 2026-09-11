@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Binyan Admin">
-    <meta name="description" content="The Binyan Shalem admin assistant for resources, encounters, directory contacts, and reminders.">
+    <meta name="description" content="The Binyan Shalem admin assistant for resources, encounters, donation interests, directory contacts, and reminders.">
     <title>Binyan Shalem Admin</title>
     <link rel="manifest" href="./manifest.webmanifest">
     <link rel="icon" href="./icons/icon-192.png" sizes="192x192" type="image/png">
@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-    <script defer src="/cache-refresh.js?v=2026-09-04.1"></script>
+    <script defer src="/cache-refresh.js?v=2026-09-11.2"></script>
     <style>
         :root {
             --admin-purple: #723358;
@@ -3576,6 +3576,153 @@
             height: 18px;
         }
 
+        .donation-center-button {
+            position: relative;
+            flex: 0 0 auto;
+        }
+
+        .donation-alert-count {
+            display: grid;
+            min-width: 19px;
+            height: 19px;
+            margin-left: 0.1rem;
+            padding: 0 0.3rem;
+            place-items: center;
+            color: #ffffff;
+            background: var(--admin-purple);
+            border-radius: 999px;
+            font-size: 0.65rem;
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+        }
+
+        .donations-workspace {
+            width: min(100%, 1120px);
+            margin: 0 auto;
+            padding: clamp(1.25rem, 4vw, 3.25rem);
+        }
+
+        .donation-overview {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 1.4rem;
+            padding: clamp(1.15rem, 3vw, 1.6rem);
+            background: var(--admin-sage);
+            border-radius: 14px;
+        }
+
+        .donation-overview strong,
+        .donation-overview p {
+            margin: 0;
+        }
+
+        .donation-overview strong {
+            display: block;
+            color: var(--admin-sage-deep);
+            font-size: 0.92rem;
+        }
+
+        .donation-overview p {
+            max-width: 68ch;
+            margin-top: 0.35rem;
+            color: #3f6556;
+            font-size: 0.78rem;
+            line-height: 1.55;
+        }
+
+        .donation-intent-list {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .donation-intent-card {
+            display: grid;
+            grid-template-columns: minmax(0, 1.3fr) repeat(4, minmax(100px, 0.58fr)) auto;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.1rem;
+            background: #ffffff;
+            border-radius: 14px;
+            box-shadow: var(--shadow-low);
+        }
+
+        .donation-intent-card.is-new {
+            background: #fffafd;
+            box-shadow: 0 1px 2px rgba(28, 39, 43, 0.06), 0 12px 30px rgba(111, 49, 87, 0.1);
+        }
+
+        .donation-intent-primary {
+            min-width: 0;
+        }
+
+        .donation-intent-heading {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+        }
+
+        .donation-intent-heading strong {
+            overflow: hidden;
+            font-size: 0.91rem;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .donation-new-badge,
+        .donation-unconfirmed-badge {
+            display: inline-flex;
+            flex: 0 0 auto;
+            align-items: center;
+            min-height: 24px;
+            padding: 0.25rem 0.5rem;
+            border-radius: 999px;
+            font-size: 0.64rem;
+            font-weight: 750;
+        }
+
+        .donation-new-badge {
+            color: #ffffff;
+            background: var(--admin-purple);
+        }
+
+        .donation-unconfirmed-badge {
+            margin-top: 0.45rem;
+            color: #2e627d;
+            background: var(--admin-blue-soft);
+        }
+
+        .donation-intent-detail span,
+        .donation-intent-detail strong {
+            display: block;
+        }
+
+        .donation-intent-detail span {
+            margin-bottom: 0.22rem;
+            color: var(--admin-muted);
+            font-size: 0.65rem;
+            font-weight: 650;
+        }
+
+        .donation-intent-detail strong {
+            color: #26343d;
+            font-size: 0.78rem;
+            line-height: 1.4;
+        }
+
+        .donation-intent-amount strong {
+            color: var(--admin-purple-dark);
+            font-size: 1rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .donation-reviewed-button {
+            min-height: 42px;
+            padding: 0.55rem 0.7rem;
+            font-size: 0.7rem;
+        }
+
         @keyframes chat-bubble-in {
             from {
                 opacity: 0;
@@ -3671,6 +3818,28 @@
                 flex: 1 1 auto;
             }
 
+            .donation-overview {
+                grid-template-columns: 1fr;
+            }
+
+            .donation-overview .button {
+                width: 100%;
+            }
+
+            .donation-intent-card {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 0.85rem;
+            }
+
+            .donation-intent-primary,
+            .donation-intent-card .donation-reviewed-button {
+                grid-column: 1 / -1;
+            }
+
+            .donation-intent-card .donation-reviewed-button {
+                width: 100%;
+            }
+
             .admin-title-block {
                 display: none;
             }
@@ -3710,6 +3879,15 @@
 
             .chat-bubble {
                 padding-inline: 0.78rem;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .admin-header .donation-alert-count {
+                display: grid !important;
+                min-width: 18px;
+                height: 18px;
+                margin: 0;
             }
         }
 
@@ -3843,6 +4021,11 @@
                             <strong id="admin-identity-label">Remembered access</strong>
                         </div>
                         <span class="preview-mode-indicator" id="preview-mode-indicator" hidden>Preview data</span>
+                        <button class="button button-quiet donation-center-button" id="donations-button" type="button" aria-label="Open donation interests">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20m5-16.5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>
+                            <span>Donations</span>
+                            <span class="donation-alert-count" id="donation-alert-count" aria-label="0 new donation interests" hidden>0</span>
+                        </button>
                         <button class="button button-quiet chat-clear-button" id="clear-chat-button" type="button" aria-label="Clear chat">
                             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V5h6v2m-8 0 1 13h8l1-13M10 11v5m4-5v5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>
                             <span>Clear chat</span>
@@ -3881,6 +4064,30 @@
                             </form>
                         </div>
                     </div>
+                </section>
+
+                <section class="donations-workspace" id="donations-workspace" aria-labelledby="donations-heading" tabindex="-1" hidden>
+                    <div class="panel-heading">
+                        <div>
+                            <h2 id="donations-heading">Donation interests.</h2>
+                            <p>See each donation form submitted before the donor continued to their payment destination.</p>
+                        </div>
+                        <span class="panel-note">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8v5m0 3.5v.1M12 3 2.8 20h18.4L12 3Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg>
+                            Intent only
+                        </span>
+                    </div>
+                    <div class="donation-overview">
+                        <div>
+                            <strong id="donation-overview-title">These forms are not payment confirmations.</strong>
+                            <p>A person reaches this list before leaving for Banquest or another giving method. Confirm completed gifts separately through the payment provider or organization records.</p>
+                        </div>
+                        <button class="button button-secondary" id="mark-all-donations-reviewed" type="button" hidden>Mark all reviewed</button>
+                    </div>
+                    <p class="status" id="donation-action-status" role="status" aria-live="polite" hidden></p>
+                    <div class="loading-state" id="donations-loading"><span class="loading-dot" aria-hidden="true"></span>Loading donation interests…</div>
+                    <div class="donation-intent-list" id="donation-intent-list"></div>
+                    <p class="empty-state" id="no-donation-intents" hidden>No donation forms have been submitted yet.</p>
                 </section>
 
                 <div class="workspace" id="workspace" tabindex="-1" hidden>
@@ -4402,6 +4609,13 @@
             sortDirectoryEntries
         } from "./directory-tools.mjs?v=2026-09-04.1";
         import { createAdminChat } from "./chat-assistant.mjs?v=2026-09-04.1";
+        import {
+            DONATIONS_COLLECTION,
+            donationFrequencyLabel,
+            donationTimestamp,
+            normalizeDonationIntent,
+            paymentMethodLabel
+        } from "../donation-tools.mjs?v=2026-09-11.2";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDxEV7W2m4jbJiVl0Sc6cN7gBH7oWu_rl8",
@@ -4459,8 +4673,14 @@
         const appShell = document.getElementById("admin-content");
         const dashboardWorkspace = document.getElementById("workspace");
         const chatWorkspace = document.getElementById("chat-workspace");
+        const donationsWorkspace = document.getElementById("donations-workspace");
         const chatModeButton = document.getElementById("chat-mode-button");
         const dashboardModeButton = document.getElementById("dashboard-mode-button");
+        const donationsButton = document.getElementById("donations-button");
+        const donationAlertCount = document.getElementById("donation-alert-count");
+        const donationIntentList = document.getElementById("donation-intent-list");
+        const donationActionStatus = document.getElementById("donation-action-status");
+        const markAllDonationsReviewedButton = document.getElementById("mark-all-donations-reviewed");
         const clearChatButton = document.getElementById("clear-chat-button");
         const installButton = document.getElementById("install-app-button");
         const installStatus = document.getElementById("install-status");
@@ -4555,6 +4775,7 @@
         let manualRemindersUnsubscribe = null;
         let reminderSnoozesUnsubscribe = null;
         let directoryUnsubscribe = null;
+        let donationsUnsubscribe = null;
         let allAdminResources = [];
         let allSubmissions = [];
         let allEncounters = [];
@@ -4562,6 +4783,7 @@
         let allManualReminders = [];
         let allReminderSnoozes = [];
         let allDirectoryEntries = [];
+        let allDonationIntents = [];
         let contentLoaded = false;
         let submissionsLoaded = false;
         let encountersLoaded = false;
@@ -4569,6 +4791,7 @@
         let manualRemindersLoaded = false;
         let reminderSnoozesLoaded = false;
         let directoryLoaded = false;
+        let donationsLoaded = false;
         let adminUnlocked = false;
         let installPrompt = null;
         let installStatusTimer = null;
@@ -4718,9 +4941,12 @@
             identityLabel.textContent = identity;
             subscribeToAdminContent();
             if (LOCAL_PREVIEW) loadPreviewOrganizer();
-            else subscribeToOrganizer();
+            else {
+                subscribeToOrganizer();
+                subscribeToDonations();
+            }
             activateInitialTab();
-            activateAdminMode("chat");
+            activateAdminMode(new URLSearchParams(window.location.search).get("view") === "donations" ? "donations" : "chat");
             void syncPushSubscription();
         }
 
@@ -5774,6 +6000,147 @@
             directoryNavCount.setAttribute("aria-label", `${allDirectoryEntries.length} directory ${allDirectoryEntries.length === 1 ? "entry" : "entries"}`);
         }
 
+        function donationDateLabel(donation) {
+            const milliseconds = donationTimestamp(donation.createdAt);
+            return milliseconds ? new Date(milliseconds).toLocaleString() : "Just submitted";
+        }
+
+        async function markDonationReviewed(donation, button = null) {
+            if (donation.adminViewed) return;
+            if (button) {
+                button.disabled = true;
+                button.textContent = "Marking…";
+            }
+            setStatus(donationActionStatus, "");
+            try {
+                if (LOCAL_PREVIEW) {
+                    allDonationIntents = allDonationIntents.map((item) => item.id === donation.id
+                        ? { ...item, adminViewed: true }
+                        : item);
+                    renderDonations();
+                } else {
+                    await updateDoc(doc(db, DONATIONS_COLLECTION, donation.id), { adminViewed: true });
+                }
+                setStatus(donationActionStatus, `${donation.name}’s donation interest was marked reviewed.`, "success");
+            } catch (error) {
+                console.error("Could not mark donation interest reviewed:", error);
+                setStatus(donationActionStatus, "The donation interest could not be updated. Try again.", "error");
+                if (button) {
+                    button.disabled = false;
+                    button.textContent = "Mark reviewed";
+                }
+            }
+        }
+
+        function renderDonationIntent(donation) {
+            const card = document.createElement("article");
+            card.className = `donation-intent-card${donation.adminViewed ? "" : " is-new"}`;
+
+            const primary = document.createElement("div");
+            primary.className = "donation-intent-primary";
+            const heading = document.createElement("div");
+            heading.className = "donation-intent-heading";
+            const name = document.createElement("strong");
+            name.textContent = donation.name;
+            heading.appendChild(name);
+            if (!donation.adminViewed) {
+                const badge = document.createElement("span");
+                badge.className = "donation-new-badge";
+                badge.textContent = "New";
+                heading.appendChild(badge);
+            }
+            const status = document.createElement("span");
+            status.className = "donation-unconfirmed-badge";
+            status.textContent = "Payment not confirmed";
+            primary.append(heading, status);
+
+            const details = [
+                ["Amount", donation.amount.toLocaleString(undefined, { style: "currency", currency: "USD" }), "donation-intent-amount"],
+                ["Giving plan", donationFrequencyLabel(donation.frequency), ""],
+                ["Method", paymentMethodLabel(donation.paymentMethod), ""],
+                ["Submitted", donationDateLabel(donation), ""]
+            ].map(([label, value, className]) => {
+                const detail = document.createElement("div");
+                detail.className = `donation-intent-detail ${className}`.trim();
+                const caption = document.createElement("span");
+                caption.textContent = label;
+                const content = document.createElement("strong");
+                content.textContent = value;
+                detail.append(caption, content);
+                return detail;
+            });
+
+            card.append(primary, ...details);
+            if (!donation.adminViewed) {
+                const button = document.createElement("button");
+                button.className = "button button-secondary donation-reviewed-button";
+                button.type = "button";
+                button.textContent = "Mark reviewed";
+                button.addEventListener("click", () => markDonationReviewed(donation, button));
+                card.appendChild(button);
+            }
+            return card;
+        }
+
+        function renderDonations() {
+            const sorted = [...allDonationIntents].sort((a, b) => donationTimestamp(b.createdAt) - donationTimestamp(a.createdAt));
+            const unread = sorted.filter((donation) => !donation.adminViewed).length;
+            donationIntentList.replaceChildren(...sorted.map(renderDonationIntent));
+            document.getElementById("donations-loading").hidden = donationsLoaded;
+            document.getElementById("no-donation-intents").hidden = !donationsLoaded || sorted.length !== 0;
+            markAllDonationsReviewedButton.hidden = unread === 0;
+            donationAlertCount.textContent = String(unread);
+            donationAlertCount.hidden = unread === 0;
+            donationAlertCount.setAttribute("aria-label", `${unread} new donation ${unread === 1 ? "interest" : "interests"}`);
+            donationsButton.setAttribute(
+                "aria-label",
+                unread ? `Open donation interests, ${unread} new` : "Open donation interests"
+            );
+            document.getElementById("donation-overview-title").textContent = unread
+                ? `${unread} new donation ${unread === 1 ? "interest needs" : "interests need"} review.`
+                : "These forms are not payment confirmations.";
+        }
+
+        async function markAllDonationsReviewed() {
+            const unread = allDonationIntents.filter((donation) => !donation.adminViewed);
+            if (!unread.length) return;
+            markAllDonationsReviewedButton.disabled = true;
+            markAllDonationsReviewedButton.textContent = "Marking…";
+            setStatus(donationActionStatus, "");
+            try {
+                if (LOCAL_PREVIEW) {
+                    allDonationIntents = allDonationIntents.map((donation) => ({ ...donation, adminViewed: true }));
+                    renderDonations();
+                } else {
+                    const batch = writeBatch(db);
+                    unread.forEach((donation) => batch.update(doc(db, DONATIONS_COLLECTION, donation.id), { adminViewed: true }));
+                    await batch.commit();
+                }
+                setStatus(donationActionStatus, "All donation interests were marked reviewed.", "success");
+            } catch (error) {
+                console.error("Could not mark donation interests reviewed:", error);
+                setStatus(donationActionStatus, "Donation interests could not be updated. Try again.", "error");
+            } finally {
+                markAllDonationsReviewedButton.disabled = false;
+                markAllDonationsReviewedButton.textContent = "Mark all reviewed";
+            }
+        }
+
+        function subscribeToDonations() {
+            if (donationsUnsubscribe || LOCAL_PREVIEW) return;
+            const donationsQuery = query(collection(db, DONATIONS_COLLECTION), orderBy("createdAt", "desc"));
+            donationsUnsubscribe = onSnapshot(donationsQuery, (snapshot) => {
+                allDonationIntents = snapshot.docs.map((item) => normalizeDonationIntent(item.data(), item.id));
+                donationsLoaded = true;
+                renderDonations();
+            }, (error) => {
+                console.error("Could not load donation interests:", error);
+                donationsLoaded = true;
+                renderDonations();
+                setStatus(donationActionStatus, "Donation interests could not be loaded. Check the connection and try again.", "error");
+            });
+        }
+
         function renderOrganizer() {
             renderSubmissions(allSubmissions);
             renderEncounters();
@@ -6036,6 +6403,26 @@
                     createdAt: new Date(Date.now() - 2 * 86400000)
                 }, "preview-resource")
             ];
+            allDonationIntents = [
+                normalizeDonationIntent({
+                    name: "Esther Levy",
+                    amount: 180,
+                    frequency: "one_time",
+                    paymentMethod: "credit_card",
+                    status: "unconfirmed",
+                    adminViewed: false,
+                    createdAt: new Date(Date.now() - 18 * 60000)
+                }, "preview-donation-new"),
+                normalizeDonationIntent({
+                    name: "Daniel Cohen",
+                    amount: 360,
+                    frequency: "one_time",
+                    paymentMethod: "donor_advised_fund",
+                    status: "unconfirmed",
+                    adminViewed: true,
+                    createdAt: new Date(Date.now() - 2 * 86400000)
+                }, "preview-donation-reviewed")
+            ];
             contentLoaded = true;
             submissionsLoaded = true;
             encountersLoaded = true;
@@ -6043,7 +6430,9 @@
             manualRemindersLoaded = true;
             reminderSnoozesLoaded = true;
             directoryLoaded = true;
+            donationsLoaded = true;
             renderOrganizer();
+            renderDonations();
         }
 
         document.querySelectorAll("[data-encounter-view]").forEach((button) => {
@@ -7130,14 +7519,23 @@
         }
 
         function activateAdminMode(mode, { focus = false } = {}) {
-            adminMode = mode === "dashboard" ? "dashboard" : "chat";
+            adminMode = ["chat", "dashboard", "donations"].includes(mode) ? mode : "chat";
             const chatActive = adminMode === "chat";
+            const dashboardActive = adminMode === "dashboard";
+            const donationsActive = adminMode === "donations";
             appShell.classList.toggle("is-chat-mode", chatActive);
             chatWorkspace.hidden = !chatActive;
-            dashboardWorkspace.hidden = chatActive;
+            dashboardWorkspace.hidden = !dashboardActive;
+            donationsWorkspace.hidden = !donationsActive;
             clearChatButton.hidden = !chatActive;
             chatModeButton.setAttribute("aria-pressed", String(chatActive));
-            dashboardModeButton.setAttribute("aria-pressed", String(!chatActive));
+            dashboardModeButton.setAttribute("aria-pressed", String(dashboardActive));
+            donationsButton.setAttribute("aria-pressed", String(donationsActive));
+
+            const url = new URL(window.location.href);
+            if (donationsActive) url.searchParams.set("view", "donations");
+            else url.searchParams.delete("view");
+            history.replaceState(null, "", url);
 
             const skipLink = document.querySelector(".skip-link");
             if (chatActive) {
@@ -7147,7 +7545,7 @@
                 skipLink.textContent = "Skip to admin assistant";
                 chatAssistant.start({ section: requestedChatSection() });
                 if (focus) document.getElementById("chat-composer-input").focus();
-            } else {
+            } else if (dashboardActive) {
                 const selectedTab = tabs.find((tab) => tab.getAttribute("aria-selected") === "true") || tabs[0];
                 const copy = tabCopy[selectedTab.id];
                 workspaceTitle.textContent = copy.title;
@@ -7155,11 +7553,19 @@
                 skipLink.href = "#workspace";
                 skipLink.textContent = "Skip to dashboard";
                 if (focus) dashboardWorkspace.focus({ preventScroll: true });
+            } else {
+                workspaceTitle.textContent = "Donations";
+                workspaceDescription.textContent = "Review donation interests before confirming payments elsewhere.";
+                skipLink.href = "#donations-workspace";
+                skipLink.textContent = "Skip to donation interests";
+                if (focus) donationsWorkspace.focus({ preventScroll: true });
             }
         }
 
         chatModeButton.addEventListener("click", () => activateAdminMode("chat"));
         dashboardModeButton.addEventListener("click", () => activateAdminMode("dashboard", { focus: true }));
+        donationsButton.addEventListener("click", () => activateAdminMode("donations", { focus: true }));
+        markAllDonationsReviewedButton.addEventListener("click", markAllDonationsReviewed);
 
         function activateTab(tab, { persist = true, updateUrl = true } = {}) {
             if (!tab || tab.hidden) tab = document.getElementById("content-tab");
@@ -7209,13 +7615,17 @@
         }
 
         tabs.forEach((tab, index) => {
-            tab.addEventListener("click", () => activateTab(tab));
+            tab.addEventListener("click", () => {
+                if (adminMode === "donations") activateAdminMode("dashboard");
+                activateTab(tab);
+            });
             tab.addEventListener("keydown", (event) => {
                 if (!['ArrowDown', 'ArrowRight', 'ArrowUp', 'ArrowLeft'].includes(event.key)) return;
                 event.preventDefault();
                 const direction = ['ArrowDown', 'ArrowRight'].includes(event.key) ? 1 : -1;
                 const nextTab = tabs[(index + direction + tabs.length) % tabs.length];
                 nextTab.focus();
+                if (adminMode === "donations") activateAdminMode("dashboard");
                 activateTab(nextTab);
             });
         });
@@ -7230,6 +7640,7 @@
             manualRemindersUnsubscribe?.();
             reminderSnoozesUnsubscribe?.();
             directoryUnsubscribe?.();
+            donationsUnsubscribe?.();
             contentUnsubscribe = null;
             submissionsUnsubscribe = null;
             encountersUnsubscribe = null;
@@ -7237,6 +7648,7 @@
             manualRemindersUnsubscribe = null;
             reminderSnoozesUnsubscribe = null;
             directoryUnsubscribe = null;
+            donationsUnsubscribe = null;
             try {
                 if (pushSubscriptionEnabled) await disablePushNotifications();
                 await signOut(auth);

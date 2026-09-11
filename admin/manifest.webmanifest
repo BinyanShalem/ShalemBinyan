@@ -2,7 +2,7 @@
   "id": "/admin/",
   "name": "Binyan Shalem Admin",
   "short_name": "Binyan Admin",
-  "description": "Handle Binyan Shalem resources, encounters, private contacts, and reminders through a simple admin assistant or full dashboard.",
+  "description": "Handle Binyan Shalem resources, encounters, donation interests, private contacts, and reminders through a simple admin assistant or full dashboard.",
   "lang": "en-US",
   "start_url": "/admin/",
   "scope": "/admin/",

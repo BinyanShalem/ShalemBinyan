@@ -1,4 +1,4 @@
-const CACHE_VERSION = "binyan-admin-2026-09-04.1";
+const CACHE_VERSION = "binyan-admin-2026-09-11.2";
 const APP_SHELL = [
     "/admin/",
     "/admin/index.html",
@@ -11,6 +11,7 @@ const APP_SHELL = [
     "/admin/icons/apple-touch-icon.png",
     "/logo_nbg.png",
     "/content-resource-tools.mjs",
+    "/donation-tools.mjs",
     "/cache-refresh.js",
     "/site-version.json"
 ];
@@ -69,7 +70,7 @@ self.addEventListener("fetch", (event) => {
     const isStaticAsset = ["style", "script", "image", "font", "manifest"].includes(request.destination);
     const isLocalAdminAsset = url.origin === self.location.origin && (
         url.pathname.startsWith("/admin/")
-        || ["/logo_nbg.png", "/content-resource-tools.mjs", "/cache-refresh.js", "/site-version.json"].includes(url.pathname)
+        || ["/logo_nbg.png", "/content-resource-tools.mjs", "/donation-tools.mjs", "/cache-refresh.js", "/site-version.json"].includes(url.pathname)
     );
 
     if (isStaticAsset || isLocalAdminAsset) {

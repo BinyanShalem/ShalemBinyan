@@ -275,6 +275,34 @@ service cloud.firestore {
         && request.resource.data.createdBy.size() <= 128;
     }
 
+    function isValidDonationIntent() {
+      return request.resource.data.keys().hasOnly([
+          'name', 'amount', 'frequency', 'paymentMethod', 'status',
+          'adminViewed', 'createdAt', 'createdBy'
+        ])
+        && request.resource.data.keys().hasAll([
+          'name', 'amount', 'frequency', 'paymentMethod', 'status',
+          'adminViewed', 'createdAt', 'createdBy'
+        ])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 160
+        && request.resource.data.amount is number
+        && request.resource.data.amount >= 1
+        && request.resource.data.amount <= 1000000
+        && request.resource.data.frequency in ['one_time', 'monthly']
+        && request.resource.data.paymentMethod in ['credit_card', 'donor_advised_fund']
+        && (
+          request.resource.data.frequency != 'monthly'
+          || request.resource.data.paymentMethod == 'credit_card'
+        )
+        && request.resource.data.status == 'unconfirmed'
+        && request.resource.data.adminViewed is bool
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.createdBy is string
+        && request.resource.data.createdBy.size() <= 128;
+    }
+
     function ownsPushSubscriptionId(subscriptionId) {
       return isSignedIn()
         && subscriptionId.matches(request.auth.uid + '_[a-zA-Z0-9-]{8,64}');
@@ -361,6 +389,24 @@ service cloud.firestore {
         && request.resource.data.createdAt == resource.data.createdAt
         && request.resource.data.createdBy == resource.data.createdBy
         && request.resource.data.updatedAt == request.time;
+    }
+
+    match /donation_intents/{donationId} {
+      allow read, delete: if isSignedIn();
+      allow create: if isSignedIn()
+        && isValidDonationIntent()
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.adminViewed == false;
+      allow update: if isSignedIn()
+        && isValidDonationIntent()
+        && request.resource.data.name == resource.data.name
+        && request.resource.data.amount == resource.data.amount
+        && request.resource.data.frequency == resource.data.frequency
+        && request.resource.data.paymentMethod == resource.data.paymentMethod
+        && request.resource.data.status == resource.data.status
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.createdBy == resource.data.createdBy;
     }
 
     match /artifacts/{appId}/users/{userId}/{document=**} {
