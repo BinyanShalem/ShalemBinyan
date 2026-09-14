@@ -30,8 +30,8 @@ const METHOD_LABELS = Object.freeze({
 });
 
 const FREQUENCY_LABELS = Object.freeze({
-    [DONATION_FREQUENCIES.oneTime]: "One-time gift",
-    [DONATION_FREQUENCIES.monthly]: "Monthly gift"
+    [DONATION_FREQUENCIES.oneTime]: "One-time donation",
+    [DONATION_FREQUENCIES.monthly]: "Monthly donation"
 });
 
 function clean(value, maxLength) {
@@ -43,7 +43,7 @@ export function paymentMethodLabel(method) {
 }
 
 export function donationFrequencyLabel(frequency) {
-    return FREQUENCY_LABELS[frequency] || "One-time gift";
+    return FREQUENCY_LABELS[frequency] || "One-time donation";
 }
 
 export function suggestedDonationAmountKey(value) {
@@ -116,6 +116,7 @@ export function normalizeDonationIntent(data = {}, id = "") {
             : DONATION_METHODS.creditCard,
         status: data.status === "unconfirmed" ? data.status : "unconfirmed",
         adminViewed: data.adminViewed === true,
+        archived: data.archived === true,
         createdAt: data.createdAt || null
     };
 }

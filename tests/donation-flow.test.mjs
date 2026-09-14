@@ -51,6 +51,14 @@ test("uses donation wording and a post-donation home action", () => {
     assert.doesNotMatch(donationPage, /donation-hero-mark/);
 });
 
+test("strengthens the charitable-account memo and removes the plan summary", () => {
+    assert.match(donationPage, /Send your donation through your charitable account/);
+    assert.match(donationPage, /class="giving-instruction is-required-memo"/);
+    assert.match(donationPage, /class="banquest-note fund-memo-note"/);
+    assert.match(donationPage, /so the donation can be directed correctly/);
+    assert.doesNotMatch(donationPage, /\["Plan", donationFrequencyLabel/);
+});
+
 test("records an unconfirmed donation intent before showing payment", () => {
     assert.match(donationPage, /addDoc\(collection\(db, DONATIONS_COLLECTION\)/);
     assert.match(donationPage, /status: "unconfirmed"/);
@@ -68,6 +76,16 @@ test("adds a donation center and unread marker to the admin PWA", () => {
     assert.match(adminPage, /subscribeToDonations/);
     assert.match(adminPage, /markAllDonationsReviewed/);
     assert.match(serviceWorker, /\/donation-tools\.mjs/);
+});
+
+test("archives donation interests with restore and permanent-delete controls", () => {
+    assert.match(adminPage, /data-donation-view="current"/);
+    assert.match(adminPage, /data-donation-view="archived"/);
+    assert.match(adminPage, /setDonationArchived/);
+    assert.match(adminPage, /deleteArchivedDonation/);
+    assert.match(adminPage, /Delete permanently/);
+    assert.match(adminPage, /This cannot be undone/);
+    assert.match(rules, /resource\.data\.get\('archived', false\) == true/);
 });
 
 test("pushes new donation interests to the donation-center deep link", () => {

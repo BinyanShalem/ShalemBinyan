@@ -278,7 +278,7 @@ service cloud.firestore {
     function isValidDonationIntent() {
       return request.resource.data.keys().hasOnly([
           'name', 'amount', 'frequency', 'paymentMethod', 'status',
-          'adminViewed', 'createdAt', 'createdBy'
+          'adminViewed', 'archived', 'createdAt', 'createdBy'
         ])
         && request.resource.data.keys().hasAll([
           'name', 'amount', 'frequency', 'paymentMethod', 'status',
@@ -298,6 +298,7 @@ service cloud.firestore {
         )
         && request.resource.data.status == 'unconfirmed'
         && request.resource.data.adminViewed is bool
+        && isOptionalBool(request.resource.data.get('archived', null))
         && request.resource.data.createdAt is timestamp
         && request.resource.data.createdBy is string
         && request.resource.data.createdBy.size() <= 128;
@@ -392,12 +393,15 @@ service cloud.firestore {
     }
 
     match /donation_intents/{donationId} {
-      allow read, delete: if isSignedIn();
+      allow read: if isSignedIn();
+      allow delete: if isSignedIn()
+        && resource.data.get('archived', false) == true;
       allow create: if isSignedIn()
         && isValidDonationIntent()
         && request.resource.data.createdBy == request.auth.uid
         && request.resource.data.createdAt == request.time
-        && request.resource.data.adminViewed == false;
+        && request.resource.data.adminViewed == false
+        && request.resource.data.get('archived', false) == false;
       allow update: if isSignedIn()
         && isValidDonationIntent()
         && request.resource.data.name == resource.data.name

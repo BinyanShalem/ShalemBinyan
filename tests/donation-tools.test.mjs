@@ -62,7 +62,7 @@ test("builds a Banquest URL with the amount and donor name in the description", 
     }));
     assert.equal(url.origin + url.pathname, "https://pay.banquest.com/binyanshalem");
     assert.equal(url.searchParams.get("amount"), "180");
-    assert.match(url.searchParams.get("description"), /monthly gift.*Sarah & David Cohen/i);
+    assert.match(url.searchParams.get("description"), /monthly donation.*Sarah & David Cohen/i);
 });
 
 test("normalizes stored donation intents for the admin list", () => {
@@ -72,9 +72,12 @@ test("normalizes stored donation intents for the admin list", () => {
         frequency: "monthly",
         paymentMethod: "credit_card",
         status: "unconfirmed",
-        adminViewed: false
+        adminViewed: false,
+        archived: true
     }, "donation-1");
     assert.equal(donation.id, "donation-1");
     assert.equal(paymentMethodLabel(donation.paymentMethod), "Credit card");
-    assert.equal(donationFrequencyLabel(donation.frequency), "Monthly gift");
+    assert.equal(donationFrequencyLabel(donation.frequency), "Monthly donation");
+    assert.equal(donation.archived, true);
+    assert.equal(normalizeDonationIntent({}, "legacy-donation").archived, false);
 });

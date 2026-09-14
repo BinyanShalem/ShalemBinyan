@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-    <script defer src="/cache-refresh.js?v=2026-09-11.3"></script>
+    <script defer src="/cache-refresh.js?v=2026-09-14.1"></script>
     <style>
         :root {
             --admin-purple: #723358;
@@ -3637,6 +3637,10 @@
             gap: 0.75rem;
         }
 
+        .donation-view-switcher {
+            margin-bottom: 1rem;
+        }
+
         .donation-intent-card {
             display: grid;
             grid-template-columns: minmax(0, 1.3fr) repeat(4, minmax(100px, 0.58fr)) auto;
@@ -3717,8 +3721,14 @@
             font-variant-numeric: tabular-nums;
         }
 
-        .donation-reviewed-button {
-            min-height: 42px;
+        .donation-intent-actions {
+            display: grid;
+            gap: 0.5rem;
+            min-width: 126px;
+        }
+
+        .donation-intent-actions .button {
+            min-height: 44px;
             padding: 0.55rem 0.7rem;
             font-size: 0.7rem;
         }
@@ -3832,11 +3842,16 @@
             }
 
             .donation-intent-primary,
-            .donation-intent-card .donation-reviewed-button {
+            .donation-intent-actions {
                 grid-column: 1 / -1;
             }
 
-            .donation-intent-card .donation-reviewed-button {
+            .donation-intent-actions {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                min-width: 0;
+            }
+
+            .donation-intent-actions .button {
                 width: 100%;
             }
 
@@ -4077,17 +4092,21 @@
                             Intent only
                         </span>
                     </div>
+                    <div class="organizer-switcher donation-view-switcher" role="group" aria-label="Donation interest view">
+                        <button type="button" data-donation-view="current" aria-pressed="true">Current</button>
+                        <button type="button" data-donation-view="archived" aria-pressed="false">Archive</button>
+                    </div>
                     <div class="donation-overview">
                         <div>
                             <strong id="donation-overview-title">These forms are not payment confirmations.</strong>
-                            <p>A person reaches this list before leaving for Banquest or another giving method. Confirm completed gifts separately through the payment provider or organization records.</p>
+                            <p id="donation-overview-copy">A person reaches this list before leaving for Banquest or another giving method. Confirm completed donations separately through the payment provider or organization records.</p>
                         </div>
                         <button class="button button-secondary" id="mark-all-donations-reviewed" type="button" hidden>Mark all reviewed</button>
                     </div>
                     <p class="status" id="donation-action-status" role="status" aria-live="polite" hidden></p>
                     <div class="loading-state" id="donations-loading"><span class="loading-dot" aria-hidden="true"></span>Loading donation interests…</div>
                     <div class="donation-intent-list" id="donation-intent-list"></div>
-                    <p class="empty-state" id="no-donation-intents" hidden>No donation forms have been submitted yet.</p>
+                    <p class="empty-state" id="no-donation-intents" hidden>No current donation forms are waiting here.</p>
                 </section>
 
                 <div class="workspace" id="workspace" tabindex="-1" hidden>
@@ -4615,7 +4634,7 @@
             donationTimestamp,
             normalizeDonationIntent,
             paymentMethodLabel
-        } from "../donation-tools.mjs?v=2026-09-11.3";
+        } from "../donation-tools.mjs?v=2026-09-14.1";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDxEV7W2m4jbJiVl0Sc6cN7gBH7oWu_rl8",
@@ -4802,6 +4821,7 @@
         let directoryFilter = "All";
         let directoryFormTrigger = null;
         let manualReminderFormTrigger = null;
+        let donationView = "current";
         let pushSubscriptionEnabled = false;
         let pushControlsBusy = false;
         let pushNotificationPreferences = {
@@ -6032,6 +6052,68 @@
             }
         }
 
+        async function setDonationArchived(donation, archived, button = null) {
+            if (button) {
+                button.disabled = true;
+                button.textContent = archived ? "Archiving…" : "Restoring…";
+            }
+            setStatus(donationActionStatus, "");
+            try {
+                if (LOCAL_PREVIEW) {
+                    allDonationIntents = allDonationIntents.map((item) => item.id === donation.id
+                        ? { ...item, archived, adminViewed: true }
+                        : item);
+                    renderDonations();
+                } else {
+                    await updateDoc(doc(db, DONATIONS_COLLECTION, donation.id), {
+                        archived,
+                        adminViewed: true
+                    });
+                }
+                setStatus(
+                    donationActionStatus,
+                    archived
+                        ? `${donation.name}’s donation interest was moved to the archive.`
+                        : `${donation.name}’s donation interest was restored.`,
+                    "success"
+                );
+            } catch (error) {
+                console.error("Could not update donation archive:", error);
+                setStatus(donationActionStatus, "The donation interest could not be updated. Try again.", "error");
+                if (button) {
+                    button.disabled = false;
+                    button.textContent = archived ? "Archive" : "Restore";
+                }
+            }
+        }
+
+        async function deleteArchivedDonation(donation, button = null) {
+            if (!donation.archived) return;
+            const confirmed = window.confirm(`Delete ${donation.name}’s archived donation interest permanently? This cannot be undone.`);
+            if (!confirmed) return;
+            if (button) {
+                button.disabled = true;
+                button.textContent = "Deleting…";
+            }
+            setStatus(donationActionStatus, "");
+            try {
+                if (LOCAL_PREVIEW) {
+                    allDonationIntents = allDonationIntents.filter((item) => item.id !== donation.id);
+                    renderDonations();
+                } else {
+                    await deleteDoc(doc(db, DONATIONS_COLLECTION, donation.id));
+                }
+                setStatus(donationActionStatus, `${donation.name}’s archived donation interest was deleted permanently.`, "success");
+            } catch (error) {
+                console.error("Could not delete archived donation interest:", error);
+                setStatus(donationActionStatus, "The archived donation interest could not be deleted. Try again.", "error");
+                if (button) {
+                    button.disabled = false;
+                    button.textContent = "Delete permanently";
+                }
+            }
+        }
+
         function renderDonationIntent(donation) {
             const card = document.createElement("article");
             card.className = `donation-intent-card${donation.adminViewed ? "" : " is-new"}`;
@@ -6071,24 +6153,54 @@
             });
 
             card.append(primary, ...details);
-            if (!donation.adminViewed) {
-                const button = document.createElement("button");
-                button.className = "button button-secondary donation-reviewed-button";
-                button.type = "button";
-                button.textContent = "Mark reviewed";
-                button.addEventListener("click", () => markDonationReviewed(donation, button));
-                card.appendChild(button);
+            const actions = document.createElement("div");
+            actions.className = "donation-intent-actions";
+            if (donation.archived) {
+                const restoreButton = document.createElement("button");
+                restoreButton.className = "button button-secondary";
+                restoreButton.type = "button";
+                restoreButton.textContent = "Restore";
+                restoreButton.addEventListener("click", () => setDonationArchived(donation, false, restoreButton));
+                const deleteButton = document.createElement("button");
+                deleteButton.className = "button button-danger";
+                deleteButton.type = "button";
+                deleteButton.textContent = "Delete permanently";
+                deleteButton.addEventListener("click", () => deleteArchivedDonation(donation, deleteButton));
+                actions.append(restoreButton, deleteButton);
+            } else {
+                if (!donation.adminViewed) {
+                    const button = document.createElement("button");
+                    button.className = "button button-secondary donation-reviewed-button";
+                    button.type = "button";
+                    button.textContent = "Mark reviewed";
+                    button.addEventListener("click", () => markDonationReviewed(donation, button));
+                    actions.appendChild(button);
+                }
+                const archiveButton = document.createElement("button");
+                archiveButton.className = "button button-secondary";
+                archiveButton.type = "button";
+                archiveButton.textContent = "Archive";
+                archiveButton.addEventListener("click", () => setDonationArchived(donation, true, archiveButton));
+                actions.appendChild(archiveButton);
             }
+            card.appendChild(actions);
             return card;
         }
 
         function renderDonations() {
             const sorted = [...allDonationIntents].sort((a, b) => donationTimestamp(b.createdAt) - donationTimestamp(a.createdAt));
-            const unread = sorted.filter((donation) => !donation.adminViewed).length;
-            donationIntentList.replaceChildren(...sorted.map(renderDonationIntent));
+            const current = sorted.filter((donation) => !donation.archived);
+            const archived = sorted.filter((donation) => donation.archived);
+            const visible = donationView === "archived" ? archived : current;
+            const unread = current.filter((donation) => !donation.adminViewed).length;
+            donationIntentList.replaceChildren(...visible.map(renderDonationIntent));
             document.getElementById("donations-loading").hidden = donationsLoaded;
-            document.getElementById("no-donation-intents").hidden = !donationsLoaded || sorted.length !== 0;
-            markAllDonationsReviewedButton.hidden = unread === 0;
+            const empty = document.getElementById("no-donation-intents");
+            empty.textContent = donationView === "archived"
+                ? "No donation interests have been archived."
+                : "No current donation forms are waiting here.";
+            empty.hidden = !donationsLoaded || visible.length !== 0;
+            markAllDonationsReviewedButton.hidden = donationView === "archived" || unread === 0;
             donationAlertCount.textContent = String(unread);
             donationAlertCount.hidden = unread === 0;
             donationAlertCount.setAttribute("aria-label", `${unread} new donation ${unread === 1 ? "interest" : "interests"}`);
@@ -6096,13 +6208,33 @@
                 "aria-label",
                 unread ? `Open donation interests, ${unread} new` : "Open donation interests"
             );
-            document.getElementById("donation-overview-title").textContent = unread
-                ? `${unread} new donation ${unread === 1 ? "interest needs" : "interests need"} review.`
-                : "These forms are not payment confirmations.";
+            document.querySelectorAll("[data-donation-view]").forEach((button) => {
+                const selected = button.dataset.donationView === donationView;
+                button.setAttribute("aria-pressed", String(selected));
+                const count = button.dataset.donationView === "archived" ? archived.length : current.length;
+                button.textContent = `${button.dataset.donationView === "archived" ? "Archive" : "Current"} (${count})`;
+            });
+            const overviewTitle = document.getElementById("donation-overview-title");
+            const overviewCopy = document.getElementById("donation-overview-copy");
+            if (donationView === "archived") {
+                overviewTitle.textContent = "Archived donation interests.";
+                overviewCopy.textContent = "Restore an item to Current when it is needed again. Permanent deletion is available only here and cannot be undone.";
+            } else {
+                overviewTitle.textContent = unread
+                    ? `${unread} new donation ${unread === 1 ? "interest needs" : "interests need"} review.`
+                    : "These forms are not payment confirmations.";
+                overviewCopy.textContent = "A person reaches this list before leaving for Banquest or another giving method. Confirm completed donations separately through the payment provider or organization records.";
+            }
+        }
+
+        function setDonationView(view) {
+            donationView = view === "archived" ? "archived" : "current";
+            setStatus(donationActionStatus, "");
+            renderDonations();
         }
 
         async function markAllDonationsReviewed() {
-            const unread = allDonationIntents.filter((donation) => !donation.adminViewed);
+            const unread = allDonationIntents.filter((donation) => !donation.archived && !donation.adminViewed);
             if (!unread.length) return;
             markAllDonationsReviewedButton.disabled = true;
             markAllDonationsReviewedButton.textContent = "Marking…";
@@ -6421,7 +6553,17 @@
                     status: "unconfirmed",
                     adminViewed: true,
                     createdAt: new Date(Date.now() - 2 * 86400000)
-                }, "preview-donation-reviewed")
+                }, "preview-donation-reviewed"),
+                normalizeDonationIntent({
+                    name: "Miriam Sasson",
+                    amount: 501,
+                    frequency: "one_time",
+                    paymentMethod: "credit_card",
+                    status: "unconfirmed",
+                    adminViewed: true,
+                    archived: true,
+                    createdAt: new Date(Date.now() - 5 * 86400000)
+                }, "preview-donation-archived")
             ];
             contentLoaded = true;
             submissionsLoaded = true;
@@ -7566,6 +7708,9 @@
         dashboardModeButton.addEventListener("click", () => activateAdminMode("dashboard", { focus: true }));
         donationsButton.addEventListener("click", () => activateAdminMode("donations", { focus: true }));
         markAllDonationsReviewedButton.addEventListener("click", markAllDonationsReviewed);
+        document.querySelectorAll("[data-donation-view]").forEach((button) => {
+            button.addEventListener("click", () => setDonationView(button.dataset.donationView));
+        });
 
         function activateTab(tab, { persist = true, updateUrl = true } = {}) {
             if (!tab || tab.hidden) tab = document.getElementById("content-tab");
