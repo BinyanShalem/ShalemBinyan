@@ -230,6 +230,44 @@ test("a durable snooze hides the reminder only through its chosen day", () => {
     }).map(({ key }) => key), ["submission:form-1"]);
 });
 
+test("new reminders stay below older entries even when their due dates are earlier", () => {
+    const input = {
+        now: new Date(2026, 9, 8, 12),
+        submissions: [{ id: "intake", data: { timestamp: "2026-10-02T12:00:00Z" } }],
+        encounters: [{
+            id: "follow-up", names: "Example couple", needsFollowUp: true,
+            occurredDate: "2026-09-01", createdAt: new Date("2026-10-03T12:00:00Z")
+        }, {
+            id: "scheduled", names: "Example appointment", encounterType: "scheduled",
+            occurredDate: "2026-10-08", createdAt: new Date("2026-10-04T12:00:00Z")
+        }],
+        manualReminders: [{
+            id: "new", title: "New reminder", dueDate: "2026-09-01",
+            createdAt: { toDate: () => new Date("2026-10-05T12:00:00Z") }
+        }, {
+            id: "old", title: "Older reminder", dueDate: "2026-10-10",
+            createdAt: new Date("2026-10-01T12:00:00Z")
+        }]
+    };
+    const expected = ["manual:old", "submission:intake", "encounter:follow-up", "scheduled:scheduled", "manual:new"];
+    assert.deepEqual(deriveReminders(input).map(({ key }) => key), expected);
+
+    input.manualReminders[1].dueDate = "2026-10-12";
+    input.manualReminders[1].updatedAt = new Date("2026-10-08T12:00:00Z");
+    input.manualReminders.reverse();
+    input.encounters.reverse();
+    assert.deepEqual(deriveReminders(input).map(({ key }) => key), expected);
+});
+
+test("legacy reminders without creation dates retain oldest-first date ordering", () => {
+    const reminders = deriveReminders({
+        now: new Date(2026, 9, 8, 12),
+        manualReminders: [{ id: "later", title: "Later", dueDate: "2026-10-07" }],
+        encounters: [{ id: "older", names: "Older", needsFollowUp: true, occurredDate: "2026-10-01" }]
+    });
+    assert.deepEqual(reminders.map(({ key }) => key), ["encounter:older", "manual:later"]);
+});
+
 test("formats a stable local day key", () => {
     assert.equal(localDayKey(new Date(2026, 7, 9, 23, 59)), "2026-08-09");
 });

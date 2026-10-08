@@ -255,7 +255,7 @@ export function deriveReminders({
                 targetId: latest.id,
                 title: `Meeting with ${latest.names || "this contact"}`,
                 detail: latest.notes || `Scheduled ${latest.method.toLocaleLowerCase()}.`,
-                sortTime: encounterTimestamp(latest),
+                sortTime: latest.createdAt ? toDate(latest.createdAt).getTime() : encounterTimestamp(latest),
                 encounter: latest
             });
             return;
@@ -272,7 +272,7 @@ export function deriveReminders({
             detail: latest.notes
                 || thread.meetings.find(({ notes }) => notes)?.notes
                 || "A follow-up is waiting.",
-            sortTime: encounterTimestamp(latest),
+            sortTime: latest.createdAt ? toDate(latest.createdAt).getTime() : encounterTimestamp(latest),
             encounter: latest
         });
     });
@@ -281,7 +281,7 @@ export function deriveReminders({
         if (!reminder.title || reminder.completed) return;
         const key = `manual:${reminder.id}`;
         if ((snoozed.get(key) || "") >= today) return;
-        const dueTimestamp = manualReminderTimestamp(reminder);
+        const dueTimestamp = manualReminderTimestamp(reminder, now);
         reminders.push({
             key,
             type: "manual",
@@ -291,10 +291,12 @@ export function deriveReminders({
             dueDate: reminder.dueDate,
             dueTime: reminder.dueTime,
             dueTimestamp,
-            sortTime: dueTimestamp ?? toDate(reminder.createdAt || reminder.updatedAt).getTime(),
+            sortTime: reminder.createdAt
+                ? toDate(reminder.createdAt).getTime()
+                : dueTimestamp ?? toDate(reminder.updatedAt).getTime(),
             manualReminder: reminder
         });
     });
 
-    return reminders.sort((a, b) => b.sortTime - a.sortTime);
+    return reminders.sort((a, b) => a.sortTime - b.sortTime || a.key.localeCompare(b.key));
 }

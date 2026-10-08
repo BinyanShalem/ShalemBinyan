@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-    <script defer src="/cache-refresh.js?v=2026-09-14.1"></script>
+    <script defer src="/cache-refresh.js?v=2026-10-08.1"></script>
     <style>
         :root {
             --admin-purple: #723358;
@@ -4618,7 +4618,7 @@
             PUSH_SUBSCRIPTIONS_COLLECTION,
             REMINDER_SNOOZES_COLLECTION,
             REMINDER_RESOLUTIONS_COLLECTION
-        } from "./organizer-tools.mjs?v=2026-09-01.1";
+        } from "./organizer-tools.mjs?v=2026-10-08.1";
         import {
             DIRECTORY_COLLECTION,
             DIRECTORY_TYPES,
@@ -5838,11 +5838,7 @@
             remindersNavCount.textContent = String(reminders.length);
             remindersNavCount.setAttribute("aria-label", `${reminders.length} ${reminders.length === 1 ? "reminder" : "reminders"}`);
 
-            const personal = reminders.filter(({ type }) => type === "manual").sort((a, b) => {
-                const aDue = a.dueTimestamp ?? Number.POSITIVE_INFINITY;
-                const bDue = b.dueTimestamp ?? Number.POSITIVE_INFINITY;
-                return aDue - bDue || b.sortTime - a.sortTime;
-            });
+            const personal = reminders.filter(({ type }) => type === "manual");
             const followUps = reminders.filter(({ type }) => type !== "manual");
             if (personal.length) list.appendChild(renderReminderGroup("Your reminders", personal));
             if (followUps.length) list.appendChild(renderReminderGroup("Appointments & follow-ups", followUps));
