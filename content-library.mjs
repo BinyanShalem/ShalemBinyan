@@ -414,6 +414,16 @@ export const BAKED_IN_RESOURCES = [
         extension: ""
     },
     {
+        id: "reb-shmuel-helevi-vozner",
+        type: "inspiration",
+        title: "The great renowned posek Reb Shmuel halevi Vozner zt”l conversing with his wife.",
+        caption: "The great renowned posek Reb Shmuel halevi Vozner zt”l conversing with his wife.",
+        imageUrl: "/inspiration-reb-shmuel-helevi-vozner.jpg?v=2026-10-29.1",
+        imageAlt: "Reb Shmuel Helevi Vozner and his wife seated together on a park bench",
+        imageWidth: 348,
+        imageHeight: 261
+    },
+    {
         id: "relationship-to-return-to",
         type: "inspiration",
         title: "A Relationship to Return To",

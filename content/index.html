@@ -32,8 +32,8 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;750&amp;display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../blue-concept-pages.css?v=2026-08-13.1">
-    <script defer src="/cache-refresh.js?v=2026-10-23.1"></script>
+    <link rel="stylesheet" href="../blue-concept-pages.css?v=2026-10-29.1">
+    <script defer src="/cache-refresh.js?v=2026-10-29.1"></script>
 </head>
 <body class="content-page">
     <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -153,7 +153,7 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
             isNewAdminResource,
             mergeResourceCollections
         } from "../content-resource-tools.mjs?v=2026-08-13.1";
-        import { BAKED_IN_RESOURCES, FIREBASE_CONFIG } from "../content-library.mjs?v=2026-08-13.1";
+        import { BAKED_IN_RESOURCES, FIREBASE_CONFIG } from "../content-library.mjs?v=2026-10-29.1";
 
         const bakedInResources = BAKED_IN_RESOURCES;
 
@@ -266,8 +266,9 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
 
         function createVisual(resource) {
             if (resource.type === "inspiration") {
-                const visual = document.createElement("div");
+                const visual = document.createElement("figure");
                 visual.className = "resource-visual inspiration";
+                if (resource.caption) visual.classList.add("inspiration--captioned");
 
                 const image = document.createElement("img");
                 image.className = "resource-image";
@@ -275,7 +276,16 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
                 image.alt = resource.imageAlt;
                 image.loading = "lazy";
                 image.decoding = "async";
+                if (resource.imageWidth && resource.imageHeight) {
+                    image.width = resource.imageWidth;
+                    image.height = resource.imageHeight;
+                }
                 visual.appendChild(image);
+                if (resource.caption) {
+                    const caption = document.createElement("figcaption");
+                    caption.textContent = resource.caption;
+                    visual.appendChild(caption);
+                }
 
                 return visual;
             }

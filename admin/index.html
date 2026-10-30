@@ -16,7 +16,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-    <script defer src="/cache-refresh.js?v=2026-10-08.1"></script>
+    <script defer src="/cache-refresh.js?v=2026-10-29.1"></script>
+    <link rel="stylesheet" href="./notification-view.css?v=2026-10-29.1">
     <style>
         :root {
             --admin-purple: #723358;
@@ -4057,6 +4058,25 @@
                     <p class="install-status" id="install-status" role="status" aria-live="polite" hidden></p>
                 </header>
 
+                <nav class="notification-return" id="notification-return" aria-label="Notification navigation" hidden>
+                    <button class="button button-secondary" id="return-to-notification" type="button">Back to notification</button>
+                    <a class="button button-secondary" href="/">Back to website</a>
+                </nav>
+
+                <section class="notification-workspace" id="notification-workspace" aria-labelledby="notification-title" tabindex="-1" hidden>
+                    <div class="notification-heading">
+                        <h2 id="notification-title" tabindex="-1">Notification</h2>
+                        <p id="notification-reason"></p>
+                    </div>
+                    <div class="notification-page-actions">
+                        <a class="button button-primary" href="/">Back to website</a>
+                        <button class="button button-secondary" id="notification-dashboard-button" type="button">Open dashboard</button>
+                    </div>
+                    <p class="notification-state" id="notification-state" role="status" aria-live="polite"></p>
+                    <div id="notification-items"></div>
+                    <p class="notification-footnote" id="notification-footnote" hidden>Showing the first six items from this alert. Open Reminders in the dashboard to see the full list.</p>
+                </section>
+
                 <section class="chat-workspace" id="chat-workspace" aria-label="Binyan Shalem admin assistant">
                     <div class="chat-frame">
                         <div class="chat-conversation" id="chat-conversation" role="log" aria-live="polite" aria-relevant="additions" tabindex="-1"></div>
@@ -4628,6 +4648,7 @@
             sortDirectoryEntries
         } from "./directory-tools.mjs?v=2026-09-04.1";
         import { createAdminChat } from "./chat-assistant.mjs?v=2026-09-04.1";
+        import { readNotificationRoute, resolveNotificationItem } from "./notification-route.mjs?v=2026-10-29.1";
         import {
             DONATIONS_COLLECTION,
             donationFrequencyLabel,
@@ -4655,6 +4676,8 @@
         const LOCAL_PREVIEW = ["127.0.0.1", "localhost"].includes(window.location.hostname)
             && new URLSearchParams(window.location.search).get("preview") === "1";
         const appId = firebaseConfig.projectId;
+        const notificationRoute = readNotificationRoute(window.location.href);
+        const notificationLoadErrors = {};
 
         const firebaseApp = initializeApp(firebaseConfig);
         const auth = getAuth(firebaseApp);
@@ -4967,6 +4990,7 @@
             }
             activateInitialTab();
             activateAdminMode(new URLSearchParams(window.location.search).get("view") === "donations" ? "donations" : "chat");
+            if (notificationRoute) activateAdminMode("notification", { focus: true });
             void syncPushSubscription();
         }
 
@@ -5740,6 +5764,8 @@
         function renderReminderCard(reminder) {
             const card = document.createElement("article");
             card.className = `reminder-card${reminder.type === "manual" ? " is-personal" : ""}${reminder.type === "scheduled" ? " is-scheduled" : ""}`;
+            card.dataset.notificationKey = reminder.key;
+            card.tabIndex = -1;
             const icon = document.createElement("span");
             icon.className = "reminder-icon";
             icon.innerHTML = reminder.type === "manual"
@@ -5842,7 +5868,7 @@
             const followUps = reminders.filter(({ type }) => type !== "manual");
             if (personal.length) list.appendChild(renderReminderGroup("Your reminders", personal));
             if (followUps.length) list.appendChild(renderReminderGroup("Appointments & follow-ups", followUps));
-
+            renderNotificationWorkspace();
         }
 
         function directoryPhoneHref(phone, protocol) {
@@ -6113,6 +6139,8 @@
         function renderDonationIntent(donation) {
             const card = document.createElement("article");
             card.className = `donation-intent-card${donation.adminViewed ? "" : " is-new"}`;
+            card.dataset.notificationKey = `donation:${donation.id}`;
+            card.tabIndex = -1;
 
             const primary = document.createElement("div");
             primary.className = "donation-intent-primary";
@@ -6260,11 +6288,15 @@
             donationsUnsubscribe = onSnapshot(donationsQuery, (snapshot) => {
                 allDonationIntents = snapshot.docs.map((item) => normalizeDonationIntent(item.data(), item.id));
                 donationsLoaded = true;
+                delete notificationLoadErrors.donations;
                 renderDonations();
+                renderNotificationWorkspace();
             }, (error) => {
                 console.error("Could not load donation interests:", error);
+                notificationLoadErrors.donations = true;
                 donationsLoaded = true;
                 renderDonations();
+                renderNotificationWorkspace();
                 setStatus(donationActionStatus, "Donation interests could not be loaded. Check the connection and try again.", "error");
             });
         }
@@ -6295,6 +6327,8 @@
                 const { id, data } = submission;
                 const card = document.createElement("article");
                 card.className = "submission-card";
+                card.dataset.notificationKey = `submission:${id}`;
+                card.tabIndex = -1;
                 const header = document.createElement("header");
                 const headerCopy = document.createElement("div");
                 headerCopy.className = "submission-header-copy";
@@ -6375,10 +6409,13 @@
             submissionsUnsubscribe = onSnapshot(submissionsRef, (snapshot) => {
                 allSubmissions = snapshot.docs.map((document) => ({ id: document.id, data: document.data() }));
                 submissionsLoaded = true;
+                delete notificationLoadErrors.submissions;
                 renderOrganizer();
                 loading.hidden = true;
             }, (error) => {
                 console.error("Could not load submissions:", error);
+                notificationLoadErrors.submissions = true;
+                renderNotificationWorkspace();
                 loading.textContent = "Submissions could not be loaded.";
             });
         }
@@ -6389,9 +6426,12 @@
                 encountersUnsubscribe = onSnapshot(collection(db, ENCOUNTERS_COLLECTION), (snapshot) => {
                     allEncounters = snapshot.docs.map((document) => normalizeEncounter(document.data(), document.id));
                     encountersLoaded = true;
+                    delete notificationLoadErrors.encounters;
                     renderOrganizer();
                 }, (error) => {
                     console.error("Could not load encounters:", error);
+                    notificationLoadErrors.encounters = true;
+                    renderNotificationWorkspace();
                     document.getElementById("encounters-loading").textContent = "Encounters could not be loaded.";
                 });
             }
@@ -6409,9 +6449,11 @@
                 manualRemindersUnsubscribe = onSnapshot(collection(db, MANUAL_REMINDERS_COLLECTION), (snapshot) => {
                     allManualReminders = snapshot.docs.map((document) => normalizeManualReminder(document.data(), document.id));
                     manualRemindersLoaded = true;
+                    delete notificationLoadErrors.manualReminders;
                     renderOrganizer();
                 }, (error) => {
                     console.error("Could not load personal reminders:", error);
+                    notificationLoadErrors.manualReminders = true;
                     manualRemindersLoaded = true;
                     renderReminders();
                     setStatus(reminderActionStatus, "Personal reminders could not be loaded. Check your connection and try again.", "error");
@@ -7644,6 +7686,122 @@
             }
         };
 
+        function renderNotificationWorkspace() {
+            if (!adminUnlocked || adminMode !== "notification" || !notificationRoute) return;
+            document.getElementById("notification-title").textContent = notificationRoute.title;
+            document.getElementById("notification-reason").textContent = notificationRoute.reason;
+            document.getElementById("notification-dashboard-button").textContent = notificationRoute.donations ? "View all donations" : "Open dashboard";
+            document.getElementById("notification-footnote").hidden = notificationRoute.count <= notificationRoute.items.length;
+            document.getElementById("notification-footnote").textContent = `Showing ${notificationRoute.items.length} of ${notificationRoute.count} items from this alert. Open Reminders in the dashboard to see the full list.`;
+            const list = document.getElementById("notification-items");
+            const state = {
+                submissions: allSubmissions, encounters: allEncounters,
+                manualReminders: allManualReminders, donations: allDonationIntents,
+                loaded: { submissions: submissionsLoaded, encounters: encountersLoaded, manualReminders: manualRemindersLoaded, donations: donationsLoaded },
+                errors: notificationLoadErrors
+            };
+            const items = notificationRoute.items.map((item) => resolveNotificationItem(item, state));
+            const signature = JSON.stringify(items);
+            if (list.dataset.signature === signature) return;
+            list.dataset.signature = signature;
+            const focusedKey = list.contains(document.activeElement) ? document.activeElement.dataset.noticeKey : "";
+            list.replaceChildren();
+            document.getElementById("notification-state").textContent = items.some(({ status }) => status === "loading")
+                ? "Loading notification details…"
+                : items.some(({ status }) => status === "error") ? "Some details could not be loaded. Check your connection, then reload."
+                    : items.length ? "Current details are shown below; they may have changed since the alert was sent." : "";
+            items.forEach((item) => {
+                const card = document.createElement("article");
+                card.className = "notification-record";
+                const heading = document.createElement("h3");
+                heading.textContent = item.title || item.label;
+                const explanation = document.createElement("p");
+                explanation.textContent = item.reason;
+                card.append(heading);
+                if (items.length > 1) card.append(explanation);
+                if (item.status !== "ready") {
+                    const message = document.createElement("p");
+                    message.textContent = ({
+                        loading: "Loading the related item…",
+                        error: "This item could not be loaded. Check your connection and reload the page to try again.",
+                        missing: "This record is no longer available. It may have been deleted since the notification was sent."
+                    })[item.status];
+                    card.append(message);
+                    if (item.status === "error") card.append(createActionButton("Reload details", "button button-secondary", () => window.location.reload()));
+                } else {
+                    const record = item.record;
+                    let fields;
+                    if (item.type === "donation") {
+                        fields = [["Amount", record.amount.toLocaleString(undefined, { style: "currency", currency: "USD" })],
+                            ["Payment status", "Payment not confirmed"], ["Method", paymentMethodLabel(record.paymentMethod)],
+                            ["Giving plan", donationFrequencyLabel(record.frequency)], ["Submitted", donationDateLabel(record)],
+                            ["Location", record.archived ? "Archive" : "Current"]];
+                    } else if (item.type === "submission") {
+                        fields = Object.entries(record.data)
+                            .filter(([key, value]) => key !== "uid" && value !== null && value !== "")
+                            .map(([key, value]) => key === "timestamp"
+                                ? ["Submitted", Number.isNaN(Date.parse(value)) ? "Date unavailable" : new Date(value).toLocaleString()]
+                                : [submissionFieldLabels[key] || key.replace(/_/g, " "), formatSubmissionValue(key, value)]);
+                    } else if (item.type === "manual") {
+                        fields = [["Reminder", record.title], ["Details", record.description || "No additional details."],
+                            ["When", formatManualReminderSchedule(record)],
+                            ["Status", record.completed ? "Taken care of" : "Open"]];
+                    } else {
+                        const archived = groupEncounterThreads(allEncounters).find((thread) => thread.meetings.some(({ id }) => id === record.id))?.archived;
+                        fields = [["Meeting", record.encounterType === "scheduled" ? "Scheduled" : "Completed"],
+                            ["When", formatEncounterMoment(record)], ["Notes", record.notes || "No notes were added."],
+                            ["Status", archived ? "Archived" : record.encounterType === "scheduled" ? "Scheduled" : record.needsFollowUp ? "Follow-up needed" : "No follow-up marked"]];
+                    }
+                    const details = document.createElement("dl");
+                    fields.forEach(([label, value]) => {
+                        const group = document.createElement("div");
+                        const term = document.createElement("dt");
+                        const description = document.createElement("dd");
+                        term.textContent = label;
+                        description.textContent = value;
+                        group.append(term, description);
+                        details.append(group);
+                    });
+                    card.append(details);
+                    const label = ({ donation: "View donation", submission: "View intake form", manual: "View reminder" })[item.type] || "View meeting";
+                    const button = createActionButton(label, "button button-secondary", () => openNotificationRecord(item));
+                    button.dataset.noticeKey = item.key;
+                    card.append(button);
+                }
+                list.append(card);
+            });
+            if (focusedKey) [...list.querySelectorAll("[data-notice-key]")].find((button) => button.dataset.noticeKey === focusedKey)?.focus({ preventScroll: true });
+        }
+
+        function openNotificationRecord(item) {
+            if (item.type === "donation") {
+                setDonationView(item.record.archived ? "archived" : "current");
+                activateAdminMode("donations");
+            } else {
+                activateAdminMode("dashboard");
+                activateTab(document.getElementById(item.type === "manual" ? "reminders-tab" : "encounters-tab"));
+                if (item.type === "submission") setEncounterView("intake");
+                else if (item.type === "manual") {
+                    openManualReminderForm(item.record, document.getElementById("return-to-notification"));
+                    return;
+                } else {
+                    const thread = groupEncounterThreads(allEncounters).find((entry) => entry.meetings.some(({ id }) => id === item.id));
+                    setEncounterView(thread?.archived ? "archived" : "active");
+                    openMeetingDetail(item.record, document.getElementById("return-to-notification"));
+                    return;
+                }
+            }
+            const target = [...document.querySelectorAll("[data-notification-key]")].find((element) => element.dataset.notificationKey === item.key && element.getClientRects().length);
+            target?.focus({ preventScroll: true });
+            target?.scrollIntoView({ behavior: "instant", block: "center" });
+        }
+
+        document.getElementById("return-to-notification").addEventListener("click", () => activateAdminMode("notification", { focus: true }));
+        document.getElementById("notification-dashboard-button").addEventListener("click", () => {
+            activateAdminMode(notificationRoute?.donations ? "donations" : "dashboard", { focus: true });
+            if (!notificationRoute?.donations) activateTab(document.getElementById("reminders-tab"));
+        });
+
         function requestedChatSection() {
             const requested = new URLSearchParams(window.location.search).get("tab");
             return ({
@@ -7657,10 +7815,14 @@
         }
 
         function activateAdminMode(mode, { focus = false } = {}) {
-            adminMode = ["chat", "dashboard", "donations"].includes(mode) ? mode : "chat";
+            adminMode = ["chat", "dashboard", "donations", "notification"].includes(mode) ? mode : "chat";
             const chatActive = adminMode === "chat";
             const dashboardActive = adminMode === "dashboard";
             const donationsActive = adminMode === "donations";
+            const notificationActive = adminMode === "notification";
+            appShell.classList.toggle("is-notification-mode", notificationActive);
+            document.getElementById("notification-workspace").hidden = !notificationActive;
+            document.getElementById("notification-return").hidden = !notificationRoute || notificationActive || chatActive;
             appShell.classList.toggle("is-chat-mode", chatActive);
             chatWorkspace.hidden = !chatActive;
             dashboardWorkspace.hidden = !dashboardActive;
@@ -7691,6 +7853,13 @@
                 skipLink.href = "#workspace";
                 skipLink.textContent = "Skip to dashboard";
                 if (focus) dashboardWorkspace.focus({ preventScroll: true });
+            } else if (notificationActive) {
+                workspaceTitle.textContent = "Notification";
+                workspaceDescription.textContent = "See why you were notified and review the related item.";
+                skipLink.href = "#notification-workspace";
+                skipLink.textContent = "Skip to notification";
+                renderNotificationWorkspace();
+                if (focus) document.getElementById("notification-title").focus({ preventScroll: true });
             } else {
                 workspaceTitle.textContent = "Donations";
                 workspaceDescription.textContent = "Review donation interests before confirming payments elsewhere.";
@@ -7757,7 +7926,7 @@
 
         tabs.forEach((tab, index) => {
             tab.addEventListener("click", () => {
-                if (adminMode === "donations") activateAdminMode("dashboard");
+                if (["donations", "notification"].includes(adminMode)) activateAdminMode("dashboard");
                 activateTab(tab);
             });
             tab.addEventListener("keydown", (event) => {
@@ -7766,7 +7935,7 @@
                 const direction = ['ArrowDown', 'ArrowRight'].includes(event.key) ? 1 : -1;
                 const nextTab = tabs[(index + direction + tabs.length) % tabs.length];
                 nextTab.focus();
-                if (adminMode === "donations") activateAdminMode("dashboard");
+                if (["donations", "notification"].includes(adminMode)) activateAdminMode("dashboard");
                 activateTab(nextTab);
             });
         });

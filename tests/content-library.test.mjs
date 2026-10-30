@@ -7,7 +7,7 @@ test("keeps the baked content catalog complete and uniquely addressable", () => 
     const ids = BAKED_IN_RESOURCES.map((resource) => resource.id);
     const videos = BAKED_IN_RESOURCES.filter((resource) => resource.type === "video");
 
-    assert.equal(BAKED_IN_RESOURCES.length, 30);
+    assert.equal(BAKED_IN_RESOURCES.length, 31);
     assert.equal(videos.length, 24);
     assert.equal(new Set(ids).size, ids.length);
     assert.ok(ids.every((id) => /^[A-Za-z0-9_-]+$/.test(id)));
@@ -27,4 +27,12 @@ test("keeps player behavior aligned with each video provider", () => {
 
 test("exports the shared Firebase project configuration", () => {
     assert.equal(FIREBASE_CONFIG.projectId, "binyanshalem-28b1a");
+});
+
+test("includes the supplied Inspiration photograph with the exact caption and original proportions", () => {
+    const resource = BAKED_IN_RESOURCES.find(({ id }) => id === "reb-shmuel-helevi-vozner");
+    assert.equal(resource.type, "inspiration");
+    assert.equal(resource.caption, "The great renowned posek Reb Shmuel halevi Vozner zt”l conversing with his wife.");
+    assert.match(resource.imageUrl, /^\/inspiration-reb-shmuel-helevi-vozner\.jpg/);
+    assert.equal(resource.imageWidth / resource.imageHeight, 4 / 3);
 });

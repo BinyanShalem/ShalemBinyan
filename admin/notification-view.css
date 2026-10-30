@@ -1,0 +1,110 @@
+.app-shell.is-notification-mode {
+    display: block;
+    padding-bottom: 0;
+}
+
+.app-shell.is-notification-mode .app-sidebar {
+    display: none;
+}
+
+/* A programmatically focused heading announces the destination, not a control. */
+#notification-title:focus {
+    outline: none;
+}
+
+.notification-workspace,
+.notification-return {
+    width: min(100%, 1040px);
+    margin-inline: auto;
+    padding: clamp(1rem, 4vw, 2.5rem);
+}
+
+.notification-workspace {
+    padding-bottom: calc(7rem + env(safe-area-inset-bottom));
+}
+
+.notification-heading h2 {
+    margin: 0 0 0.65rem;
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+}
+
+.notification-heading p,
+.notification-footnote {
+    max-width: 68ch;
+    color: var(--admin-muted);
+    line-height: 1.65;
+}
+
+.notification-page-actions,
+.notification-return {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.notification-page-actions {
+    margin-top: 1.25rem;
+}
+
+.notification-return {
+    padding-block: 1rem 0;
+}
+
+.notification-state {
+    margin: 1.5rem 0 0;
+    color: var(--admin-muted);
+}
+
+.notification-record {
+    padding: clamp(1.1rem, 3vw, 1.75rem);
+    margin-top: 1.25rem;
+    background: var(--admin-surface);
+    border: 1px solid var(--admin-line);
+    border-radius: 14px;
+    overflow-wrap: anywhere;
+}
+
+.notification-record h3 {
+    margin: 0 0 0.75rem;
+    font-size: 1.2rem;
+    line-height: 1.4;
+}
+
+.notification-record > p {
+    margin: 0 0 1rem;
+    color: var(--admin-muted);
+    line-height: 1.6;
+}
+
+.notification-record dl {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+    margin: 1.25rem 0;
+}
+
+.notification-record dt {
+    color: var(--admin-muted);
+    font-size: 0.85rem;
+}
+
+.notification-record dd {
+    margin: 0.3rem 0 0;
+    white-space: pre-wrap;
+    font-weight: 600;
+    line-height: 1.6;
+    font-variant-numeric: tabular-nums;
+}
+
+[data-notification-key] {
+    scroll-margin-top: calc(100px + env(safe-area-inset-top));
+}
+
+@media (max-width: 620px) {
+    .notification-record dl { grid-template-columns: 1fr; }
+    .notification-page-actions .button,
+    .notification-return .button { flex: 1 1 auto; }
+}

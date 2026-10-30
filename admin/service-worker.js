@@ -1,4 +1,4 @@
-const CACHE_VERSION = "binyan-admin-2026-10-08.1";
+const CACHE_VERSION = "binyan-admin-2026-10-29.1";
 const APP_SHELL = [
     "/admin/",
     "/admin/index.html",
@@ -6,6 +6,8 @@ const APP_SHELL = [
     "/admin/organizer-tools.mjs",
     "/admin/directory-tools.mjs",
     "/admin/chat-assistant.mjs",
+    "/admin/notification-route.mjs?v=2026-10-29.1",
+    "/admin/notification-view.css?v=2026-10-29.1",
     "/admin/icons/icon-192.png",
     "/admin/icons/icon-512.png",
     "/admin/icons/apple-touch-icon.png",
@@ -95,15 +97,39 @@ self.addEventListener("push", (event) => {
     }));
 });
 
+function notificationTarget(notification) {
+    let target;
+    try {
+        target = new URL(notification.data?.url || "/admin/?tab=reminders", self.location.origin);
+    } catch {
+        target = new URL("/admin/?tab=reminders", self.location.origin);
+    }
+    if (target.origin !== self.location.origin || !["/admin/", "/admin/index.html"].includes(target.pathname)) {
+        target = new URL("/admin/?tab=reminders", self.location.origin);
+    }
+    if (!target.searchParams.has("notice")) {
+        target.searchParams.set("notice", notification.tag === "binyan-push-test" ? "test" : "legacy");
+        if (notification.body) target.searchParams.set("reason", notification.body.slice(0, 300));
+    }
+    return target.href;
+}
+
 self.addEventListener("notificationclick", (event) => {
     event.notification.close();
-    const targetUrl = new URL(event.notification.data?.url || "/admin/?tab=reminders", self.location.origin).href;
+    const targetUrl = notificationTarget(event.notification);
     event.waitUntil(
         self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(async (clients) => {
-            const existing = clients.find((client) => new URL(client.url).pathname.startsWith("/admin/"));
+            const existing = clients.find((client) => {
+                const url = new URL(client.url);
+                return url.origin === self.location.origin && url.pathname.startsWith("/admin/");
+            });
             if (existing) {
-                await existing.navigate(targetUrl);
-                return existing.focus();
+                try {
+                    const navigated = await existing.navigate(targetUrl);
+                    if (navigated) return navigated.focus();
+                } catch {
+                    // A closing tab must not swallow the notification click.
+                }
             }
             return self.clients.openWindow(targetUrl);
         })

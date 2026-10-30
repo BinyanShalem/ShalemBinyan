@@ -650,6 +650,7 @@ input {
 }
 
 .resource-visual.inspiration {
+    margin: 0;
     min-height: 0;
     aspect-ratio: 9 / 16;
     background: var(--white);
@@ -662,6 +663,27 @@ input {
 
 .resource-visual.inspiration:hover .resource-image {
     transform: none;
+}
+
+.content-page .resource-visual.inspiration.inspiration--captioned {
+    display: block;
+    aspect-ratio: auto;
+    background: transparent;
+}
+
+.content-page .inspiration--captioned .resource-image {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.inspiration--captioned figcaption {
+    padding-top: 1rem;
+    color: var(--midnight);
+    font-size: 1rem;
+    line-height: 1.6;
+    text-align: center;
+    text-wrap: pretty;
 }
 
 .resource-mark {

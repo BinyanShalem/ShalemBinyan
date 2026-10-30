@@ -10,6 +10,7 @@ const { onSchedule } = require("firebase-functions/v2/scheduler");
 const webpush = require("web-push");
 const { generateAssistantPlan, summarizeGeminiError, usageKeys } = require("./gemini-assistant");
 const { clockParts, deriveDueReminders, filterNotificationPreferences } = require("./reminders");
+const { notificationPayload } = require("./notification-payload");
 
 initializeApp();
 
@@ -79,21 +80,6 @@ async function removeExpiredSubscription(ref, error) {
     if (![404, 410].includes(error?.statusCode)) return false;
     await ref.delete();
     return true;
-}
-
-function notificationPayload(reminders, { test = false, tag = "", title = "", body = "", url = "" } = {}) {
-    return JSON.stringify({
-        title: title || (test ? "Binyan Shalem notifications are ready" : "Binyan Shalem reminder"),
-        body: body || (test
-            ? "You’ll now receive reminders even when the admin app is closed."
-            : reminders.length === 1
-                ? reminders[0].body
-                : `${reminders.length} reminders need your attention.`),
-        icon: "/admin/icons/icon-192.png",
-        badge: "/admin/icons/icon-192.png",
-        tag: tag || (test ? "binyan-push-test" : "binyan-reminders"),
-        url: url || "/admin/?tab=reminders"
-    });
 }
 
 async function reserveAssistantUsage(uid, now = new Date()) {
