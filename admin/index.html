@@ -2259,6 +2259,311 @@
             white-space: pre-wrap;
         }
 
+        .meeting-photo-panel {
+            margin-top: 1.4rem;
+            padding-top: 1.25rem;
+            border-top: 1px solid var(--admin-line);
+        }
+
+        .meeting-photo-panel.is-compact {
+            margin-top: 0.8rem;
+            padding-top: 0;
+            border-top: 0;
+        }
+
+        .meeting-photo-heading {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .meeting-photo-heading h3 {
+            margin: 0;
+            color: var(--admin-purple-dark);
+            font-size: 0.94rem;
+            letter-spacing: -0.012em;
+        }
+
+        .meeting-photo-heading p {
+            max-width: 58ch;
+            margin: 0.3rem 0 0;
+            color: var(--admin-muted);
+            font-size: 0.72rem;
+            line-height: 1.5;
+        }
+
+        .meeting-photo-upload {
+            flex: 0 0 auto;
+            min-height: 44px;
+            cursor: pointer;
+        }
+
+        .meeting-photo-upload.is-disabled {
+            opacity: 0.62;
+            pointer-events: none;
+        }
+
+        .meeting-photo-upload:has(input:focus-visible) {
+            outline: 3px solid var(--admin-focus);
+            outline-offset: 2px;
+        }
+
+        .meeting-photo-status {
+            margin-top: 0.85rem;
+        }
+
+        .meeting-photo-queue {
+            display: grid;
+            gap: 0.45rem;
+            margin-top: 0.85rem;
+        }
+
+        .meeting-photo-queue:empty {
+            display: none;
+        }
+
+        .meeting-photo-queue-item {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(90px, 0.8fr) auto;
+            align-items: center;
+            gap: 0.65rem;
+            min-height: 42px;
+            padding: 0.55rem 0.65rem;
+            color: #344149;
+            background: #f7f9f8;
+            border-radius: 10px;
+            font-size: 0.7rem;
+        }
+
+        .meeting-photo-queue-item > span:first-child {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .meeting-photo-queue-item progress {
+            width: 100%;
+            height: 7px;
+            accent-color: var(--admin-purple);
+        }
+
+        .meeting-photo-queue-item[data-state="complete"] {
+            color: var(--admin-success);
+            background: var(--admin-success-soft);
+        }
+
+        .meeting-photo-queue-item[data-state="error"] {
+            color: var(--admin-error);
+            background: var(--admin-error-soft);
+        }
+
+        .meeting-photo-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.75rem;
+            margin-top: 0.95rem;
+        }
+
+        .meeting-photo-grid[aria-busy="true"] {
+            min-height: 92px;
+            background: linear-gradient(100deg, #f2f5f3 25%, #fafbfa 42%, #f2f5f3 58%);
+            background-size: 220% 100%;
+            border-radius: 12px;
+            animation: photo-loading 1.1s ease-in-out infinite;
+        }
+
+        @keyframes photo-loading {
+            from { background-position: 100% 0; }
+            to { background-position: -100% 0; }
+        }
+
+        .meeting-photo-card {
+            min-width: 0;
+            overflow: hidden;
+            background: #f5f7f6;
+            border-radius: 12px;
+        }
+
+        .meeting-photo-thumb {
+            position: relative;
+            display: block;
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            padding: 0;
+            overflow: hidden;
+            color: var(--admin-muted);
+            background: #e8eeeb;
+            border: 0;
+            border-radius: 0;
+        }
+
+        .meeting-photo-thumb img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+            transition: transform 160ms ease-out;
+        }
+
+        .meeting-photo-thumb:hover img {
+            transform: scale(1.018);
+        }
+
+        .meeting-photo-thumb.is-unavailable::after {
+            content: "Photo unavailable";
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            padding: 0.75rem;
+            color: var(--admin-muted);
+            font-size: 0.7rem;
+            text-align: center;
+        }
+
+        .meeting-photo-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.45rem;
+            min-height: 42px;
+            padding: 0.42rem 0.52rem;
+        }
+
+        .meeting-photo-card-footer span {
+            min-width: 0;
+            overflow: hidden;
+            color: var(--admin-muted);
+            font-size: 0.64rem;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .meeting-photo-remove {
+            min-width: 44px;
+            min-height: 44px;
+            padding: 0.25rem 0.4rem;
+            color: var(--admin-error);
+            background: transparent;
+            border: 0;
+            border-radius: 8px;
+            font-size: 0.66rem;
+            font-weight: 700;
+        }
+
+        .meeting-photo-remove:hover {
+            background: var(--admin-error-soft);
+        }
+
+        .meeting-photo-empty {
+            margin: 0.9rem 0 0;
+            padding: 0.9rem;
+            color: var(--admin-muted);
+            background: #f7f9f8;
+            border-radius: 11px;
+            font-size: 0.74rem;
+            text-align: center;
+        }
+
+        .meeting-photo-load-more {
+            width: 100%;
+            margin-top: 0.8rem;
+            min-height: 44px;
+        }
+
+        .meeting-photo-viewer {
+            width: min(980px, calc(100% - 2rem));
+            max-width: none;
+            max-height: calc(100dvh - 2rem);
+            padding: 0;
+            overflow: hidden;
+            background: #111715;
+            border: 0;
+            border-radius: 16px;
+            box-shadow: 0 28px 80px rgba(15, 20, 18, 0.4);
+        }
+
+        .meeting-photo-viewer::backdrop {
+            background: rgba(16, 22, 19, 0.82);
+        }
+
+        .meeting-photo-viewer-shell {
+            position: relative;
+            display: grid;
+            width: 100%;
+            min-height: min(72dvh, 720px);
+            max-height: calc(100dvh - 2rem);
+            place-items: center;
+        }
+
+        .meeting-photo-viewer-close {
+            position: absolute;
+            z-index: 1;
+            top: 0.75rem;
+            right: 0.75rem;
+            min-width: 64px;
+            min-height: 44px;
+        }
+
+        .meeting-photo-viewer-image {
+            width: 100%;
+            height: 100%;
+            max-height: calc(100dvh - 2rem);
+            object-fit: contain;
+        }
+
+        .meeting-photo-viewer-loading {
+            max-width: 34ch;
+            margin: 0;
+            padding: 1rem;
+            color: #dbe5e0;
+            font-size: 0.82rem;
+            text-align: center;
+        }
+
+        .meeting-photo-viewer-loading[data-tone="error"] {
+            color: #ffd9dc;
+        }
+
+        @media (max-width: 620px) {
+            .meeting-photo-heading {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .meeting-photo-upload {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .meeting-photo-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 0.6rem;
+            }
+
+            .meeting-photo-queue-item {
+                grid-template-columns: minmax(0, 1fr) auto;
+            }
+
+            .meeting-photo-queue-item progress {
+                grid-column: 1 / -1;
+                grid-row: 2;
+            }
+
+            .meeting-photo-viewer {
+                width: 100%;
+                max-height: 100dvh;
+                border-radius: 0;
+            }
+
+            .meeting-photo-viewer-shell,
+            .meeting-photo-viewer-image {
+                min-height: 100dvh;
+                max-height: 100dvh;
+            }
+        }
+
         .meeting-followup-state {
             display: inline-flex;
             align-items: center;
@@ -4535,6 +4840,7 @@
                         <dd id="meeting-detail-notes"></dd>
                     </div>
                 </dl>
+                <section id="meeting-photo-panel" aria-label="Private meeting photos"></section>
                 <p class="status" id="meeting-detail-status" role="status" aria-live="polite" hidden></p>
                 <div class="meeting-dialog-actions">
                     <button class="button button-primary" id="record-meeting-outcome-button" type="button" hidden>Record outcome</button>
@@ -4601,15 +4907,26 @@
             deleteDoc,
             doc,
             getDoc,
+            getDocs,
             getFirestore,
+            limit,
             onSnapshot,
             orderBy,
             query,
             serverTimestamp,
             setDoc,
+            startAfter,
             updateDoc,
+            where,
             writeBatch
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import {
+            deleteObject,
+            getBlob,
+            getStorage,
+            ref as storageRef,
+            uploadBytesResumable
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
         import {
             getFunctions,
             httpsCallable
@@ -4647,8 +4964,10 @@
             normalizeDirectoryUrl,
             sortDirectoryEntries
         } from "./directory-tools.mjs?v=2026-09-04.1";
-        import { createAdminChat } from "./chat-assistant.mjs?v=2026-09-04.1";
+        import { createAdminChat } from "./chat-assistant.mjs?v=2026-11-04.1";
+        import { createMeetingPhotoManager } from "./meeting-photo-tools.mjs?v=2026-11-03.1";
         import { readNotificationRoute, resolveNotificationItem } from "./notification-route.mjs?v=2026-10-29.1";
+        import { createAdminSessionAuth, isTransientAdminSessionError } from "./session-auth.mjs?v=2026-10-19.1";
         import {
             DONATIONS_COLLECTION,
             donationFrequencyLabel,
@@ -4666,8 +4985,6 @@
             appId: "1:923017150407:web:35d71ffa41943bbbf623e2",
             measurementId: "G-YRWCMR3HVD"
         };
-
-        const ADMIN_PASSWORD = "Hello123?!";
         const ADMIN_UNLOCK_KEY = "binyanShalem.adminUnlocked.v1";
         const ADMIN_TAB_KEY = "binyanShalem.adminTab.v1";
         const REMINDER_SNOOZE_KEY = "binyanShalem.reminderSnoozes.v1";
@@ -4682,9 +4999,43 @@
         const firebaseApp = initializeApp(firebaseConfig);
         const auth = getAuth(firebaseApp);
         const db = getFirestore(firebaseApp);
+        const storage = getStorage(firebaseApp);
         const cloudFunctions = getFunctions(firebaseApp, "us-central1");
         const sendTestPushFunction = httpsCallable(cloudFunctions, "sendTestPush");
         const adminAssistantFunction = httpsCallable(cloudFunctions, "adminAssistant", { timeout: 30000 });
+        const adminLoginFunction = httpsCallable(cloudFunctions, "adminLogin");
+        const adminSession = createAdminSessionAuth({
+            auth,
+            persistence: browserLocalPersistence,
+            setPersistence,
+            signInAnonymously,
+            adminLogin: async (credentials) => (await adminLoginFunction(credentials)).data
+        });
+        const meetingPhotoManager = createMeetingPhotoManager({
+            db,
+            storage,
+            auth,
+            localPreview: LOCAL_PREVIEW,
+            firestore: {
+                collection,
+                deleteDoc,
+                doc,
+                getDocs,
+                limit,
+                orderBy,
+                query,
+                serverTimestamp,
+                setDoc,
+                startAfter,
+                where
+            },
+            storageApi: {
+                deleteObject,
+                getBlob,
+                ref: storageRef,
+                uploadBytesResumable
+            }
+        });
 
         const loginSection = document.getElementById("admin-login-form");
         const bootScreen = document.getElementById("app-boot");
@@ -4771,6 +5122,7 @@
         };
         const meetingDetailDialog = document.getElementById("meeting-detail-dialog");
         const meetingDetailView = document.getElementById("meeting-detail-view");
+        const meetingPhotoPanel = document.getElementById("meeting-photo-panel");
         const meetingEditForm = document.getElementById("meeting-edit-form");
         const meetingDetailFields = {
             title: document.getElementById("meeting-detail-title"),
@@ -4994,30 +5346,24 @@
             void syncPushSubscription();
         }
 
-        async function startAdminSession(identity = "Remembered access") {
-            await setPersistence(auth, browserLocalPersistence);
-            if (!auth.currentUser) await signInAnonymously(auth);
-            showWorkspace(identity);
-        }
-
         loginForm.addEventListener("submit", async (event) => {
             event.preventDefault();
             setStatus(loginStatus, "");
-            if (passwordInput.value !== ADMIN_PASSWORD) {
-                setStatus(loginStatus, "That password didn’t match. Please try again.", "error");
-                passwordInput.value = "";
-                passwordInput.focus();
-                return;
-            }
-
             setButtonLoading(loginButton, true, "Unlocking…", "Unlock workspace");
             try {
-                await startAdminSession();
+                await adminSession.unlock(passwordInput.value);
+                showWorkspace();
                 rememberUnlock();
                 passwordInput.value = "";
             } catch (error) {
-                console.error("Could not start the admin session:", error);
-                setStatus(loginStatus, "The workspace could not connect. Check your internet connection and try again.", "error");
+                if (error?.code === "functions/permission-denied") {
+                    setStatus(loginStatus, "That password didn’t match. Please try again.", "error");
+                    passwordInput.value = "";
+                    passwordInput.focus();
+                } else {
+                    console.error("Could not start the admin session:", error?.code || "unknown");
+                    setStatus(loginStatus, "The workspace could not connect. Check your internet connection and try again.", "error");
+                }
             } finally {
                 setButtonLoading(loginButton, false, "Unlocking…", "Unlock workspace");
             }
@@ -5326,6 +5672,9 @@
                 : meeting.needsFollowUp ? "Follow-up needed" : "No follow-up needed";
             meetingDetailFields.needsFollowUp.dataset.active = String(!scheduled && meeting.needsFollowUp);
             meetingDetailFields.needsFollowUp.dataset.kind = scheduled ? "scheduled" : "completed";
+            if (meetingPhotoPanel.dataset.meetingId !== meeting.id) {
+                meetingPhotoManager.mount(meetingPhotoPanel, meeting);
+            }
 
             const recordButton = document.getElementById("record-meeting-outcome-button");
             const editButton = document.getElementById("edit-meeting-button");
@@ -5433,9 +5782,10 @@
         }
 
         async function deleteEncounter(encounter) {
-            if (!window.confirm(`Delete this meeting with ${encounter.names || "this contact"}? This cannot be undone.`)) return;
+            if (!window.confirm(`Delete this meeting with ${encounter.names || "this contact"}? Any photos attached to this meeting will also be permanently deleted. This cannot be undone.`)) return;
             setStatus(encounterActionStatus, "");
             try {
+                await meetingPhotoManager.deleteMeetingPhotos(encounter.id);
                 if (LOCAL_PREVIEW) {
                     allEncounters = allEncounters.filter(({ id }) => id !== encounter.id);
                     renderOrganizer();
@@ -6655,6 +7005,8 @@
             meetingDetailTrigger = null;
             meetingEditTargetType = "completed";
             meetingEditIsConversion = false;
+            meetingPhotoPanel.replaceChildren();
+            delete meetingPhotoPanel.dataset.meetingId;
             meetingDetailView.hidden = false;
             meetingEditForm.hidden = true;
             if (restoreTarget) window.setTimeout(() => restoreTarget.focus(), 0);
@@ -7426,6 +7778,7 @@
         }
 
         async function deleteEncounterFromChat(encounter) {
+            await meetingPhotoManager.deleteMeetingPhotos(encounter.id);
             if (LOCAL_PREVIEW) {
                 allEncounters = allEncounters.filter(({ id }) => id !== encounter.id);
                 renderOrganizer();
@@ -7641,6 +7994,7 @@
                 encounterPrefill: ({ encounter, submission, encounterType }) => buildEncounterPrefill({ encounter, submission, encounterType }),
                 saveEncounter: saveEncounterFromChat,
                 deleteEncounter: deleteEncounterFromChat,
+                mountMeetingPhotos: (container, meeting, options) => meetingPhotoManager.mount(container, meeting, options),
                 setThreadArchived,
                 formatReminderSchedule: formatManualReminderSchedule,
                 saveReminder: saveReminderFromChat,
@@ -8054,7 +8408,13 @@
             }, { once: true });
         }
 
+        let adminRestorePending = false;
+        let adminRestoreRunning = false;
+        let adminRestoreRetryTimer;
+        let adminRestoreRetryDelay = 1000;
+
         async function bootstrapAdmin() {
+            if (adminRestoreRunning) return;
             if (LOCAL_PREVIEW) {
                 document.getElementById("logout-button").hidden = true;
                 document.getElementById("preview-mode-indicator").hidden = false;
@@ -8062,18 +8422,39 @@
                 return;
             }
 
-            if (!hasRememberedUnlock()) {
-                showLogin();
-                return;
-            }
-
+            adminRestoreRunning = true;
+            window.clearTimeout(adminRestoreRetryTimer);
             try {
-                await startAdminSession();
+                const restored = await adminSession.restore({ remembered: hasRememberedUnlock() });
+                adminRestorePending = false;
+                adminRestoreRetryDelay = 1000;
+                if (restored) {
+                    showWorkspace();
+                } else {
+                    showLogin();
+                }
             } catch (error) {
-                console.error("Could not restore the remembered admin session:", error);
+                if (isTransientAdminSessionError(error)) {
+                    adminRestorePending = true;
+                    if (navigator.onLine) {
+                        adminRestoreRetryTimer = window.setTimeout(() => {
+                            void bootstrapAdmin();
+                        }, adminRestoreRetryDelay);
+                        adminRestoreRetryDelay = Math.min(adminRestoreRetryDelay * 2, 30000);
+                    }
+                    return;
+                }
+                adminRestorePending = false;
+                console.error("Could not restore the remembered admin session:", error?.code || "unknown");
                 showLogin("The saved workspace could not connect. Enter the password to try again.");
+            } finally {
+                adminRestoreRunning = false;
             }
         }
+
+        window.addEventListener("online", () => {
+            if (adminRestorePending) void bootstrapAdmin();
+        });
 
         void bootstrapAdmin();
     </script>

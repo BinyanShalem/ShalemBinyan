@@ -1186,9 +1186,11 @@
         async function initializeDonations() {
             try {
                 const app = initializeApp(FIREBASE_CONFIG);
-                const credential = await signInAnonymously(getAuth(app));
+                const auth = getAuth(app);
+                await auth.authStateReady();
+                const user = auth.currentUser || (await signInAnonymously(auth)).user;
                 db = getFirestore(app);
-                userId = credential.user.uid;
+                userId = user.uid;
                 setSubmitState({ disabled: false, label: "Continue securely" });
             } catch (error) {
                 console.error("Donation service could not connect:", error);

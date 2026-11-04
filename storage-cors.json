@@ -1,0 +1,11 @@
+[
+  {
+    "origin": [
+      "https://www.binyan-shalem.com",
+      "https://binyan-shalem.com"
+    ],
+    "method": ["GET", "HEAD"],
+    "responseHeader": ["Content-Type", "Content-Length", "Content-Range"],
+    "maxAgeSeconds": 3600
+  }
+]

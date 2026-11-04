@@ -1,13 +1,15 @@
-const CACHE_VERSION = "binyan-admin-2026-10-29.1";
+const CACHE_VERSION = "binyan-admin-2026-11-03.1";
 const APP_SHELL = [
     "/admin/",
     "/admin/index.html",
     "/admin/manifest.webmanifest",
     "/admin/organizer-tools.mjs",
     "/admin/directory-tools.mjs",
-    "/admin/chat-assistant.mjs",
+    "/admin/chat-assistant.mjs?v=2026-11-04.1",
     "/admin/notification-route.mjs?v=2026-10-29.1",
     "/admin/notification-view.css?v=2026-10-29.1",
+    "/admin/session-auth.mjs?v=2026-10-19.1",
+    "/admin/meeting-photo-tools.mjs?v=2026-11-03.1",
     "/admin/icons/icon-192.png",
     "/admin/icons/icon-512.png",
     "/admin/icons/apple-touch-icon.png",
@@ -69,6 +71,10 @@ self.addEventListener("fetch", (event) => {
     }
 
     const url = new URL(request.url);
+    const isPrivateStorageRequest = url.hostname === "firebasestorage.googleapis.com"
+        || url.hostname === "storage.googleapis.com"
+        || url.hostname.endsWith(".storage.googleapis.com");
+    if (isPrivateStorageRequest) return;
     const isStaticAsset = ["style", "script", "image", "font", "manifest"].includes(request.destination);
     const isLocalAdminAsset = url.origin === self.location.origin && (
         url.pathname.startsWith("/admin/")

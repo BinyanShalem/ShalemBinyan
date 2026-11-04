@@ -1,0 +1,35 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.admin == true;
+    }
+
+    function isValidMeetingPhoto(meetingId, photoId, fileName) {
+      return request.resource != null
+        && resource == null
+        && fileName in ['display.jpg', 'thumb.jpg']
+        && request.resource.contentType == 'image/jpeg'
+        && request.resource.size > 0
+        && (
+          (fileName == 'thumb.jpg' && request.resource.size <= 2 * 1024 * 1024)
+          || (fileName == 'display.jpg' && request.resource.size <= 8 * 1024 * 1024)
+        )
+        && request.resource.metadata.meetingId == meetingId
+        && request.resource.metadata.photoId == photoId
+        && request.resource.metadata.createdBy == request.auth.uid
+        && firestore.exists(/databases/(default)/documents/admin_encounters/$(meetingId))
+        && (
+          (fileName == 'display.jpg' && request.resource.metadata.variant == 'display')
+          || (fileName == 'thumb.jpg' && request.resource.metadata.variant == 'thumbnail')
+        );
+    }
+
+    match /admin-meeting-images/{meetingId}/{photoId}/{fileName} {
+      allow read: if isAdmin();
+      allow write: if isAdmin()
+        && (request.resource == null || isValidMeetingPhoto(meetingId, photoId, fileName));
+    }
+  }
+}

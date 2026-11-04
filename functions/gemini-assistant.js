@@ -191,6 +191,7 @@ Rules:
 Skill intent:
 - show_today, show_encounters, show_reminders, show_directory, show_resources, show_intakes: open those areas.
 - open_encounter_thread/open_intake: use the matching context targetId.
+- For photo, image, or picture uploads, use open_encounter_thread for the matching encounter when possible, otherwise show_encounters. The local app handles the files; never ask the user to send an image to you and never claim to inspect one.
 - find_directory: place the search words in query.
 - create_intake: use this when the admin asks to create, make, add, or start an intake form for someone. Put the primary name or couple name in name, a second spouse name in spouseName when stated, and extract only the intake details explicitly supplied. The app opens a review form and requires only name.
 - create/edit/delete/complete/snooze reminder: use reminder fields or targetId.

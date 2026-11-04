@@ -508,7 +508,7 @@ export function createAdminChat({
                     task: () => actions.deleteEncounter(encounter),
                     success: "The meeting was deleted.",
                     confirmationTitle: `Delete the ${formatDate(encounter.occurredDate)} meeting with ${names}?`,
-                    confirmationMeta: "This permanently removes this meeting from the timeline. This cannot be undone.",
+                    confirmationMeta: "This permanently removes this meeting and every photo attached to it. This cannot be undone.",
                     confirmationTone: "danger"
                 } : null;
             }
@@ -700,7 +700,7 @@ export function createAdminChat({
         else if (/log (a )?meeting|record (a )?meeting|met with/.test(lower)) chooseEncounterSource("completed");
         else if (/remind|todo|task/.test(lower)) showReminders({ announce: false });
         else if (/schedule|appointment/.test(lower)) chooseEncounterSource("scheduled");
-        else if (/meeting|encounter|met with/.test(lower)) showEncounters({ announce: false });
+        else if (/meeting|encounter|met with|photo|image|picture/.test(lower)) showEncounters({ announce: false });
         else if (/contact|directory|therapist|phone/.test(lower)) showDirectory({ announce: false });
         else if (/resource|youtube|amazon|itorah|torahanytime/.test(lower)) showResources({ announce: false });
         else if (/intake|form/.test(lower)) showIntakes({ announce: false });
@@ -873,11 +873,12 @@ export function createAdminChat({
         const meetings = [...thread.meetings].reverse().map((meeting) => {
             const scheduled = meeting.encounterType === "scheduled";
             const buttons = [
+                actionButton("Photos", () => showMeetingPhotos(meeting)),
                 actionButton(scheduled ? "Edit schedule" : "Edit", () => showEncounterForm({ existing: meeting, encounterType: meeting.encounterType }), { tone: "secondary" })
             ];
             if (scheduled) buttons.unshift(actionButton("Record outcome", () => showEncounterForm({ existing: meeting, encounterType: "completed", converting: true })));
             buttons.push(actionButton("Delete", () => confirmAction({
-                question: `Delete this ${scheduled ? "scheduled " : ""}meeting with ${meeting.names}? This cannot be undone.`,
+                question: `Delete this ${scheduled ? "scheduled " : ""}meeting with ${meeting.names}? Every photo attached to this meeting will also be deleted. This cannot be undone.`,
                 confirmLabel: "Delete meeting",
                 onConfirm: (button) => runAction(button, () => actions.deleteEncounter(meeting), {
                     busyLabel: "Deleting…",
@@ -904,6 +905,19 @@ export function createAdminChat({
                 actionButton("Back", () => showEncounters(), { tone: "secondary" })
             ]
         });
+    }
+
+    function showMeetingPhotos(meeting) {
+        sayUser(`Photos for the ${formatDate(meeting.occurredDate)} meeting`);
+        const host = element("section", "chat-meeting-photos");
+        const thread = findThreadForAI({ targetId: meeting.id });
+        say("Choose files below or review what is already attached to this meeting.", {
+            content: host,
+            buttons: [
+                actionButton("Back to timeline", () => thread ? showThread(thread) : showEncounters(), { tone: "secondary" })
+            ]
+        });
+        actions.mountMeetingPhotos(host, meeting, { compact: true });
     }
 
     function showEncounters({ archived = false, announce = true } = {}) {

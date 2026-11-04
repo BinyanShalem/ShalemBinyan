@@ -5,6 +5,10 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.get('admin', false) == true;
+    }
+
     function isOptionalString(value, maxLength) {
       return value == null || (value is string && value.size() <= maxLength);
     }
@@ -160,6 +164,38 @@ service cloud.firestore {
         && request.resource.data.createdBy.size() <= 128;
     }
 
+    function isValidMeetingPhoto(imageId) {
+      return request.resource.data.keys().hasOnly([
+          'meetingId', 'storagePath', 'thumbnailPath', 'originalName',
+          'contentType', 'size', 'width', 'height', 'createdAt', 'createdBy'
+        ])
+        && request.resource.data.keys().hasAll([
+          'meetingId', 'storagePath', 'thumbnailPath', 'originalName',
+          'contentType', 'size', 'width', 'height', 'createdAt', 'createdBy'
+        ])
+        && request.resource.data.meetingId is string
+        && request.resource.data.meetingId.size() > 0
+        && request.resource.data.meetingId.size() <= 180
+        && request.resource.data.storagePath == 'admin-meeting-images/' + request.resource.data.meetingId + '/' + imageId + '/display.jpg'
+        && request.resource.data.thumbnailPath == 'admin-meeting-images/' + request.resource.data.meetingId + '/' + imageId + '/thumb.jpg'
+        && request.resource.data.originalName is string
+        && request.resource.data.originalName.size() > 0
+        && request.resource.data.originalName.size() <= 240
+        && request.resource.data.contentType == 'image/jpeg'
+        && request.resource.data.size is int
+        && request.resource.data.size > 0
+        && request.resource.data.size <= 8 * 1024 * 1024
+        && request.resource.data.width is int
+        && request.resource.data.width > 0
+        && request.resource.data.width <= 2400
+        && request.resource.data.height is int
+        && request.resource.data.height > 0
+        && request.resource.data.height <= 2400
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.createdBy is string
+        && request.resource.data.createdBy.size() <= 128;
+    }
+
     function isValidReminderResolution() {
       return request.resource.data.keys().hasOnly(['targetKey', 'resolvedAt', 'resolvedBy'])
         && request.resource.data.keys().hasAll(['targetKey', 'resolvedAt', 'resolvedBy'])
@@ -305,30 +341,30 @@ service cloud.firestore {
     }
 
     function ownsPushSubscriptionId(subscriptionId) {
-      return isSignedIn()
+      return isAdmin()
         && subscriptionId.matches(request.auth.uid + '_[a-zA-Z0-9-]{8,64}');
     }
 
     match /content/{contentId} {
       allow read: if true;
-      allow create: if isSignedIn() && contentId == request.resource.data.id && isValidContentResource();
-      allow delete: if isSignedIn();
+      allow create: if isAdmin() && contentId == request.resource.data.id && isValidContentResource();
+      allow delete: if isAdmin();
       allow update: if false;
     }
 
     match /artifacts/{appId}/public/data/submissions/{submissionId} {
       allow create: if isSignedIn() && isValidSubmission();
-      allow read, update, delete: if isSignedIn();
+      allow read, update, delete: if isAdmin();
     }
 
     match /admin_encounters/{encounterId} {
-      allow read, delete: if isSignedIn();
-      allow create: if isSignedIn()
+      allow read, delete: if isAdmin();
+      allow create: if isAdmin()
         && isValidEncounter()
         && request.resource.data.createdBy == request.auth.uid
         && request.resource.data.createdAt == request.time
         && request.resource.data.updatedAt == request.time;
-      allow update: if isSignedIn()
+      allow update: if isAdmin()
         && isValidEncounter()
         && request.resource.data.createdAt == resource.data.createdAt
         && request.resource.data.createdBy == resource.data.createdBy
@@ -336,20 +372,30 @@ service cloud.firestore {
         && request.resource.data.updatedAt == request.time;
     }
 
+    match /admin_meeting_photos/{imageId} {
+      allow read, delete: if isAdmin();
+      allow create: if isAdmin()
+        && isValidMeetingPhoto(imageId)
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdAt == request.time
+        && exists(/databases/$(database)/documents/admin_encounters/$(request.resource.data.meetingId));
+      allow update: if false;
+    }
+
     match /admin_reminder_resolutions/{resolutionId} {
-      allow read: if isSignedIn();
-      allow create, update: if isSignedIn() && isValidReminderResolution();
-      allow delete: if isSignedIn();
+      allow read: if isAdmin();
+      allow create, update: if isAdmin() && isValidReminderResolution();
+      allow delete: if isAdmin();
     }
 
     match /admin_manual_reminders/{reminderId} {
-      allow read, delete: if isSignedIn();
-      allow create: if isSignedIn()
+      allow read, delete: if isAdmin();
+      allow create: if isAdmin()
         && isValidManualReminder()
         && request.resource.data.createdBy == request.auth.uid
         && request.resource.data.createdAt == request.time
         && request.resource.data.updatedAt == request.time;
-      allow update: if isSignedIn()
+      allow update: if isAdmin()
         && isValidManualReminder()
         && request.resource.data.createdAt == resource.data.createdAt
         && request.resource.data.createdBy == resource.data.createdBy
@@ -357,8 +403,8 @@ service cloud.firestore {
     }
 
     match /admin_reminder_snoozes/{snoozeId} {
-      allow read, delete: if isSignedIn();
-      allow create, update: if isSignedIn() && isValidReminderSnooze();
+      allow read, delete: if isAdmin();
+      allow create, update: if isAdmin() && isValidReminderSnooze();
     }
 
     match /admin_push_subscriptions/{subscriptionId} {
@@ -379,13 +425,13 @@ service cloud.firestore {
     }
 
     match /admin_directory/{entryId} {
-      allow read, delete: if isSignedIn();
-      allow create: if isSignedIn()
+      allow read, delete: if isAdmin();
+      allow create: if isAdmin()
         && isValidDirectoryEntry()
         && request.resource.data.createdBy == request.auth.uid
         && request.resource.data.createdAt == request.time
         && request.resource.data.updatedAt == request.time;
-      allow update: if isSignedIn()
+      allow update: if isAdmin()
         && isValidDirectoryEntry()
         && request.resource.data.createdAt == resource.data.createdAt
         && request.resource.data.createdBy == resource.data.createdBy
@@ -393,8 +439,8 @@ service cloud.firestore {
     }
 
     match /donation_intents/{donationId} {
-      allow read: if isSignedIn();
-      allow delete: if isSignedIn()
+      allow read: if isAdmin();
+      allow delete: if isAdmin()
         && resource.data.get('archived', false) == true;
       allow create: if isSignedIn()
         && isValidDonationIntent()
@@ -402,7 +448,7 @@ service cloud.firestore {
         && request.resource.data.createdAt == request.time
         && request.resource.data.adminViewed == false
         && request.resource.data.get('archived', false) == false;
-      allow update: if isSignedIn()
+      allow update: if isAdmin()
         && isValidDonationIntent()
         && request.resource.data.name == resource.data.name
         && request.resource.data.amount == resource.data.amount

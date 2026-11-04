@@ -2,6 +2,7 @@
 
 const { createHash } = require("node:crypto");
 const { initializeApp } = require("firebase-admin/app");
+const { getAuth } = require("firebase-admin/auth");
 const { FieldValue, getFirestore, Timestamp } = require("firebase-admin/firestore");
 const { defineSecret } = require("firebase-functions/params");
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
@@ -11,6 +12,7 @@ const webpush = require("web-push");
 const { generateAssistantPlan, summarizeGeminiError, usageKeys } = require("./gemini-assistant");
 const { clockParts, deriveDueReminders, filterNotificationPreferences } = require("./reminders");
 const { notificationPayload } = require("./notification-payload");
+const { authorizedPushSubscriptions, createAdminLoginHandler, requireAdmin, reserveLoginAttempt } = require("./admin-auth");
 
 initializeApp();
 
@@ -25,6 +27,20 @@ const AI_MONTHLY_LIMIT = 500;
 const VAPID_PUBLIC_KEY = "BL7ha4R4kMW9sE9RJAkn1tIfJFEjjRYVUVDRTGq1TZrSCuReDfCebPst902WeZbNSBZYMnt-Qx4qeDqOCR4LHAQ";
 const VAPID_PRIVATE_KEY = defineSecret("WEB_PUSH_VAPID_PRIVATE_KEY");
 const GEMINI_API_KEY = defineSecret("GEMINI_API_KEY");
+const ADMIN_PASSWORD_VERIFIER = defineSecret("ADMIN_PASSWORD_VERIFIER");
+
+exports.adminLogin = onCall({
+    region: "us-central1",
+    memory: "256MiB",
+    timeoutSeconds: 30,
+    maxInstances: 2,
+    concurrency: 4,
+    secrets: [ADMIN_PASSWORD_VERIFIER]
+}, createAdminLoginHandler({
+    auth: getAuth(),
+    readPasswordVerifier: () => ADMIN_PASSWORD_VERIFIER.value(),
+    reserveAttempt: (uid, ip) => reserveLoginAttempt(db, uid, ip)
+}));
 
 function configureWebPush() {
     const privateKey = VAPID_PRIVATE_KEY.value().trim();
@@ -145,7 +161,8 @@ exports.sendAdminReminders = onSchedule({
         snoozes: documentRows(snoozes)
     };
 
-    await Promise.all(subscriptions.docs.map(async (subscriptionDoc) => {
+    const authorizedSubscriptions = await authorizedPushSubscriptions(getAuth(), subscriptions.docs);
+    await Promise.all(authorizedSubscriptions.map(async (subscriptionDoc) => {
         const subscriptionData = subscriptionDoc.data();
         const { day, reminders } = deriveDueReminders({
             ...rows,
@@ -194,7 +211,8 @@ exports.sendNewIntakeNotification = onDocumentCreated({
     const tag = `binyan-intake-${createHash("sha256").update(event.params.submissionId).digest("hex").slice(0, 12)}`;
     const subscriptions = await db.collection(PUSH_SUBSCRIPTIONS_COLLECTION).where("enabled", "==", true).get();
 
-    await Promise.all(subscriptions.docs.map(async (subscriptionDoc) => {
+    const authorizedSubscriptions = await authorizedPushSubscriptions(getAuth(), subscriptions.docs);
+    await Promise.all(authorizedSubscriptions.map(async (subscriptionDoc) => {
         const subscriptionData = subscriptionDoc.data();
         if (subscriptionData.notifyNewIntakes === false) return;
         const { day } = clockParts(new Date(), subscriptionData.timeZone || "America/New_York");
@@ -232,7 +250,8 @@ exports.sendNewDonationNotification = onDocumentCreated({
     const tag = `binyan-donation-${createHash("sha256").update(donationId).digest("hex").slice(0, 12)}`;
     const subscriptions = await db.collection(PUSH_SUBSCRIPTIONS_COLLECTION).where("enabled", "==", true).get();
 
-    await Promise.all(subscriptions.docs.map(async (subscriptionDoc) => {
+    const authorizedSubscriptions = await authorizedPushSubscriptions(getAuth(), subscriptions.docs);
+    await Promise.all(authorizedSubscriptions.map(async (subscriptionDoc) => {
         const subscriptionData = subscriptionDoc.data();
         const { day } = clockParts(new Date(), subscriptionData.timeZone || "America/New_York");
         const [unsent] = await unsentReminders(subscriptionDoc.id, day, [reminder]);
@@ -261,7 +280,7 @@ exports.sendTestPush = onCall({
     timeoutSeconds: 30,
     secrets: [VAPID_PRIVATE_KEY]
 }, async (request) => {
-    if (!request.auth) throw new HttpsError("unauthenticated", "Sign in before enabling notifications.");
+    requireAdmin(request, "Sign in before enabling notifications.");
     const deviceId = typeof request.data?.deviceId === "string" ? request.data.deviceId : "";
     if (!/^[a-zA-Z0-9-]{8,64}$/.test(deviceId)) {
         throw new HttpsError("invalid-argument", "A valid device ID is required.");
@@ -292,7 +311,7 @@ exports.adminAssistant = onCall({
     maxInstances: 2,
     secrets: [GEMINI_API_KEY]
 }, async (request) => {
-    if (!request.auth) throw new HttpsError("unauthenticated", "Unlock the admin app before using the Smart assistant.");
+    requireAdmin(request, "Unlock the admin app before using the Smart assistant.");
     const message = typeof request.data?.message === "string" ? request.data.message.trim() : "";
     if (!message || message.length > 500) {
         throw new HttpsError("invalid-argument", "Write a message between 1 and 500 characters.");

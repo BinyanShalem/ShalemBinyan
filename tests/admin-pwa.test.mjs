@@ -3,18 +3,22 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { INTAKE_REQUEST_TEXT } from "../admin/chat-assistant.mjs";
 
-const [adminPage, chatAssistant, manifestSource, serviceWorker, firestoreRules, functionsSource, geminiAssistantSource, functionsPackage] = await Promise.all([
+const [adminPage, chatAssistant, meetingPhotoTools, manifestSource, serviceWorker, firestoreRules, storageRules, firebaseConfigSource, functionsSource, geminiAssistantSource, functionsPackage] = await Promise.all([
     readFile(new URL("../admin/index.html", import.meta.url), "utf8"),
     readFile(new URL("../admin/chat-assistant.mjs", import.meta.url), "utf8"),
+    readFile(new URL("../admin/meeting-photo-tools.mjs", import.meta.url), "utf8"),
     readFile(new URL("../admin/manifest.webmanifest", import.meta.url), "utf8"),
     readFile(new URL("../admin/service-worker.js", import.meta.url), "utf8"),
     readFile(new URL("../firestore.rules", import.meta.url), "utf8"),
+    readFile(new URL("../storage.rules", import.meta.url), "utf8"),
+    readFile(new URL("../firebase.json", import.meta.url), "utf8"),
     readFile(new URL("../functions/index.js", import.meta.url), "utf8"),
     readFile(new URL("../functions/gemini-assistant.js", import.meta.url), "utf8"),
     readFile(new URL("../functions/package.json", import.meta.url), "utf8")
 ]);
 
 const manifest = JSON.parse(manifestSource);
+const firebaseConfig = JSON.parse(firebaseConfigSource);
 
 test("defines an installable admin PWA scoped to /admin/", () => {
     assert.equal(manifest.id, "/admin/");
@@ -27,12 +31,20 @@ test("defines an installable admin PWA scoped to /admin/", () => {
     assert.match(adminPage, /navigator\.serviceWorker\.register\("\.\/service-worker\.js", \{ scope: "\.\/" \}\)/);
 });
 
-test("remembers a successful device unlock until the admin locks the app", () => {
+test("remembers the device UI preference while requiring a server-authorized admin session", () => {
     assert.match(adminPage, /const ADMIN_UNLOCK_KEY = "binyanShalem\.adminUnlocked\.v1"/);
     assert.match(adminPage, /window\.localStorage\.setItem\(ADMIN_UNLOCK_KEY, "unlocked"\)/);
     assert.match(adminPage, /window\.localStorage\.removeItem\(ADMIN_UNLOCK_KEY\)/);
     assert.match(adminPage, />Lock app</);
-    assert.match(adminPage, /if \(!hasRememberedUnlock\(\)\)/);
+    assert.match(adminPage, /adminSession\.restore\(\{ remembered: hasRememberedUnlock\(\) \}\)/);
+    assert.match(adminPage, /createAdminSessionAuth/);
+    assert.match(adminPage, /persistence: browserLocalPersistence/);
+    assert.match(adminPage, /const adminLoginFunction = httpsCallable\(cloudFunctions, "adminLogin"\)/);
+    assert.match(adminPage, /await adminSession\.unlock\(passwordInput\.value\)/);
+    assert.match(adminPage, /error\?\.code === "functions\/permission-denied"/);
+    assert.match(adminPage, /That password didn’t match\. Please try again\./);
+    assert.doesNotMatch(adminPage, /ADMIN_PASSWORD/);
+    assert.doesNotMatch(adminPage, /passwordInput\.value\s*[!=]=/);
 });
 
 test("keeps the app shell cached without caching Firestore writes", () => {
@@ -250,4 +262,33 @@ test("opens one meeting at a time and supports editing that meeting", () => {
     assert.match(adminPage, /encounterType: meetingEditTargetType/);
     assert.match(adminPage, /await updateDoc\(doc\(db, ENCOUNTERS_COLLECTION, meeting\.id\), changes\)/);
     assert.match(firestoreRules, /otherPeopleInvolved/);
+});
+
+test("attaches private admin photos to individual meetings in Dashboard and Chat", () => {
+    assert.match(adminPage, /id="meeting-photo-panel"/);
+    assert.match(adminPage, /createMeetingPhotoManager/);
+    assert.match(adminPage, /mountMeetingPhotos:/);
+    assert.match(adminPage, /deleteMeetingPhotos\(encounter\.id\)/);
+    assert.match(chatAssistant, /actionButton\("Photos", \(\) => showMeetingPhotos\(meeting\)\)/);
+    assert.match(chatAssistant, /actions\.mountMeetingPhotos\(host, meeting, \{ compact: true \}\)/);
+    assert.match(meetingPhotoTools, /const MEETING_PHOTOS_COLLECTION = "admin_meeting_photos"/);
+    assert.match(meetingPhotoTools, /input\.multiple = true/);
+    assert.match(meetingPhotoTools, /firestore\.where\("meetingId", "==", meetingId\)/);
+    assert.match(meetingPhotoTools, /storageApi\.getBlob/);
+    assert.doesNotMatch(meetingPhotoTools, /getDownloadURL/);
+    assert.match(meetingPhotoTools, /never sent to the AI assistant/);
+    assert.match(firestoreRules, /match \/admin_meeting_photos\/\{imageId\}/);
+    assert.match(firestoreRules, /exists\(\/databases\/\$\(database\)\/documents\/admin_encounters\/\$\(request\.resource\.data\.meetingId\)\)/);
+    assert.match(storageRules, /request\.auth\.token\.admin == true/);
+    assert.match(storageRules, /firestore\.exists\(\/databases\/\(default\)\/documents\/admin_encounters\/\$\(meetingId\)\)/);
+    assert.match(storageRules, /resource == null/);
+    assert.match(storageRules, /request\.resource\.contentType == 'image\/jpeg'/);
+    assert.equal(firebaseConfig.storage.rules, "storage.rules");
+});
+
+test("keeps private meeting photos out of the PWA cache", () => {
+    assert.match(serviceWorker, /meeting-photo-tools\.mjs/);
+    assert.match(serviceWorker, /isPrivateStorageRequest/);
+    assert.match(serviceWorker, /firebasestorage\.googleapis\.com/);
+    assert.match(serviceWorker, /if \(isPrivateStorageRequest\) return/);
 });
