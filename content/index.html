@@ -32,7 +32,7 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;750&amp;display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../blue-concept-pages.css?v=2026-10-29.1">
+    <link rel="stylesheet" href="../blue-concept-pages.css?v=2026-11-05.1">
     <script defer src="/cache-refresh.js?v=2026-11-01.1"></script>
 </head>
 <body class="content-page">
@@ -153,7 +153,7 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
             isNewAdminResource,
             mergeResourceCollections
         } from "../content-resource-tools.mjs?v=2026-08-13.1";
-        import { BAKED_IN_RESOURCES, FIREBASE_CONFIG } from "../content-library.mjs?v=2026-11-01.1";
+        import { BAKED_IN_RESOURCES, FIREBASE_CONFIG } from "../content-library.mjs?v=2026-11-05.1";
 
         const bakedInResources = BAKED_IN_RESOURCES;
 
@@ -343,6 +343,7 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
             article.className = `resource resource--${resource.type}`;
             article.id = resource.id;
             article.dataset.type = resource.type;
+            article.dataset.exclusive = String(resource.exclusive === true);
             article.dataset.origin = resource.origin || "baked";
             article.dataset.createdAtMs = String(resource.createdAtMs || 0);
             article.appendChild(createVisual(resource));
@@ -416,14 +417,17 @@ FORM: Sixth grounded structure, an open sleeve with a denser resource band; surf
             const now = Date.now();
             let visible = 0;
             [...list.children].forEach((item) => {
-                const show = filter === "all"
-                    ? item.dataset.type !== "inspiration"
-                    : newMode
-                        ? isNewAdminResource({
-                            origin: item.dataset.origin,
-                            createdAtMs: Number(item.dataset.createdAtMs)
-                        }, now)
-                        : item.dataset.type === filter;
+                const exclusive = item.dataset.exclusive === "true";
+                const show = podcastMode
+                    ? exclusive
+                    : filter === "all"
+                        ? item.dataset.type !== "inspiration" && !exclusive
+                        : newMode
+                            ? isNewAdminResource({
+                                origin: item.dataset.origin,
+                                createdAtMs: Number(item.dataset.createdAtMs)
+                            }, now)
+                            : item.dataset.type === filter && !exclusive;
 
                 if (!show && !item.hidden) {
                     const embeddedPlayer = item.querySelector(".resource-embed");

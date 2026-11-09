@@ -25,6 +25,8 @@ test("labels the podcast section as exclusive content without changing its filte
     assert.match(contentPage, />More content coming soon\.<\/p>/);
     assert.doesNotMatch(contentPage, />A new podcast from Binyan Shalem<\/p>/);
     assert.doesNotMatch(contentPage, />Episodes coming soon\.<\/p>/);
+    assert.match(contentPage, /article\.dataset\.exclusive = String\(resource\.exclusive === true\)/);
+    assert.match(contentPage, /podcastMode\s*\? exclusive/);
 });
 
 function jsonResponse(data, ok = true) {

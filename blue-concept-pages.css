@@ -480,6 +480,48 @@ input {
     color: var(--white);
 }
 
+.library-section.podcast-mode .resource-list {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.library-section.podcast-mode .resource {
+    border-top-color: rgba(255, 255, 255, 0.22);
+}
+
+.library-section.podcast-mode .resource-visual.embedded-video {
+    box-shadow: 0 22px 48px rgba(5, 22, 33, 0.34);
+}
+
+.library-section.podcast-mode .resource-type {
+    color: var(--sky);
+}
+
+.library-section.podcast-mode .resource h3 {
+    color: var(--white);
+}
+
+.library-section.podcast-mode .resource-speaker {
+    color: #bfd6e3;
+}
+
+.library-section.podcast-mode .action-link.primary {
+    color: var(--midnight);
+    background: var(--white);
+    border-color: var(--white);
+    box-shadow: 0 10px 24px rgba(5, 22, 33, 0.24);
+}
+
+.library-section.podcast-mode .resource-share-button {
+    color: var(--white);
+    border-color: rgba(255, 255, 255, 0.42);
+}
+
+.library-section.podcast-mode .resource-share-button:hover {
+    color: var(--midnight);
+    background: var(--sky);
+    border-color: var(--sky);
+}
+
 .library-section.podcast-mode .empty-state {
     display: grid;
     min-height: 340px;
@@ -1670,7 +1712,7 @@ input {
 
     .filter-featured {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 0.45rem;
         padding-right: 0;
         border-right: 0;
@@ -1678,7 +1720,7 @@ input {
 
     .filter-formats {
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 0.35rem;
     }
 

@@ -10,6 +10,19 @@ export const FIREBASE_CONFIG = {
 
 export const BAKED_IN_RESOURCES = [
     {
+        id: "youtube_aRZfAm4ujSE",
+        type: "video",
+        source: "youtube",
+        exclusive: true,
+        title: "Focus on Marriage",
+        speaker: "R' Shaul Haber · Binyan Shalem",
+        primaryLabel: "Watch on YouTube",
+        primaryUrl: "https://www.youtube.com/watch?v=aRZfAm4ujSE",
+        embedUrl: "https://www.youtube-nocookie.com/embed/aRZfAm4ujSE?rel=0",
+        imageUrl: "https://i.ytimg.com/vi/aRZfAm4ujSE/hqdefault.jpg",
+        imageAlt: "R' Shaul Haber speaking about focusing on marriage"
+    },
+    {
         id: "anshei-shalom-shiur",
         type: "video",
         title: "Shalom Bayit Shiur in Anshei Shalom",
